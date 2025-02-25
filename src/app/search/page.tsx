@@ -35,6 +35,7 @@ import {
 import { useRouter } from "next/router";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Column from "./features/column";
+import SortableDoctor from "./features/column";
 
 export default function SearchPage() {
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -339,6 +340,99 @@ export default function SearchPage() {
     { value: "Western Health Advantage", label: "Western Health Advantage" },
     { value: "Zurich North America", label: "Zurich North America" },
   ];
+  const doctorx = [
+    {
+      id: 1,
+      name: "Dr. Sarah Johnson, MD",
+      doctorType: " Primary Care Doctor",
+      rating: 4.8,
+      review: 36,
+      callStatus: "Available",
+      distance: "2.3 km",
+      address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    },
+    {
+      id: 2,
+      name: "Dr. Sarah Johnson, MD",
+      doctorType: " Primary Care Doctor",
+      rating: 4.8,
+      review: 36,
+      callStatus: "Available",
+      distance: "2.3 km",
+      address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    },
+    {
+      id: 3,
+      name: "Dr. Sarah Johnson, MD",
+      doctorType: " Primary Care Doctor",
+      rating: 4.8,
+      review: 3,
+      callStatus: "Available",
+      distance: "2.3 km",
+      address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    },
+    {
+      id: 4,
+      name: "Dr. Sarah Johnson, MD",
+      doctorType: " Primary Care Doctor",
+      rating: 4.8,
+      review: 36,
+      callStatus: "Available",
+      distance: "2.3 km",
+      address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    },
+    {
+      id: 5,
+      name: "Dr. Sarah Johnson, MD",
+      doctorType: " Primary Care Doctor",
+      rating: 4.8,
+      review: 36,
+      callStatus: "Available",
+      distance: "2.3 km",
+      address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    },
+    {
+      id: 6,
+      name: "Dr. Sarah Johnson, MD",
+      doctorType: " Primary Care Doctor",
+      rating: 4.8,
+      review: 36,
+      callStatus: "Available",
+      distance: "2.3 km",
+      address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    },
+    {
+      id: 7,
+      name: "Dr. Sarah Johnson, MD",
+      doctorType: " Primary Care Doctor",
+      rating: 4.8,
+      review: 36,
+      callStatus: "Available",
+      distance: "2.3 km",
+      address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    },
+    {
+      id: 8,
+      name: "Dr. Sarah Johnson, MD",
+      doctorType: " Primary Care Doctor",
+      rating: 4.8,
+      review: 36,
+      callStatus: "Available",
+      distance: "2.3 km",
+      address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    },
+    {
+      id: 9,
+      name: "Dr. Sarah Johnson, MD",
+      doctorType: " Primary Care Doctor",
+      rating: 4.8,
+      review: 36,
+      callStatus: "Available",
+      distance: "2.3 km",
+      address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    },
+  ];
+
   const [showStatusBar, setShowStatusBar] = useState(true);
   const [showActivityBar, setShowActivityBar] = React.useState(false);
   const [showPanel, setShowPanel] = React.useState(false);
@@ -361,23 +455,16 @@ export default function SearchPage() {
   //     router.push("/");
   //   }
   // }, [router]);
-  const handleDragEnd = (event: any) => {
-    if (isConfirmed) return; // Prevent reordering if call sequence has started
-
+  const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    // const oldIndex = doctors.findIndex((doctor) => doctor.id === active.id);
-    // const newIndex = doctors.findIndex((doctor) => doctor.id === over.id);
+    const oldIndex = doctors.findIndex((doctor) => doctor.id === active.id);
+    const newIndex = doctors.findIndex((doctor) => doctor.id === over.id);
 
-    // const newSortedDoctors = arrayMove(doctors, oldIndex, newIndex).map(
-    //   (doctor, index) => ({
-    //     ...doctor,
-    //     name: `${doctor.name.replace(/^\d+\.\s*/, "")}`, // Renumber dynamically
-    //   })
-    // );
-
-    // setDoctors(newSortedDoctors);
+    if (oldIndex !== -1 && newIndex !== -1) {
+      setDoctors(arrayMove(doctors, oldIndex, newIndex));
+    }
   };
   return (
     <>
@@ -512,7 +599,7 @@ export default function SearchPage() {
 
         <div>
           <p className="text-[#FF6723] mt-4 md:mt-0">
-            Tip: You can re-arrange the priorty by dragging list items
+            Tip: You can re-arrange the priority by dragging list items
           </p>
         </div>
       </div>
@@ -530,11 +617,11 @@ export default function SearchPage() {
         </div>
       </div>
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        <ScrollArea className="h-96 w-full">
+        <ScrollArea className="h-[39rem] w-full">
           <Column
             activeCallIndex={activeCallIndex}
-            tasks={doctors}
-            // isDraggable={!isConfirmed}
+            tasks={doctorx}
+            isDraggable={!isConfirmed}
             callStatus={callStatus}
             isAppointmentBooked={isAppointmentBooked}
           />

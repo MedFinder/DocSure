@@ -2,6 +2,7 @@ import Navbar from "@/components/general-components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import React from "react";
 
@@ -14,7 +15,7 @@ export default function Contact() {
         <div className="w-full max-w-lg   p-6 sm:p-10 rounded-lg">
           {/* Title */}
           <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
-            One Last Step
+            Contact Us
           </p>
 
           {/* Form Fields */}
@@ -23,23 +24,20 @@ export default function Contact() {
               <Label>Patient name</Label>
               <Input className="rounded-none"></Input>
             </div>
-            <div className="space-y-2">
-              <Label>Date of Birth</Label>
-              <Input className="rounded-none"></Input>
-            </div>
-            <div className="space-y-2">
-              <Label>Address</Label>
-              <Input className="rounded-none"></Input>
-            </div>
+
             <div className="space-y-2">
               <Label>Email Address</Label>
               <Input className="rounded-none"></Input>
+            </div>
+            <div className="space-y-2">
+              <Label>Your Message</Label>
+              <Textarea className="rounded-none"></Textarea>
             </div>
           </div>
 
           {/* Additional Info */}
           <span className="text-sm text-gray-600 block pt-2 ">
-            Appointment details will be sent to this email.
+            We will respond within 24 hours.
           </span>
 
           {/* Button */}
