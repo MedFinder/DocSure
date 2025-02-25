@@ -33,7 +33,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useRouter } from "next/router";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import SortableDoctor from "./features/column";
 import Column from "../search/features/column";
 
@@ -611,7 +611,7 @@ export default function Transcript() {
             onDragEnd={handleDragEnd}
             collisionDetection={closestCenter}
           >
-            <ScrollArea className="h-[49rem] w-full">
+            <ScrollArea className="h-[39rem] md:w-full w-auto whitespace-nowrap">
               <Column
                 activeCallIndex={activeCallIndex}
                 tasks={doctorx}
@@ -619,6 +619,7 @@ export default function Transcript() {
                 callStatus={callStatus}
                 isAppointmentBooked={isAppointmentBooked}
               />
+              <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </DndContext>
         </div>

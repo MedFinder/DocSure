@@ -32,10 +32,18 @@ const Column: React.FC<ColumnProps> = ({
 }) => {
   return (
     <div className="column">
-      {/* Mobile scrollable wrapper */}
-      <div className="overflow-x-auto w-full">
-        <table className="task-table w-full whitespace-nowrap">
-          <tbody>
+      <table className="task-table">
+        {/* <thead>
+          <tr>
+            <th>#</th>
+            <th>Hospital / Doctor Name</th>
+            <th>Rating</th>
+            <th>Call Status</th>
+            <th>Distance</th>
+          </tr>
+        </thead> */}
+        <tbody>
+          <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
             {tasks.map((task, index) => (
               <Task
                 key={task.id}
@@ -53,9 +61,9 @@ const Column: React.FC<ColumnProps> = ({
                 doctorType={task.doctorType}
               />
             ))}
-          </tbody>
-        </table>
-      </div>
+          </SortableContext>
+        </tbody>
+      </table>
     </div>
   );
 };
