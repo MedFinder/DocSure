@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React from "react";
 import {
   SortableContext,
@@ -31,18 +32,10 @@ const Column: React.FC<ColumnProps> = ({
 }) => {
   return (
     <div className="column">
-      <table className="task-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Hospital / Doctor Name</th>
-            <th>Rating</th>
-            <th>Call Status</th>
-            <th>Distance</th>
-          </tr>
-        </thead>
-        <tbody>
-          <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
+      {/* Mobile scrollable wrapper */}
+      <div className="overflow-x-auto w-full">
+        <table className="task-table w-full whitespace-nowrap">
+          <tbody>
             {tasks.map((task, index) => (
               <Task
                 key={task.id}
@@ -55,11 +48,14 @@ const Column: React.FC<ColumnProps> = ({
                 activeCallIndex={activeCallIndex}
                 isAppointmentBooked={isAppointmentBooked}
                 callStatus={callStatus}
+                review={task.review}
+                address={task.address}
+                doctorType={task.doctorType}
               />
             ))}
-          </SortableContext>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

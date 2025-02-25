@@ -1,9 +1,21 @@
+//@ts-nocheck
+"use client";
 import Navbar from "@/components/general-components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LocateFixed, MapPin, Search } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { useRouter } from "next/navigation";
+import {
+  GoogleMap,
+  useJsApiLoader,
+  StandaloneSearchBox,
+} from "@react-google-maps/api";
+import axios from "axios";
+import { toast } from "sonner";
 
 const doctorTypes = [
   "Dermatologist",
@@ -17,8 +29,112 @@ const doctorTypes = [
   "Orthopedic",
   "ENT Specialist",
 ];
+const validationSchema = Yup.object().shape({
+  phoneNumber: Yup.string().required("Phone number is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  objective: Yup.string().required("Required"),
+  specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
+});
 
 export default function Home() {
+  const router = useRouter();
+  const [selectedAvailability, setSelectedAvailability] = useState("anytime");
+  const [timeOfAppointment, settimeOfAppointment] = useState("soonest");
+  const [isnewPatient, setisnewPatient] = useState("yes");
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [addressLocation, setAddressLocation] = useState(null);
+  const [isLoading, setisLoading] = useState(false);
+  const inputRefs = useRef([]);
+  const addressRefs = useRef([]);
+  const [selectedOption, setSelectedOption] = useState("no");
+
+  const [doctors, setDoctors] = useState([]);
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
+    libraries: ["places"],
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      patientName: "",
+      phoneNumber: "",
+      email: "",
+      patientHistory: "",
+      objective: "",
+      specialty: "",
+      groupId: "",
+      subscriberId: "",
+      insurer: "",
+      zipcode: "",
+      dob: "",
+      address: "",
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      const updatedValues = {
+        ...values,
+        selectedAvailability,
+        timeOfAppointment,
+        isnewPatient,
+        selectedOption,
+      };
+      // console.log(updatedValues)
+      setisLoading(true);
+      if (!selectedLocation) {
+        toast.error("No location selected");
+        return;
+      }
+
+      try {
+        const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
+        const response = await axios.get(
+          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
+        );
+
+        sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+        sessionStorage.setItem("statusData", JSON.stringify(response.data));
+
+        // console.log("Form Data:", values);
+        // console.log("API Response Data:", response.data);
+        // Navigate to status page
+        router.push("/status");
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (selectedOption === "no") {
+      formik.setFieldValue("subscriberId", "");
+      formik.setFieldValue("groupId", "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedOption]);
+
+  const handleOnPlacesChanged = (index) => {
+    if (inputRefs.current[index]) {
+      const places = inputRefs.current[index].getPlaces();
+      if (places.length > 0) {
+        const place = places[0];
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        setSelectedLocation({ lat, lng });
+      }
+    }
+  };
+  const handleOnAddressChanged = (index) => {
+    if (addressRefs.current[index]) {
+      const places = addressRefs.current[index].getPlaces();
+      if (places && places.length > 0) {
+        // <-- Added defensive check
+        const address = places[0];
+        //console.log(address)
+        formik.setFieldValue("address", address?.formatted_address);
+      }
+    }
+  };
   return (
     <>
       <Navbar />
@@ -30,7 +146,7 @@ export default function Home() {
           </p>
 
           {/* Combined Search Input */}
-          <div className="flex flex-wrap md:flex-nowrap w-full border md:border-gray-600 rounded-none overflow-hidden shadow-sm outline-none  gap-2 md:gap-0">
+          <form className="flex flex-wrap md:flex-nowrap w-full border md:border-gray-600 rounded-none overflow-hidden shadow-sm outline-none  gap-2 md:gap-0">
             {/* Search Icon */}
             <div className="flex items-center justify-center px-3 ">
               <Search className="w-5 h-5 text-gray-500 hidden md:block" />
@@ -61,7 +177,7 @@ export default function Home() {
                 <Search className="text-white w-5 h-5" />
               </Button>
             </Link>
-          </div>
+          </form>
 
           {/* Spaced Top Searches Section */}
           <div className="flex flex-col gap-4">
@@ -85,7 +201,10 @@ export default function Home() {
         </div>
 
         {/* Bottom Centered Text */}
-        <Link href="" className="absolute bottom-6  w-full text-center px-4 md:block hidden">
+        <Link
+          href=""
+          className="absolute bottom-6  w-full text-center px-4 md:block hidden"
+        >
           <p className="text-[#FF6723] underline py-2 px-4 inline-block rounded-md text-xs sm:text-sm">
             Allow location access for a smoother experience
           </p>

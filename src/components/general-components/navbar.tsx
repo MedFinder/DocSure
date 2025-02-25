@@ -51,9 +51,15 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-8 items-center text-md font-normal">
-          <Link href="">Browse</Link>
-          <Link href="">Help</Link>
-          <Link href="">Log In</Link>
+          <Link href="/" className="hover:text-gray-500">
+            Browse
+          </Link>
+          <Link href="/contact-us" className="hover:text-gray-500">
+            Help
+          </Link>
+          <Link href="" className="hover:text-gray-500">
+            Log In{" "}
+          </Link>
           <Button className="bg-[#0074BA] rounded-none py-6">Sign Up</Button>
         </div>
 
@@ -78,10 +84,10 @@ export default function Navbar() {
         </div>
 
         <nav className="flex flex-col gap-6 p-6 text-lg">
-          <Link href="" onClick={closeSidebar}>
+          <Link href="/" onClick={closeSidebar}>
             Browse
           </Link>
-          <Link href="" onClick={closeSidebar}>
+          <Link href="/contact-us" onClick={closeSidebar}>
             Help
           </Link>
           <Link href="" onClick={closeSidebar}>
