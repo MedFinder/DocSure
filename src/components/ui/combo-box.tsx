@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { ScrollArea } from "./scroll-area";
 
 export type ComboboxOptions = {
@@ -30,7 +30,7 @@ type Mode = "single" | "multiple";
 interface ComboboxProps {
   mode?: Mode;
   options: ComboboxOptions[];
-  selected: string | string[]; // Fix: Changed from number to string to match options
+  selected: string | string[];
   className?: string;
   placeholder?: string;
   onChange?: (value: string | string[]) => void;
@@ -46,33 +46,47 @@ export function Combobox({
   onChange,
   onCreate,
 }: ComboboxProps) {
-  const [open, setOpen] = React.useState(false);
-  const [query, setQuery] = React.useState<string>("");
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState<string>("");
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [width, setWidth] = useState<string>("auto");
+
+  useEffect(() => {
+    if (triggerRef.current) {
+      setWidth(`${triggerRef.current.offsetWidth}px`);
+    }
+  }, [open]);
 
   return (
     <div className={cn("block", className)}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            ref={triggerRef}
             type="button"
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between outline-none border-none shadow-none hover:bg-white mt-1  text-base placeholder:text-muted-foreground text-black "
+            className="w-full justify-between outline-none border-none shadow-none hover:bg-white mt-1 text-sm text-black"
             onClick={() => setOpen(!open)}
           >
-            {options.find((item) => item.value === selected)?.label ||
-              placeholder ||
-              "Select an option..."}
-            {/* <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /> */}
+            <span className={selected ? "text-black" : "text-gray-500"}>
+              {options.find((item) => item.value === selected)?.label ||
+                placeholder ||
+                "Select an option..."}
+            </span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full min-w-md min-w-[45rem] p-0">
+        <PopoverContent
+          className="p-0"
+          style={{ width }} // Dynamically set width
+        >
           <Command>
             <CommandInput
               placeholder="Search..."
               value={query}
               onValueChange={(value) => setQuery(value)}
+              className="text-sm placeholder-gray-400"
             />
             <CommandEmpty>No results found.</CommandEmpty>
             <ScrollArea>
@@ -86,6 +100,7 @@ export function Combobox({
                         onChange?.(option.value);
                         setOpen(false);
                       }}
+                      className="text-sm"
                     >
                       <Check
                         className={cn(

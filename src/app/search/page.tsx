@@ -1030,6 +1030,11 @@ export default function SearchPage() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+          <div>
+            <p className="text-[#FF6723] mt-4 md:mt-0">
+              Tip: You can re-arrange the priority by dragging list items
+            </p>
+          </div>
         </div>
 
         {/* Submit Section */}
@@ -1051,7 +1056,7 @@ export default function SearchPage() {
       </form>
 
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        <ScrollArea className="h-[39rem] md:w-full w-auto whitespace-nowrap">
+        <ScrollArea className="h-full md:w-full w-auto whitespace-nowrap">
           <Column
             activeCallIndex={activeCallIndex}
             tasks={doctors}

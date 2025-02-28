@@ -603,6 +603,7 @@ export default function Transcript() {
           </p>
         </div>
       </div> */}
+      
       <div className="md:grid md:grid-cols-3 w-full md:mt-24 gap-4 ">
         {/* First column (2/3 width) */}
         <div className="col-span-2">
