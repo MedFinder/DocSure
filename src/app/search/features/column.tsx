@@ -44,23 +44,30 @@ const Column: React.FC<ColumnProps> = ({
         </thead> */}
         <tbody>
           <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
-            {tasks.map((task, index) => (
-              <Task
-                key={task.id}
-                id={task.id.toString()}
-                index={index}
-                website={task.website}
-                title={task.name}
-                rating={task.rating}
-                distance={task.distance}
-                activeCallIndex={activeCallIndex}
-                isAppointmentBooked={isAppointmentBooked}
-                callStatus={callStatus}
-                review={task.review}
-                address={task.address}
-                doctorType={task.doctorType}
-              />
-            ))}
+            {tasks.map((task, index) => {
+              const doctorType = task.types?.[0]
+                ? task.types[0].charAt(0).toUpperCase() + task.types[0].slice(1)
+                : "";
+
+              return (
+                <Task
+                  key={task.id}
+                  id={task.id.toString()}
+                  index={index}
+                  website={task.website}
+                  title={task.name}
+                  rating={task.rating}
+                  distance={task.distance}
+                  activeCallIndex={activeCallIndex}
+                  isAppointmentBooked={isAppointmentBooked}
+                  callStatus={callStatus}
+                  review={task.user_ratings_total}
+                  vicinity={task.vicinity}
+                  address={task.address}
+                  doctorType={doctorType}
+                />
+              );
+            })}
           </SortableContext>
         </tbody>
       </table>
