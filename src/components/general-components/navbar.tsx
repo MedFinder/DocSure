@@ -248,7 +248,6 @@ export default function Navbar() {
               className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 text-sm"
             /> */}
 
-              {/* Location Icon */}
               <div className="hidden md:flex items-center justify-center px-3 ">
                 <MapPin className="w-5 h-5 text-gray-500" />
               </div>
