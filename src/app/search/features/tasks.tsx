@@ -4,7 +4,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MapPin } from "lucide-react";
-
+import Image from "next/image";
+import More from "../../../../public/more.png";
 interface TaskProps {
   id: string;
   title: string;
@@ -124,14 +125,18 @@ export const Task: React.FC<TaskProps> = ({
             onCheckedChange={(checked) => setIsSelected(!!checked)} // Toggle state properly
             onPointerDown={(e) => e.stopPropagation()}
             className={`w-5 h-5 rounded-full transition-all duration-300  ${
-              isSelected ? "0 border-green-500 data-[state=checked]:bg-[#00BA85] data-[state=checked]:text-white" : "bg-gray-100"
+              isSelected
+                ? "0 border-green-500 data-[state=checked]:bg-[#00BA85] data-[state=checked]:text-white"
+                : "bg-gray-100"
             }`}
           />
         </div>
       </td>
-
-      {/* Call Status */}
       <td>
+        <Image alt="more" src={More} className=" h-4 w-3 "></Image>
+      </td>
+      {/* Call Status */}
+      {/* <td>
         {callStatus.isInitiated === false
           ? "..."
           : activeCallIndex === index && !isAppointmentBooked
@@ -141,9 +146,7 @@ export const Task: React.FC<TaskProps> = ({
           : activeCallIndex < index
           ? "..."
           : "\u274C"}
-      </td>
+      </td> */}
     </tr>
   );
 };
-
-

@@ -3,7 +3,7 @@
 import Navbar from "@/components/general-components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LocateFixed, MapPin, Search } from "lucide-react";
+import { Loader2, LocateFixed, MapPin, Search } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { useFormik } from "formik";
@@ -184,83 +184,89 @@ export default function Home() {
   function handleCreateOptions() {
     return null;
   }
+  const handleDoctorTypeClick = (type) => {
+    formik.setFieldValue("specialty", type);
+    formik.setTouched({ specialty: true }); // Ensures Formik updates the field
+  };
+
   return (
     <>
       <Navbar />
       <div className="h-screen flex flex-col items-center justify-center px-6 sm:px-10">
         {/* Centered Main Content */}
-        <div className="text-start items-center space-y-8 w-full px-6 sm:px-20 lg:px-40 mt-16 md:mt-0">
-          <p className="text-2xl sm:text-4xl font-semibold text-center sm:text-left">
-            Book top-rated doctors near you
+        <div className="text-start items-center space-y-4 w-full px-6 sm:px-20 lg:px-40 mt-16 md:mt-0">
+          <p className="text-2xl sm:text-4xl font-semibold text-center sm:text-left mb-8 text-[#333333]">
+            Book top rated doctors near you
           </p>
 
           {/* Combined Search Input */}
+
           <form
             onSubmit={formik.handleSubmit}
-            className="flex flex-wrap md:flex-nowrap w-full border md:border-gray-600 rounded-none overflow-hidden shadow-sm outline-none  gap-2 md:gap-0"
+            className="flex flex-wrap md:flex-nowrap w-full border border-gray-500 overflow-hidden shadow-sm outline-none gap-2 md:gap-0 rounded-none "
           >
-            {/* Search Icon */}
-            <div className="flex items-center justify-center px-3 ">
-              <Search className="w-5 h-5 text-gray-500 hidden md:block" />
+            {/* Left Section: Specialty & Location Inputs */}
+            <div className="flex flex-grow items-center">
+              {/* Search Icon */}
+              <div className="hidden md:flex items-center justify-center px-3">
+                <Search className="w-5 h-5 text-gray-500" />
+              </div>
+
+              <Combobox
+                mode="single"
+                id="specialty"
+                name="specialty"
+                className="w-full md:w-1/2 min-w-[150px] p-0 border-none bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground"
+                options={medicalSpecialtiesOptions}
+                placeholder="Condition, procedure, doctor"
+                selected={formik.values.specialty} // Ensure this updates correctly
+                onChange={(value) => {
+                  formik.setFieldValue("specialty", value);
+                }}
+              />
+
+              {/* Location Icon */}
+              <div className="hidden md:flex items-center justify-center px-3">
+                <MapPin className="w-5 h-5 text-gray-500" />
+              </div>
+
+              {/* Location Search Input (2/3 Width on Medium+ Screens) */}
+              {isLoaded && (
+                <StandaloneSearchBox
+                  onLoad={(ref) => (inputRefs.current[0] = ref)}
+                  onPlacesChanged={() => handleOnPlacesChanged(0)}
+                >
+                  <Input
+                    type="text"
+                    placeholder="Address, city, zip code"
+                    className="w-full md:w-2/3 min-w-[180px] border-none focus:ring-0 focus:outline-none h-12 px-3"
+                  />
+                </StandaloneSearchBox>
+              )}
             </div>
-            <Combobox
-              mode="single"
-              id="specialty"
-              name="specialty"
-              className="w-[60%] p-0 border-none shadow-none m-0 shadow-transparent bg-white focus:ring-0 focus:outline-none   text-sm placeholder:text-muted-foreground "
-              options={medicalSpecialtiesOptions}
-              placeholder="Condition, procedure, doctor"
-              selected={formik.values.specialty}
-              onChange={(value) => {
-                console.log("Selected value:", value);
-                formik.setFieldValue("specialty", value);
-              }}
-            />
 
-            {/* First Input */}
-            {/* <Input
-              type="text"
-              placeholder="Condition, procedure, doctor"
-              className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 text-sm"
-            /> */}
-
-            {/* Location Icon */}
-            <div className="hidden md:flex items-center justify-center px-3 ">
-              <MapPin className="w-5 h-5 text-gray-500" />
-            </div>
-
-            {/* Second Input */}
-
-            {isLoaded && (
-              <StandaloneSearchBox
-                onLoad={(ref) => (inputRefs.current[0] = ref)}
-                onPlacesChanged={() => handleOnPlacesChanged(0)}
-              >
-                <Input
-                  type="text"
-                  placeholder="Address, city, zip code"
-                  className="w-[22rem] border-none focus:ring-0 focus:outline-none h-12 px-3"
-                />
-              </StandaloneSearchBox>
-            )}
-            {/* Search Button */}
-
+            {/* Search Button - Always at the Far Right Edge */}
             <Button
               disabled={isLoading}
-              className="bg-[#FF6723] text-white rounded-none px-6 h-12 flex items-center justify-center w-full md:w-0"
+              className="bg-[#FF6723] text-white rounded-none px-6 h-12 flex items-center justify-center md:flex-grow-0 md:w-auto"
             >
-              <Search className="text-white w-5 h-5" />
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 text-white animate-spin" />
+              ) : (
+                <Search className="w-5 h-5 text-white" />
+              )}
             </Button>
           </form>
 
           {/* Spaced Top Searches Section */}
-          <div className="flex flex-col gap-4">
-            <span className="text-xs text-gray-900 py-2">Top searches</span>
+          <div className="flex flex-col gap-4 pt-4">
+            <span className="text-xs text-gray-900 ">Top searches</span>
             <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
               {doctorTypes.map((type, index) => (
                 <Button
                   key={index}
                   className="rounded-full bg-[#EFF2F4] text-[#595959] hover:text-white hover:bg-slate-800 text-xs px-3 py-2 w-full sm:w-auto"
+                  // onClick={() => handleDoctorTypeClick(type)} // Add onClick handler
                 >
                   {type}
                 </Button>

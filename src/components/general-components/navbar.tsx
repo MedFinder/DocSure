@@ -231,7 +231,7 @@ export default function Navbar() {
                 mode="single"
                 id="specialty"
                 name="specialty"
-                className="w-[40%] p-0 border-none shadow-none m-0 shadow-transparent bg-white focus:ring-0 focus:outline-none   text-sm placeholder:text-muted-foreground "
+                className="w-full md:w-1/2 min-w-[150px] p-0 border-none bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground py-1"
                 options={medicalSpecialtiesOptions}
                 placeholder="Condition, procedure, doctor"
                 selected={formik.values.specialty}
