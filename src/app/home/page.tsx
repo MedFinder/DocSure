@@ -16,6 +16,7 @@ import {
 } from "@react-google-maps/api";
 import axios from "axios";
 import { toast } from "sonner";
+import { Combobox } from "@/components/ui/combo-box";
 
 const doctorTypes = [
   "Dermatologist",
@@ -29,10 +30,71 @@ const doctorTypes = [
   "Orthopedic",
   "ENT Specialist",
 ];
+const medicalSpecialtiesOptions = [
+  { value: "allergy and immunology", label: "Allergy and Immunology" },
+  { value: "anesthesiology", label: "Anesthesiology" },
+  { value: "cardiology", label: "Cardiology" },
+  { value: "cardiothoracic surgery", label: "Cardiothoracic Surgery" },
+  {
+    value: "Colon and rectal surgery (proctology)",
+    label: "Colon and Rectal surgery (Proctology)",
+  },
+  {
+    value: "Cosmetic & Restorative Dentistry",
+    label: "Cosmetic & Restorative Dentistry",
+  },
+  { value: "critical care medicine", label: "Critical Care Medicine" },
+  { value: "dentist", label: "Dentist" },
+  { value: "Dermatology", label: "Dermatology" },
+  { value: "Emergency Medicine", label: "Emergency Medicine" },
+  { value: "Endodontics", label: "Endodontics" },
+  { value: "Endocrinology", label: "Endocrinology" },
+  { value: "Family Medicine", label: "Family Medicine" },
+  { value: "Gastroenterology", label: "Gastroenterology" },
+  {
+    value: "General & Preventive Dentistry",
+    label: "General & Preventive Dentistry",
+  },
+  { value: "General Surgery", label: "General Surgery" },
+  { value: "Genetics", label: "Genetics" },
+  { value: "Geriatrics", label: "Geriatrics" },
+  { value: "Hematology", label: "Hematology" },
+  { value: "Infectious Disease", label: "Infectious Disease" },
+  { value: "Internal Medicine", label: "Internal Medicine" },
+  { value: "Nephrology", label: "Nephrology" },
+  { value: "Neurology", label: "Neurology" },
+  { value: "Neurosurgery", label: "Neurosurgery" },
+  { value: "Ophthalmology", label: "Ophthalmology" },
+  {
+    value: "Oral and Maxillofacial Surgery",
+    label: "Oral and Maxillofacial Surgery",
+  },
+  { value: "Orthodontics", label: "Orthodontics" },
+  { value: "Orthopedic Surgery", label: "Orthopedic Surgery" },
+  { value: "Otolaryngology (ENT)", label: "Otolaryngology (ENT)" },
+  { value: "Pediatric Dentistry", label: "Pediatric Dentistry" },
+  { value: "Pediatric Surgery", label: "Pediatric Surgery" },
+  { value: "Pediatrics", label: "Pediatrics" },
+  {
+    value: "Periodontics & Implant Dentistry",
+    label: "Periodontics & Implant Dentistry",
+  },
+  {
+    value: "Physical Medicine and Rehabilitation (Physiatry)",
+    label: "Physical Medicine and Rehabilitation (Physiatry)",
+  },
+  { value: "Plastic Surgery", label: "Plastic Surgery" },
+  { value: "Psychiatry", label: "Psychiatry" },
+  { value: "Pulmonology", label: "Pulmonology" },
+  { value: "Radiology", label: "Radiology" },
+  { value: "Rheumatology", label: "Rheumatology" },
+  { value: "Sleep Medicine", label: "Sleep Medicine" },
+  { value: "Sports Medicine", label: "Sports Medicine" },
+  { value: "Therapy and Counseling", label: "Therapy and Counseling" },
+  { value: "Urology", label: "Urology" },
+  { value: "Vascular Surgery", label: "Vascular Surgery" },
+];
 const validationSchema = Yup.object().shape({
-  phoneNumber: Yup.string().required("Phone number is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  objective: Yup.string().required("Required"),
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
 
@@ -57,29 +119,13 @@ export default function Home() {
 
   const formik = useFormik({
     initialValues: {
-      patientName: "",
-      phoneNumber: "",
-      email: "",
-      patientHistory: "",
-      objective: "",
       specialty: "",
-      groupId: "",
-      subscriberId: "",
-      insurer: "",
-      zipcode: "",
-      dob: "",
-      address: "",
     },
     validationSchema,
     onSubmit: async (values) => {
-      const updatedValues = {
-        ...values,
-        selectedAvailability,
-        timeOfAppointment,
-        isnewPatient,
-        selectedOption,
-      };
-      // console.log(updatedValues)
+      console.log(values);
+      const updatedValues = { ...values };
+
       setisLoading(true);
       if (!selectedLocation) {
         toast.error("No location selected");
@@ -88,30 +134,29 @@ export default function Home() {
 
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
+        console.log(lat, lng);
         const response = await axios.get(
           `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
         );
 
         sessionStorage.setItem("formData", JSON.stringify(updatedValues));
         sessionStorage.setItem("statusData", JSON.stringify(response.data));
+        sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
 
-        // console.log("Form Data:", values);
-        // console.log("API Response Data:", response.data);
-        // Navigate to status page
-        router.push("/status");
+        router.push("/search");
       } catch (error) {
         console.error("Error submitting form:", error);
       }
     },
   });
 
-  useEffect(() => {
-    if (selectedOption === "no") {
-      formik.setFieldValue("subscriberId", "");
-      formik.setFieldValue("groupId", "");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedOption]);
+  // useEffect(() => {
+  //   if (selectedOption === "no") {
+  //     formik.setFieldValue("subscriberId", "");
+  //     formik.setFieldValue("groupId", "");
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [selectedOption]);
 
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
@@ -135,6 +180,10 @@ export default function Home() {
       }
     }
   };
+
+  function handleCreateOptions() {
+    return null;
+  }
   return (
     <>
       <Navbar />
@@ -146,18 +195,34 @@ export default function Home() {
           </p>
 
           {/* Combined Search Input */}
-          <form className="flex flex-wrap md:flex-nowrap w-full border md:border-gray-600 rounded-none overflow-hidden shadow-sm outline-none  gap-2 md:gap-0">
+          <form
+            onSubmit={formik.handleSubmit}
+            className="flex flex-wrap md:flex-nowrap w-full border md:border-gray-600 rounded-none overflow-hidden shadow-sm outline-none  gap-2 md:gap-0"
+          >
             {/* Search Icon */}
             <div className="flex items-center justify-center px-3 ">
               <Search className="w-5 h-5 text-gray-500 hidden md:block" />
             </div>
+            <Combobox
+              mode="single"
+              id="specialty"
+              name="specialty"
+              className="w-[60%] p-0 border-none shadow-none m-0 shadow-transparent bg-white focus:ring-0 focus:outline-none   text-sm placeholder:text-muted-foreground "
+              options={medicalSpecialtiesOptions}
+              placeholder="Condition, procedure, doctor"
+              selected={formik.values.specialty}
+              onChange={(value) => {
+                console.log("Selected value:", value);
+                formik.setFieldValue("specialty", value);
+              }}
+            />
 
             {/* First Input */}
-            <Input
+            {/* <Input
               type="text"
               placeholder="Condition, procedure, doctor"
               className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 text-sm"
-            />
+            /> */}
 
             {/* Location Icon */}
             <div className="hidden md:flex items-center justify-center px-3 ">
@@ -165,18 +230,27 @@ export default function Home() {
             </div>
 
             {/* Second Input */}
-            <Input
-              type="text"
-              placeholder="Address, city, zip code"
-              className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 text-sm"
-            />
 
+            {isLoaded && (
+              <StandaloneSearchBox
+                onLoad={(ref) => (inputRefs.current[0] = ref)}
+                onPlacesChanged={() => handleOnPlacesChanged(0)}
+              >
+                <Input
+                  type="text"
+                  placeholder="Address, city, zip code"
+                  className="w-[22rem] border-none focus:ring-0 focus:outline-none h-12 px-3"
+                />
+              </StandaloneSearchBox>
+            )}
             {/* Search Button */}
-            <Link href="/search">
-              <Button className="bg-[#FF6723] text-white rounded-none px-6 h-12 flex items-center justify-center w-full md:w-0">
-                <Search className="text-white w-5 h-5" />
-              </Button>
-            </Link>
+
+            <Button
+              disabled={isLoading}
+              className="bg-[#FF6723] text-white rounded-none px-6 h-12 flex items-center justify-center w-full md:w-0"
+            >
+              <Search className="text-white w-5 h-5" />
+            </Button>
           </form>
 
           {/* Spaced Top Searches Section */}

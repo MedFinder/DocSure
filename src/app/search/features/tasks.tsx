@@ -13,6 +13,7 @@ interface TaskProps {
   distance?: string;
   index: number;
   review?: number;
+  vicinity: string;
   doctorType?: string;
   activeCallIndex: number;
   address: string;
@@ -24,7 +25,13 @@ interface TaskProps {
 
 const getRandomColor = (id: string) => {
   const colors = ["#FFD700", "#FF6347", "#4682B4", "#32CD32", "#FF69B4"];
-  return colors[id % colors.length];
+
+  // Convert string ID into a consistent numeric value
+  const numericId = id
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+  return colors[numericId % colors.length]; // ✅ Now it works!
 };
 
 export const Task: React.FC<TaskProps> = ({
@@ -32,6 +39,7 @@ export const Task: React.FC<TaskProps> = ({
   title,
   rating,
   review,
+  vicinity,
   address,
   index,
   activeCallIndex,
@@ -43,8 +51,7 @@ export const Task: React.FC<TaskProps> = ({
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
-
-  const [isSelected, setIsSelected] = useState(false);
+  const [isSelected, setIsSelected] = useState(true); // Checkbox is checked on load
 
   const style = {
     transition,
@@ -58,7 +65,7 @@ export const Task: React.FC<TaskProps> = ({
       {...attributes}
       {...listeners}
       className={`transition-all duration-300 ${
-        isSelected ? "bg-green-100" : "bg-white"
+        isSelected ? "bg-blue-50" : "bg-white"
       }`}
     >
       {/* Avatar with Random Background Color */}
@@ -67,7 +74,7 @@ export const Task: React.FC<TaskProps> = ({
           className="avatar rounded-full text-white flex items-center justify-center font-bold"
           style={{ backgroundColor: getRandomColor(id), width: 50, height: 50 }}
         >
-          {title.charAt(4)}
+          {title.charAt(0)}
         </div>
       </td>
 
@@ -93,20 +100,20 @@ export const Task: React.FC<TaskProps> = ({
             <span className="text-yellow-500">{"\u2B50"}</span>
             <span>{rating !== undefined ? rating : "-"}</span>
             <span>•</span>
-            <span>{review} reviews</span>
+            <span>{review || 0} reviews</span>
           </div>
         </div>
         <div className="flex flex-row items-center gap-x-2 text-sm text-[#333333]">
           <MapPin size={13} className="text-gray-500" />
           <span>{distance !== undefined ? distance : "-"}</span>
           <span>•</span>
-          <span>{address}</span>
+          <span>{vicinity}</span>
         </div>
-        <div className="flex flex-row items-center gap-x-2 text-sm text-[#a1a1a1]">
+        {/* <div className="flex flex-row items-center gap-x-2 text-sm text-[#a1a1a1]">
           <span>New patient appointments</span>
           <span>•</span>
           <span>Excellent wait time</span>
-        </div>
+        </div> */}
       </td>
 
       {/* Checkbox with Dynamic Colors */}
@@ -114,9 +121,10 @@ export const Task: React.FC<TaskProps> = ({
         <div className="flex justify-center items-center">
           <Checkbox
             checked={isSelected}
-            onCheckedChange={(checked) => setIsSelected(checked)}
-            className={`w-5 h-5 rounded-full transition-all duration-300 ${
-              isSelected ? "bg-green-500 border-green-500" : "bg-gray-300"
+            onCheckedChange={(checked) => setIsSelected(!!checked)} // Toggle state properly
+            onPointerDown={(e) => e.stopPropagation()}
+            className={`w-5 h-5 rounded-full transition-all duration-300  ${
+              isSelected ? "0 border-green-500 data-[state=checked]:bg-[#00BA85] data-[state=checked]:text-white" : "bg-gray-100"
             }`}
           />
         </div>
@@ -137,3 +145,5 @@ export const Task: React.FC<TaskProps> = ({
     </tr>
   );
 };
+
+
