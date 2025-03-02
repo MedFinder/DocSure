@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { lexendFont } from "@/lib/font";
-
+import { Toaster } from "sonner";
+import Providers from "@/providers/permission-provider";
 export const metadata: Metadata = {
   title: "DocSure",
   description: "DocSure App",
@@ -13,7 +14,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${lexendFont.className} font-sans`}>{children}</body>
+      <Providers>
+        <body className={`${lexendFont.className} font-sans`}>
+          {children}
+          <Toaster richColors={true} position="top-right" />
+        </body>
+      </Providers>
     </html>
   );
 }

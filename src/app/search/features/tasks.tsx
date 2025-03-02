@@ -6,6 +6,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { MapPin } from "lucide-react";
 import Image from "next/image";
 import More from "../../../../public/more.png";
+
 interface TaskProps {
   id: string;
   title: string;
@@ -26,13 +27,10 @@ interface TaskProps {
 
 const getRandomColor = (id: string) => {
   const colors = ["#FFD700", "#FF6347", "#4682B4", "#32CD32", "#FF69B4"];
-
-  // Convert string ID into a consistent numeric value
   const numericId = id
     .split("")
     .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-  return colors[numericId % colors.length]; // ✅ Now it works!
+  return colors[numericId % colors.length];
 };
 
 export const Task: React.FC<TaskProps> = ({
@@ -52,7 +50,7 @@ export const Task: React.FC<TaskProps> = ({
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
-  const [isSelected, setIsSelected] = useState(true); // Checkbox is checked on load
+  const [isSelected, setIsSelected] = useState(true);
 
   const style = {
     transition,
@@ -69,73 +67,68 @@ export const Task: React.FC<TaskProps> = ({
         isSelected ? "bg-blue-50" : "bg-white"
       }`}
     >
-      {/* Avatar with Random Background Color */}
-      <td className="avatar-cell">
+      {/* Avatar with Dynamic Background Color */}
+      <td className="p-2 text-center">
         <div
-          className="avatar rounded-full text-white flex items-center justify-center font-bold"
-          style={{ backgroundColor: getRandomColor(id), width: 50, height: 50 }}
+          className="rounded-full text-white flex items-center justify-center font-bold w-10 h-10 sm:w-12 sm:h-12"
+          style={{ backgroundColor: getRandomColor(id) }}
         >
           {title.charAt(0)}
         </div>
       </td>
 
       {/* Doctor Info */}
-      <td>
+      <td className="p-2 min-w-[140px]">
         <div className="flex flex-col">
           <a
             href={website}
             target="_blank"
-            className="cursor-pointer font-semibold"
-            onClick={(e) => e.stopPropagation()} // Prevent drag interference
+            rel="noopener noreferrer"
+            className="cursor-pointer font-semibold text-sm sm:text-base"
+            onClick={(e) => e.stopPropagation()}
           >
             {title}
           </a>
-          <span className="text-sm">{doctorType}</span>
+          <span className="text-xs sm:text-sm text-gray-600">{doctorType}</span>
         </div>
       </td>
 
       {/* Ratings & Location */}
-      <td className="text-sm">
-        <div className="flex flex-col text-[#333333]">
+      <td className="p-2 min-w-[160px]">
+        <div className="flex flex-col text-[#333] text-xs sm:text-sm">
           <div className="flex flex-row items-center gap-x-2">
             <span className="text-yellow-500">{"\u2B50"}</span>
             <span>{rating !== undefined ? rating : "-"}</span>
             <span>•</span>
             <span>{review || 0} reviews</span>
           </div>
+          <div className="flex flex-row items-center gap-x-2 text-gray-500 text-xs">
+            <MapPin size={13} />
+            <span>{distance || "-"}</span>
+            <span>•</span>
+            <span>{vicinity}</span>
+          </div>
         </div>
-        <div className="flex flex-row items-center gap-x-2 text-sm text-[#333333]">
-          <MapPin size={13} className="text-gray-500" />
-          <span>{distance !== undefined ? distance : "-"}</span>
-          <span>•</span>
-          <span>{vicinity}</span>
-        </div>
-        {/* <div className="flex flex-row items-center gap-x-2 text-sm text-[#a1a1a1]">
-          <span>New patient appointments</span>
-          <span>•</span>
-          <span>Excellent wait time</span>
-        </div> */}
       </td>
 
-      {/* Checkbox with Dynamic Colors */}
-      <td>
-        <div className="flex justify-center items-center">
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={(checked) => setIsSelected(!!checked)} // Toggle state properly
-            onPointerDown={(e) => e.stopPropagation()}
-            className={`w-5 h-5 rounded-full transition-all duration-300  ${
-              isSelected
-                ? "0 border-green-500 data-[state=checked]:bg-[#00BA85] data-[state=checked]:text-white"
-                : "bg-gray-100"
-            }`}
-          />
-        </div>
+      {/* Checkbox */}
+      <td className="p-2 text-center">
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={(checked) => setIsSelected(!!checked)}
+          onPointerDown={(e) => e.stopPropagation()}
+          className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-all duration-300 ${
+            isSelected
+              ? "border-green-500 data-[state=checked]:bg-[#00BA85] data-[state=checked]:text-white"
+              : "bg-gray-100"
+          }`}
+        />
       </td>
-      <td>
-        <Image alt="more" src={More} className=" h-4 w-3 "></Image>
+
+      {/* More Icon */}
+      <td className="p-2">
+        <Image alt="more" src={More} className="h-4 w-3 sm:h-5 sm:w-4" />
       </td>
-      {/* Call Status */}
       {/* <td>
         {callStatus.isInitiated === false
           ? "..."

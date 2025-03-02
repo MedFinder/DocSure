@@ -186,7 +186,6 @@ export default function Home() {
   }
   const handleDoctorTypeClick = (type) => {
     formik.setFieldValue("specialty", type);
-    formik.setTouched({ specialty: true }); // Ensures Formik updates the field
   };
 
   return (
@@ -219,7 +218,7 @@ export default function Home() {
                 className="w-full md:w-1/2 min-w-[150px] p-0 border-none bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground"
                 options={medicalSpecialtiesOptions}
                 placeholder="Condition, procedure, doctor"
-                selected={formik.values.specialty} // Ensure this updates correctly
+                selected={formik.values.specialty} // ✅ Make sure this updates correctly
                 onChange={(value) => {
                   formik.setFieldValue("specialty", value);
                 }}
@@ -258,6 +257,7 @@ export default function Home() {
             </Button>
           </form>
 
+          {/* //try using mdicalspecialties */}
           {/* Spaced Top Searches Section */}
           <div className="flex flex-col gap-4 pt-4">
             <span className="text-xs text-gray-900 ">Top searches</span>
@@ -266,7 +266,7 @@ export default function Home() {
                 <Button
                   key={index}
                   className="rounded-full bg-[#EFF2F4] text-[#595959] hover:text-white hover:bg-slate-800 text-xs px-3 py-2 w-full sm:w-auto"
-                  // onClick={() => handleDoctorTypeClick(type)} // Add onClick handler
+                  onClick={() => handleDoctorTypeClick(type)} // ✅ Correct way
                 >
                   {type}
                 </Button>
@@ -293,3 +293,70 @@ export default function Home() {
     </>
   );
 }
+// onSubmit: async (values) => {
+//   console.log("Submitting form...");
+//   toast.info("Submitted form");
+//   console.log(
+//     "Form values:",
+//     values,
+//     timeOfAppointment,
+//     isNewPatient,
+//     selectedOption,
+//     selectedInsurance
+//   );
+
+//   // Retrieve searchData
+//   const searchData = JSON.parse(sessionStorage.getItem("searchData"));
+//   console.log("Retrieved searchData from sessionStorage:", searchData);
+
+//   // Check if searchData exists
+//   if (!searchData) {
+//     toast.error(
+//       "Search data is missing. Please select a location and specialty."
+//     );
+//     return;
+//   }
+
+//   const { lat, lng, specialty } = searchData;
+
+//   // Validate latitude and longitude
+//   if (!lat || !lng) {
+//     toast.error("No location selected. Please choose a valid location.");
+//     return;
+//   }
+
+//   // Validate specialty
+  // if (!specialty) {
+  //   toast.error("No specialty selected. Please choose a specialty.");
+  //   return;
+  // }
+
+//   // Validate selected objective
+  // if (!values.objective) {
+  //   toast.error("No objective selected. Please choose an objective.");
+  //   return;
+  // }
+  // console.log("Form values:", values);
+  // toast.info("here form");
+
+//   const updatedValues = {
+//     ...values,
+//     timeOfAppointment,
+//     isNewPatient,
+//     selectedOption,
+//     selectedInsurance,
+//   };
+
+//   setisLoading(true);
+
+//   // Store form data in sessionStorage
+//   sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+
+//   console.log("Stored formData in sessionStorage:", updatedValues);
+//   toast.info("lastly");
+
+//   // Redirect to search page
+//   setTimeout(() => {
+//     router.push("/contact");
+//   }, 500);
+// },
