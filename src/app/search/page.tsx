@@ -39,17 +39,13 @@ import SortableDoctor from "./features/column";
 import { Textarea } from "@/components/ui/textarea";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { toast } from "sonner";
 
-const timingOptions = [
-  { value: "today", label: "Today" },
-  { value: "few days", label: "Few days" },
-  { value: "two weeks", label: "Two weeks" },
-  { value: "2+ weeks", label: "2+ weeks" },
-];
+const validationSchema = Yup.object().shape({
+  objective: Yup.string().required("Required"),
+});
 
-const availabilityOptions = [
-  { value: "av-anytime", label: "I am available anytime" },
-];
+const availabilityOptions = [{ value: "yes", label: "I am available anytime" }];
 const insurerOptions = [
   { value: "Aetna", label: "Aetna" },
   { value: "Aflac", label: "Aflac" },
@@ -321,6 +317,12 @@ const insurerOptions = [
   { value: "Zurich North America", label: "Zurich North America" },
 ];
 
+const timingOptions = [
+  { value: "today", label: "Today" },
+  { value: "few days", label: "Few days" },
+  { value: "two weeks", label: "Two weeks" },
+  { value: "2+ weeks", label: "2+ weeks" },
+];
 export default function SearchPage() {
   const wsRef = useRef<WebSocket | null>(null);
   const router = useRouter();
@@ -335,8 +337,8 @@ export default function SearchPage() {
   const [timeOfAppointment, settimeOfAppointment] = useState("today");
   const [searchData, setSearchData] = useState(null);
   const [isNewPatient, setIsNewPatient] = useState(true);
-  const [selectedOption, setSelectedOption] = useState("no");
-
+  const [selectedOption, setSelectedOption] = useState("yes");
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [callStatus, setCallStatus] = useState({
     isInitiated: false,
     ssid: "",
@@ -434,8 +436,6 @@ export default function SearchPage() {
   }, [router]);
 
   const handleDragEnd = (event) => {
-    if (isConfirmed) return; // Prevent reordering if call sequence has started
-
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -451,26 +451,7 @@ export default function SearchPage() {
 
     setDoctors(newSortedDoctors);
   };
-  const fetchPhoneNumbers = async () => {
-    const numbers = await Promise.all(
-      doctors.map(async (doctor) => {
-        try {
-          const response = await axios.get(
-            `https://maps.googleapis.com/maps/api/place/details/json?fields=name,rating,formatted_phone_number,opening_hours,reviews,geometry&key=${process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY}&place_id=${doctor.place_id}`
-          );
-          return response.data.result.formatted_phone_number;
-        } catch (error) {
-          console.error(
-            `Error fetching details for ${doctor.place_id}:`,
-            error
-          );
-          return null;
-        }
-      })
-    );
-    setPhoneNumbers(numbers);
-    // console.log(doctors,numbers,'xxxx')
-  };
+
   useEffect(() => {
     if (doctors.length) {
       // console.log(doctors)
@@ -478,306 +459,6 @@ export default function SearchPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doctors]);
-
-  const handleConfirmSequence = useCallback(async () => {
-    await connectWebSocket();
-    try {
-      setIsConfirmed(true); // Disable button and dragging
-      const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
-      await initiateCall(
-        firstDoctorPhoneNumber,
-        doctors[activeCallIndex]?.name
-      );
-      return;
-    } catch (error) {
-      console.error("Error fetching phone numbers or initiating call:", error);
-      setIsConfirmed(false); // Re-enable button and dragging if there's an error
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCallIndex, phoneNumbers, doctors]);
-
-  useEffect(() => {
-    if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
-      setShowTranscript(true);
-      setTranscriptArray((prev) => [
-        ...prev,
-        `---CALL BEGINS FOR ${doctors[activeCallIndex]?.name}---\n`,
-      ]);
-      console.log("ws listener added for id:", callStatus?.ssid);
-      if (wsRef.current.readyState !== WebSocket.OPEN) {
-        console.log("WebSocket not in OPEN state:", wsRef.current.readyState);
-        return;
-      }
-      try {
-        wsRef.current.send(
-          JSON.stringify({
-            event: "start",
-            transcription_id: callStatus.ssid,
-          })
-        );
-        // console.log('WebSocket message sent successfully');
-      } catch (error) {
-        console.log("Failed to send WebSocket message:", error);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [callStatus, doctors, wsRef]);
-
-  const terminateRequest = () => {
-    // sent ws event to cancel call
-    wsRef?.current?.close();
-    setIsConfirmed(false);
-    terminateCurrentCall(callStatus?.ssid);
-    setTimeout(() => {
-      setCallStatus({
-        isInitiated: false,
-        ssid: "",
-        email: "",
-      });
-    }, 500);
-  };
-  const initiateCall = useCallback(
-    async (doctorPhoneNumber: string, nameOfOrg: string) => {
-      console.log("new call initiated for", doctorPhoneNumber, nameOfOrg);
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
-      if (!formData) {
-        console.error("No formData found in sessionStorage.");
-        return;
-      }
-
-      const {
-        email,
-        phoneNumber,
-        patientName,
-        objective,
-        subscriberId,
-        groupId,
-        selectedOption,
-        dob,
-        address,
-        selectedAvailability,
-        timeOfAppointment,
-        isnewPatient,
-        zipcode,
-        insurer,
-      } = formData;
-
-      let context =
-        "Clinical concerns:" +
-        objective +
-        "; " +
-        "Patient has insurance:" +
-        selectedOption;
-
-      if (insurer) context += `; Insurance Provider:${insurer}`;
-      if (subscriberId) context += `; Subscriber Id:${subscriberId}`;
-      if (groupId) context += `; Group Id:${groupId}`;
-      if (dob) context += `; Date of birth:${dob}`;
-      if (address) context += `; Address of the patient:${address}`;
-      if (selectedAvailability)
-        context += `; Availability of the patient:${selectedAvailability}`;
-      if (timeOfAppointment)
-        context += `; Time Of Appointment:${timeOfAppointment}`;
-      if (isnewPatient) context += `; Is New Patient:${isnewPatient}`;
-      if (zipcode) context += `; Zipcode:${zipcode}`;
-
-      const data = {
-        objective: "Schedule an appointment",
-        context: context,
-        caller_number: phoneNumber,
-        caller_name: patientName,
-        name_of_org: nameOfOrg,
-        caller_email: email,
-        phone_number: doctorPhoneNumber,
-      };
-      sessionStorage.setItem("context", context);
-      // console.log(data);
-      try {
-        const callResponse = await axios.post(
-          "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
-          data
-        );
-        setCallStatus({
-          isInitiated: true,
-          ssid: callResponse.data.call_id,
-          email: email,
-        });
-      } catch (error) {
-        console.log(error, "error initiating bland AI");
-        toast.error(error?.response?.data?.detail);
-      }
-    },
-    []
-  );
-
-  const moveToNextDoctor = async (id: string) => {
-    let newIndex = 0;
-    if (id) {
-      terminateCurrentCall(id);
-    }
-    // Move to the next doctor
-    setActiveCallIndex((prevIndex) => {
-      newIndex = prevIndex + 1;
-      return newIndex;
-    });
-    // console.log(newIndex,activeCallIndex)
-    if (newIndex + 1 <= doctors.length) {
-      const nextDoctor = doctors[newIndex];
-      //console.log("Calling next doctor:", nextDoctor);
-
-      const phoneNumber = phoneNumbers[newIndex]; //+2348168968260
-      const nameOfOrg = nextDoctor?.name; //+2348168968260
-      if (phoneNumber) {
-        await initiateCall(phoneNumber, nameOfOrg);
-      } else {
-        console.log("No phone number available for the next doctor.");
-        toast.error("Next doctor has no phone number. Skipping...");
-        // setActiveCallIndex((prevIndex) => prevIndex + 1); // Move to the next doctor
-      }
-    } else {
-      toast.success("All doctors have been called successfully..");
-      setIsConfirmed(false);
-    }
-  };
-  const connectWebSocket = () => {
-    if (wsRef?.current) {
-      //check if exisiting connection exists and disconnect
-      console.log("disconnect exisiting connection if it exists...");
-      wsRef?.current?.close();
-    }
-    wsRef.current = new WebSocket(
-      "wss://callai-backend-243277014955.us-central1.run.app/ws/notifications"
-    );
-
-    wsRef.current.onopen = () => {
-      console.log("WebSocket connected successfully and opened.");
-    };
-
-    wsRef.current.onmessage = async (event) => {
-      const data = JSON.parse(event.data);
-      // console.log("WebSocket Message:", data);
-
-      if (data.event === "call_ended") {
-        // console.log("Call Ended Data:", data);
-        setTimeout(async () => {
-          const call_ended_result = await handleEndCall(data?.call_sid);
-          console.log({ call_ended_result });
-          if (call_ended_result?.status == "yes") {
-            // toast.success("Appointment Booked Successfully");
-            Swal.fire({
-              icon: "success",
-              title: "Appointment Booked",
-              text:
-                call_ended_result?.confirmation_message ??
-                "Appointment Booked Successfully",
-              confirmButtonText: "Okay",
-              //confirmButtonColor:""
-            });
-            setIsAppointmentBooked(true);
-            wsRef?.current?.close();
-            return;
-          } else {
-            toast.warning(
-              "Appointment could not be booked. Trying next doctor..."
-            );
-            moveToNextDoctor();
-          }
-        }, 5000);
-      }
-
-      if (data.event === "call_in_process") {
-        const timestamp = new Date().toLocaleTimeString();
-        setTranscriptArray((prev) => [
-          ...prev,
-          `[${timestamp}] ${data.transcription}`,
-        ]);
-      }
-
-      if (data.event === "call_not_picked") {
-        // doctor did not pick call...move to next
-        toast.info("Doctor did not pick call. Trying next doctor...");
-
-        moveToNextDoctor();
-      }
-    };
-
-    wsRef.current.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-
-    wsRef.current.onerror = (error) => {
-      //console.error("WebSocket Error:", error);
-      console.log("Retrying WebSocket connection in 5 seconds...");
-      setTimeout(connectWebSocket, 5000);
-    };
-  };
-
-  const getDisplayTranscript = () => {
-    if (transcriptArray.length > 0) {
-      return transcriptArray.map((transcript) => `${transcript}\n`).join("");
-    }
-    return "Waiting for conversation to begin...";
-  };
-  const handleEndCall = useCallback(
-    async (id: string, retries = 5): Promise<any> => {
-      const index = activeCallIndexRef.current;
-      // console.log('cuurentIndex',index)
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
-      const context = sessionStorage.getItem("context");
-      const { email, phoneNumber, patientName, zipcode } = formData;
-      const data = {
-        call_id: id,
-        doctor_phone_number: phoneNumbers[index],
-        doctor_address: doctors[index]?.vicinity,
-        patient_org_name: doctors[index]?.name,
-        doctor_hospital_name: doctors[index]?.name,
-        doctor_phone_number: doctors[index]?.phone_number,
-        distance: doctors[index]?.distance,
-        ratings: doctors[index]?.rating,
-        website: doctors[index]?.website,
-        patient_number: phoneNumber,
-        patient_name: patientName,
-        patient_email: email,
-        calee_zip_code: zipcode,
-        context,
-      };
-      // console.log(data)
-
-      try {
-        const resp = await axios.post(
-          `https://callai-backend-243277014955.us-central1.run.app/api/appointment-booked-status`,
-          data
-        );
-        return resp.data;
-      } catch (error) {
-        if (error.response && error.response.status === 500 && retries > 0) {
-          console.log(
-            `Retrying to end call in 5 seconds... (${retries} retries left)`
-          );
-          await new Promise((resolve) => setTimeout(resolve, 5000));
-          return handleEndCall(id, retries - 1);
-        }
-        console.log(
-          "Failed to end call after multiple attempts. Returning true."
-        );
-        return true;
-      }
-    },
-    [doctors, phoneNumbers]
-  );
-  const terminateCurrentCall = async (id: string): Promise<any> => {
-    // console.log(id,'xxx')
-    try {
-      const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/terminate-call`,
-        { call_id: id }
-      );
-      return resp.data;
-    } catch (error) {
-      console.error("Error ending call:", error);
-      return true;
-    }
-  };
 
   useEffect(() => {
     if (selectedInsurance === "no") {
@@ -798,90 +479,60 @@ export default function SearchPage() {
       groupNumber: "",
       noInsurance: false,
     },
-    validationSchema: Yup.object({
-      // specialty: Yup.string().required("Required"),
-      // location: Yup.string().required("Required"),
-    }),
-
+    validationSchema,
     onSubmit: async (values) => {
-      router.push("/contact");
-      // console.log("you got here");
+      console.log("Submitting form...");
+      toast.info("Submitted form");
+      console.log(
+        values,
+        timeOfAppointment,
+        isNewPatient,
+        selectedOption,
+        selectedInsurance
+      );
+      const searchData = JSON.parse(sessionStorage.getItem("searchData"));
+      console.log("Retrieved searchData from sessionStorage:", searchData);
+
+      // Ensure searchData is not null
+      if (!values.objective) {
+        toast.error("Health concerns is required!");
+        return;
+      }
+      console.log("Form values:", values);
+    
       const updatedValues = {
         ...values,
-        selectedAvailability,
         timeOfAppointment,
         isNewPatient,
         selectedOption,
         selectedInsurance,
       };
-      console.log("you got her");
-      console.log("updatedValues", updatedValues);
-      console.log("Submitting form..."); // ✅ Debugging
-      console.log("Values:", values);
-      console.log("Extra Data:", {
-        selectedAvailability,
-        timeOfAppointment,
-        isNewPatient,
-        selectedOption,
-        selectedInsurance,
-      });
 
-      setisLoading(false);
-      if (!selectedLocation) {
-        toast.error("No location selected");
-        return;
-      }
+      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
 
-      try {
-        const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-        const response = await axios.get(
-          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
-        );
+      console.log("Stored formData in sessionStorage:", updatedValues);
 
-        sessionStorage.setItem("formData", JSON.stringify(updatedValues));
-        sessionStorage.setItem("statusData", JSON.stringify(response.data));
-
-        // console.log("Form Data:", values);
-        // console.log("API Response Data:", response.data);
-        // Navigate to status page
+      // Redirect to search page
+      setTimeout(() => {
         router.push("/contact");
-      } catch (error) {
-        console.error("Error submitting form:", error);
-      }
+      }, 500);
     },
   });
+  const handleOnPlacesChanged = (index) => {
+    if (inputRefs.current[index]) {
+      const places = inputRefs.current[index].getPlaces();
+      if (places.length > 0) {
+        const place = places[0];
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        setSelectedLocation({ lat, lng });
+      }
+    }
+  };
   return (
     <>
       <Navbar />
-
       <form onSubmit={formik.handleSubmit}>
-        {/* <div className="mt-24 md:hidden mx-2 px-4">
-          <div className="flex flex-wrap w-full ml-2 border md:border-gray-600 rounded-none overflow-hidden shadow-sm outline-none gap-2 md:gap-0">
-            <Input
-              type="text"
-              name="specialty"
-              placeholder="Condition, procedure, doctor"
-              className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 text-sm"
-              value={formik.values.specialty}
-              onChange={formik.handleChange}
-            />
-            <Input
-              type="text"
-              name="location"
-              placeholder="Address, city, zip code"
-              className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 text-sm"
-              value={formik.values.location}
-              onChange={formik.handleChange}
-            />
-            <Button
-              type="submit"
-              className="bg-[#FF6723] text-white rounded-none px-6 h-12 flex items-center justify-center w-full md:w-0"
-            >
-              Search
-            </Button>
-          </div>
-        </div> */}
-
         {/* Filters Section */}
         <div className="md:flex justify-between mt-24 px-8 text-[#595959] py-4 border-b-2 text-sm">
           <div className="flex md:gap-4 md:flex-row flex-col gap-5">
@@ -906,11 +557,19 @@ export default function SearchPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 py-6 px-4 space-y-2">
                 <Textarea
-                  placeholder="Your main medical concerns.."
                   name="objective"
-                  value={formik.values.objective}
+                  placeholder="Your main medical concern"
                   onChange={formik.handleChange}
+                  value={formik.values.objective}
+                  className={
+                    formik.errors.objective && formik.touched.objective
+                      ? "border-red-500"
+                      : ""
+                  }
                 />
+                {formik.errors.objective && formik.touched.objective && (
+                  <div className="text-red-500">{formik.errors.objective}</div>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -1067,35 +726,6 @@ export default function SearchPage() {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </DndContext>
-      {/* <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        <ScrollArea className="h-96 w-full">
-          <Column
-            activeCallIndex={activeCallIndex}
-            tasks={doctors}
-            isDraggable={!isConfirmed}
-            callStatus={callStatus}
-            isAppointmentBooked={isAppointmentBooked}
-          />
-        </ScrollArea>
-        <div className="flex justify-between">
-          <Button
-            className="px-4 py-6 bg-[#EB6F27] "
-            onClick={handleConfirmSequence}
-            disabled={isConfirmed}
-          >
-            Confirm the doctor sequence
-          </Button>
-          <p className="px-2 py-2 text-sm text-gray-600">
-            NB: You can move cards to adjust sequence
-          </p>
-        </div>
-        <div>
-          <p className="px-2 py-2 text-sm text-600">
-            By continuing, you authorize us to book an appointment on your
-            behalf.
-          </p>
-        </div>
-      </DndContext> */}
     </>
   );
 }
