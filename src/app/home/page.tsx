@@ -19,21 +19,21 @@ import { toast } from "sonner";
 import { Combobox } from "@/components/ui/combo-box";
 
 const doctorTypes = [
-  "Dermatologist",
-  "Cardiologist",
-  "Neurologist",
-  "Pediatrician",
-  "Dentist",
-  "Psychiatrist",
-  "Gynecologist",
-  "Ophthalmologist",
-  "Orthopedic",
-  "ENT Specialist",
+  { value: "Dermatology", label: "Dermatologist" },
+  { value: "Cardiology", label: "Cardiologist" },
+  { value: "Neurology", label: "Neurologist" },
+  { value: "Pediatrics", label: "Pediatrician" },
+  { value: "Dentist", label: "Dentist" },
+  { value: "Psychiatry", label: "Psychiatrist" },
+  { value: "Gynecology", label: "Gynecologist" },
+  { value: "Ophthalmology", label: "Ophthalmologist" },
+  { value: "Orthopedic Surgery", label: "Orthopedic" },
+  { value: "ENT", label: "ENT Specialist" },
 ];
 const medicalSpecialtiesOptions = [
   { value: "allergy and immunology", label: "Allergy and Immunology" },
   { value: "anesthesiology", label: "Anesthesiology" },
-  { value: "cardiology", label: "Cardiology" },
+  { value: "Cardiology", label: "Cardiology" },
   { value: "cardiothoracic surgery", label: "Cardiothoracic Surgery" },
   {
     value: "Colon and rectal surgery (proctology)",
@@ -44,11 +44,12 @@ const medicalSpecialtiesOptions = [
     label: "Cosmetic & Restorative Dentistry",
   },
   { value: "critical care medicine", label: "Critical Care Medicine" },
-  { value: "dentist", label: "Dentist" },
+  { value: "Dentist", label: "Dentist" },
   { value: "Dermatology", label: "Dermatology" },
   { value: "Emergency Medicine", label: "Emergency Medicine" },
   { value: "Endodontics", label: "Endodontics" },
   { value: "Endocrinology", label: "Endocrinology" },
+  { value: "ENT", label: "ENT Specialist" },
   { value: "Family Medicine", label: "Family Medicine" },
   { value: "Gastroenterology", label: "Gastroenterology" },
   {
@@ -58,6 +59,7 @@ const medicalSpecialtiesOptions = [
   { value: "General Surgery", label: "General Surgery" },
   { value: "Genetics", label: "Genetics" },
   { value: "Geriatrics", label: "Geriatrics" },
+  { value: "Gynecology", label: "Gynecologist" },
   { value: "Hematology", label: "Hematology" },
   { value: "Infectious Disease", label: "Infectious Disease" },
   { value: "Internal Medicine", label: "Internal Medicine" },
@@ -109,6 +111,7 @@ export default function Home() {
   const inputRefs = useRef([]);
   const addressRefs = useRef([]);
   const [selectedOption, setSelectedOption] = useState("no");
+  const [selectedDoctorType, setSelectedDoctorType] = useState(""); // Add this state to track selected button
 
   const [doctors, setDoctors] = useState([]);
 
@@ -186,6 +189,7 @@ export default function Home() {
   }
   const handleDoctorTypeClick = (type) => {
     formik.setFieldValue("specialty", type);
+    setSelectedDoctorType(type); // Update selected doctor type
   };
 
   return (
@@ -262,13 +266,17 @@ export default function Home() {
           <div className="flex flex-col gap-4 pt-4">
             <span className="text-xs text-gray-900 ">Top searches</span>
             <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
-              {doctorTypes.map((type, index) => (
+              {doctorTypes.map((value, index) => (
                 <Button
                   key={index}
-                  className="rounded-full bg-[#EFF2F4] text-[#595959] hover:text-white hover:bg-slate-800 text-xs px-3 py-2 w-full sm:w-auto"
-                  onClick={() => handleDoctorTypeClick(type)} // ✅ Correct way
+                  className={`rounded-full text-xs px-3 py-2 w-full sm:w-auto ${
+                    selectedDoctorType === value.value 
+                      ? "bg-slate-800 text-white" // Selected state
+                      : "bg-[#EFF2F4] text-[#595959] hover:text-white hover:bg-slate-800" // Normal state
+                  }`}
+                  onClick={() => handleDoctorTypeClick(value.value)}
                 >
-                  {type}
+                  {value.label}
                 </Button>
               ))}
             </div>
