@@ -334,7 +334,7 @@ export default function SearchPage() {
   const [transcriptArray, setTranscriptArray] = useState([]);
   const [selectedInsurance, setSelectedInsurance] = useState(true);
   const [customAvailability, setCustomAvailability] = useState("");
-  const [timeOfAppointment, settimeOfAppointment] = useState("today");
+  const [timeOfAppointment, settimeOfAppointment] = useState("few days");
   const [searchData, setSearchData] = useState(null);
   const [isNewPatient, setIsNewPatient] = useState(true);
   const [selectedOption, setSelectedOption] = useState("yes");
