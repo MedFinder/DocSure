@@ -113,6 +113,10 @@ export default function Navbar() {
     libraries: ["places"],
   });
 
+  const savedAddress = sessionStorage.getItem("selectedAddress");
+  // console.log("::", savedAddress);
+  const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+  // console.log("::", savedAddress, savedSpecialty);
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty");

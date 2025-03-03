@@ -481,25 +481,25 @@ export default function SearchPage() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log("Submitting form...");
-      // toast.info("Submitted form");
-      console.log(
-        values,
-        timeOfAppointment,
-        isNewPatient,
-        selectedOption,
-        selectedInsurance
-      );
+      //console.log("Submitting form...");
+      //toast.info("Submitted form");
+      // console.log(
+      //   values,
+      //   timeOfAppointment,
+      //   isNewPatient,
+      //   selectedOption,
+      //   selectedInsurance
+      // );
       const searchData = JSON.parse(sessionStorage.getItem("searchData"));
-      console.log("Retrieved searchData from sessionStorage:", searchData);
+      //console.log("Retrieved searchData from sessionStorage:", searchData);
 
       // Ensure searchData is not null
       if (!values.objective) {
         toast.info("Health concerns is required!");
         return;
       }
-      console.log("Form values:", values);
-
+      //console.log("Form values:", values);
+    
       const updatedValues = {
         ...values,
         timeOfAppointment,

@@ -27,22 +27,22 @@
 //   });
 
 //   useEffect(() => {
-//     const storedData = sessionStorage.getItem("formData");
+//     const storedData =  window.sessionStorage.getItem("formData");
 //     if (storedData) {
 //       const parsedData = JSON.parse(storedData);
 //       setFormData(parsedData);
 //       console.log("Retrieved formData:", parsedData);
 //     } else {
-//       console.warn("No form data found in sessionStorage.");
+//       console.warn("No form data found in  window.sessionStorage.");
 //     }
 
 //     // Retrieve searchData
-//     const storedSearchData = sessionStorage.getItem("searchData");
+//     const storedSearchData =  window.sessionStorage.getItem("searchData");
 //     if (storedSearchData) {
 //       const parsedSearchData = JSON.parse(storedSearchData);
 //       console.log("Retrieved searchData:", parsedSearchData);
 //     } else {
-//       console.warn("No searchData found in sessionStorage.");
+//       console.warn("No searchData found in  window.sessionStorage.");
 //     }
 //   }, []);
 
@@ -87,8 +87,8 @@
 //           `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
 //         );
 
-//         sessionStorage.setItem("formData", JSON.stringify(updatedValues));
-//         sessionStorage.setItem("statusData", JSON.stringify(response.data));
+//          window.sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+//          window.sessionStorage.setItem("statusData", JSON.stringify(response.data));
 
 //         // console.log("Form Data:", values);
 //         // console.log("API Response Data:", response.data);
@@ -255,14 +255,16 @@ export default function Contact() {
   });
 
   useEffect(() => {
-    const storedFormData = sessionStorage.getItem("formData");
-    if (storedFormData) {
-      setFormData(JSON.parse(storedFormData));
-    }
-
-    const storedSearchData = sessionStorage.getItem("searchData");
-    if (storedSearchData) {
-      setSearchData(JSON.parse(storedSearchData));
+    if (typeof window !== "undefined") {
+      const storedFormData = sessionStorage.getItem("formData");
+      if (storedFormData) {
+        setFormData(JSON.parse(storedFormData));
+      }
+  
+      const storedSearchData = sessionStorage.getItem("searchData");
+      if (storedSearchData) {
+        setSearchData(JSON.parse(storedSearchData));
+      }
     }
   }, []);
 
@@ -283,7 +285,7 @@ export default function Contact() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log(values);
+      //console.log(values);
       setIsLoading(true);
 
       const updatedFormData = {
@@ -291,7 +293,7 @@ export default function Contact() {
         ...values, // Add new values
         address: values.address || formData.address, // Keep existing address if unchanged
       };
-      console.log("got here", values);
+      //console.log("got here", values);
       console.log(updatedFormData);
       // try {
       //   // const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
@@ -299,8 +301,8 @@ export default function Contact() {
       //   //   `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
       //   // );
 
-      //   sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
-      //   sessionStorage.setItem("statusData", JSON.stringify(response.data));
+      //    window.sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
+      //    window.sessionStorage.setItem("statusData", JSON.stringify(response.data));
 
       //   router.push("/transcript");
       // } catch (error) {
@@ -309,7 +311,7 @@ export default function Contact() {
       //   setIsLoading(false);
       // }
       try {
-        sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
+         window.sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
 
         router.push("/transcript?confirmed=true"); // Redirect immediately after confirming
       } catch (error) {
