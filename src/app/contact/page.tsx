@@ -375,7 +375,7 @@ export default function Contact() {
                     onPlacesChanged={() => handleOnAddressChanged(0)}
                   >
                     <Input
-                      className="rounded-none w-full"
+                      className="rounded-none"
                       placeholder="Search address.."
                       value={formik.values.address}
                       onChange={formik.handleChange}

@@ -99,7 +99,6 @@ export default function Navbar() {
   const [timeOfAppointment, settimeOfAppointment] = useState("soonest");
   const [isnewPatient, setisnewPatient] = useState("yes");
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [addressLocation, setAddressLocation] = useState(null);
   const [isLoading, setisLoading] = useState(false);
   const inputRefs = useRef([]);
   const addressRefs = useRef([]);
@@ -108,33 +107,60 @@ export default function Navbar() {
   const [doctors, setDoctors] = useState([]);
   const [specialty, setSpecialty] = useState("");
   const [location, setLocation] = useState(null);
-
+  const [addressLocation, setAddressLocation] = useState(null);
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
   });
 
-  const savedAddress = sessionStorage.getItem("selectedAddress");
-  // console.log("::", savedAddress);
-  const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-  // console.log("::", savedAddress, savedSpecialty);
   useEffect(() => {
-    const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-    if (savedSpecialty) {
-      setSpecialty(savedSpecialty); // Set the state first
-      formik.setFieldValue("specialty", savedSpecialty);
-    }
+    if (typeof window !== "undefined") {
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      if (savedSpecialty) {
+        setSpecialty(savedSpecialty);
+      }
 
-    const savedAddress = sessionStorage.getItem("selectedAddress");
-    if (savedAddress) {
-      setAddressLocation(savedAddress);
+      const savedAddress = sessionStorage.getItem("selectedAddress");
+      if (savedAddress) {
+        setAddressLocation(savedAddress);
+      }
     }
   }, []);
 
+  useEffect(() => {
+    if (specialty) {
+      sessionStorage.setItem("selectedSpecialty", specialty);
+      formik.setFieldValue("specialty", specialty);
+    }
+  }, [specialty]); // Ensure formik updates only after specialty is set
+
+  useEffect(() => {
+    if (addressLocation) {
+      sessionStorage.setItem("selectedAddress", addressLocation);
+    }
+  }, [addressLocation]); // Update sessionStorage when address changes
+
+  const savedAddress = sessionStorage.getItem("selectedAddress");
+  // console.log("::", savedAddress);
+  const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+  console.log("::", savedAddress, savedSpecialty);
+  // useEffect(() => {
+  //   const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+  //   if (savedSpecialty) {
+  //     setSpecialty(savedSpecialty); // Set the state first
+  //     formik.setFieldValue("specialty", savedSpecialty);
+  //   }
+
+  //   const savedAddress = sessionStorage.getItem("selectedAddress");
+  //   if (savedAddress) {
+  //     setAddressLocation(savedAddress);
+  //   }
+  // }, []);
+
   const formik = useFormik({
     initialValues: {
-      // specialty: savedSpecialty || "",
-      specialty: "",
+      specialty: specialty || "",
+      // specialty: "",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -191,22 +217,52 @@ export default function Navbar() {
   //     }
   //   }
   // };
+  // const handleOnPlacesChanged = (index) => {
+  //   if (inputRefs.current[index]) {
+  //     const places = inputRefs.current[index].getPlaces();
+  //     if (places.length > 0) {
+  //       const place = places[0];
+  //       const lat = place.geometry.location.lat();
+  //       const lng = place.geometry.location.lng();
+  //       // const formattedAddress = place.formatted_address; // Get address string
+
+  //       setSelectedLocation({ lat, lng });
+  //       // setAddressLocation(formattedAddress); // Update input field state
+  //       // sessionStorage.setItem("selectedAddress", formattedAddress); // Store in session
+  //     }
+  //   }
+  // };
+  // const handleOnPlacesChanged = (index) => {
+  //   if (inputRefs.current[index]) {
+  //     const places = inputRefs.current[index].getPlaces();
+  //     if (places.length > 0) {
+  //       const place = places[0];
+  //       const lat = place.geometry.location.lat();
+  //       const lng = place.geometry.location.lng();
+  //       const formattedAddress = place.formatted_address;
+
+  //       setSelectedLocation({ lat, lng });
+  //       setAddressLocation(formattedAddress);
+  //       sessionStorage.setItem('selectedAddress', formattedAddress);
+  //     }
+  //   }
+  // };
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
       const places = inputRefs.current[index].getPlaces();
-      if (places.length > 0) {
+      if (places && places.length > 0) {
+        // Check if places exist
         const place = places[0];
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        // const formattedAddress = place.formatted_address; // Get address string
+        const formattedAddress = place.formatted_address;
 
         setSelectedLocation({ lat, lng });
-        // setAddressLocation(formattedAddress); // Update input field state
-        // sessionStorage.setItem("selectedAddress", formattedAddress); // Store in session
+        setAddressLocation(formattedAddress);
+        sessionStorage.setItem("selectedAddress", formattedAddress);
       }
     }
   };
-
   function handleCreateOptions() {
     return null;
   }
@@ -271,11 +327,10 @@ export default function Navbar() {
                 name="specialty"
                 className="w-full md:w-1/2 min-w-[280px] p-0 border-none bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground py-1"
                 options={medicalSpecialtiesOptions}
-                placeholder="Medical specialty"
-                selected={specialty} // Use local state
+                placeholder={specialty ? specialty : "Medical specialty"} // Correct placeholder logic
+                selected={specialty}
                 onChange={(value) => {
-                  setSpecialty(value); // Update state
-                  formik.setFieldValue("specialty", value);
+                  setSpecialty(value);
                 }}
               />
 
@@ -292,7 +347,7 @@ export default function Navbar() {
 
               {/* Second Input */}
 
-              {isLoaded && (
+              {/* {isLoaded && (
                 <StandaloneSearchBox
                   onLoad={(ref) => (inputRefs.current[0] = ref)}
                   onPlacesChanged={() => handleOnPlacesChanged(0)}
@@ -305,7 +360,25 @@ export default function Navbar() {
                     onChange={(e) => setAddressLocation(e.target.value)} // Allow editing
                   />
                 </StandaloneSearchBox>
+              )} */}
+              {isLoaded && (
+                <StandaloneSearchBox
+                  onLoad={(ref) => (inputRefs.current[0] = ref)}
+                  onPlacesChanged={() => handleOnPlacesChanged(0)}
+                >
+                  <Input
+                    type="text"
+                    placeholder="Address, city, zip code"
+                    className="w-[22rem] border-none focus:ring-0 focus:outline-none h-12 px-3"
+                    value={addressLocation} // Use addressLocation state directly
+                    onChange={(e) => {
+                      setAddressLocation(e.target.value);
+                      sessionStorage.setItem("selectedAddress", e.target.value);
+                    }}
+                  />
+                </StandaloneSearchBox>
               )}
+
               {/* Search Button */}
 
               <Button
