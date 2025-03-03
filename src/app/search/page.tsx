@@ -495,7 +495,7 @@ export default function SearchPage() {
 
       // Ensure searchData is not null
       if (!values.objective) {
-        toast.error("Health concerns is required!");
+        toast.info("Health concerns is required!");
         return;
       }
       //console.log("Form values:", values);
@@ -529,6 +529,7 @@ export default function SearchPage() {
       }
     }
   };
+
   return (
     <>
       <Navbar />
@@ -549,7 +550,7 @@ export default function SearchPage() {
             </div>
 
             {/* Health Concerns */}
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="rounded-full">
                   Health concerns
@@ -558,7 +559,7 @@ export default function SearchPage() {
               <DropdownMenuContent className="w-56 py-6 px-4 space-y-2">
                 <Textarea
                   name="objective"
-                  placeholder="Your main medical concern"
+                  placeholder="Knee pain, fever, skin rash..."
                   onChange={formik.handleChange}
                   value={formik.values.objective}
                   className={
@@ -569,6 +570,43 @@ export default function SearchPage() {
                 />
                 {formik.errors.objective && formik.touched.objective && (
                   <div className="text-red-500">{formik.errors.objective}</div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu> */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`rounded-full ${
+                    formik.errors.objective && formik.touched.objective
+                      ? "border-red-500 text-red-500"
+                      : ""
+                  }`}
+                >
+                  Health concerns
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                className={`w-56 py-6 px-4 space-y-2 ${
+                  formik.errors.objective && formik.touched.objective
+                    ? "border-red-500"
+                    : ""
+                }`}
+              >
+                <Textarea
+                  name="objective"
+                  placeholder="Knee pain, fever, skin rash..."
+                  onChange={formik.handleChange}
+                  value={formik.values.objective}
+                  className={
+                    formik.errors.objective && formik.touched.objective
+                      ? "border-red-500 focus:ring-red-500"
+                      : ""
+                  }
+                />
+                {formik.errors.objective && formik.touched.objective && (
+                  <div className="text-red-500">Required</div>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -599,7 +637,7 @@ export default function SearchPage() {
 
             {/* Availability */}
             <Select name="availability">
-              <SelectTrigger className="md:w-[180px] w-full rounded-full">
+              <SelectTrigger className="md:w-auto w-full rounded-full">
                 <SelectValue placeholder="Your availability" />
               </SelectTrigger>
               <SelectContent>
@@ -698,7 +736,7 @@ export default function SearchPage() {
 
         {/* Submit Section */}
         <div className="bg-[#FFF6F2] p-4 px-7">
-          <div className="flex items-center justify-between sm:gap-2">
+          <div className="flex items-center  sm:gap-2">
             <p className="text-xs md:text-base">
               AI assistant will call the following recommended doctors in this
               sequence and seek an appointment for you.
@@ -706,7 +744,7 @@ export default function SearchPage() {
             <Button
               type="submit"
               // disabled={isLoading}
-              className="bg-[#FF6723] text-white md:p-5 p-4"
+              className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2"
             >
               Continue
             </Button>

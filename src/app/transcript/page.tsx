@@ -286,7 +286,7 @@ export default function Transcript() {
       console.log("✅ Phone numbers available, initiating call...");
      handleConfirmSequence();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
 
 
@@ -540,7 +540,7 @@ export default function Transcript() {
       const formData = JSON.parse(sessionStorage.getItem("formData"));
       const context = sessionStorage.getItem("context");
       const { email, phoneNumber, patientName, zipcode, request_id } = formData;
-      const data = { 
+      const data = {
         call_id: id,
         request_id,
         doctor_number: doctors[index]?.phone_number, // phoneNumbers[index]
