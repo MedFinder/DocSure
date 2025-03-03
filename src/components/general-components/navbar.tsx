@@ -113,22 +113,21 @@ export default function Navbar() {
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
   });
-
-  const savedAddress = sessionStorage.getItem("selectedAddress");
-  // console.log("::", savedAddress);
-  const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
   // console.log("::", savedAddress, savedSpecialty);
   useEffect(() => {
-    const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-    if (savedSpecialty) {
-      setSpecialty(savedSpecialty); // Set the state first
-      formik.setFieldValue("specialty", savedSpecialty);
-    }
+    if (typeof window !== "undefined") {
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      if (savedSpecialty) {
+        setSpecialty(savedSpecialty);
+        formik.setFieldValue("specialty", savedSpecialty);
+      }
 
-    const savedAddress = sessionStorage.getItem("selectedAddress");
-    if (savedAddress) {
-      setAddressLocation(savedAddress);
+      const savedAddress = sessionStorage.getItem("selectedAddress");
+      if (savedAddress) {
+        setAddressLocation(savedAddress);
+      }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formik = useFormik({

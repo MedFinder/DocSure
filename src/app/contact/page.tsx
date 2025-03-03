@@ -255,14 +255,16 @@ export default function Contact() {
   });
 
   useEffect(() => {
-    const storedFormData =  window.sessionStorage.getItem("formData");
-    if (storedFormData) {
-      setFormData(JSON.parse(storedFormData));
-    }
-
-    const storedSearchData =  window.sessionStorage.getItem("searchData");
-    if (storedSearchData) {
-      setSearchData(JSON.parse(storedSearchData));
+    if (typeof window !== "undefined") {
+      const storedFormData = sessionStorage.getItem("formData");
+      if (storedFormData) {
+        setFormData(JSON.parse(storedFormData));
+      }
+  
+      const storedSearchData = sessionStorage.getItem("searchData");
+      if (storedSearchData) {
+        setSearchData(JSON.parse(storedSearchData));
+      }
     }
   }, []);
 
