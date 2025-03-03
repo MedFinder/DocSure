@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 
 export default function Success() {
 const searchParams = useSearchParams();
@@ -27,7 +27,8 @@ if (phone) {
 }, [searchParams]);
   return (
     <>
-      <Navbar />
+    <Suspense fallback={<div>Loading...</div>}>
+    <Navbar />
       {/* Centered Full Page Form */}
       <div className="h-screen flex flex-col justify-center items-center px-6 sm:px-10 text-[#333333]">
         <div className="w-full max-w-2xl  text-center   sm:p-10 ">
@@ -53,6 +54,8 @@ if (phone) {
           </div>
         </div>
       </div>
+    </Suspense>
+
     </>
   );
 }
