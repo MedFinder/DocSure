@@ -140,7 +140,7 @@ export default function Transcript() {
       console.log("✅ Phone numbers available, initiating call...");
       handleConfirmSequence();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
 
   //console.log(phoneNumbers.length);
@@ -468,7 +468,7 @@ export default function Transcript() {
       const formData = JSON.parse(sessionStorage.getItem("formData"));
       const context = sessionStorage.getItem("context");
       const { email, phoneNumber, patientName, zipcode, request_id } = formData;
-      const data = { 
+      const data = {
         call_id: id,
         request_id,
         doctor_number: doctors[index]?.phone_number, // phoneNumbers[index]
@@ -529,7 +529,7 @@ export default function Transcript() {
           {/* First Input */}
           <Input
             type="text"
-            placeholder="Condition, procedure, doctor"
+            placeholder="Medical specialty"
             className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 text-sm"
           />
 
