@@ -405,23 +405,23 @@ export default function Transcript() {
       };
       sessionStorage.setItem("context", context);
       console.log(data);
-      // try {
-      //   const callResponse = await axios.post(
-      //     "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
-      //     data
-      //   );
-      //   setCallStatus({
-      //     isInitiated: true,
-      //     ssid: callResponse.data.call_id,
-      //     email: email,
-      //   });
-      // } catch (error) {
-      //   console.log(error, "error initiating bland AI");
+      try {
+        const callResponse = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
+          data
+        );
+        setCallStatus({
+          isInitiated: true,
+          ssid: callResponse.data.call_id,
+          email: email,
+        });
+      } catch (error) {
+        console.log(error, "error initiating bland AI");
 
-      //   toast.error(error?.response?.data?.detail, {
-      //     duration: 20000,
-      //   });
-      // }
+        toast.error(error?.response?.data?.detail, {
+          duration: 20000,
+        });
+      }
     },
     []
   );
