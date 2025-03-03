@@ -16,7 +16,7 @@ import axios from "axios";
 
 export default function Transcript() {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY;
-  console.log(apiKey);
+  // console.log(apiKey);
   const wsRef = useRef<WebSocket | null>(null);
   const router = useRouter();
   const [doctors, setDoctors] = useState([]);
@@ -39,19 +39,10 @@ export default function Transcript() {
   useEffect(() => {
     const storedFormData = sessionStorage.getItem("formData");
     if (storedFormData) {
+      console.log(JSON.parse(storedFormData));
       setFormData(JSON.parse(storedFormData));
     }
   }, []);
-
-  useEffect(() => {
-    if (doctors.length > 0) {
-      fetchPhoneNumbers().then(() => {
-        if (!callStatus.isInitiated) {
-          handleConfirmSequence(); // Start call only after phone numbers are set
-        }
-      });
-    }
-  }, [doctors]); // Trigger only after doctors are set
 
   useEffect(() => {
     activeCallIndexRef.current = activeCallIndex;
@@ -149,9 +140,10 @@ export default function Transcript() {
       console.log("✅ Phone numbers available, initiating call...");
       handleConfirmSequence();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
 
-  console.log(phoneNumbers.length);
+  //console.log(phoneNumbers.length);
   // const handleConfirmSequence = useCallback(async () => {
   //   if (!doctors.length) return; // Ensure doctors are loaded first
 
@@ -238,7 +230,7 @@ export default function Transcript() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCallIndex, phoneNumbers, doctors]);
-  console.log(phoneNumbers.length);
+  //console.log(phoneNumbers.length);
   useEffect(() => {
     if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
       setShowTranscript(true);
@@ -279,11 +271,11 @@ export default function Transcript() {
       });
     }, 500);
   };
-  console.log(phoneNumbers, "numbers now");
+  // console.log(phoneNumbers, "numbers now");
 
   // console.log("new call initiated for", doctorPhoneNumber, nameOfOrg);
 
-  console.log(formData);
+  //console.log(formData);
   const initiateCall = useCallback(
     async (doctorPhoneNumber: string, nameOfOrg: string) => {
       console.log("new call initiated for", doctorPhoneNumber, nameOfOrg);
@@ -332,11 +324,11 @@ export default function Transcript() {
       const data = {
         objective: "Schedule an appointment",
         context: context,
-        caller_number: phoneNumber,
-        caller_name: patientName,
-        name_of_org: nameOfOrg,
-        caller_email: email,
-        phone_number: doctorPhoneNumber,
+        patient_number: phoneNumber,
+        patient_name: patientName,
+        hospital_name: nameOfOrg,
+        patient_email: email,
+        doctor_number: doctorPhoneNumber,
       };
       sessionStorage.setItem("context", context);
       console.log(data);
@@ -475,22 +467,20 @@ export default function Transcript() {
       // console.log('cuurentIndex',index)
       const formData = JSON.parse(sessionStorage.getItem("formData"));
       const context = sessionStorage.getItem("context");
-      const { email, phoneNumber, patientName, zipcode } = formData;
-      const data = {
+      const { email, phoneNumber, patientName, zipcode, request_id } = formData;
+      const data = { 
         call_id: id,
-        doctor_phone_number: phoneNumbers[index],
+        request_id,
+        doctor_number: doctors[index]?.phone_number, // phoneNumbers[index]
+        hospital_name: doctors[index]?.name,
         doctor_address: doctors[index]?.vicinity,
-        patient_org_name: doctors[index]?.name,
-        doctor_hospital_name: doctors[index]?.name,
-        doctor_phone_number: doctors[index]?.phone_number,
         distance: doctors[index]?.distance,
-        ratings: doctors[index]?.rating,
+        rating: doctors[index]?.rating,
         website: doctors[index]?.website,
-        patient_number: phoneNumber,
+        context,
         patient_name: patientName,
         patient_email: email,
-        calee_zip_code: zipcode,
-        context,
+        patient_number: phoneNumber,
       };
       // console.log(data)
 
@@ -514,7 +504,7 @@ export default function Transcript() {
         return true;
       }
     },
-    [doctors, phoneNumbers]
+    [doctors]
   );
   const terminateCurrentCall = async (id: string): Promise<any> => {
     // console.log(id,'xxx')
