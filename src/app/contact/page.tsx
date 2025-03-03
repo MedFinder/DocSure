@@ -283,7 +283,7 @@ export default function Contact() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log(values);
+      //console.log(values);
       setIsLoading(true);
 
       const updatedFormData = {
@@ -291,7 +291,7 @@ export default function Contact() {
         ...values, // Add new values
         address: values.address || formData.address, // Keep existing address if unchanged
       };
-      console.log("got here", values);
+      //console.log("got here", values);
       console.log(updatedFormData);
       // try {
       //   // const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };

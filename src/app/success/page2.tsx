@@ -1,30 +1,11 @@
-"use client";
-
 import Navbar from "@/components/general-components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 export default function Success() {
-const searchParams = useSearchParams();
-const [successMessage, setSuccessMessage] = useState<string>("Your appointment was booked successfully");
-const [phoneNumber, setPhoneNumber] = useState<string>("");
-useEffect(() => {
-// Get the parameters from URL
-const message = searchParams.get("success_message");
-const phone = searchParams.get("phone_number");
-
-if (message) {
-    setSuccessMessage(decodeURIComponent(message));
-}
-
-if (phone) {
-    setPhoneNumber(decodeURIComponent(phone));
-}
-}, [searchParams]);
   return (
     <>
       <Navbar />
@@ -36,16 +17,19 @@ if (phone) {
             Success!
           </p>
           <p>
-            {successMessage}
+            Your appointment is set with{" "}
+            <span className="font-semibold">Dr. Igor Kletsman, </span> MD on
+            Monday, February 19, 2025, at 10:30 AM at Carewell Medical Clinic,
+            New York
           </p>
           {/* Button */}
           <div className="flex justify-center space-x-4 mt-12">
-            <Link href="#">
+            <Link href="/contact">
               <Button className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto ">
                 Call Doctors Office
               </Button>
             </Link>
-            <Link href="/">
+            <Link href="/contact">
               <Button className="bg-[#7DA1B7] text-white px-6 py-5 w-full sm:w-auto ">
                 Search Again
               </Button>
