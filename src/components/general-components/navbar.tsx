@@ -113,9 +113,6 @@ export default function Navbar() {
     libraries: ["places"],
   });
 
-  const savedAddress = sessionStorage.getItem("selectedAddress");
-  // console.log("::", savedAddress);
-  const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
   // console.log("::", savedAddress, savedSpecialty);
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -276,9 +273,12 @@ export default function Navbar() {
         {/* Left Section: Logo & Search (only on Search Page) */}
         <div className="flex items-center gap-8">
           {/* Logo */}
-          <span className="text-[#FF6723] font-semibold text-xl whitespace-nowrap">
-            DocSure AI
-          </span>
+          <Link
+            href="/"
+            className="text-[#FF6723] font-semibold text-xl whitespace-nowrap"
+          >
+            Docsure
+          </Link>
 
           {/* Conditionally Show Search Bar on Search Page */}
           {pathname !== "/" && (

@@ -208,14 +208,16 @@ export default function Transcript() {
         return {
           id: item.place_id, // Preserve the original id from place_id
           name: item.name || "Unknown Doctor",
-          title: item.types?.includes("health") ? "Primary Care Doctor" : "Specialist",
-          image: item.photos?.[0]?.photo_reference 
+          title: item.types?.includes("health")
+            ? "Primary Care Doctor"
+            : "Specialist",
+          image: item.photos?.[0]?.photo_reference
             ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${item.photos[0].photo_reference}&key=${apiKey}`
             : "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
           rating: item.rating || 0,
           reviews: item.user_ratings_total || 0,
           distance: item.distance || "Unknown distance",
-          address: item.vicinity  || "Address unavailable",
+          address: item.vicinity || "Address unavailable",
           status: "queue", // Default status
           waitTime: "Excellent wait time", // Default wait time
           appointments: "New patient appointments", // Default appointment text
@@ -223,11 +225,11 @@ export default function Transcript() {
           place_id: item.place_id,
           vicinity: item.vicinity || "",
           website: item.website || "",
-          isSponsored: false // Default not sponsored
+          isSponsored: false, // Default not sponsored
         };
       });
-      console.log({parsedData})
-      console.log({sortedData});
+      console.log({ parsedData });
+      console.log({ sortedData });
       setDoctors(sortedData);
     } else {
       router.push("/");
@@ -284,11 +286,10 @@ export default function Transcript() {
   useEffect(() => {
     if (phoneNumbers.length > 0 && !callStatus.isInitiated) {
       console.log("✅ Phone numbers available, initiating call...");
-     handleConfirmSequence();
+      handleConfirmSequence();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
-
 
   const handleConfirmSequence = useCallback(async () => {
     await connectWebSocket();
@@ -478,16 +479,19 @@ export default function Transcript() {
           console.log({ call_ended_result });
           if (call_ended_result?.status == "yes") {
             // Save relevant information for success page
-            const successMessage = call_ended_result?.confirmation_message ?? 
+            const successMessage =
+              call_ended_result?.confirmation_message ??
               "Appointment Booked Successfully";
             const doctorPhone = doctors[activeCallIndex]?.phone_number;
-            
+
             setIsAppointmentBooked(true);
             wsRef?.current?.close();
-            
+
             // Pass parameters to success page using router.push with query params
             router.push(
-              `/success?success_message=${encodeURIComponent(successMessage)}&phone_number=${encodeURIComponent(doctorPhone || '')}`
+              `/success?success_message=${encodeURIComponent(
+                successMessage
+              )}&phone_number=${encodeURIComponent(doctorPhone || "")}`
             );
             return;
           } else {
@@ -501,10 +505,7 @@ export default function Transcript() {
 
       if (data.event === "call_in_process") {
         const timestamp = new Date().toLocaleTimeString();
-        setTranscriptArray((prev) => [
-          ...prev,
-          `${data.transcription}`,
-        ]);
+        setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
       }
 
       if (data.event === "call_not_picked") {
@@ -529,7 +530,7 @@ export default function Transcript() {
   const getDisplayTranscript = () => {
     if (transcriptArray.length > 0) {
       // console.log(transcriptArray)
-      return transcriptArray
+      return transcriptArray;
     }
     return "Waiting for conversation to begin...";
   };
@@ -594,15 +595,12 @@ export default function Transcript() {
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <Navbar />
-
       <div className="mt-5 w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full mt-24 md:hidden mx-2 px-4" />
-
       <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full">
-        <div className="flex flex-wrap gap-5 justify-between w-full text-lg font-medium tracking-tight max-w-[1272px] text-zinc-800 max-md:max-w-full mt-20">
-          <h2>Request Status</h2>
-          <h2>Chat Transcript</h2>
+        <div className="flex  gap-5  w-full text-lg font-medium tracking-tight max-w-[1272px] text-zinc-800 max-md:max-w-full mt-20">
+          <h2 className="w-[82%]">Request Status</h2>
+          <h2 className="  ">Chat Transcript</h2>
         </div>
-
         <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
           <div className="flex gap-5 h-full max-md:flex-col">
             {/* Left column with doctor cards and terminate button */}
@@ -621,16 +619,16 @@ export default function Transcript() {
                   />
                 ))}
               </div>
-              
+
               {/* Terminate Request Button - fixed at bottom */}
               <div className="flex justify-center mt-4 pb-2">
-                <button 
+                <button
                   onClick={terminateRequest}
-                  disabled={!callStatus?.isInitiated} 
+                  disabled={!callStatus?.isInitiated}
                   className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
-                    callStatus?.isInitiated 
-                    ? "bg-red-600 hover:bg-red-700 text-white" 
-                    : "bg-red-300 cursor-not-allowed text-white opacity-70"
+                    callStatus?.isInitiated
+                      ? "bg-red-600 hover:bg-red-700 text-white"
+                      : "bg-red-300 cursor-not-allowed text-white opacity-70"
                   }`}
                 >
                   Terminate Request
@@ -639,12 +637,15 @@ export default function Transcript() {
             </div>
 
             <div className="ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full">
-              <ChatSection doctorName={doctors[activeCallIndex]?.name} transcripts={getDisplayTranscript()} />
-              
+              <ChatSection
+                doctorName={doctors[activeCallIndex]?.name}
+                transcripts={getDisplayTranscript()}
+              />
+
               <footer className="mt-4 text-sm tracking-tight text-black self-end">
                 <p>
-                  <strong>Note:</strong> Feel free to close this browser. A summary of
-                  the interaction(s) will be sent to you over email.
+                  <strong>Note:</strong> Feel free to close this browser. A
+                  summary of the interaction(s) will be sent to you over email.
                 </p>
               </footer>
             </div>
