@@ -3,7 +3,7 @@
 import { Menu, X, Search, MapPin } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation"; // Detect the current page
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils"; // Helper for conditional classes
@@ -106,14 +106,33 @@ export default function Navbar() {
   const [selectedOption, setSelectedOption] = useState("no");
 
   const [doctors, setDoctors] = useState([]);
+  const [specialty, setSpecialty] = useState("");
+  const [location, setLocation] = useState(null);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
   });
+  // console.log("::", savedAddress, savedSpecialty);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      if (savedSpecialty) {
+        setSpecialty(savedSpecialty);
+        formik.setFieldValue("specialty", savedSpecialty);
+      }
+
+      const savedAddress = sessionStorage.getItem("selectedAddress");
+      if (savedAddress) {
+        setAddressLocation(savedAddress);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formik = useFormik({
     initialValues: {
+      // specialty: savedSpecialty || "",
       specialty: "",
     },
     validationSchema,
@@ -133,6 +152,7 @@ export default function Navbar() {
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
+        console.log();
         const response = await axios.get(
           `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
         );
@@ -159,6 +179,17 @@ export default function Navbar() {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [selectedOption]);
 
+  // const handleOnPlacesChanged = (index) => {
+  //   if (inputRefs.current[index]) {
+  //     const places = inputRefs.current[index].getPlaces();
+  //     if (places.length > 0) {
+  //       const place = places[0];
+  //       const lat = place.geometry.location.lat();
+  //       const lng = place.geometry.location.lng();
+  //       setSelectedLocation({ lat, lng });
+  //     }
+  //   }
+  // };
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
       const places = inputRefs.current[index].getPlaces();
@@ -166,18 +197,11 @@ export default function Navbar() {
         const place = places[0];
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
+        // const formattedAddress = place.formatted_address; // Get address string
+
         setSelectedLocation({ lat, lng });
-      }
-    }
-  };
-  const handleOnAddressChanged = (index) => {
-    if (addressRefs.current[index]) {
-      const places = addressRefs.current[index].getPlaces();
-      if (places && places.length > 0) {
-        // <-- Added defensive check
-        const address = places[0];
-        //console.log(address)
-        formik.setFieldValue("address", address?.formatted_address);
+        // setAddressLocation(formattedAddress); // Update input field state
+        // sessionStorage.setItem("selectedAddress", formattedAddress); // Store in session
       }
     }
   };
@@ -186,7 +210,7 @@ export default function Navbar() {
     return null;
   }
   return (
-    <div className="fixed top-0 left-0 w-full border-b-2 border-gray-200 bg-white z-50">
+    <div className="fixed top-0 left-0 w-full  border-gray-200 bg-white z-50">
       <div className="flex justify-between py-5 px-8 relative items-center">
         {/* Left Section: Logo & Search (only on Search Page) */}
         <div className="flex items-center gap-8">
@@ -227,16 +251,29 @@ export default function Navbar() {
               <div className="flex items-center justify-center px-3 ">
                 <Search className="w-5 h-5 text-gray-500 hidden md:block" />
               </div>
+              {/* <ComboboxNav
+                mode="single"
+                id="specialty"
+                name="specialty"
+                className="w-full md:w-1/2 min-w-[280px] p-0 border-none bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground py-1"
+                options={medicalSpecialtiesOptions}
+                placeholder="Medical specialty"
+                selected={formik.values.specialty}
+                onChange={(value) => {
+                  console.log("Selected value:", value);
+                  formik.setFieldValue("specialty", value);
+                }}
+              /> */}
               <ComboboxNav
                 mode="single"
                 id="specialty"
                 name="specialty"
-                className="w-full md:w-1/2 min-w-[150px] p-0 border-none bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground py-1"
+                className="w-full md:w-1/2 min-w-[280px] p-0 border-none bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground py-1"
                 options={medicalSpecialtiesOptions}
-                placeholder="Condition, procedure, doctor"
-                selected={formik.values.specialty}
+                placeholder="Medical specialty"
+                selected={specialty} // Use local state
                 onChange={(value) => {
-                  console.log("Selected value:", value);
+                  setSpecialty(value); // Update state
                   formik.setFieldValue("specialty", value);
                 }}
               />
@@ -263,6 +300,8 @@ export default function Navbar() {
                     type="text"
                     placeholder="Address, city, zip code"
                     className="w-[22rem] border-none focus:ring-0 focus:outline-none h-12 px-3"
+                    value={addressLocation || ""}
+                    onChange={(e) => setAddressLocation(e.target.value)} // Allow editing
                   />
                 </StandaloneSearchBox>
               )}
@@ -279,18 +318,18 @@ export default function Navbar() {
         </div>
 
         {/* Desktop Menu */}
-        {/* <div className="hidden md:flex gap-8 items-center text-md font-normal">
-          <Link href="/" className="hover:text-gray-500">
+        <div className="hidden md:flex gap-8 items-center text-md font-normal">
+          {/* <Link href="/" className="hover:text-gray-500">
             Browse
-          </Link>
+          </Link> */}
           <Link href="/contact-us" className="hover:text-gray-500">
             Help
           </Link>
-          <Link href="" className="hover:text-gray-500">
+          {/* <Link href="" className="hover:text-gray-500">
             Log In{" "}
           </Link>
-          <Button className="bg-[#0074BA] rounded-none py-6">Sign Up</Button>
-        </div> */}
+          <Button className="bg-[#0074BA] rounded-none py-6">Sign Up</Button> */}
+        </div>
 
         {/* Mobile Hamburger */}
         <button onClick={toggleSidebar} className="md:hidden">
@@ -341,5 +380,3 @@ export default function Navbar() {
     </div>
   );
 }
-
-
