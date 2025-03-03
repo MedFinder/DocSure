@@ -371,6 +371,7 @@ export default function Transcript() {
         isnewPatient,
         zipcode,
         insurer,
+        maxWait,
       } = formData;
 
       let context =
@@ -385,6 +386,7 @@ export default function Transcript() {
       if (groupId) context += `; Group Id:${groupId}`;
       if (dob) context += `; Date of birth:${dob}`;
       if (address) context += `; Address of the patient:${address}`;
+      if (maxWait) context += `; Max Wait:${maxWait}`;
       if (selectedAvailability)
         context += `; Availability of the patient:${selectedAvailability}`;
       if (timeOfAppointment)
@@ -403,23 +405,23 @@ export default function Transcript() {
       };
       sessionStorage.setItem("context", context);
       console.log(data);
-      try {
-        const callResponse = await axios.post(
-          "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
-          data
-        );
-        setCallStatus({
-          isInitiated: true,
-          ssid: callResponse.data.call_id,
-          email: email,
-        });
-      } catch (error) {
-        console.log(error, "error initiating bland AI");
+      // try {
+      //   const callResponse = await axios.post(
+      //     "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
+      //     data
+      //   );
+      //   setCallStatus({
+      //     isInitiated: true,
+      //     ssid: callResponse.data.call_id,
+      //     email: email,
+      //   });
+      // } catch (error) {
+      //   console.log(error, "error initiating bland AI");
 
-        toast.error(error?.response?.data?.detail, {
-          duration: 20000,
-        });
-      }
+      //   toast.error(error?.response?.data?.detail, {
+      //     duration: 20000,
+      //   });
+      // }
     },
     []
   );
@@ -639,14 +641,14 @@ export default function Transcript() {
             </div>
 
             <div className="ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full">
-              <ChatSection doctorName={doctors[activeCallIndex]?.name} transcripts={getDisplayTranscript()} />
-              
-              <footer className="mt-4 text-sm tracking-tight text-black self-end">
+              {/* Note text updated with orange color */}
+              <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
                 <p>
-                  <strong>Note:</strong> Feel free to close this browser. A summary of
-                  the interaction(s) will be sent to you over email.
+                  Tip: Feel free to close this browser. Your booking confirmation will be sent to you over email and text.
                 </p>
-              </footer>
+              </div>
+              
+              <ChatSection doctorName={doctors[activeCallIndex]?.name} transcripts={getDisplayTranscript()} />
             </div>
           </div>
         </div>

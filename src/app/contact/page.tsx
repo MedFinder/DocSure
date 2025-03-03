@@ -289,7 +289,7 @@ export default function Contact() {
         address: values.address || formData.address, // Keep existing address if unchanged
       };
       //console.log("got here", values);
-      console.log(updatedFormData);
+      // console.log(updatedFormData);
       // try {
       //   // const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
       //   // const response = await axios.get(
