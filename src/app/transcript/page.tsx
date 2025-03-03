@@ -595,12 +595,15 @@ export default function Transcript() {
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <Navbar />
-      <div className="mt-5 w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full 4 md:hidden mx-2 px-4" />
+
+      <div className="mt-5 w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full mt-24 md:hidden mx-2 px-4" />
+
       <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full">
-        <div className="flex  gap-5  w-full text-lg font-medium tracking-tight max-w-[1272px] text-zinc-800 max-md:max-w-full mt-20">
-          <h2 className="w-[82%]">Request Status</h2>
-          <h2 className="  ">Chat Transcript</h2>
+        <div className="flex flex-wrap gap-5 justify-between w-full text-lg font-medium tracking-tight max-w-[1272px] text-zinc-800 max-md:max-w-full mt-20">
+          <h2>Request Status</h2>
+          <h2>Chat Transcript</h2>
         </div>
+
         <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
           <div className="flex gap-5 h-full max-md:flex-col">
             {/* Left column with doctor cards and terminate button */}
