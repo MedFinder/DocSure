@@ -20,74 +20,11 @@ import {
 import { toast } from "sonner";
 import axios from "axios";
 import { ComboboxNav } from "../ui/combo-box-nav";
+import { medicalSpecialtiesOptions } from "@/constants/store-constants";
 
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
-const medicalSpecialtiesOptions = [
-  { value: "allergy and immunology", label: "Allergy and Immunology" },
-  { value: "anesthesiology", label: "Anesthesiology" },
-  { value: "cardiology", label: "Cardiology" },
-  { value: "cardiothoracic surgery", label: "Cardiothoracic Surgery" },
-  {
-    value: "Colon and rectal surgery (proctology)",
-    label: "Colon and Rectal surgery (Proctology)",
-  },
-  {
-    value: "Cosmetic & Restorative Dentistry",
-    label: "Cosmetic & Restorative Dentistry",
-  },
-  { value: "critical care medicine", label: "Critical Care Medicine" },
-  { value: "dentist", label: "Dentist" },
-  { value: "Dermatology", label: "Dermatology" },
-  { value: "Emergency Medicine", label: "Emergency Medicine" },
-  { value: "Endodontics", label: "Endodontics" },
-  { value: "Endocrinology", label: "Endocrinology" },
-  { value: "Family Medicine", label: "Family Medicine" },
-  { value: "Gastroenterology", label: "Gastroenterology" },
-  {
-    value: "General & Preventive Dentistry",
-    label: "General & Preventive Dentistry",
-  },
-  { value: "General Surgery", label: "General Surgery" },
-  { value: "Genetics", label: "Genetics" },
-  { value: "Geriatrics", label: "Geriatrics" },
-  { value: "Hematology", label: "Hematology" },
-  { value: "Infectious Disease", label: "Infectious Disease" },
-  { value: "Internal Medicine", label: "Internal Medicine" },
-  { value: "Nephrology", label: "Nephrology" },
-  { value: "Neurology", label: "Neurology" },
-  { value: "Neurosurgery", label: "Neurosurgery" },
-  { value: "Ophthalmology", label: "Ophthalmology" },
-  {
-    value: "Oral and Maxillofacial Surgery",
-    label: "Oral and Maxillofacial Surgery",
-  },
-  { value: "Orthodontics", label: "Orthodontics" },
-  { value: "Orthopedic Surgery", label: "Orthopedic Surgery" },
-  { value: "Otolaryngology (ENT)", label: "Otolaryngology (ENT)" },
-  { value: "Pediatric Dentistry", label: "Pediatric Dentistry" },
-  { value: "Pediatric Surgery", label: "Pediatric Surgery" },
-  { value: "Pediatrics", label: "Pediatrics" },
-  {
-    value: "Periodontics & Implant Dentistry",
-    label: "Periodontics & Implant Dentistry",
-  },
-  {
-    value: "Physical Medicine and Rehabilitation (Physiatry)",
-    label: "Physical Medicine and Rehabilitation (Physiatry)",
-  },
-  { value: "Plastic Surgery", label: "Plastic Surgery" },
-  { value: "Psychiatry", label: "Psychiatry" },
-  { value: "Pulmonology", label: "Pulmonology" },
-  { value: "Radiology", label: "Radiology" },
-  { value: "Rheumatology", label: "Rheumatology" },
-  { value: "Sleep Medicine", label: "Sleep Medicine" },
-  { value: "Sports Medicine", label: "Sports Medicine" },
-  { value: "Therapy and Counseling", label: "Therapy and Counseling" },
-  { value: "Urology", label: "Urology" },
-  { value: "Vascular Surgery", label: "Vascular Surgery" },
-];
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname(); // Get the current route
@@ -123,11 +60,16 @@ export default function Navbar() {
       }
 
       const savedAddress = sessionStorage.getItem("selectedAddress");
+      const savedAddressLocation = sessionStorage.getItem("selectedLocation");
+      const AddressLocation = JSON.parse(savedAddressLocation);
       if (savedAddress) {
         setAddressLocation(savedAddress);
       }
+      if(AddressLocation){
+        setSelectedLocation({ lat:AddressLocation.lat, lng:AddressLocation.lng });
+      }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formik = useFormik({
@@ -214,9 +156,12 @@ export default function Navbar() {
       <div className="flex justify-between py-5 px-8 relative items-center">
         {/* Left Section: Logo & Search (only on Search Page) */}
         <div className="flex items-center gap-8">
-          {/* Logo */}
-          <span className="text-[#FF6723] font-semibold text-xl whitespace-nowrap">
-            DocSure AI
+          {/* Logo with onClick handler to navigate to home */}
+          <span 
+            onClick={() => router.push('/')}
+            className="text-[#FF6723] font-semibold text-xl whitespace-nowrap cursor-pointer"
+          >
+            Docsure | Book top rated doctors near me
           </span>
 
           {/* Conditionally Show Search Bar on Search Page */}

@@ -332,9 +332,9 @@ export default function SearchPage() {
   const [showTranscript, setShowTranscript] = useState(false);
   const [isAppointmentBooked, setIsAppointmentBooked] = useState(false);
   const [transcriptArray, setTranscriptArray] = useState([]);
-  const [selectedInsurance, setSelectedInsurance] = useState("no");
+  const [selectedInsurance, setSelectedInsurance] = useState(true);
   const [customAvailability, setCustomAvailability] = useState("");
-  const [timeOfAppointment, settimeOfAppointment] = useState("today");
+  const [timeOfAppointment, settimeOfAppointment] = useState("few days");
   const [searchData, setSearchData] = useState(null);
   const [isNewPatient, setIsNewPatient] = useState(true);
   const [selectedOption, setSelectedOption] = useState("yes");
@@ -461,39 +461,26 @@ export default function SearchPage() {
   }, [doctors]);
 
   useEffect(() => {
-    if (selectedInsurance === "no") {
+    if (selectedInsurance === true) {
       formik.setFieldValue("subscriberId", "");
       formik.setFieldValue("groupId", "");
+      formik.setFieldValue("insurer", "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedInsurance]);
   const formik = useFormik({
     initialValues: {
       specialty: "",
-      location: "",
       objective: "",
       maxWait: "",
       availability: "",
       insurer: "",
-      memberID: "",
-      groupNumber: "",
-      noInsurance: false,
+      subscriberId: "",
+      groupId: "",
     },
     validationSchema,
     onSubmit: async (values) => {
-      //console.log("Submitting form...");
-      //toast.info("Submitted form");
-      // console.log(
-      //   values,
-      //   timeOfAppointment,
-      //   isNewPatient,
-      //   selectedOption,
-      //   selectedInsurance
-      // );
-      const searchData = JSON.parse(sessionStorage.getItem("searchData"));
-      //console.log("Retrieved searchData from sessionStorage:", searchData);
-
-      // Ensure searchData is not null
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
       if (!values.objective) {
         toast.info("Health concerns is required!");
         return;
@@ -501,11 +488,16 @@ export default function SearchPage() {
       //console.log("Form values:", values);
     
       const updatedValues = {
-        ...values,
+        groupId: values.groupId,
+        subscriberId: values.subscriberId,
+        objective: values.objective,
+        insurer: values.insurer,
+        selectedOption: selectedInsurance === true?'no':'yes',
+        availability: customAvailability ?? availabilityOptions[0].label,
+        specialty: savedSpecialty,
         timeOfAppointment,
-        isNewPatient,
-        selectedOption,
-        selectedInsurance,
+        maxWait: timeOfAppointment,
+        isNewPatient: isNewPatient?'yes':'no',
       };
 
       sessionStorage.setItem("formData", JSON.stringify(updatedValues));
@@ -701,8 +693,11 @@ export default function SearchPage() {
                   <Label>Insurer (optional)</Label>
                   <Select
                     name="insurer"
-                    // value={formik.values.insurer}
-                    // onValueChange={formik.handleChange}
+                    value={formik.values.insurer}
+                    onValueChange={(value) => {
+                      formik.setFieldValue("insurer", value);
+                      setSelectedInsurance(false); //patient has insurance
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select insurer" />

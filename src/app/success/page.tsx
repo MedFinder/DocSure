@@ -14,7 +14,11 @@ export default function Success() {
       {/* Centered Full Page Form */}
       <div className="h-screen flex flex-col justify-center items-center px-6 sm:px-10 text-[#333333]">
         {/* Wrap client component with Suspense boundary */}
-        <Suspense fallback={<p className="text-center">Loading appointment details...</p>}>
+        <Suspense
+          fallback={
+            <p className="text-center">Loading appointment details...</p>
+          }
+        >
           <SuccessContent />
         </Suspense>
       </div>

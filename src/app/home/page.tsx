@@ -17,6 +17,7 @@ import {
 import axios from "axios";
 import { toast } from "sonner";
 import { Combobox } from "@/components/ui/combo-box";
+import { medicalSpecialtiesOptions } from "@/constants/store-constants";
 
 const doctorTypes = [
   { value: "Dermatology", label: "Dermatologist" },
@@ -29,72 +30,6 @@ const doctorTypes = [
   { value: "Ophthalmology", label: "Ophthalmologist" },
   { value: "Orthopedic Surgery", label: "Orthopedic" },
   { value: "ENT", label: "ENT Specialist" },
-];
-const medicalSpecialtiesOptions = [
-  { value: "allergy and immunology", label: "Allergy and Immunology" },
-  { value: "anesthesiology", label: "Anesthesiology" },
-  { value: "Cardiology", label: "Cardiology" },
-  { value: "cardiothoracic surgery", label: "Cardiothoracic Surgery" },
-  {
-    value: "Colon and rectal surgery (proctology)",
-    label: "Colon and Rectal surgery (Proctology)",
-  },
-  {
-    value: "Cosmetic & Restorative Dentistry",
-    label: "Cosmetic & Restorative Dentistry",
-  },
-  { value: "critical care medicine", label: "Critical Care Medicine" },
-  { value: "Dentist", label: "Dentist" },
-  { value: "Dermatology", label: "Dermatology" },
-  { value: "Emergency Medicine", label: "Emergency Medicine" },
-  { value: "Endodontics", label: "Endodontics" },
-  { value: "Endocrinology", label: "Endocrinology" },
-  { value: "ENT", label: "ENT Specialist" },
-  { value: "Family Medicine", label: "Family Medicine" },
-  { value: "Gastroenterology", label: "Gastroenterology" },
-  {
-    value: "General & Preventive Dentistry",
-    label: "General & Preventive Dentistry",
-  },
-  { value: "General Surgery", label: "General Surgery" },
-  { value: "Genetics", label: "Genetics" },
-  { value: "Geriatrics", label: "Geriatrics" },
-  { value: "Gynecology", label: "Gynecologist" },
-  { value: "Hematology", label: "Hematology" },
-  { value: "Infectious Disease", label: "Infectious Disease" },
-  { value: "Internal Medicine", label: "Internal Medicine" },
-  { value: "Nephrology", label: "Nephrology" },
-  { value: "Neurology", label: "Neurology" },
-  { value: "Neurosurgery", label: "Neurosurgery" },
-  { value: "Ophthalmology", label: "Ophthalmology" },
-  {
-    value: "Oral and Maxillofacial Surgery",
-    label: "Oral and Maxillofacial Surgery",
-  },
-  { value: "Orthodontics", label: "Orthodontics" },
-  { value: "Orthopedic Surgery", label: "Orthopedic Surgery" },
-  { value: "Otolaryngology (ENT)", label: "Otolaryngology (ENT)" },
-  { value: "Pediatric Dentistry", label: "Pediatric Dentistry" },
-  { value: "Pediatric Surgery", label: "Pediatric Surgery" },
-  { value: "Pediatrics", label: "Pediatrics" },
-  {
-    value: "Periodontics & Implant Dentistry",
-    label: "Periodontics & Implant Dentistry",
-  },
-  {
-    value: "Physical Medicine and Rehabilitation (Physiatry)",
-    label: "Physical Medicine and Rehabilitation (Physiatry)",
-  },
-  { value: "Plastic Surgery", label: "Plastic Surgery" },
-  { value: "Psychiatry", label: "Psychiatry" },
-  { value: "Pulmonology", label: "Pulmonology" },
-  { value: "Radiology", label: "Radiology" },
-  { value: "Rheumatology", label: "Rheumatology" },
-  { value: "Sleep Medicine", label: "Sleep Medicine" },
-  { value: "Sports Medicine", label: "Sports Medicine" },
-  { value: "Therapy and Counseling", label: "Therapy and Counseling" },
-  { value: "Urology", label: "Urology" },
-  { value: "Vascular Surgery", label: "Vascular Surgery" },
 ];
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
@@ -252,38 +187,42 @@ export default function Home() {
                 <Search className="w-5 h-5 text-gray-500" />
               </div>
 
-              {/* Specialty Dropdown */}
-              <Combobox
-                mode="single"
-                id="specialty"
-                name="specialty"
-                className="flex-grow w-full md:w-1/2 min-w-[150px] bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground"
-                options={medicalSpecialtiesOptions}
-                placeholder="Medical specialty"
-                selected={formik.values.specialty}
-                onChange={(value) => {
-                  formik.setFieldValue("specialty", value);
-                }}
-              />
+              {/* Specialty Dropdown (Now Slightly Longer) */}
+              <div className="flex-1 md:w-[45%] min-w-[200px]">
+                <Combobox
+                  mode="single"
+                  id="specialty"
+                  name="specialty"
+                  className="w-full"
+                  options={medicalSpecialtiesOptions}
+                  placeholder="Medical specialty"
+                  selected={formik.values.specialty}
+                  onChange={(value) => {
+                    formik.setFieldValue("specialty", value);
+                  }}
+                />
+              </div>
 
               {/* Location Icon */}
-              <div className="hidden md:flex items-center justify-center px-3 border-l-2 h-full">
+              <div className="hidden md:flex items-center justify-center px-3  h-full">
                 <MapPin className="w-5 h-5 text-gray-500" />
               </div>
 
-              {/* Location Search Input (Dynamically Adjusts) */}
-              {isLoaded && (
-                <StandaloneSearchBox
-                  onLoad={(ref) => (inputRefs.current[0] = ref)}
-                  onPlacesChanged={() => handleOnPlacesChanged(0)}
-                >
-                  <Input
-                    type="text"
-                    placeholder="Address, city, zip code"
-                    className="flex-grow w-full min-w-[200px] md:min-w-[350px] lg:min-w-[480px] border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
-                  />
-                </StandaloneSearchBox>
-              )}
+              {/* Location Search Input (Still Wider) */}
+              <div className="flex-2 md:w-[55%]">
+                {isLoaded && (
+                  <StandaloneSearchBox
+                    onLoad={(ref) => (inputRefs.current[0] = ref)}
+                    onPlacesChanged={() => handleOnPlacesChanged(0)}
+                  >
+                    <Input
+                      type="text"
+                      placeholder="Address, city, zip code"
+                      className="w-full min-w-[300px] md:min-w-[450px] lg:min-w-[550px] border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+                    />
+                  </StandaloneSearchBox>
+                )}
+              </div>
             </div>
 
             {/* Search Button - Stays at Right Edge */}
