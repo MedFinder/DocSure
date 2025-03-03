@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 //@ts-nocheck
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -97,7 +98,12 @@ export const Task: React.FC<TaskProps> = ({
       <td className="p-2 min-w-[160px]">
         <div className="flex flex-col text-[#333] text-xs sm:text-sm">
           <div className="flex flex-row items-center gap-x-2">
-            <span className="text-yellow-500">{"\u2B50"}</span>
+            {/* <span className="text-yellow-500">{"\u2B50"}</span> */}
+            <img
+            src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
+            className="object-contain w-3 rounded-sm aspect-[1.09] max-md:mr-3.5"
+            alt="Rating star"
+          />
             <span>{rating !== undefined ? rating : "-"}</span>
             <span>•</span>
             <span>{review || 0} reviews</span>

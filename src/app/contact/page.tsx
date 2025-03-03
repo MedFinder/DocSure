@@ -219,6 +219,7 @@ import * as Yup from "yup";
 const validationSchema = Yup.object().shape({
   patientName: Yup.string().required("Patient name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
+  phoneNumber: Yup.string().required("Phone number is required"),
 });
 
 export default function Contact() {
@@ -273,12 +274,6 @@ export default function Contact() {
       patientName: formData.patientName || "",
       phoneNumber: formData.phoneNumber || "",
       email: formData.email || "",
-      patientHistory: formData.patientHistory || "",
-      objective: formData.objective || "",
-      specialty: formData.specialty || "",
-      groupId: formData.groupId || "",
-      subscriberId: formData.subscriberId || "",
-      insurer: formData.insurer || "",
       zipcode: formData.zipcode || "",
       dob: formData.dob || "",
       address: formData.address || "",
@@ -388,6 +383,15 @@ export default function Contact() {
               </div>
             </div>
             <div className="space-y-2">
+              <Label>Zipcode</Label>
+              <Input
+                name="zipcode"
+                onChange={formik.handleChange}
+                value={formik.values.zipcode}
+                className={"rounded-none"}
+              />
+            </div>
+            <div className="space-y-2">
               <Label>Email address</Label>
               <Input
                 name="email"
@@ -401,6 +405,22 @@ export default function Contact() {
               />
               {formik.errors.email && formik.touched.email && (
                 <div className="text-red-500">{formik.errors.email}</div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label>Phone number</Label>
+              <Input
+                name="phoneNumber"
+                onChange={formik.handleChange}
+                value={formik.values.phoneNumber}
+                className={
+                  formik.errors.phoneNumber && formik.touched.phoneNumber
+                    ? "border-red-500"
+                    : "rounded-none"
+                }
+              />
+              {formik.errors.phoneNumber && formik.touched.phoneNumber && (
+                <div className="text-red-500">{formik.errors.phoneNumber}</div>
               )}
             </div>
           </div>
