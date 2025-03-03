@@ -68,8 +68,17 @@ export const Task: React.FC<TaskProps> = ({
         isSelected ? "bg-blue-50" : "bg-white"
       }`}
     >
+      {/* <td></td> */}
+      {/* <td className="p-2">
+        {More && (
+          <div className="flex items-center justify-center">
+            <Image alt="More" src={More} className="h-4 w-4 sm:h-5 sm:w-5" />
+          </div>
+        )}
+      </td> */}
+
       {/* Avatar with Dynamic Background Color */}
-      <td className="p-2 text-center">
+      <td className="p-2 text-center ">
         <div
           className="rounded-full text-white flex items-center justify-center font-bold w-10 h-10 sm:w-12 sm:h-12"
           style={{ backgroundColor: getRandomColor(id) }}
@@ -133,7 +142,11 @@ export const Task: React.FC<TaskProps> = ({
 
       {/* More Icon */}
       <td className="p-2">
-        <Image alt="more" src={More} className="h-4 w-3 sm:h-5 sm:w-4" />
+        {More && (
+          <div className="flex items-center justify-center">
+            <Image alt="More" src={More} className="h-4 w-4 sm:h-5 sm:w-5" />
+          </div>
+        )}
       </td>
       {/* <td>
         {callStatus.isInitiated === false
