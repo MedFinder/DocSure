@@ -15,6 +15,7 @@ export const medicalSpecialtiesOptions = [
     label: "Cosmetic & Restorative Dentistry",
   },
   { value: "critical care medicine", label: "Critical Care Medicine" },
+  { value: "Chiropractor", label: "Chiropractor" },
   { value: "Dentist", label: "Dentist" },
   { value: "Dermatology", label: "Dermatology" },
   { value: "Emergency Medicine", label: "Emergency Medicine" },
@@ -53,8 +54,8 @@ export const medicalSpecialtiesOptions = [
     label: "Periodontics & Implant Dentistry",
   },
   {
-    value: "Physical Medicine and Rehabilitation (Physiatry)",
-    label: "Physical Medicine and Rehabilitation (Physiatry)",
+    value: "Physical Medicine and Rehabilitation (physical therapy)",
+    label: "Physical Medicine and Rehabilitation (physical therapy)",
   },
   { value: "Plastic Surgery", label: "Plastic Surgery" },
   { value: "Psychiatry", label: "Psychiatry" },
