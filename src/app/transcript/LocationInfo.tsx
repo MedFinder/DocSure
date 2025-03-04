@@ -30,9 +30,9 @@ export const LocationInfo: React.FC<LocationInfoProps> = ({
           {distance} • {address}
         </div>
       </div>
-      <p className="self-start text-xs tracking-tight text-zinc-800">
+      {/* <p className="self-start text-xs tracking-tight text-zinc-800">
         {appointments} • {waitTime}
-      </p>
+      </p> */}
     </div>
   );
 };
