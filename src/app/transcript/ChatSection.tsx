@@ -47,9 +47,9 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
             </div>
           ))}
       </div>
-      <button className="gap-2.5 self-start px-4 py-2.5 mt-6 text-sm tracking-tight text-center text-white bg-slate-400">
+      {/* <button className="gap-2.5 self-start px-4 py-2.5 mt-6 text-sm tracking-tight text-center text-white bg-slate-400">
         View full chat
-      </button>
+      </button> */}
     </aside>
   );
 };

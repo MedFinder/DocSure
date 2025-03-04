@@ -38,7 +38,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({ doctor,index, onSkip, ac
             <h3 className="text-base font-medium tracking-tight">
               {doctor.name}
             </h3>
-            <p className="text-xs tracking-tight">{doctor.title}</p>
+            {/* <p className="text-xs tracking-tight">{doctor.title}</p> */}
           </div>
         </div>
 
