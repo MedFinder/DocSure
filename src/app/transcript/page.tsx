@@ -15,6 +15,13 @@ import { toast } from "sonner";
 import axios from "axios";
 import { DoctorCard } from "./DoctorCard";
 import { ChatSection } from "./ChatSection";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const _doctors: Doctor[] = [
   {
@@ -181,6 +188,10 @@ export default function Transcript() {
   const [activeCallIndex, setActiveCallIndex] = useState(0);
   const activeCallIndexRef = useRef(activeCallIndex);
   const [context, setcontext] = useState("");
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [isTerminated, setIsTerminated] = useState(false);
+
   useEffect(() => {
     const storedFormData = sessionStorage.getItem("formData");
     if (storedFormData) {
@@ -347,6 +358,15 @@ export default function Transcript() {
         email: "",
       });
     }, 500);
+  };
+  const handleTerminateRequest = () => {
+    setOpenDialog(true);
+  };
+  const confirmTermination = () => {
+    terminateRequest();
+    setIsTerminated(true);
+    setOpenDialog(false);
+    toast.success("Your request has been terminated successfully.");
   };
   const initiateCall = useCallback(
     async (doctorPhoneNumber: string, nameOfOrg: string) => {
@@ -598,12 +618,12 @@ export default function Transcript() {
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <Navbar />
 
-      <div className="mt-5 w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full mt-24 md:hidden mx-2 px-4" />
+      <div className="mt-5 w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4" />
 
-      <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full">
-        <div className="flex flex-wrap gap-5 justify-between w-full text-lg font-medium tracking-tight max-w-[1272px] text-zinc-800 max-md:max-w-full mt-20">
-          <h2>Request Status</h2>
-          <h2>Chat Transcript</h2>
+      <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
+        <div className=" flex  w-full  text-[#333333] text-lg mt-20 ">
+          <h2 className=" w-2/3">Request Status</h2>
+          <h2 className="w-1/3 pl-8">Chat Transcript</h2>
         </div>
 
         <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
@@ -626,9 +646,22 @@ export default function Transcript() {
               </div>
 
               {/* Terminate Request Button - fixed at bottom */}
-              <div className="flex justify-center mt-4 pb-2">
+              {/* <div className="flex justify-center mt-4 pb-2">
                 <button
                   onClick={terminateRequest}
+                  disabled={!callStatus?.isInitiated}
+                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                    callStatus?.isInitiated
+                      ? "bg-red-600 hover:bg-red-700 text-white"
+                      : "bg-red-300 cursor-not-allowed text-white opacity-70"
+                  }`}
+                >
+                  Terminate Request
+                </button>
+              </div> */}
+              <div className="flex justify-center mt-4 pb-2">
+                <button
+                  onClick={handleTerminateRequest}
                   disabled={!callStatus?.isInitiated}
                   className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
                     callStatus?.isInitiated
@@ -645,15 +678,46 @@ export default function Transcript() {
               {/* Note text updated with orange color */}
               <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
                 <p>
-                  Tip: Feel free to close this browser. Your booking confirmation will be sent to you over email and text.
+                  Tip: Feel free to close this browser. Your booking
+                  confirmation will be sent to you over email and text.
                 </p>
               </div>
-              
-              <ChatSection doctorName={doctors[activeCallIndex]?.name} transcripts={getDisplayTranscript()} />
+
+              <ChatSection
+                doctorName={doctors[activeCallIndex]?.name}
+                transcripts={getDisplayTranscript()}
+              />
             </div>
           </div>
         </div>
       </section>
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent className="sm:max-w-lg h-52">
+          <DialogHeader>
+            <DialogTitle>Terminate Request</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">
+            This will terminate your appointment booking request and cannot be
+            undone. Continue?
+          </p>
+          <DialogFooter className="flex justify-between gap-6">
+            <Button
+              variant="secondary"
+              className="w-1/2 rounded-md"
+              onClick={() => setOpenDialog(false)}
+            >
+              No
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-1/2 rounded-md"
+              onClick={confirmTermination}
+            >
+              Yes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

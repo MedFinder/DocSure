@@ -338,7 +338,7 @@ export default function Contact() {
         onSubmit={formik.handleSubmit}
         className="h-screen flex flex-col justify-center items-center px-6 sm:px-10"
       >
-        <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg">
+        <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg mt-12">
           <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
             One Last Step
           </p>

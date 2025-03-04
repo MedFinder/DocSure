@@ -161,7 +161,7 @@ export default function Navbar() {
             onClick={() => router.push('/')}
             className="text-[#FF6723] font-semibold text-xl whitespace-nowrap cursor-pointer"
           >
-            Docsure | Book top rated doctors near me
+            Docsure
           </span>
 
           {/* Conditionally Show Search Bar on Search Page */}

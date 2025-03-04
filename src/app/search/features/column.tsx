@@ -23,13 +23,17 @@ interface ColumnProps {
   activeCallIndex: number;
   isAppointmentBooked: boolean;
   callStatus: CallStatusType;
+  onDelete: (id: string) => void;
 }
 const Column: React.FC<ColumnProps> = ({
   tasks,
   activeCallIndex,
   callStatus,
   isAppointmentBooked,
+  onDelete,
 }) => {
+  // Function to delete a task by ID
+
   return (
     <div className="column">
       <table className="task-table">
@@ -65,6 +69,7 @@ const Column: React.FC<ColumnProps> = ({
                   vicinity={task.vicinity}
                   address={task.address}
                   doctorType={doctorType}
+                  onDelete={onDelete}
                 />
               );
             })}
