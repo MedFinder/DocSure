@@ -261,7 +261,7 @@ export default function Contact() {
       if (storedFormData) {
         setFormData(JSON.parse(storedFormData));
       }
-  
+
       const storedSearchData = sessionStorage.getItem("searchData");
       if (storedSearchData) {
         setSearchData(JSON.parse(storedSearchData));
@@ -274,7 +274,7 @@ export default function Contact() {
       patientName: formData.patientName || "",
       phoneNumber: formData.phoneNumber || "",
       email: formData.email || "",
-      zipcode: formData.zipcode || "",
+      // zipcode: formData.zipcode || "",
       dob: formData.dob || "",
       address: formData.address || "",
     },
@@ -306,7 +306,10 @@ export default function Contact() {
       //   setIsLoading(false);
       // }
       try {
-         window.sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
+        window.sessionStorage.setItem(
+          "formData",
+          JSON.stringify(updatedFormData)
+        );
 
         router.push("/transcript?confirmed=true"); // Redirect immediately after confirming
       } catch (error) {
@@ -382,7 +385,7 @@ export default function Contact() {
                 )}
               </div>
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label>Zipcode</Label>
               <Input
                 name="zipcode"
@@ -390,7 +393,7 @@ export default function Contact() {
                 value={formik.values.zipcode}
                 className={"rounded-none"}
               />
-            </div>
+            </div> */}
             <div className="space-y-2">
               <Label>Email address</Label>
               <Input
@@ -426,7 +429,7 @@ export default function Contact() {
           </div>
 
           <span className="text-sm text-gray-600 block pt-2">
-            Appointment details will be sent to this email.
+            Appointment details will be sent to this phone number.
           </span>
           <span className="text-xs block pt-8 text-[#FF6723]">
             By continuing, you authorize us to book an appointment on your

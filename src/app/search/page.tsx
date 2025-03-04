@@ -584,7 +584,10 @@ export default function SearchPage() {
                       : ""
                   }`}
                 >
-                  Health concerns <span className="text-red-500 text-xl flex items-center  self-center pt-1">*</span>
+                  Health concerns{" "}
+                  <span className="text-red-500 text-xl flex items-center  self-center pt-1">
+                    *
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
 
@@ -742,7 +745,7 @@ export default function SearchPage() {
         <div className="bg-[#FFF6F2] p-4 px-7">
           <div className="flex items-center  sm:gap-2">
             <p className="text-xs md:text-base">
-              AI assistant will call the following recommended doctors in this
+              Docsure AI will call the following recommended doctors in this
               sequence and seek an appointment for you.
             </p>
             <Button
