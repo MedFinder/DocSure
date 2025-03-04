@@ -45,7 +45,7 @@ const validationSchema = Yup.object().shape({
   objective: Yup.string().required("Required"),
 });
 
-const availabilityOptions = [{ value: "yes", label: "I am available anytime" }];
+const availabilityOptions = [{ value: "yes", label: "Available anytime" }];
 const insurerOptions = [
   { value: "Aetna", label: "Aetna" },
   { value: "Aflac", label: "Aflac" },
@@ -434,6 +434,11 @@ export default function SearchPage() {
       router.events?.off("routeChangeComplete", handleRouteChange);
     };
   }, [router]);
+  const handleDelete = (id: string) => {
+    setDoctors((prevDoctors) =>
+      prevDoctors.filter((doctor) => doctor.id.toString() !== id)
+    );
+  };
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -478,26 +483,30 @@ export default function SearchPage() {
       subscriberId: "",
       groupId: "",
     },
-    validationSchema,
+    // validationSchema,
     onSubmit: async (values) => {
+      console.log("here");
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      if (!values.objective) {
-        toast.info("Health concerns is required!");
+      console.log("Objective value:", values.objective);
+
+      if (!values.objective || !values.objective.trim()) {
+        toast.error("Please fill up all the required information");
         return;
       }
+
       //console.log("Form values:", values);
-    
+
       const updatedValues = {
         groupId: values.groupId,
         subscriberId: values.subscriberId,
         objective: values.objective,
         insurer: values.insurer,
-        selectedOption: selectedInsurance === true?'no':'yes',
+        selectedOption: selectedInsurance === true ? "no" : "yes",
         availability: customAvailability ?? availabilityOptions[0].label,
         specialty: savedSpecialty,
         timeOfAppointment,
         maxWait: timeOfAppointment,
-        isNewPatient: isNewPatient?'yes':'no',
+        isNewPatient: isNewPatient ? "yes" : "no",
       };
 
       sessionStorage.setItem("formData", JSON.stringify(updatedValues));
@@ -575,7 +584,10 @@ export default function SearchPage() {
                       : ""
                   }`}
                 >
-                  Health concerns
+                  Health concerns{" "}
+                  <span className="text-red-500 text-xl flex items-center  self-center pt-1">
+                    *
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
 
@@ -630,7 +642,7 @@ export default function SearchPage() {
             {/* Availability */}
             <Select name="availability">
               <SelectTrigger className="md:w-auto w-full rounded-full">
-                <SelectValue placeholder="Your availability" />
+                <SelectValue placeholder="Patient availability" />
               </SelectTrigger>
               <SelectContent>
                 <RadioGroup
@@ -654,7 +666,7 @@ export default function SearchPage() {
                     </div>
                     {selectedOption === "custom" && (
                       <Textarea
-                        placeholder="I’m free after 3 PM on weekdays"
+                        placeholder="Free after 3pm on weekdays"
                         value={customAvailability}
                         onChange={(e) => setCustomAvailability(e.target.value)}
                         className="w-full border border-gray-300 rounded-md p-2"
@@ -733,7 +745,7 @@ export default function SearchPage() {
         <div className="bg-[#FFF6F2] p-4 px-7">
           <div className="flex items-center  sm:gap-2">
             <p className="text-xs md:text-base">
-              AI assistant will call the following recommended doctors in this
+              Docsure AI will call the following recommended doctors in this
               sequence and seek an appointment for you.
             </p>
             <Button
@@ -752,6 +764,7 @@ export default function SearchPage() {
           <Column
             activeCallIndex={activeCallIndex}
             tasks={doctors}
+            onDelete={handleDelete}
             isDraggable={!isConfirmed}
             callStatus={callStatus}
             isAppointmentBooked={isAppointmentBooked}

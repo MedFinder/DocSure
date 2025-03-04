@@ -42,11 +42,11 @@ export default function Contact() {
 
           {/* Button */}
           <div className="flex justify-center mt-12">
-            <Link href="/transcript">
-              <Button className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto ">
-                Continue
-              </Button>
-            </Link>
+            {/* <Link href="/"> */}
+            <Button className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto ">
+              Continue
+            </Button>
+            {/* </Link> */}
           </div>
         </div>
       </div>

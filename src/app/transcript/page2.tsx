@@ -298,7 +298,7 @@ export default function Transcript() {
         selectedAvailability,
         timeOfAppointment,
         isnewPatient,
-        zipcode,
+        // zipcode,
         insurer,
       } = formData;
 
@@ -319,7 +319,7 @@ export default function Transcript() {
       if (timeOfAppointment)
         context += `; Time Of Appointment:${timeOfAppointment}`;
       if (isnewPatient) context += `; Is New Patient:${isnewPatient}`;
-      if (zipcode) context += `; Zipcode:${zipcode}`;
+      // if (zipcode) context += `; Zipcode:${zipcode}`;
 
       const data = {
         objective: "Schedule an appointment",
@@ -467,7 +467,7 @@ export default function Transcript() {
       // console.log('cuurentIndex',index)
       const formData = JSON.parse(sessionStorage.getItem("formData"));
       const context = sessionStorage.getItem("context");
-      const { email, phoneNumber, patientName, zipcode, request_id } = formData;
+      const { email, phoneNumber, patientName, request_id } = formData;
       const data = { 
         call_id: id,
         request_id,
