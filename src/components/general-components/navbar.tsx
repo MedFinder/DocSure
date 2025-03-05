@@ -140,10 +140,10 @@ export default function Navbar() {
         const place = places[0];
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        // const formattedAddress = place.formatted_address; // Get address string
+        const formattedAddress = place.formatted_address; // Get address string
 
         setSelectedLocation({ lat, lng });
-        // setAddressLocation(formattedAddress); // Update input field state
+        setAddressLocation(formattedAddress); // Update input field state
         // sessionStorage.setItem("selectedAddress", formattedAddress); // Store in session
       }
     }
