@@ -212,6 +212,8 @@ export default function Navbar() {
                           className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
                           value={addressLocation || ""}
                           onChange={(e) => setAddressLocation(e.target.value)}
+                          autoComplete="off"
+                          aria-autocomplete="none"
                         />
                       </StandaloneSearchBox>
                     )}

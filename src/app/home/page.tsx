@@ -220,6 +220,8 @@ export default function Home() {
                           type="text"
                           placeholder="Address, city, zip code"
                           className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+                          autoComplete="off"
+                          aria-autocomplete="none"
                         />
                       </StandaloneSearchBox>
                     )}
