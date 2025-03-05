@@ -676,12 +676,12 @@ export default function Transcript() {
 
             <div className="ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full">
               {/* Note text updated with orange color */}
-              <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
+              {/* <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
                 <p>
                   Tip: Feel free to close this browser. Your booking
                   confirmation will be sent to you over email and text.
                 </p>
-              </div>
+              </div> */}
 
               <ChatSection
                 doctorName={doctors[activeCallIndex]?.name}

@@ -111,7 +111,7 @@ export const Task: React.FC<TaskProps> = ({
             >
               {title}
             </a>
-            <span className="text-xs sm:text-sm text-gray-600">{doctorType}</span>
+            {/* <span className="text-xs sm:text-sm text-gray-600">{doctorType}</span> */}
           </div>
         </div>
       </td>

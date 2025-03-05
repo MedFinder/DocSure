@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { ComboboxNav } from "../ui/combo-box-nav";
 import { medicalSpecialtiesOptions } from "@/constants/store-constants";
+import { Autocomplete } from "../../../components/ui/autocomplete";
 
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
@@ -139,10 +140,10 @@ export default function Navbar() {
         const place = places[0];
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        // const formattedAddress = place.formatted_address; // Get address string
+        const formattedAddress = place.formatted_address; // Get address string
 
         setSelectedLocation({ lat, lng });
-        // setAddressLocation(formattedAddress); // Update input field state
+        setAddressLocation(formattedAddress); // Update input field state
         // sessionStorage.setItem("selectedAddress", formattedAddress); // Store in session
       }
     }
@@ -155,7 +156,7 @@ export default function Navbar() {
     <div className="fixed top-0 left-0 w-full  border-gray-200 bg-white z-50">
       <div className="flex justify-between py-5 px-8 relative items-center">
         {/* Left Section: Logo & Search (only on Search Page) */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-6 w-full">
           {/* Logo with onClick handler to navigate to home */}
           <span 
             onClick={() => router.push('/')}
@@ -166,95 +167,61 @@ export default function Navbar() {
 
           {/* Conditionally Show Search Bar on Search Page */}
           {pathname !== "/" && (
-            // <div className="hidden md:flex w-[38rem] border border-gray-400  overflow-hidden shadow-sm outline-none">
-            //   {/* Search Icon */}
-
-            //   {/* First Input */}
-            //   <Input
-            //     type="text"
-            //     placeholder="Condition, procedure, doctor"
-            //     className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 text-sm ml-1"
-            //   />
-
-            //   {/* Second Input */}
-            //   <Input
-            //     type="text"
-            //     placeholder="Address, city, zip code"
-            //     className="w-full border-none focus:ring-0 focus:outline-none h-12  text-sm"
-            //   />
-
-            //   {/* Search Button */}
-            //   <Button className="bg-[#FF6723] text-white rounded-none px-6 h-12">
-            //     <Search className="text-white w-5 h-5" />
-            //   </Button>
-            // </div>
             <form
               onSubmit={formik.handleSubmit}
-              className="flex flex-wrap md:flex-nowrap w-full border md:border-gray-600 rounded-none overflow-hidden shadow-sm outline-none  gap-2 md:gap-0"
+              className="hidden md:flex w-full max-w-[50rem] border border-gray-600 rounded-none shadow-sm"
             >
-              {/* Search Icon */}
-              <div className="flex items-center justify-center px-3 ">
-                <Search className="w-5 h-5 text-gray-500 hidden md:block" />
+              <div className="flex flex-grow items-center w-full">
+                {/* Specialty section */}
+                <div className="flex items-center flex-1">
+                  <div className="flex items-center justify-center px-3">
+                    <Search className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="flex-1 min-w-[180px]">
+                    <Autocomplete
+                      id="specialty"
+                      name="specialty"
+                      className="w-full"
+                      options={medicalSpecialtiesOptions}
+                      placeholder="Medical specialty"
+                      selected={specialty}
+                      onChange={(value) => {
+                        setSpecialty(value);
+                        formik.setFieldValue("specialty", value);
+                      }}
+                      clearable={false}
+                      navbar
+                    />
+                  </div>
+                </div>
+
+                {/* Location section */}
+                <div className="flex items-center flex-1">
+                  <div className="flex items-center justify-center px-3">
+                    <MapPin className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="flex-1">
+                    {isLoaded && (
+                      <StandaloneSearchBox
+                        onLoad={(ref) => (inputRefs.current[0] = ref)}
+                        onPlacesChanged={() => handleOnPlacesChanged(0)}
+                      >
+                        <Input
+                          type="text"
+                          placeholder="Address, city, zip code"
+                          className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+                          value={addressLocation || ""}
+                          onChange={(e) => setAddressLocation(e.target.value)}
+                        />
+                      </StandaloneSearchBox>
+                    )}
+                  </div>
+                </div>
               </div>
-              {/* <ComboboxNav
-                mode="single"
-                id="specialty"
-                name="specialty"
-                className="w-full md:w-1/2 min-w-[280px] p-0 border-none bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground py-1"
-                options={medicalSpecialtiesOptions}
-                placeholder="Medical specialty"
-                selected={formik.values.specialty}
-                onChange={(value) => {
-                  console.log("Selected value:", value);
-                  formik.setFieldValue("specialty", value);
-                }}
-              /> */}
-              <ComboboxNav
-                mode="single"
-                id="specialty"
-                name="specialty"
-                className="w-full md:w-1/2 min-w-[280px] p-0 border-none bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground py-1"
-                options={medicalSpecialtiesOptions}
-                placeholder="Medical specialty"
-                selected={specialty} // Use local state
-                onChange={(value) => {
-                  setSpecialty(value); // Update state
-                  formik.setFieldValue("specialty", value);
-                }}
-              />
 
-              {/* First Input */}
-              {/* <Input
-              type="text"
-              placeholder="Condition, procedure, doctor"
-              className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 text-sm"
-            /> */}
-
-              <div className="hidden md:flex items-center justify-center px-3 ">
-                <MapPin className="w-5 h-5 text-gray-500" />
-              </div>
-
-              {/* Second Input */}
-
-              {isLoaded && (
-                <StandaloneSearchBox
-                  onLoad={(ref) => (inputRefs.current[0] = ref)}
-                  onPlacesChanged={() => handleOnPlacesChanged(0)}
-                >
-                  <Input
-                    type="text"
-                    placeholder="Address, city, zip code"
-                    className="w-[22rem] border-none focus:ring-0 focus:outline-none h-12 px-3"
-                    value={addressLocation || ""}
-                    onChange={(e) => setAddressLocation(e.target.value)} // Allow editing
-                  />
-                </StandaloneSearchBox>
-              )}
-              {/* Search Button */}
-
+              {/* Search Button - Properly aligned */}
               <Button
-                // disabled={isLoading}
-                className="bg-[#FF6723] text-white rounded-none px-6 h-12 flex items-center justify-center w-full md:w-0"
+                className="bg-[#FF6723] text-white rounded-none h-12 px-6 flex-shrink-0"
               >
                 <Search className="text-white w-5 h-5" />
               </Button>
@@ -264,16 +231,9 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-8 items-center text-md font-normal">
-          {/* <Link href="/" className="hover:text-gray-500">
-            Browse
-          </Link> */}
           <Link href="/contact-us" className="hover:text-gray-500">
             Help
           </Link>
-          {/* <Link href="" className="hover:text-gray-500">
-            Log In{" "}
-          </Link>
-          <Button className="bg-[#0074BA] rounded-none py-6">Sign Up</Button> */}
         </div>
 
         {/* Mobile Hamburger */}
