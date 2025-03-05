@@ -198,6 +198,7 @@ export default function Home() {
                       selected={formik.values.specialty}
                       onChange={(value) => {
                         formik.setFieldValue("specialty", value);
+                        setSelectedDoctorType("")
                       }}
                       clearable={false}
                     />
@@ -248,7 +249,7 @@ export default function Home() {
                 <Button
                   key={index}
                   className={`rounded-full text-xs px-3 py-2 w-full sm:w-auto ${
-                    selectedDoctorType === value.value
+                    selectedDoctorType === value.value || formik.values.specialty === value.value
                       ? "bg-slate-800 text-white" // Selected state
                       : "bg-[#EFF2F4] text-[#595959] hover:text-white hover:bg-slate-800" // Normal state
                   }`}

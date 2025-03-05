@@ -22,6 +22,7 @@ interface AutocompleteProps {
   id?: string
   name?: string
   clearable?: boolean
+  navbar?:boolean
   maxItemsToShow?: number;
 }
 
@@ -34,6 +35,7 @@ export function Autocomplete({
   id,
   name,
   clearable = true,
+  navbar = false,   
   maxItemsToShow = 7, // Default to show up to 7 items before scrolling
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false)
@@ -186,6 +188,7 @@ export function Autocomplete({
           left: `${position.left}px`,
           width: `${position.width}px`,
           maxHeight: `${position.height}px`,
+          zIndex: navbar ? 9999 : 9998 // Ensure dropdown is above navbar
         }}
       >
         {filteredOptions.length > 0 ? (

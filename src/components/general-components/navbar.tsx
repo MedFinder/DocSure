@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { ComboboxNav } from "../ui/combo-box-nav";
 import { medicalSpecialtiesOptions } from "@/constants/store-constants";
+import { Autocomplete } from "../../../components/ui/autocomplete";
 
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
@@ -209,7 +210,7 @@ export default function Navbar() {
                   formik.setFieldValue("specialty", value);
                 }}
               /> */}
-              <ComboboxNav
+              {/* <ComboboxNav
                 mode="single"
                 id="specialty"
                 name="specialty"
@@ -221,6 +222,20 @@ export default function Navbar() {
                   setSpecialty(value); // Update state
                   formik.setFieldValue("specialty", value);
                 }}
+              /> */}
+              <Autocomplete
+                id="specialty"
+                name="specialty"
+                className="w-full md:w-1/2 min-w-[280px] p-0 border-none bg-white focus:ring-0 focus:outline-none text-sm placeholder:text-muted-foreground py-1"
+                options={medicalSpecialtiesOptions}
+                placeholder="Medical specialty"
+                selected={specialty}
+                onChange={(value) => {
+                  setSpecialty(value); // Update state
+                  formik.setFieldValue("specialty", value);
+                }}
+                clearable={false}
+                navbar
               />
 
               {/* First Input */}
@@ -244,7 +259,7 @@ export default function Navbar() {
                   <Input
                     type="text"
                     placeholder="Address, city, zip code"
-                    className="w-[22rem] border-none focus:ring-0 focus:outline-none h-12 px-3"
+                    className="w-[22rem] border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
                     value={addressLocation || ""}
                     onChange={(e) => setAddressLocation(e.target.value)} // Allow editing
                   />
