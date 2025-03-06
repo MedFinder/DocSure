@@ -195,7 +195,7 @@ export default function Transcript() {
   useEffect(() => {
     const storedFormData = sessionStorage.getItem("formData");
     if (storedFormData) {
-      console.log(JSON.parse(storedFormData));
+      // console.log(JSON.parse(storedFormData));
       setFormData(JSON.parse(storedFormData));
     }
   }, []);
@@ -239,8 +239,8 @@ export default function Transcript() {
           isSponsored: false, // Default not sponsored
         };
       });
-      console.log({ parsedData });
-      console.log({ sortedData });
+      // console.log({ parsedData });
+      // console.log({ sortedData });
       setDoctors(sortedData);
     } else {
       router.push("/");
@@ -273,7 +273,7 @@ export default function Transcript() {
             `https://maps.googleapis.com/maps/api/place/details/json?fields=name,rating,formatted_phone_number,opening_hours,reviews,geometry&key=${apiKey}&place_id=${doctor.place_id}`
           );
 
-          console.log("fetchPhone", response);
+          // console.log("fetchPhone", response);
           return response.data.result.formatted_phone_number;
         } catch (error) {
           console.error(
@@ -303,6 +303,7 @@ export default function Transcript() {
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
 
   const handleConfirmSequence = useCallback(async () => {
+    logDrLists()  //log doctor details
     await connectWebSocket();
     try {
       setIsConfirmed(true); // Disable button and dragging
@@ -425,7 +426,7 @@ export default function Transcript() {
         doctor_number: doctorPhoneNumber,
       };
       sessionStorage.setItem("context", context);
-      console.log(data);
+      // console.log(data);
       try {
         const callResponse = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
@@ -548,6 +549,53 @@ export default function Transcript() {
       setTimeout(connectWebSocket, 5000);
     };
   };
+  const logDrLists = async () => {
+    // Create arrays to collect the values
+    const doctor_numbers = [];
+    const hospital_names = [];
+    const addresses = [];
+    const distances = [];
+    const ratings = [];
+    const websites = [];
+  
+    // Map through the doctors and phoneNumbers arrays
+    for (let i = 0; i < doctors.length; i++) {
+      // Add values to respective arrays, ensuring we handle potentially missing values
+      doctor_numbers.push(phoneNumbers[i] || 'N/A');
+      hospital_names.push(doctors[i]?.name || 'N/A');
+      addresses.push(doctors[i]?.vicinity || 'N/A');
+      distances.push(doctors[i]?.distance || 'N/A');
+      ratings.push(doctors[i]?.rating || 0);
+      websites.push(doctors[i]?.website || 'N/A');
+    }
+    const formData = JSON.parse(sessionStorage.getItem("formData"));
+    // console.log(formData);
+    const { request_id } = formData;
+    // Create final object with comma-separated values
+    const result = {
+      request_id,
+      doctor_numbers: doctor_numbers.join(','),
+      hospital_names: hospital_names.join(','),
+      addresses: addresses.join(','),
+      distances: distances.join(','),
+      ratings: ratings.join(','),
+      websites: websites.join(',')
+    };
+  
+    console.log(result, 'log dr lists');
+  
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`, 
+        result
+      );
+      // console.log(resp?.data)
+      return;
+    } catch (error) {
+      console.log('Error logging dr details:', error);
+      return null;
+    }
+  };
 
   const getDisplayTranscript = () => {
     if (transcriptArray.length > 0) {
@@ -577,7 +625,7 @@ export default function Transcript() {
         patient_email: email,
         patient_number: phoneNumber,
       };
-      // console.log(data)
+      console.log(data, 'end call data');
 
       try {
         const resp = await axios.post(

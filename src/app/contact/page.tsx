@@ -87,12 +87,16 @@ export default function Contact() {
       }
       
       setIsLoading(true);
-
       const updatedFormData = {
         ...formData, // Preserve existing data
         ...values, // Add new values
         address: values.address || formData.address, // Keep existing address if unchanged
       };
+      const request_id = await logRequestInfo();
+      console.log(request_id)
+      if(request_id){
+        updatedFormData.request_id = request_id;
+      }
 
       try {
         window.sessionStorage.setItem(
@@ -140,6 +144,34 @@ export default function Contact() {
       }
     }
   };
+  const logRequestInfo = async () => {
+    const data = {
+      patient_name: formik.values.patientName,
+      patient_dob: formik.values.dob,
+      patient_email: formik.values.email,
+      patient_number: formik.values.phoneNumber,
+      patient_zipcode: '',
+      doctor_speciality: formData.specialty,
+      preferred_location: formData.address,
+      new_patient: formData.isNewPatient,
+      time_of_appointment: formData.timeOfAppointment,
+      patient_availability: formData.maxWait,
+      insurance_details: formData.insurer??'none',
+      medical_concerns: formData.objective,
+    }
+    // console.log(data)
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`, 
+        data
+      );
+      // console.log(resp)
+      return resp.data?.request_id;
+    } catch (error) {
+      // console.error('Error logging call details:', error);
+      return null;
+    }
+  }
 
   return (
     <>
