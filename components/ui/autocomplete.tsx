@@ -182,7 +182,7 @@ export function Autocomplete({
 
     const dropdown = (
       <div 
-        className="autocomplete-dropdown fixed z-[9999] bg-white border border-gray-200 rounded-md shadow-lg overflow-y-auto"
+        className="autocomplete-dropdown fixed z-[9999] bg-white border border-gray-200 rounded-md shadow-lg overflow-y-auto "
         style={{ 
           top: `${position.top}px`,
           left: `${position.left}px`,
