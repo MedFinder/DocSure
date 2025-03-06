@@ -2,6 +2,7 @@
 "use client";
 import { Menu, X, Search, MapPin } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image"; // Import Image component
 import { usePathname } from "next/navigation"; // Detect the current page
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
@@ -66,8 +67,11 @@ export default function Navbar() {
       if (savedAddress) {
         setAddressLocation(savedAddress);
       }
-      if(AddressLocation){
-        setSelectedLocation({ lat:AddressLocation.lat, lng:AddressLocation.lng });
+      if (AddressLocation) {
+        setSelectedLocation({
+          lat: AddressLocation.lat,
+          lng: AddressLocation.lng,
+        });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -154,16 +158,25 @@ export default function Navbar() {
   }
   return (
     <div className="fixed top-0 left-0 w-full  border-gray-200 bg-white z-50">
-      <div className="flex justify-between py-5 px-8 relative items-center">
+      <div className="flex justify-between py-5 md:px-8 px-5 relative items-center">
         {/* Left Section: Logo & Search (only on Search Page) */}
         <div className="flex items-center gap-6 w-full">
           {/* Logo with onClick handler to navigate to home */}
-          <span 
+          <div 
             onClick={() => router.push('/')}
-            className="text-[#FF6723] font-semibold text-xl whitespace-nowrap cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer"
           >
-            Docsure
-          </span>
+            <Image 
+              src="/Logo.png" 
+              alt="Docsure Logo"
+              width={30}
+              height={30}
+              className="w-auto h-auto"
+            />
+            <span className="text-[#FF6723] font-semibold text-xl whitespace-nowrap">
+              Docsure
+            </span>
+          </div>
 
           {/* Conditionally Show Search Bar on Search Page */}
           {pathname !== "/" && (
@@ -222,9 +235,7 @@ export default function Navbar() {
               </div>
 
               {/* Search Button - Properly aligned */}
-              <Button
-                className="bg-[#FF6723] text-white rounded-none h-12 px-6 flex-shrink-0"
-              >
+              <Button className="bg-[#FF6723] text-white rounded-none h-12 px-6 flex-shrink-0">
                 <Search className="text-white w-5 h-5" />
               </Button>
             </form>
@@ -239,9 +250,18 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Hamburger */}
-        <button onClick={toggleSidebar} className="md:hidden">
-          <Menu className="w-8 h-8 text-gray-700" />
-        </button>
+        {pathname == "/" && (
+          <div className="md:hidden flex gap-8 items-center text-md font-normal">
+            <Link href="/contact-us" className="hover:text-gray-500">
+              Help
+            </Link>
+          </div>
+        )}
+        {pathname !== "/" && (
+          <button onClick={toggleSidebar} className="md:hidden">
+            <Menu className="w-8 h-8 text-gray-700" />
+          </button>
+        )}
       </div>
 
       {/* Mobile Sidebar */}
@@ -252,7 +272,16 @@ export default function Navbar() {
         )}
       >
         <div className="flex justify-between items-center px-6 py-4 border-b">
-          <span className="text-xl font-semibold text-[#FF6723]">DocSure</span>
+          <div className="flex items-center gap-2">
+            <Image 
+              src="/Logo.png" // Fixed path - removed "/public/" prefix
+              alt="Docsure Logo"
+              width={24}
+              height={24}
+              className="w-auto h-auto"
+            />
+            <span className="text-xl font-semibold text-[#FF6723]">DocSure</span>
+          </div>
           <button onClick={closeSidebar}>
             <X className="w-6 h-6 text-gray-700" />
           </button>

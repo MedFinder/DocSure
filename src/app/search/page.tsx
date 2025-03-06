@@ -534,24 +534,39 @@ export default function SearchPage() {
   return (
     <>
       <Navbar />
-      <form onSubmit={formik.handleSubmit}>
-        {/* Filters Section */}
-        <div className="md:flex justify-between mt-24 px-8 text-[#595959] py-4 border-b-2 text-sm">
-          <div className="flex md:gap-4 md:flex-row flex-col gap-5">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="new-patient"
-                checked={isNewPatient} // Use checked instead of value
-                onCheckedChange={(value) => setIsNewPatient(value)}
-                className="rounded-none"
-              />
-              <Label htmlFor="new-patient" className="font-medium">
-                New Patient
-              </Label>
-            </div>
+      {doctors.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-screen text-center">
+          <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
+            No results found!
+          </p>
+          <p className="text-gray-500 mt-2">
+            We could not find any doctors that meet this criteria.
+          </p>
+          <Link href="/">
+            <Button className=" bg-[#7DA1B7] text-white px-6 py-5 mt-8 w-full sm:w-auto">
+              Search Again
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <form onSubmit={formik.handleSubmit}>
+          {/* Filters Section */}
+          <div className="md:flex justify-between mt-24 px-8 text-[#595959] py-4 border-b-2 text-sm">
+            <div className="flex md:gap-4 md:flex-row flex-col gap-5">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="new-patient"
+                  checked={isNewPatient} // Use checked instead of value
+                  onCheckedChange={(value) => setIsNewPatient(value)}
+                  className="rounded-none"
+                />
+                <Label htmlFor="new-patient" className="font-medium">
+                  New Patient
+                </Label>
+              </div>
 
-            {/* Health Concerns */}
-            {/* <DropdownMenu>
+              {/* Health Concerns */}
+              {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="rounded-full">
                   Health concerns
@@ -574,191 +589,202 @@ export default function SearchPage() {
                 )}
               </DropdownMenuContent>
             </DropdownMenu> */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={`rounded-full ${
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={`rounded-full ${
+                      formik.errors.objective && formik.touched.objective
+                        ? "border-red-500 text-red-500"
+                        : ""
+                    }`}
+                  >
+                    Health concerns{" "}
+                    <span className="text-red-500 text-xl flex items-center  self-center pt-1">
+                      *
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  className={`w-56 py-6 px-4 space-y-2 ${
                     formik.errors.objective && formik.touched.objective
-                      ? "border-red-500 text-red-500"
+                      ? "border-red-500"
                       : ""
                   }`}
                 >
-                  Health concerns{" "}
-                  <span className="text-red-500 text-xl flex items-center  self-center pt-1">
-                    *
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent
-                className={`w-56 py-6 px-4 space-y-2 ${
-                  formik.errors.objective && formik.touched.objective
-                    ? "border-red-500"
-                    : ""
-                }`}
-              >
-                <Textarea
-                  name="objective"
-                  placeholder="Knee pain, fever, skin rash..."
-                  onChange={formik.handleChange}
-                  value={formik.values.objective}
-                  className={
-                    formik.errors.objective && formik.touched.objective
-                      ? "border-red-500 focus:ring-red-500"
-                      : ""
-                  }
-                />
-                {formik.errors.objective && formik.touched.objective && (
-                  <div className="text-red-500">Required</div>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Max Wait */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="rounded-full">
-                  Max wait
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="md:w-36 py-6 px-4 space-y-2">
-                <RadioGroup
-                  name="maxWait"
-                  value={timeOfAppointment}
-                  onValueChange={(value) => settimeOfAppointment(value)}
-                  className="flex flex-col gap-4"
-                >
-                  {timingOptions.map((option) => (
-                    <div key={option.value} className="flex items-center gap-2">
-                      <RadioGroupItem id={option.value} value={option.value} />
-                      <Label htmlFor={option.value}>{option.label}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Availability */}
-            <Select name="availability">
-              <SelectTrigger className="md:w-auto w-full rounded-full">
-                <SelectValue placeholder="Patient availability" />
-              </SelectTrigger>
-              <SelectContent>
-                <RadioGroup
-                  value={selectedOption}
-                  onValueChange={setSelectedOption}
-                  className="flex flex-col gap-4"
-                >
-                  {availabilityOptions.map((option) => (
-                    <div
-                      key={option.value}
-                      className="flex items-center gap-2 px-3 py-2"
-                    >
-                      <RadioGroupItem id={option.value} value={option.value} />
-                      <Label htmlFor={option.value}>{option.label}</Label>
-                    </div>
-                  ))}
-                  <div className="flex flex-col gap-2 px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem id="custom" value="custom" />
-                      <Label htmlFor="custom">Input your availability</Label>
-                    </div>
-                    {selectedOption === "custom" && (
-                      <Textarea
-                        placeholder="Free after 3pm on weekdays"
-                        value={customAvailability}
-                        onChange={(e) => setCustomAvailability(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md p-2"
-                      />
-                    )}
-                  </div>
-                </RadioGroup>
-              </SelectContent>
-            </Select>
-
-            {/* Insurance */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="rounded-full">
-                  Insurance
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 py-6 px-4 space-y-2">
-                <div className="space-y-2">
-                  <Label>Member ID</Label>
-                  <Input
-                    name="subscriberId"
-                    value={formik.values.subscriberId}
+                  <Textarea
+                    name="objective"
+                    placeholder="Knee pain, fever, skin rash..."
                     onChange={formik.handleChange}
+                    value={formik.values.objective}
+                    className={
+                      formik.errors.objective && formik.touched.objective
+                        ? "border-red-500 focus:ring-red-500"
+                        : ""
+                    }
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label>Group Number</Label>
-                  <Input
-                    name="groupId"
-                    value={formik.values.groupId}
-                    onChange={formik.handleChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Insurer (optional)</Label>
-                  <Select
-                    name="insurer"
-                    value={formik.values.insurer}
-                    onValueChange={(value) => {
-                      formik.setFieldValue("insurer", value);
-                      setSelectedInsurance(false); //patient has insurance
-                    }}
+                  {formik.errors.objective && formik.touched.objective && (
+                    <div className="text-red-500">Required</div>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Max Wait */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="rounded-full">
+                    Max wait
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="md:w-36 py-6 px-4 space-y-2">
+                  <RadioGroup
+                    name="maxWait"
+                    value={timeOfAppointment}
+                    onValueChange={(value) => settimeOfAppointment(value)}
+                    className="flex flex-col gap-4"
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select insurer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {insurerOptions.map((p) => (
-                        <SelectItem key={p.value} value={p.value}>
-                          {p.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center gap-2 pt-2">
-                  <Checkbox
-                    id="noInsurance"
-                    checked={selectedInsurance} // Use checked instead of value
-                    onCheckedChange={(value) => setSelectedInsurance(value)}
-                  />
-                  <Label htmlFor="noInsurance">Don’t have insurance</Label>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div>
-            <p className="text-[#FF6723] mt-4 md:mt-0">
-              Tip: You can re-arrange the priority by dragging list items
-            </p>
-          </div>
-        </div>
+                    {timingOptions.map((option) => (
+                      <div
+                        key={option.value}
+                        className="flex items-center gap-2"
+                      >
+                        <RadioGroupItem
+                          id={option.value}
+                          value={option.value}
+                        />
+                        <Label htmlFor={option.value}>{option.label}</Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-        {/* Submit Section */}
-        <div className="bg-[#FFF6F2] p-4 px-7">
-          <div className="flex items-center  sm:gap-2">
-            <p className="text-xs md:text-base">
-              Docsure AI will call the following recommended doctors in this
-              sequence and seek an appointment for you.
-            </p>
-            <Button
-              type="submit"
-              // disabled={isLoading}
-              className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2"
-            >
-              Continue
-            </Button>
-          </div>
-        </div>
-      </form>
+              {/* Availability */}
+              <Select name="availability">
+                <SelectTrigger className="md:w-auto w-full rounded-full">
+                  <SelectValue placeholder="Patient availability" />
+                </SelectTrigger>
+                <SelectContent>
+                  <RadioGroup
+                    value={selectedOption}
+                    onValueChange={setSelectedOption}
+                    className="flex flex-col gap-4"
+                  >
+                    {availabilityOptions.map((option) => (
+                      <div
+                        key={option.value}
+                        className="flex items-center gap-2 px-3 py-2"
+                      >
+                        <RadioGroupItem
+                          id={option.value}
+                          value={option.value}
+                        />
+                        <Label htmlFor={option.value}>{option.label}</Label>
+                      </div>
+                    ))}
+                    <div className="flex flex-col gap-2 px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem id="custom" value="custom" />
+                        <Label htmlFor="custom">Input your availability</Label>
+                      </div>
+                      {selectedOption === "custom" && (
+                        <Textarea
+                          placeholder="Free after 3pm on weekdays"
+                          value={customAvailability}
+                          onChange={(e) =>
+                            setCustomAvailability(e.target.value)
+                          }
+                          className="w-full border border-gray-300 rounded-md p-2"
+                        />
+                      )}
+                    </div>
+                  </RadioGroup>
+                </SelectContent>
+              </Select>
 
+              {/* Insurance */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="rounded-full">
+                    Insurance
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 py-6 px-4 space-y-2">
+                  <div className="space-y-2">
+                    <Label>Member ID</Label>
+                    <Input
+                      name="subscriberId"
+                      value={formik.values.subscriberId}
+                      onChange={formik.handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Group Number</Label>
+                    <Input
+                      name="groupId"
+                      value={formik.values.groupId}
+                      onChange={formik.handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Insurer (optional)</Label>
+                    <Select
+                      name="insurer"
+                      value={formik.values.insurer}
+                      onValueChange={(value) => {
+                        formik.setFieldValue("insurer", value);
+                        setSelectedInsurance(false); //patient has insurance
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select insurer" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {insurerOptions.map((p) => (
+                          <SelectItem key={p.value} value={p.value}>
+                            {p.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2 pt-2">
+                    <Checkbox
+                      id="noInsurance"
+                      checked={selectedInsurance} // Use checked instead of value
+                      onCheckedChange={(value) => setSelectedInsurance(value)}
+                    />
+                    <Label htmlFor="noInsurance">Don’t have insurance</Label>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div>
+              <p className="text-[#FF6723] mt-4 md:mt-0">
+                Tip: You can re-arrange the priority by dragging list items
+              </p>
+            </div>
+          </div>
+
+          {/* Submit Section */}
+          <div className="bg-[#FFF6F2] p-4 px-7">
+            <div className="flex items-center  sm:gap-2">
+              <p className="text-xs md:text-base">
+                Docsure AI will call the following recommended doctors in this
+                sequence and seek an appointment for you.
+              </p>
+              <Button
+                type="submit"
+                // disabled={isLoading}
+                className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2"
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        </form>
+      )}
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
         <ScrollArea className="h-full md:w-full w-auto whitespace-nowrap">
           <Column

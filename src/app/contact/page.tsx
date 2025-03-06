@@ -1,207 +1,3 @@
-// "use client";
-// import Navbar from "@/components/general-components/navbar";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
-// import axios from "axios";
-// import { useFormik } from "formik";
-// import Link from "next/link";
-// import { useRouter } from "next/navigation";
-// import React, { useEffect, useRef, useState } from "react";
-// import * as Yup from "yup";
-
-// const validationSchema = Yup.object().shape({
-//   name: Yup.string().required("Name is required"),
-//   email: Yup.string().email("Invalid email").required("Email is required"),
-// });
-// export default function Contact() {
-//   const [formData, setFormData] = useState(null);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [addressLocation, setAddressLocation] = useState(null);
-//   const router = useRouter();
-//   const addressRefs = useRef([]);
-//   const { isLoaded } = useJsApiLoader({
-//     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
-//     libraries: ["places"],
-//   });
-
-//   useEffect(() => {
-//     const storedData =  window.sessionStorage.getItem("formData");
-//     if (storedData) {
-//       const parsedData = JSON.parse(storedData);
-//       setFormData(parsedData);
-//       console.log("Retrieved formData:", parsedData);
-//     } else {
-//       console.warn("No form data found in  window.sessionStorage.");
-//     }
-
-//     // Retrieve searchData
-//     const storedSearchData =  window.sessionStorage.getItem("searchData");
-//     if (storedSearchData) {
-//       const parsedSearchData = JSON.parse(storedSearchData);
-//       console.log("Retrieved searchData:", parsedSearchData);
-//     } else {
-//       console.warn("No searchData found in  window.sessionStorage.");
-//     }
-//   }, []);
-
-//   const formik = useFormik({
-//     initialValues: {
-//       patientName: "",
-//       phoneNumber: "",
-//       email: "",
-//       patientHistory: "",
-//       objective: "",
-//       specialty: "",
-//       groupId: "",
-//       subscriberId: "",
-//       insurer: "",
-//       zipcode: "",
-//       dob: "",
-//       address: "",
-//     },
-//     validationSchema,
-//     onSubmit: async (values) => {
-//       console.log("here", values);
-
-//       const updatedValues = {
-//         ...values,
-//       };
-//       console.log(updatedValues);
-//       // setIsLoading(true);
-//       // if (!selectedLocation) {
-//       //   toast.error("No location selected");
-//       //   return;
-//       // }
-
-//       // Ensure searchData is not null
-//       if (!searchData) {
-//         console.warn(
-//           "searchData is null, ensuring it's set correctly before navigating."
-//         );
-//       }
-//       try {
-//         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-//         const response = await axios.get(
-//           `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
-//         );
-
-//          window.sessionStorage.setItem("formData", JSON.stringify(updatedValues));
-//          window.sessionStorage.setItem("statusData", JSON.stringify(response.data));
-
-//         // console.log("Form Data:", values);
-//         // console.log("API Response Data:", response.data);
-//         // Navigate to status page
-//         router.push("/transcript");
-//       } catch (error) {
-//         console.error("Error submitting form:", error);
-//       }
-//     },
-//   });
-
-//   const handleOnAddressChanged = (index) => {
-//     if (addressRefs.current[index]) {
-//       const places = addressRefs.current[index].getPlaces();
-//       if (places && places.length > 0) {
-//         // <-- Added defensive check
-//         const address = places[0];
-//         //console.log(address)
-//         formik.setFieldValue("address", address?.formatted_address);
-//       }
-//     }
-//   };
-//   return (
-//     <>
-//       <Navbar />
-//       <form
-//         onSubmit={formik.handleSubmit}
-//         className="h-screen flex flex-col justify-center items-center px-6 sm:px-10"
-//       >
-//         <div className="w-full max-w-lg   p-6 sm:p-10 rounded-lg">
-//           <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
-//             One Last Step
-//           </p>
-//           <div className="space-y-6">
-//             <div className="space-y-2">
-//               <Label>Patient name</Label>
-//               <Input
-//                 className="rounded-none"
-//                 name="patientName"
-//                 onChange={formik.handleChange}
-//                 value={formik.values.patientName}
-//               />
-//             </div>
-//             <div className="space-y-2">
-//               <Label>Date of Birth</Label>
-//               <Input
-//                 className="rounded-none"
-//                 id="dob-id"
-//                 name="dob"
-//                 onChange={formik.handleChange}
-//                 value={formik.values.dob}
-//               />
-//             </div>
-//             <div className="space-y-2">
-//               {/* <Label>Address</Label>
-//               <Input className="rounded-none"></Input> */}
-//               <div className="flex flex-col space-y-4">
-//                 <Label htmlFor="address" className=" w-auto  font-semibold ">
-//                   Address
-//                 </Label>
-//                 {isLoaded && (
-//                   <StandaloneSearchBox
-//                     onLoad={(ref) => (addressRefs.current[0] = ref)}
-//                     onPlacesChanged={() => handleOnAddressChanged(0)}
-//                   >
-//                     <Input
-//                       className="rounded-none"
-//                       placeholder="Search address.."
-//                     />
-//                   </StandaloneSearchBox>
-//                 )}
-//               </div>
-//             </div>
-//             <div className="space-y-2">
-//               <Label>Email address</Label>
-//               <Input
-//                 name="email"
-//                 placeholder=""
-//                 onChange={formik.handleChange}
-//                 value={formik.values.email}
-//                 className={
-//                   formik.errors.email && formik.touched.email
-//                     ? "border-red-500"
-//                     : " rounded-none"
-//                 }
-//               />
-//               {formik.errors.email && formik.touched.email && (
-//                 <div className="text-red-500">{formik.errors.email}</div>
-//               )}
-//             </div>
-//           </div>
-
-//           <span className="text-sm text-gray-600 block pt-2 ">
-//             Appointment details will be sent to this email.
-//           </span>
-//           <span className="text-xs  block pt-8  text-[#FF6723]">
-//             By continuing, you authorize us to book an appointment on your
-//             behalf.
-//           </span>
-
-//           <div className="flex justify-center mt-12">
-//             <Button
-//               type="submit"
-//               className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto "
-//             >
-//               Continue
-//             </Button>
-//           </div>
-//         </div>
-//       </form>
-//     </>
-//   );
-// }
 // @ts-nocheck
 "use client";
 import Navbar from "@/components/general-components/navbar";
@@ -216,10 +12,13 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import * as Yup from "yup";
 
+// Validation schema remains the same - all fields required
 const validationSchema = Yup.object().shape({
   patientName: Yup.string().required("Patient name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
   phoneNumber: Yup.string().required("Phone number is required"),
+  dob: Yup.string().required("Date of birth is required"),
+  address: Yup.string().required("Address is required"),
 });
 
 export default function Contact() {
@@ -274,37 +73,31 @@ export default function Contact() {
       patientName: formData.patientName || "",
       phoneNumber: formData.phoneNumber || "",
       email: formData.email || "",
-      // zipcode: formData.zipcode || "",
       dob: formData.dob || "",
       address: formData.address || "",
     },
     validationSchema,
     onSubmit: async (values) => {
-      //console.log(values);
+      // Remove the manual empty fields check since formik will handle this
+      // Use formik's built-in validation instead
+      
+      if (!formik.isValid) {
+        toast.error("Please fill up all the required information");
+        return;
+      }
+      
       setIsLoading(true);
-
       const updatedFormData = {
         ...formData, // Preserve existing data
         ...values, // Add new values
         address: values.address || formData.address, // Keep existing address if unchanged
       };
-      //console.log("got here", values);
-      // console.log(updatedFormData);
-      // try {
-      //   // const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-      //   // const response = await axios.get(
-      //   //   `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
-      //   // );
+      const request_id = await logRequestInfo();
+      console.log(request_id)
+      if(request_id){
+        updatedFormData.request_id = request_id;
+      }
 
-      //    window.sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
-      //    window.sessionStorage.setItem("statusData", JSON.stringify(response.data));
-
-      //   router.push("/transcript");
-      // } catch (error) {
-      //   console.error("Error submitting form:", error);
-      // } finally {
-      //   setIsLoading(false);
-      // }
       try {
         window.sessionStorage.setItem(
           "formData",
@@ -314,11 +107,29 @@ export default function Contact() {
         router.push("/transcript?confirmed=true"); // Redirect immediately after confirming
       } catch (error) {
         console.error("Error submitting form:", error);
+        toast.error("An error occurred. Please try again.");
       } finally {
         setIsLoading(false);
       }
     },
+    // Enable validation on change
+    validateOnChange: true,
+    // Add validation on blur
+    validateOnBlur: true,
   });
+
+  // Force validation of all fields on submission attempt
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Touch all fields to show errors
+    Object.keys(formik.values).forEach(field => {
+      formik.setFieldTouched(field, true);
+    });
+    
+    // Then submit if valid
+    formik.handleSubmit(e);
+  };
 
   const handleOnAddressChanged = (index) => {
     if (addressRefs.current[index]) {
@@ -333,12 +144,40 @@ export default function Contact() {
       }
     }
   };
+  const logRequestInfo = async () => {
+    const data = {
+      patient_name: formik.values.patientName,
+      patient_dob: formik.values.dob,
+      patient_email: formik.values.email,
+      patient_number: formik.values.phoneNumber,
+      patient_zipcode: '',
+      doctor_speciality: formData.specialty,
+      preferred_location: formData.address,
+      new_patient: formData.isNewPatient,
+      time_of_appointment: formData.timeOfAppointment,
+      patient_availability: formData.maxWait,
+      insurance_details: formData.insurer??'none',
+      medical_concerns: formData.objective,
+    }
+    // console.log(data)
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`, 
+        data
+      );
+      // console.log(resp)
+      return resp.data?.request_id;
+    } catch (error) {
+      // console.error('Error logging call details:', error);
+      return null;
+    }
+  }
 
   return (
     <>
       <Navbar />
       <form
-        onSubmit={formik.handleSubmit}
+        onSubmit={handleSubmit}
         className="h-screen flex flex-col justify-center items-center px-6 sm:px-10"
       >
         <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg mt-12">
@@ -347,27 +186,39 @@ export default function Contact() {
           </p>
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label>Patient name</Label>
+              <Label>Patient name <span className="text-red-500">*</span></Label>
               <Input
-                className="rounded-none"
+                className={formik.errors.patientName && formik.touched.patientName
+                  ? "border-red-500 rounded-none"
+                  : "rounded-none"}
                 name="patientName"
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 value={formik.values.patientName}
               />
+              {formik.errors.patientName && formik.touched.patientName && (
+                <div className="text-red-500 text-sm">{formik.errors.patientName}</div>
+              )}
             </div>
             <div className="space-y-2">
-              <Label>Date of Birth</Label>
+              <Label>Date of Birth <span className="text-red-500">*</span></Label>
               <Input
-                className="rounded-none"
+                className={formik.errors.dob && formik.touched.dob
+                  ? "border-red-500 rounded-none"
+                  : "rounded-none"}
                 name="dob"
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 value={formik.values.dob}
               />
+              {formik.errors.dob && formik.touched.dob && (
+                <div className="text-red-500 text-sm">{formik.errors.dob}</div>
+              )}
             </div>
             <div className="space-y-2">
               <div className="flex flex-col space-y-4">
                 <Label htmlFor="address" className="w-auto font-semibold">
-                  Address
+                  Address <span className="text-red-500">*</span>
                 </Label>
                 {isLoaded && (
                   <StandaloneSearchBox
@@ -375,55 +226,53 @@ export default function Contact() {
                     onPlacesChanged={() => handleOnAddressChanged(0)}
                   >
                     <Input
-                      className="rounded-none"
+                      className={formik.errors.address && formik.touched.address
+                        ? "border-red-500 rounded-none"
+                        : "rounded-none"}
                       placeholder="Search address.."
                       value={formik.values.address}
-                      onChange={formik.handleChange}
+                      onChange={(e) => {
+                        formik.handleChange(e);
+                        // Let the user type a custom address if they want
+                      }}
+                      onBlur={formik.handleBlur}
                       name="address"
                     />
                   </StandaloneSearchBox>
                 )}
+                {formik.errors.address && formik.touched.address && (
+                  <div className="text-red-500 text-sm">{formik.errors.address}</div>
+                )}
               </div>
             </div>
-            {/* <div className="space-y-2">
-              <Label>Zipcode</Label>
-              <Input
-                name="zipcode"
-                onChange={formik.handleChange}
-                value={formik.values.zipcode}
-                className={"rounded-none"}
-              />
-            </div> */}
             <div className="space-y-2">
-              <Label>Email address</Label>
+              <Label>Email address <span className="text-red-500">*</span></Label>
               <Input
                 name="email"
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 value={formik.values.email}
-                className={
-                  formik.errors.email && formik.touched.email
-                    ? "border-red-500"
-                    : "rounded-none"
-                }
+                className={formik.errors.email && formik.touched.email
+                  ? "border-red-500 rounded-none"
+                  : "rounded-none"}
               />
               {formik.errors.email && formik.touched.email && (
-                <div className="text-red-500">{formik.errors.email}</div>
+                <div className="text-red-500 text-sm">{formik.errors.email}</div>
               )}
             </div>
             <div className="space-y-2">
-              <Label>Phone number</Label>
+              <Label>Phone number <span className="text-red-500">*</span></Label>
               <Input
                 name="phoneNumber"
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 value={formik.values.phoneNumber}
-                className={
-                  formik.errors.phoneNumber && formik.touched.phoneNumber
-                    ? "border-red-500"
-                    : "rounded-none"
-                }
+                className={formik.errors.phoneNumber && formik.touched.phoneNumber
+                  ? "border-red-500 rounded-none"
+                  : "rounded-none"}
               />
               {formik.errors.phoneNumber && formik.touched.phoneNumber && (
-                <div className="text-red-500">{formik.errors.phoneNumber}</div>
+                <div className="text-red-500 text-sm">{formik.errors.phoneNumber}</div>
               )}
             </div>
           </div>
