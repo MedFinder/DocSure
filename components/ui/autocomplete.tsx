@@ -89,9 +89,10 @@ export function Autocomplete({
       // If it would overflow, position above the input instead
       const positionAbove = wouldOverflowBottom && rect.top > dropdownHeight;
       
+      // Use viewport-relative positioning (no scroll offsets)
       setPosition({
-        top: positionAbove ? rect.top + window.scrollY - dropdownHeight : rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
+        top: positionAbove ? rect.top - dropdownHeight : rect.bottom,
+        left: rect.left,
         width: rect.width,
         height: dropdownHeight
       });
@@ -99,10 +100,12 @@ export function Autocomplete({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredOptions.length]);
   
-  // Update position when open state changes, input value changes, or on window resize
+  // Update position when open state changes, input value changes, or on window resize/scroll
   React.useEffect(() => {
     if (open && containerRef.current) {
       updatePosition();
+      
+      // Update position on resize and scroll events
       window.addEventListener('resize', updatePosition);
       window.addEventListener('scroll', updatePosition, true);
       
@@ -111,7 +114,7 @@ export function Autocomplete({
         window.removeEventListener('scroll', updatePosition, true);
       };
     }
-  }, [open, inputValue, updatePosition]); // Added inputValue as dependency
+  }, [open, inputValue, updatePosition]);
 
   // Set input value when selected changes from outside
   React.useEffect(() => {

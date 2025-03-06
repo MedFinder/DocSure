@@ -53,12 +53,12 @@ const Column: React.FC<ColumnProps> = ({
                 ? task.types[0].charAt(0).toUpperCase() + task.types[0].slice(1)
                 : "";
 
-              return (
+                return (
                 <Task
                   key={task.id}
                   id={task.id.toString()}
                   index={index}
-                  website={task.website}
+                  website={task.website === 'NA' ? null : task.website}
                   title={task.name}
                   rating={task.rating}
                   distance={task.distance}
@@ -71,7 +71,7 @@ const Column: React.FC<ColumnProps> = ({
                   doctorType={doctorType}
                   onDelete={onDelete}
                 />
-              );
+                );
             })}
           </SortableContext>
         </tbody>

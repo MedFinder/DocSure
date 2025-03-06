@@ -4,8 +4,8 @@ import { lexendFont } from "@/lib/font";
 import { Toaster } from "sonner";
 import Providers from "@/providers/permission-provider";
 export const metadata: Metadata = {
-  title: "Docsure| Book top rated doctors near me",
-  description: "Docsure| Book top rated doctors near me",
+  title: "Docsure | Book top rated doctors near me",
+  description: "Docsure | Book top rated doctors near me",
 };
 export default function RootLayout({
   children,

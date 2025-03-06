@@ -2,6 +2,7 @@
 "use client";
 import { Menu, X, Search, MapPin } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image"; // Import Image component
 import { usePathname } from "next/navigation"; // Detect the current page
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
@@ -158,12 +159,21 @@ export default function Navbar() {
         {/* Left Section: Logo & Search (only on Search Page) */}
         <div className="flex items-center gap-6 w-full">
           {/* Logo with onClick handler to navigate to home */}
-          <span 
+          <div 
             onClick={() => router.push('/')}
-            className="text-[#FF6723] font-semibold text-xl whitespace-nowrap cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer"
           >
-            Docsure
-          </span>
+            <Image 
+              src="/Logo.png" 
+              alt="Docsure Logo"
+              width={30}
+              height={30}
+              className="w-auto h-auto"
+            />
+            <span className="text-[#FF6723] font-semibold text-xl whitespace-nowrap">
+              Docsure
+            </span>
+          </div>
 
           {/* Conditionally Show Search Bar on Search Page */}
           {pathname !== "/" && (
@@ -252,7 +262,16 @@ export default function Navbar() {
         )}
       >
         <div className="flex justify-between items-center px-6 py-4 border-b">
-          <span className="text-xl font-semibold text-[#FF6723]">DocSure</span>
+          <div className="flex items-center gap-2">
+            <Image 
+              src="/Logo.png" // Fixed path - removed "/public/" prefix
+              alt="Docsure Logo"
+              width={24}
+              height={24}
+              className="w-auto h-auto"
+            />
+            <span className="text-xl font-semibold text-[#FF6723]">DocSure</span>
+          </div>
           <button onClick={closeSidebar}>
             <X className="w-6 h-6 text-gray-700" />
           </button>
