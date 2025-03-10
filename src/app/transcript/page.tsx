@@ -447,21 +447,17 @@ export default function Transcript() {
     },
     []
   );
-
-  const moveToNextDoctor = async (id: string) => {
-    let newIndex = 0;
+  const moveToNextDoctor = async (id: string, currentindex: number) => {
+    let newIndex = currentindex+1;
     if (id) {
       terminateCurrentCall(id);
     }
     // Move to the next doctor
-    setActiveCallIndex((prevIndex) => {
-      newIndex = prevIndex + 1;
-      return newIndex;
-    });
-    // console.log(newIndex,activeCallIndex)
-    if (newIndex + 1 <= doctors.length) {
+    setActiveCallIndex(newIndex);
+    // console.log(newIndex,'newIndex');
+    if (newIndex < doctors.length) {
       const nextDoctor = doctors[newIndex];
-      //console.log("Calling next doctor:", nextDoctor);
+      // console.log("Calling next doctor:", nextDoctor);
 
       const phoneNumber = phoneNumbers[newIndex]; //+2348168968260
       const nameOfOrg = nextDoctor?.name; //+2348168968260
@@ -475,6 +471,11 @@ export default function Transcript() {
     } else {
       toast.success("All doctors have been called successfully..");
       setIsConfirmed(false);
+      setCallStatus({
+        isInitiated: false,
+        ssid: "",
+        email: "",
+      })
     }
   };
   const connectWebSocket = () => {
@@ -505,8 +506,9 @@ export default function Transcript() {
             const successMessage =
               call_ended_result?.confirmation_message ??
               "Appointment Booked Successfully";
-            const doctorPhone = doctors[activeCallIndex]?.phone_number;
-
+            const doctorPhone = doctors[activeCallIndexRef.current]?.phone_number;
+            // console.log(doctorPhone, "doctorPhone");
+            // make the sms call to the patient
             setIsAppointmentBooked(true);
             wsRef?.current?.close();
 
@@ -521,7 +523,7 @@ export default function Transcript() {
             toast.warning(
               "Appointment could not be booked. Trying next doctor..."
             );
-            moveToNextDoctor();
+            moveToNextDoctor(null,activeCallIndexRef.current);
           }
         }, 5000);
       }
@@ -535,7 +537,7 @@ export default function Transcript() {
         // doctor did not pick call...move to next
         toast.info("Doctor did not pick call. Trying next doctor...");
 
-        moveToNextDoctor();
+        moveToNextDoctor(null,activeCallIndexRef.current);
       }
     };
 
@@ -688,7 +690,7 @@ export default function Transcript() {
                     doctor={doctor}
                     callStatus={callStatus}
                     isAppointmentBooked={isAppointmentBooked}
-                    onSkip={() => moveToNextDoctor(callStatus?.ssid)} // Move to next doctor
+                    onSkip={() => moveToNextDoctor(callStatus?.ssid,activeCallIndexRef.current)} // Move to next doctor
                   />
                 ))}
               </div>
