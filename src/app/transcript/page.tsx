@@ -379,6 +379,7 @@ export default function Transcript() {
       }
 
       const {
+        availability,
         email,
         phoneNumber,
         patientName,
@@ -408,11 +409,8 @@ export default function Transcript() {
       if (groupId) context += `; Group Id:${groupId}`;
       if (dob) context += `; Date of birth:${dob}`;
       if (address) context += `; Address of the patient:${address}`;
-      if (maxWait) context += `; Max Wait:${maxWait}`;
-      if (selectedAvailability)
-        context += `; Availability of the patient:${selectedAvailability}`;
-      if (timeOfAppointment)
-        context += `; Time Of Appointment:${timeOfAppointment}`;
+      if (maxWait) context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;
+      if (availability) context += `; Availability of the patient:${availability}`;
       if (isnewPatient) context += `; Is New Patient:${isnewPatient}`;
       // if (zipcode) context += `; Zipcode:${zipcode}`;
 
@@ -426,7 +424,7 @@ export default function Transcript() {
         doctor_number: doctorPhoneNumber,
       };
       sessionStorage.setItem("context", context);
-      // console.log(data);
+      console.log(data);
       try {
         const callResponse = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
@@ -626,6 +624,11 @@ export default function Transcript() {
         patient_name: patientName,
         patient_email: email,
         patient_number: phoneNumber,
+        prompt: "Has the appointment been booked?",
+        voice_used: "Alex",
+        interruption_threshold: 70,
+        temperature: 0.7,
+        model: "gpt-4-turbo"
       };
       console.log(data, 'end call data');
 
