@@ -506,8 +506,8 @@ export default function Transcript() {
             const successMessage =
               call_ended_result?.confirmation_message ??
               "Appointment Booked Successfully";
+              sendSMS(successMessage);
             const doctorPhone = doctors[activeCallIndexRef.current]?.phone_number;
-            // console.log(doctorPhone, "doctorPhone");
             // make the sms call to the patient
             setIsAppointmentBooked(true);
             wsRef?.current?.close();
@@ -661,6 +661,20 @@ export default function Transcript() {
       return resp.data;
     } catch (error) {
       console.error("Error ending call:", error);
+      return true;
+    }
+  };
+  const sendSMS = async ( message: string): Promise<any> => {
+    // console.log(id,'xxx')
+    const { phoneNumber } = formData;
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/send-sms`,
+        { to_number: phoneNumber, message_body: message }
+      );
+      return resp.data;
+    } catch (error) {
+      console.error("Error sending SMS:", error);
       return true;
     }
   };
