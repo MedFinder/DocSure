@@ -80,12 +80,12 @@ export default function Contact() {
     onSubmit: async (values) => {
       // Remove the manual empty fields check since formik will handle this
       // Use formik's built-in validation instead
-      
+
       if (!formik.isValid) {
         toast.error("Please fill up all the required information");
         return;
       }
-      
+
       setIsLoading(true);
       const updatedFormData = {
         ...formData, // Preserve existing data
@@ -93,8 +93,8 @@ export default function Contact() {
         address: values.address || formData.address, // Keep existing address if unchanged
       };
       const request_id = await logRequestInfo();
-      console.log(request_id)
-      if(request_id){
+      console.log(request_id);
+      if (request_id) {
         updatedFormData.request_id = request_id;
       }
 
@@ -121,12 +121,12 @@ export default function Contact() {
   // Force validation of all fields on submission attempt
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Touch all fields to show errors
-    Object.keys(formik.values).forEach(field => {
+    Object.keys(formik.values).forEach((field) => {
       formik.setFieldTouched(field, true);
     });
-    
+
     // Then submit if valid
     formik.handleSubmit(e);
   };
@@ -150,19 +150,19 @@ export default function Contact() {
       patient_dob: formik.values.dob,
       patient_email: formik.values.email,
       patient_number: formik.values.phoneNumber,
-      patient_zipcode: '',
+      patient_zipcode: "",
       doctor_speciality: formData.specialty,
       preferred_location: formData.address,
       new_patient: formData.isNewPatient,
       time_of_appointment: formData.timeOfAppointment,
       patient_availability: formData.maxWait,
-      insurance_details: formData.insurer??'none',
+      insurance_details: formData.insurer ?? "none",
       medical_concerns: formData.objective,
-    }
+    };
     // console.log(data)
     try {
       const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`, 
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`,
         data
       );
       // console.log(resp)
@@ -171,7 +171,7 @@ export default function Contact() {
       // console.error('Error logging call details:', error);
       return null;
     }
-  }
+  };
 
   return (
     <>
@@ -180,32 +180,42 @@ export default function Contact() {
         onSubmit={handleSubmit}
         className="h-screen flex flex-col justify-center items-center px-6 sm:px-10"
       >
-        <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg mt-12">
+        <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg mt-32 md:mt-12">
           <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
             One Last Step
           </p>
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label>Patient name <span className="text-red-500">*</span></Label>
+              <Label>
+                Patient name 
+              </Label>
               <Input
-                className={formik.errors.patientName && formik.touched.patientName
-                  ? "border-red-500 rounded-none"
-                  : "rounded-none"}
+                className={
+                  formik.errors.patientName && formik.touched.patientName
+                    ? "border-red-500 rounded-none"
+                    : "rounded-none"
+                }
                 name="patientName"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.patientName}
               />
               {formik.errors.patientName && formik.touched.patientName && (
-                <div className="text-red-500 text-sm">{formik.errors.patientName}</div>
+                <div className="text-red-500 text-sm">
+                  {formik.errors.patientName}
+                </div>
               )}
             </div>
             <div className="space-y-2">
-              <Label>Date of Birth <span className="text-red-500">*</span></Label>
+              <Label>
+                Date of Birth 
+              </Label>
               <Input
-                className={formik.errors.dob && formik.touched.dob
-                  ? "border-red-500 rounded-none"
-                  : "rounded-none"}
+                className={
+                  formik.errors.dob && formik.touched.dob
+                    ? "border-red-500 rounded-none"
+                    : "rounded-none"
+                }
                 name="dob"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -217,8 +227,8 @@ export default function Contact() {
             </div>
             <div className="space-y-2">
               <div className="flex flex-col space-y-4">
-                <Label htmlFor="address" className="w-auto font-semibold">
-                  Address <span className="text-red-500">*</span>
+                <Label htmlFor="address" className="w-auto ">
+                  Address
                 </Label>
                 {isLoaded && (
                   <StandaloneSearchBox
@@ -226,9 +236,11 @@ export default function Contact() {
                     onPlacesChanged={() => handleOnAddressChanged(0)}
                   >
                     <Input
-                      className={formik.errors.address && formik.touched.address
-                        ? "border-red-500 rounded-none"
-                        : "rounded-none"}
+                      className={
+                        formik.errors.address && formik.touched.address
+                          ? "border-red-500 rounded-none"
+                          : "rounded-none"
+                      }
                       placeholder="Search address.."
                       value={formik.values.address}
                       onChange={(e) => {
@@ -241,38 +253,52 @@ export default function Contact() {
                   </StandaloneSearchBox>
                 )}
                 {formik.errors.address && formik.touched.address && (
-                  <div className="text-red-500 text-sm">{formik.errors.address}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.address}
+                  </div>
                 )}
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Email address <span className="text-red-500">*</span></Label>
+              <Label>
+                Email address
+              </Label>
               <Input
                 name="email"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.email}
-                className={formik.errors.email && formik.touched.email
-                  ? "border-red-500 rounded-none"
-                  : "rounded-none"}
+                className={
+                  formik.errors.email && formik.touched.email
+                    ? "border-red-500 rounded-none"
+                    : "rounded-none"
+                }
               />
               {formik.errors.email && formik.touched.email && (
-                <div className="text-red-500 text-sm">{formik.errors.email}</div>
+                <div className="text-red-500 text-sm">
+                  {formik.errors.email}
+                </div>
               )}
             </div>
             <div className="space-y-2">
-              <Label>Phone number <span className="text-red-500">*</span></Label>
+              <Label>
+                Phone number 
+              </Label>
               <Input
                 name="phoneNumber"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.phoneNumber}
-                className={formik.errors.phoneNumber && formik.touched.phoneNumber
-                  ? "border-red-500 rounded-none"
-                  : "rounded-none"}
+                className={
+                  formik.errors.phoneNumber && formik.touched.phoneNumber
+                    ? "border-red-500 rounded-none"
+                    : "rounded-none"
+                }
               />
               {formik.errors.phoneNumber && formik.touched.phoneNumber && (
-                <div className="text-red-500 text-sm">{formik.errors.phoneNumber}</div>
+                <div className="text-red-500 text-sm">
+                  {formik.errors.phoneNumber}
+                </div>
               )}
             </div>
           </div>
@@ -285,7 +311,7 @@ export default function Contact() {
             behalf.
           </span>
 
-          <div className="flex justify-center mt-12">
+          <div className="flex justify-center md:mt-12 mt-6">
             <Button
               type="submit"
               className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto"
@@ -299,3 +325,4 @@ export default function Contact() {
     </>
   );
 }
+

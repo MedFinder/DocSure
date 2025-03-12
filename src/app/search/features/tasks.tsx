@@ -62,91 +62,103 @@ export const Task: React.FC<TaskProps> = ({
     transition,
     transform: CSS.Transform.toString(transform),
   };
-
   return (
-    <tr
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={`transition-all duration-300 ${
-        index % 2 === 0 ? "bg-white" : "bg-blue-50"
-      }`}
-    >
-      <td className="hidden"></td>
+    <>
+      <tr
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className={`transition-all duration-300 w-full ${
+          index % 2 === 0 ? "bg-white" : "bg-blue-50"
+        } md:table-row block rounded-lg md:rounded-none p-4 md:p-0`}
+      >
+        <td className="hidden"></td>
 
-      {/* Combined Number, Avatar, and Doctor Info all in one cell */}
-      <td className="p-2">
-        <div className="flex items-center gap-3">
-          {/* Number & More Icon */}
-          <div className="flex items-center mr-1">
-            <div className="flex items-center justify-center mr-2">
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
-                alt="Input design element"
-                className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3"
-              />
+        {/* Combined Number, Avatar, and Doctor Info all in one cell */}
+        <td className="p-2">
+          <div className="flex items-center gap-3">
+            {/* Number & More Icon */}
+            <div className="flex items-center mr-1">
+              <div className="md:flex items-center hidden  justify-center mr-2">
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
+                  alt="Input design element"
+                  className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3"
+                />
+              </div>
+              <span className="bg-[#00BA85] rounded-full w-5 h-5 sm:w-6 sm:h-6 text-white flex items-center justify-center text-xs sm:text-sm font-medium">
+                {index + 1}
+              </span>
             </div>
-            <span className="bg-[#00BA85] rounded-full w-5 h-5 sm:w-6 sm:h-6 text-white flex items-center justify-center text-xs sm:text-sm font-medium">
-              {index + 1}
-            </span>
-          </div>
-          
-          {/* Avatar with Dynamic Background Color */}
-          <div
-            className="rounded-full text-black flex items-center justify-center font-bold w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
-            style={{ backgroundColor: getAlternateColor(index) }}
-          >
-            {title.charAt(0)}
-          </div>
 
-          {/* Doctor Info */}
-          <div className="flex flex-col">
-            <a
-              href={website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="cursor-pointer font-medium text-sm sm:text-base"
-              onClick={(e) => e.stopPropagation()}
+            {/* Avatar with Dynamic Background Color */}
+            <div
+              className="rounded-full text-black flex items-center justify-center font-bold w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+              style={{ backgroundColor: getAlternateColor(index) }}
             >
-              {title}
-            </a>
-            {/* <span className="text-xs sm:text-sm text-gray-600">{doctorType}</span> */}
-          </div>
-        </div>
-      </td>
+              {title.charAt(0)}
+            </div>
 
-      {/* Ratings & Location */}
-      <td className="p-2 min-w-[160px]">
-        <div className="flex flex-col text-[#333] text-xs sm:text-sm">
-          <div className="flex flex-row items-center gap-x-2">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
-              className="object-contain w-3 rounded-sm aspect-[1.09] max-md:mr-3.5"
-              alt="Rating star"
-            />
-            <span>{rating !== undefined ? rating : "-"}</span>
-            <span>•</span>
-            <span>{review || 0} reviews</span>
+            {/* Doctor Info */}
+            <div className="flex md:flex-col flex-row justify-between items-center text-center">
+              <a
+                href={website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer font-medium text-sm sm:text-base"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {title}
+              </a>
+              {/* <span className="text-xs sm:text-sm text-gray-600">{doctorType}</span> */}
+              <span className="p-2 text-center md:hidden ml-auto ">
+                <button
+                  onClick={() => setOpen(true)}
+                  className="md:hidden  self-end flex ml-8"
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
+                </button>
+              </span>
+            </div>
           </div>
-          <div className="flex flex-row items-center gap-x-2 text-gray-500 text-xs">
-            <MapPin size={13} />
-            <span>{distance || "-"}</span>
-            <span>•</span>
-            <span>{vicinity}</span>
-          </div>
-        </div>
-      </td>
+        </td>
 
-      {/* Delete Button */}
-      <td className="p-2 text-center">
-        <button
-          onClick={() => setOpen(true)}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
-        </button>
-      </td>
+        {/* Ratings & Location */}
+        <td className="p-2 min-w-[160px] md:ml-0 ml-10">
+          <div className="flex flex-col text-[#333] text-xs sm:text-sm">
+            <div className="flex flex-row items-center gap-x-2">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
+                className="object-contain w-3 rounded-sm aspect-[1.09] max-md:mr-3.5"
+                alt="Rating star"
+              />
+              <span>{rating !== undefined ? rating : "-"}</span>
+              <span>•</span>
+              <span>{review || 0} reviews</span>
+            </div>
+            <div className="flex flex-row items-center gap-x-2 text-gray-500 text-xs">
+              <MapPin size={13} />
+              <span>{distance || "-"}</span>
+              <span>•</span>
+              <span>{vicinity}</span>
+            </div>
+          </div>
+        </td>
+
+        {/* Delete Button */}
+        <td className="p-2 text-center   ">
+          <button
+            onClick={() => setOpen(true)}
+            className="md:flex  self-end hidden"
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
+          </button>
+        </td>
+      </tr>
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg  h-52">
           <DialogHeader>
@@ -175,6 +187,6 @@ export const Task: React.FC<TaskProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-    </tr>
+    </>
   );
 };

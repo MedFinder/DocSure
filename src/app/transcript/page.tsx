@@ -303,7 +303,7 @@ export default function Transcript() {
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
 
   const handleConfirmSequence = useCallback(async () => {
-    logDrLists()  //log doctor details
+    logDrLists(); //log doctor details
     await connectWebSocket();
     try {
       setIsConfirmed(true); // Disable button and dragging
@@ -557,16 +557,16 @@ export default function Transcript() {
     const distances = [];
     const ratings = [];
     const websites = [];
-  
+
     // Map through the doctors and phoneNumbers arrays
     for (let i = 0; i < doctors.length; i++) {
       // Add values to respective arrays, ensuring we handle potentially missing values
-      doctor_numbers.push(phoneNumbers[i] || 'N/A');
-      hospital_names.push(doctors[i]?.name || 'N/A');
-      addresses.push(doctors[i]?.vicinity || 'N/A');
-      distances.push(doctors[i]?.distance || 'N/A');
+      doctor_numbers.push(phoneNumbers[i] || "N/A");
+      hospital_names.push(doctors[i]?.name || "N/A");
+      addresses.push(doctors[i]?.vicinity || "N/A");
+      distances.push(doctors[i]?.distance || "N/A");
       ratings.push(doctors[i]?.rating || 0);
-      websites.push(doctors[i]?.website || 'N/A');
+      websites.push(doctors[i]?.website || "N/A");
     }
     const formData = JSON.parse(sessionStorage.getItem("formData"));
     // console.log(formData);
@@ -574,25 +574,25 @@ export default function Transcript() {
     // Create final object with comma-separated values
     const result = {
       request_id,
-      doctor_numbers: doctor_numbers.join(','),
-      hospital_names: hospital_names.join(','),
-      addresses: addresses.join(','),
-      distances: distances.join(','),
-      ratings: ratings.join(','),
-      websites: websites.join(',')
+      doctor_numbers: doctor_numbers.join(","),
+      hospital_names: hospital_names.join(","),
+      addresses: addresses.join(","),
+      distances: distances.join(","),
+      ratings: ratings.join(","),
+      websites: websites.join(","),
     };
-  
-    console.log(result, 'log dr lists');
-  
+
+    console.log(result, "log dr lists");
+
     try {
       const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`, 
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
         result
       );
       // console.log(resp?.data)
       return;
     } catch (error) {
-      console.log('Error logging dr details:', error);
+      console.log("Error logging dr details:", error);
       return null;
     }
   };
@@ -625,7 +625,7 @@ export default function Transcript() {
         patient_email: email,
         patient_number: phoneNumber,
       };
-      console.log(data, 'end call data');
+      console.log(data, "end call data");
 
       try {
         const resp = await axios.post(
@@ -662,39 +662,50 @@ export default function Transcript() {
       return true;
     }
   };
+  const toggleTranscript = () => {
+    setShowTranscript((prev) => !prev);
+  };
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <Navbar />
 
       <div className="mt-5 w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4" />
-
       <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
         <div className=" flex  w-full  text-[#333333] text-lg mt-20 ">
-          <h2 className=" w-2/3">Request Status</h2>
-          <h2 className="w-1/3 pl-8">Chat Transcript</h2>
+          <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
+          <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
+          <button
+            onClick={toggleTranscript}
+            className="w-1/3 mt-6 md:mt-0 whitespace-nowrap md:hidden text-[#FF6723] underline"
+          >
+            {showTranscript ? "Back to List" : "View Transcript"}
+          </button>
         </div>
 
         <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
           <div className="flex gap-5 h-full max-md:flex-col">
-            {/* Left column with doctor cards and terminate button */}
-            <div className="w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full">
-              {/* Scrollable doctor cards container */}
-              <div className="overflow-y-auto pr-2 h-[calc(100%-60px)]">
-                {doctors.map((doctor, index) => (
-                  <DoctorCard
-                    key={index}
-                    index={index}
-                    activeCallIndex={activeCallIndex}
-                    doctor={doctor}
-                    callStatus={callStatus}
-                    isAppointmentBooked={isAppointmentBooked}
-                    onSkip={() => moveToNextDoctor(callStatus?.ssid)} // Move to next doctor
-                  />
-                ))}
-              </div>
+            {!showTranscript && (
+              <div className="w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full">
+                {/* Scrollable doctor cards container */}
 
-              {/* Terminate Request Button - fixed at bottom */}
-              {/* <div className="flex justify-center mt-4 pb-2">
+                <div className="pr-2 h-[calc(100%-60px)]">
+                  <ScrollArea className="h-full w-full md:w-auto">
+                    {doctors.map((doctor, index) => (
+                      <DoctorCard
+                        key={index}
+                        index={index}
+                        activeCallIndex={activeCallIndex}
+                        doctor={doctor}
+                        callStatus={callStatus}
+                        isAppointmentBooked={isAppointmentBooked}
+                        onSkip={() => moveToNextDoctor(callStatus?.ssid)} // Move to next doctor
+                      />
+                    ))}
+                  </ScrollArea>
+                </div>
+
+                {/* Terminate Request Button - fixed at bottom */}
+                {/* <div className="flex justify-center mt-4 pb-2">
                 <button
                   onClick={terminateRequest}
                   disabled={!callStatus?.isInitiated}
@@ -707,35 +718,37 @@ export default function Transcript() {
                   Terminate Request
                 </button>
               </div> */}
-              <div className="flex justify-center mt-4 pb-2">
-                <button
-                  onClick={handleTerminateRequest}
-                  disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
-                    callStatus?.isInitiated
-                      ? "bg-red-600 hover:bg-red-700 text-white"
-                      : "bg-red-300 cursor-not-allowed text-white opacity-70"
-                  }`}
-                >
-                  Terminate Request
-                </button>
+                <div className="flex justify-center mt-4 pb-2">
+                  <button
+                    onClick={handleTerminateRequest}
+                    disabled={!callStatus?.isInitiated}
+                    className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                      callStatus?.isInitiated
+                        ? "bg-red-600 hover:bg-red-700 text-white"
+                        : "bg-red-300 cursor-not-allowed text-white opacity-70"
+                    }`}
+                  >
+                    Terminate Request
+                  </button>
+                </div>
               </div>
-            </div>
-
-            <div className="ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full">
-              {/* Note text updated with orange color */}
-              {/* <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
+            )}
+            {(showTranscript || window.innerWidth >= 768) && (
+              <div className="ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full">
+                {/* Note text updated with orange color */}
+                {/* <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
                 <p>
                   Tip: Feel free to close this browser. Your booking
                   confirmation will be sent to you over email and text.
                 </p>
               </div> */}
 
-              <ChatSection
-                doctorName={doctors[activeCallIndex]?.name}
-                transcripts={getDisplayTranscript()}
-              />
-            </div>
+                <ChatSection
+                  doctorName={doctors[activeCallIndex]?.name}
+                  transcripts={getDisplayTranscript()}
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>

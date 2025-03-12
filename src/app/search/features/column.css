@@ -17,10 +17,7 @@
 
 .task-table td {
   text-align: start;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  padding-left: 30px;
-  padding-right: 30px;
+  padding: 20px 30px;
 }
 
 .task-table td:first-child {
@@ -31,12 +28,48 @@
 .task-table tbody tr:hover {
   background-color: #f9f9f9;
 }
+
+/* Mobile styles */
 @media (max-width: 768px) {
-  .overflow-x-auto {
-    overflow-x: auto;
+  .task-table {
+    display: block;
+    border: none;
   }
 
-  .task-table {
-    min-width: 600px; /* Prevents columns from squeezing too much */
+  .task-table thead {
+    display: none; /* Hide table headers */
+  }
+
+  .task-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .task-table tr {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+  }
+
+  .task-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: none;
+  }
+
+  .task-table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    flex: 1;
+  }
+
+  .task-table td:first-child {
+    font-size: 1.1em;
+    font-weight: bold;
   }
 }
