@@ -501,34 +501,24 @@ export default function SearchPage() {
       try {
         const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
 
-      const updatedValues = {
-        groupId: values.groupId,
-        subscriberId: values.subscriberId,
-        objective: values.objective,
-        insurer: values.insurer,
-        selectedOption: selectedInsurance === true ? "no" : "yes",
-        availability: customAvailability ? customAvailability: availabilityOptions[0].label,
-        specialty: savedSpecialty,
-        timeOfAppointment,
-        maxWait: timeOfAppointment,
-        isNewPatient: isNewPatient ? "yes" : "no",
-      };
         const updatedValues = {
           groupId: values.groupId,
           subscriberId: values.subscriberId,
           objective: values.objective,
           insurer: values.insurer,
-          selectedOption: selectedInsurance ? "no" : "yes",
-          availability: customAvailability ?? availabilityOptions[0].label,
+          selectedOption: selectedInsurance === true ? "no" : "yes",
+          availability: customAvailability
+            ? customAvailability
+            : availabilityOptions[0].label,
           specialty: savedSpecialty,
           timeOfAppointment,
           maxWait: timeOfAppointment,
           isNewPatient: isNewPatient ? "yes" : "no",
         };
 
-      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+        sessionStorage.setItem("formData", JSON.stringify(updatedValues));
 
-      // console.log("Stored formData in sessionStorage:", updatedValues);
+        // console.log("Stored formData in sessionStorage:", updatedValues);
 
         await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate delay
         router.push("/contact");
