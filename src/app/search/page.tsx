@@ -487,6 +487,10 @@ export default function SearchPage() {
     },
     validationSchema,
     onSubmit: async (values) => {
+      // console.log("here");
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      // console.log("Objective value:", values.objective);
+
       if (!values.objective || !values.objective.trim()) {
         toast.error("Please fill up all the required information");
         return;
@@ -497,6 +501,18 @@ export default function SearchPage() {
       try {
         const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
 
+      const updatedValues = {
+        groupId: values.groupId,
+        subscriberId: values.subscriberId,
+        objective: values.objective,
+        insurer: values.insurer,
+        selectedOption: selectedInsurance === true ? "no" : "yes",
+        availability: customAvailability ? customAvailability: availabilityOptions[0].label,
+        specialty: savedSpecialty,
+        timeOfAppointment,
+        maxWait: timeOfAppointment,
+        isNewPatient: isNewPatient ? "yes" : "no",
+      };
         const updatedValues = {
           groupId: values.groupId,
           subscriberId: values.subscriberId,
@@ -510,8 +526,9 @@ export default function SearchPage() {
           isNewPatient: isNewPatient ? "yes" : "no",
         };
 
-        sessionStorage.setItem("formData", JSON.stringify(updatedValues));
-        console.log("Stored formData in sessionStorage:", updatedValues);
+      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+
+      // console.log("Stored formData in sessionStorage:", updatedValues);
 
         await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate delay
         router.push("/contact");
