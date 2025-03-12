@@ -187,7 +187,7 @@ export default function Transcript() {
   const [extractedData, setExtractedData] = useState<TaskType[]>([]);
   const [activeCallIndex, setActiveCallIndex] = useState(0);
   const activeCallIndexRef = useRef(activeCallIndex);
-  const requestIdRef = useRef(formData?.request_id);  
+  const requestIdRef = useRef(formData?.request_id);
   const [context, setcontext] = useState("");
 
   const [openDialog, setOpenDialog] = useState(false);
@@ -362,7 +362,11 @@ export default function Transcript() {
     toast.success("Your request has been terminated successfully.");
   };
   const initiateCall = useCallback(
-    async (doctorPhoneNumber: string, nameOfOrg: string, request_id?: string) => {
+    async (
+      doctorPhoneNumber: string,
+      nameOfOrg: string,
+      request_id?: string
+    ) => {
       console.log("new call initiated for", doctorPhoneNumber, nameOfOrg);
       const formData = JSON.parse(sessionStorage.getItem("formData"));
       if (!formData) {
@@ -440,12 +444,9 @@ export default function Transcript() {
           interruption_threshold: callResponse.data.interruption_threshold,
           temperature: callResponse.data.temperature,
           model: callResponse.data.model,
-        }
-       setFormData(updatedFormData);
-       sessionStorage.setItem(
-        "formData",
-        JSON.stringify(updatedFormData)
-      );
+        };
+        setFormData(updatedFormData);
+        sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
       } catch (error) {
         console.log(error, "error initiating bland AI");
 
@@ -472,7 +473,11 @@ export default function Transcript() {
       const phoneNumber = phoneNumbers[newIndex]; //+2348168968260
       const nameOfOrg = nextDoctor?.name; //+2348168968260
       if (phoneNumber) {
-        await initiateCall(phoneNumber, nameOfOrg, request_id??requestIdRef?.current);
+        await initiateCall(
+          phoneNumber,
+          nameOfOrg,
+          request_id ?? requestIdRef?.current
+        );
       } else {
         console.log("No phone number available for the next doctor.");
         toast.error("Next doctor has no phone number. Skipping...");
@@ -506,32 +511,35 @@ export default function Transcript() {
       // console.log("WebSocket Message:", data);
       if (data.event === "Welcome") {
         const formData = JSON.parse(sessionStorage.getItem("formData"));
-          const request_id =  data?.client_id
-          console.log(request_id)
-          logRequestInfo(request_id)
-         // console.log(formData)
-         const updatedFormData = {
-          ...formData, request_id
-         }
-          setFormData(updatedFormData);
-          sessionStorage.setItem(
-            "formData",
-            JSON.stringify(updatedFormData))
-          // initiate call
-          try {
-            setIsConfirmed(true); // Disable button and dragging
-            const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
-            await initiateCall(
-              firstDoctorPhoneNumber,
-              doctors[activeCallIndex]?.name,
-              request_id
-            );
-            return;
-          } catch (error) {
-            console.error("Error fetching phone numbers or initiating call:", error);
-            setIsConfirmed(false); // Re-enable button and dragging if there's an error
-          }
-        } if (data.event === "call_ended") {
+        const request_id = data?.client_id;
+        console.log(request_id);
+        logRequestInfo(request_id);
+        // console.log(formData)
+        const updatedFormData = {
+          ...formData,
+          request_id,
+        };
+        setFormData(updatedFormData);
+        sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
+        // initiate call
+        try {
+          setIsConfirmed(true); // Disable button and dragging
+          const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
+          await initiateCall(
+            firstDoctorPhoneNumber,
+            doctors[activeCallIndex]?.name,
+            request_id
+          );
+          return;
+        } catch (error) {
+          console.error(
+            "Error fetching phone numbers or initiating call:",
+            error
+          );
+          setIsConfirmed(false); // Re-enable button and dragging if there's an error
+        }
+      }
+      if (data.event === "call_ended") {
         // console.log("Call Ended Data:", data);
         setTimeout(async () => {
           const call_ended_result = await handleEndCall(data?.call_sid);
@@ -559,7 +567,11 @@ export default function Transcript() {
             toast.warning(
               "Appointment could not be booked. Trying next doctor..."
             );
-            moveToNextDoctor(null,activeCallIndexRef.current, formData.request_id);
+            moveToNextDoctor(
+              null,
+              activeCallIndexRef.current,
+              formData.request_id
+            );
           }
         }, 5000);
       }
@@ -573,7 +585,7 @@ export default function Transcript() {
         // doctor did not pick call...move to next
         toast.info("Doctor did not pick call. Trying next doctor...");
 
-        moveToNextDoctor(null,activeCallIndexRef.current, formData.request_id);
+        moveToNextDoctor(null, activeCallIndexRef.current, formData.request_id);
       }
     };
 
@@ -595,7 +607,7 @@ export default function Transcript() {
   //   const distances = [];
   //   const ratings = [];
   //   const websites = [];
-  
+
   //   // Map through the doctors and phoneNumbers arrays
   //   for (let i = 0; i < doctors.length; i++) {
   //     // Add values to respective arrays, ensuring we handle potentially missing values
@@ -619,12 +631,12 @@ export default function Transcript() {
   //     ratings: ratings.join(','),
   //     websites: websites.join(',')
   //   };
-  
+
   //   console.log(result, 'log dr lists');
-  
+
   //   try {
   //     const resp = await axios.post(
-  //       `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`, 
+  //       `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
   //       result
   //     );
   //     // console.log(resp?.data)
@@ -642,19 +654,19 @@ export default function Transcript() {
       patient_dob: formData.dob,
       patient_email: formData.email,
       patient_number: formData.phoneNumber,
-      patient_zipcode: '',
+      patient_zipcode: "",
       doctor_speciality: formData.specialty,
       preferred_location: savedAddress,
       new_patient: formData.isNewPatient,
       time_of_appointment: formData.timeOfAppointment,
       patient_availability: formData.maxWait,
-      insurance_details: formData.insurer??'none',
+      insurance_details: formData.insurer ?? "none",
       medical_concerns: formData.objective,
-    }
+    };
     // console.log(data)
     try {
       const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`, 
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`,
         data
       );
       // console.log(resp)
@@ -663,7 +675,7 @@ export default function Transcript() {
       // console.error('Error logging call details:', error);
       return null;
     }
-  }
+  };
 
   const getDisplayTranscript = () => {
     if (transcriptArray.length > 0) {
@@ -676,9 +688,19 @@ export default function Transcript() {
     async (id: string, retries = 2): Promise<any> => {
       const index = activeCallIndexRef.current;
       // console.log('cuurentIndex',index)
-     // const formData = JSON.parse(sessionStorage.getItem("formData"));
+      // const formData = JSON.parse(sessionStorage.getItem("formData"));
       const context = sessionStorage.getItem("context");
-      const { email, phoneNumber, patientName, request_id, prompt, voice_used, interruption_threshold, temperature, model } = formData;
+      const {
+        email,
+        phoneNumber,
+        patientName,
+        request_id,
+        prompt,
+        voice_used,
+        interruption_threshold,
+        temperature,
+        model,
+      } = formData;
       const data = {
         call_id: id,
         request_id: request_id ?? requestIdRef?.current,
@@ -696,7 +718,7 @@ export default function Transcript() {
         voice_used: voice_used ?? "Alex",
         interruption_threshold: interruption_threshold ?? 70,
         temperature: temperature ?? 0.7,
-        model: model ?? "gpt-4-turbo"
+        model: model ?? "gpt-4-turbo",
       };
       // console.log(data, 'end call data');
 
@@ -720,7 +742,7 @@ export default function Transcript() {
         return true;
       }
     },
-    [doctors,formData]
+    [doctors, formData]
   );
   const terminateCurrentCall = async (id: string): Promise<any> => {
     // console.log(id,'xxx')
@@ -757,9 +779,12 @@ export default function Transcript() {
 
         <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
           <div className="flex gap-5 h-full max-md:flex-col">
-            {!showTranscript && (
-              <div className="w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full">
-                {/* Scrollable doctor cards container */}
+            <div
+              className={`w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full ${
+                showTranscript ? "hidden md:block" : "block"
+              }`}
+            >
+              {/* Scrollable doctor cards container */}
 
                 <div className="pr-2 h-[calc(100%-60px)]">
                   <ScrollArea className="h-full w-full md:w-auto">
@@ -777,8 +802,8 @@ export default function Transcript() {
                   </ScrollArea>
                 </div>
 
-                {/* Terminate Request Button - fixed at bottom */}
-                {/* <div className="flex justify-center mt-4 pb-2">
+              {/* Terminate Request Button - fixed at bottom */}
+              {/* <div className="flex justify-center mt-4 pb-2">
                 <button
                   onClick={terminateRequest}
                   disabled={!callStatus?.isInitiated}
@@ -791,21 +816,21 @@ export default function Transcript() {
                   Terminate Request
                 </button>
               </div> */}
-                <div className="flex justify-center mt-4 pb-2">
-                  <button
-                    onClick={handleTerminateRequest}
-                    disabled={!callStatus?.isInitiated}
-                    className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
-                      callStatus?.isInitiated
-                        ? "bg-red-600 hover:bg-red-700 text-white"
-                        : "bg-red-300 cursor-not-allowed text-white opacity-70"
-                    }`}
-                  >
-                    Terminate Request
-                  </button>
-                </div>
+              <div className="flex justify-center mt-4 pb-2">
+                <button
+                  onClick={handleTerminateRequest}
+                  disabled={!callStatus?.isInitiated}
+                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                    callStatus?.isInitiated
+                      ? "bg-red-600 hover:bg-red-700 text-white"
+                      : "bg-red-300 cursor-not-allowed text-white opacity-70"
+                  }`}
+                >
+                  Terminate Request
+                </button>
               </div>
-            )}
+            </div>
+
             {/* Always show in desktop, conditionally in mobile */}
             <div
               className={`ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full ${
