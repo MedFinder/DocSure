@@ -187,6 +187,7 @@ export default function Transcript() {
   const [extractedData, setExtractedData] = useState<TaskType[]>([]);
   const [activeCallIndex, setActiveCallIndex] = useState(0);
   const activeCallIndexRef = useRef(activeCallIndex);
+  const requestIdRef = useRef(formData?.request_id);  
   const [context, setcontext] = useState("");
 
   const [openDialog, setOpenDialog] = useState(false);
@@ -203,6 +204,9 @@ export default function Transcript() {
   useEffect(() => {
     activeCallIndexRef.current = activeCallIndex;
   }, [activeCallIndex]);
+  useEffect(() => {
+    requestIdRef.current = formData?.request_id;
+  }, [formData]);
 
   const getPhoneNumbers = () => {
     const numbers = doctors.map((doctor) => doctor.phone_number || null);
@@ -449,6 +453,7 @@ export default function Transcript() {
     []
   );
   const moveToNextDoctor = async (id: string, currentindex: number, request_id: string) => {
+    // console.log("request_id", request_id)
     let newIndex = currentindex+1;
     if (id) {
       terminateCurrentCall(id);
@@ -463,7 +468,7 @@ export default function Transcript() {
       const phoneNumber = phoneNumbers[newIndex]; //+2348168968260
       const nameOfOrg = nextDoctor?.name; //+2348168968260
       if (phoneNumber) {
-        await initiateCall(phoneNumber, nameOfOrg, request_id);
+        await initiateCall(phoneNumber, nameOfOrg, request_id??requestIdRef?.current);
       } else {
         console.log("No phone number available for the next doctor.");
         toast.error("Next doctor has no phone number. Skipping...");
@@ -671,7 +676,7 @@ export default function Transcript() {
       const { email, phoneNumber, patientName, request_id, prompt, voice_used, interruption_threshold, temperature, model } = formData;
       const data = {
         call_id: id,
-        request_id,
+        request_id: request_id ?? requestIdRef?.current,
         doctor_number: doctors[index]?.phone_number, // phoneNumbers[index]
         hospital_name: doctors[index]?.name,
         doctor_address: doctors[index]?.vicinity,

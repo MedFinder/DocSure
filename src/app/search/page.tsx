@@ -485,9 +485,9 @@ export default function SearchPage() {
     },
     // validationSchema,
     onSubmit: async (values) => {
-      console.log("here");
+      // console.log("here");
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      console.log("Objective value:", values.objective);
+      // console.log("Objective value:", values.objective);
 
       if (!values.objective || !values.objective.trim()) {
         toast.error("Please fill up all the required information");
@@ -511,7 +511,7 @@ export default function SearchPage() {
 
       sessionStorage.setItem("formData", JSON.stringify(updatedValues));
 
-      console.log("Stored formData in sessionStorage:", updatedValues);
+      // console.log("Stored formData in sessionStorage:", updatedValues);
 
       // Redirect to search page
       setTimeout(() => {
