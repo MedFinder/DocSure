@@ -339,6 +339,8 @@ export default function SearchPage() {
   const [isNewPatient, setIsNewPatient] = useState(true);
   const [selectedOption, setSelectedOption] = useState("yes");
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [callStatus, setCallStatus] = useState({
     isInitiated: false,
     ssid: "",
@@ -485,38 +487,37 @@ export default function SearchPage() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log("here");
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      console.log("Objective value:", values.objective);
-
       if (!values.objective || !values.objective.trim()) {
         toast.error("Please fill up all the required information");
         return;
       }
 
-      //console.log("Form values:", values);
+      setIsLoading(true); // Start loading
 
-      const updatedValues = {
-        groupId: values.groupId,
-        subscriberId: values.subscriberId,
-        objective: values.objective,
-        insurer: values.insurer,
-        selectedOption: selectedInsurance === true ? "no" : "yes",
-        availability: customAvailability ?? availabilityOptions[0].label,
-        specialty: savedSpecialty,
-        timeOfAppointment,
-        maxWait: timeOfAppointment,
-        isNewPatient: isNewPatient ? "yes" : "no",
-      };
+      try {
+        const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
 
-      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+        const updatedValues = {
+          groupId: values.groupId,
+          subscriberId: values.subscriberId,
+          objective: values.objective,
+          insurer: values.insurer,
+          selectedOption: selectedInsurance ? "no" : "yes",
+          availability: customAvailability ?? availabilityOptions[0].label,
+          specialty: savedSpecialty,
+          timeOfAppointment,
+          maxWait: timeOfAppointment,
+          isNewPatient: isNewPatient ? "yes" : "no",
+        };
 
-      console.log("Stored formData in sessionStorage:", updatedValues);
+        sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+        console.log("Stored formData in sessionStorage:", updatedValues);
 
-      // Redirect to search page
-      setTimeout(() => {
+        await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate delay
         router.push("/contact");
-      }, 500);
+      } finally {
+        setIsLoading(false); // Stop loading
+      }
     },
   });
   const handleOnPlacesChanged = (index) => {
@@ -764,9 +765,9 @@ export default function SearchPage() {
             </div>
 
             <div>
-              <p className=" hidden md:block text-[#FF6723] mt-4 md:mt-0">
+              {/* <p className=" hidden md:block text-[#FF6723] mt-4 md:mt-0">
                 Tip: You can re-arrange the priority by dragging list items
-              </p>
+              </p> */}
             </div>
           </div>
 
@@ -780,8 +781,9 @@ export default function SearchPage() {
               <Button
                 type="submit"
                 className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2"
+                disabled={isLoading}
               >
-                Continue
+                {isLoading ? "Submitting..." : "Continue"}
               </Button>
             </div>
           </div>
@@ -826,8 +828,9 @@ export default function SearchPage() {
             type="button" // Prevents default form submission behavior since it's outside the form
             onClick={formik.handleSubmit}
             className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2 text-sm"
+            disabled={isLoading}
           >
-            Continue
+            {isLoading ? "Submitting..." : "Continue"}
           </Button>
         </div>
       </div>

@@ -409,8 +409,10 @@ export default function Transcript() {
       if (groupId) context += `; Group Id:${groupId}`;
       if (dob) context += `; Date of birth:${dob}`;
       if (address) context += `; Address of the patient:${address}`;
-      if (maxWait) context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;
-      if (availability) context += `; Availability of the patient:${availability}`;
+      if (maxWait)
+        context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;
+      if (availability)
+        context += `; Availability of the patient:${availability}`;
       if (isnewPatient) context += `; Is New Patient:${isnewPatient}`;
       // if (zipcode) context += `; Zipcode:${zipcode}`;
 
@@ -446,7 +448,7 @@ export default function Transcript() {
     []
   );
   const moveToNextDoctor = async (id: string, currentindex: number) => {
-    let newIndex = currentindex+1;
+    let newIndex = currentindex + 1;
     if (id) {
       terminateCurrentCall(id);
     }
@@ -473,7 +475,7 @@ export default function Transcript() {
         isInitiated: false,
         ssid: "",
         email: "",
-      })
+      });
     }
   };
   const connectWebSocket = () => {
@@ -504,8 +506,9 @@ export default function Transcript() {
             const successMessage =
               call_ended_result?.confirmation_message ??
               "Appointment Booked Successfully";
-              sendSMS(successMessage);
-            const doctorPhone = doctors[activeCallIndexRef.current]?.phone_number;
+            sendSMS(successMessage);
+            const doctorPhone =
+              doctors[activeCallIndexRef.current]?.phone_number;
             // make the sms call to the patient
             setIsAppointmentBooked(true);
             wsRef?.current?.close();
@@ -521,7 +524,7 @@ export default function Transcript() {
             toast.warning(
               "Appointment could not be booked. Trying next doctor..."
             );
-            moveToNextDoctor(null,activeCallIndexRef.current);
+            moveToNextDoctor(null, activeCallIndexRef.current);
           }
         }, 5000);
       }
@@ -535,7 +538,7 @@ export default function Transcript() {
         // doctor did not pick call...move to next
         toast.info("Doctor did not pick call. Trying next doctor...");
 
-        moveToNextDoctor(null,activeCallIndexRef.current);
+        moveToNextDoctor(null, activeCallIndexRef.current);
       }
     };
 
@@ -628,7 +631,7 @@ export default function Transcript() {
         voice_used: "Alex",
         interruption_threshold: 70,
         temperature: 0.7,
-        model: "gpt-4-turbo"
+        model: "gpt-4-turbo",
       };
       console.log(data, "end call data");
 
@@ -738,22 +741,24 @@ export default function Transcript() {
                 </div>
               </div>
             )}
-            {(showTranscript || window.innerWidth >= 768) && (
-              <div className="ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full">
-                {/* Note text updated with orange color */}
-                {/* <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
+            {/* Always show in desktop, conditionally in mobile */}
+            <div
+              className={`ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full ${
+                showTranscript ? "block" : "hidden md:block"
+              }`}
+            >
+              {/* Note text updated with orange color */}
+              {/* <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
                 <p>
                   Tip: Feel free to close this browser. Your booking
                   confirmation will be sent to you over email and text.
                 </p>
               </div> */}
-
-                <ChatSection
-                  doctorName={doctors[activeCallIndex]?.name}
-                  transcripts={getDisplayTranscript()}
-                />
-              </div>
-            )}
+              <ChatSection
+                doctorName={doctors[activeCallIndex]?.name}
+                transcripts={getDisplayTranscript()}
+              />
+            </div>
           </div>
         </div>
       </section>
