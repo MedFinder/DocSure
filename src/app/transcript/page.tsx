@@ -187,7 +187,7 @@ export default function Transcript() {
   const [extractedData, setExtractedData] = useState<TaskType[]>([]);
   const [activeCallIndex, setActiveCallIndex] = useState(0);
   const activeCallIndexRef = useRef(activeCallIndex);
-  const requestIdRef = useRef(formData?.request_id);  
+  const requestIdRef = useRef(formData?.request_id);
   const [context, setcontext] = useState("");
 
   const [openDialog, setOpenDialog] = useState(false);
@@ -362,7 +362,11 @@ export default function Transcript() {
     toast.success("Your request has been terminated successfully.");
   };
   const initiateCall = useCallback(
-    async (doctorPhoneNumber: string, nameOfOrg: string, request_id?: string) => {
+    async (
+      doctorPhoneNumber: string,
+      nameOfOrg: string,
+      request_id?: string
+    ) => {
       console.log("new call initiated for", doctorPhoneNumber, nameOfOrg);
       const formData = JSON.parse(sessionStorage.getItem("formData"));
       if (!formData) {
@@ -383,6 +387,7 @@ export default function Transcript() {
         address,
         selectedAvailability,
         timeOfAppointment,
+        insuranceType,
         isnewPatient,
         // zipcode,
         insurer,
@@ -397,12 +402,15 @@ export default function Transcript() {
         selectedOption;
 
       if (insurer) context += `; Insurance Provider:${insurer}`;
-      if (subscriberId) context += `; Subscriber Id:${subscriberId}`;
-      if (groupId) context += `; Group Id:${groupId}`;
+      if (subscriberId) context += `; Member Id:"${subscriberId}"`;
+      if (groupId) context += `; Group Number:${groupId}`;
+      if (insuranceType) context += `; Insurance type:${insuranceType}`;
       if (dob) context += `; Date of birth:${dob}`;
       if (address) context += `; Address of the patient:${address}`;
-      if (maxWait) context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;
-      if (availability) context += `; Availability of the patient:${availability}`;
+      if (maxWait)
+        context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;
+      if (availability)
+        context += `; Availability of the patient:${availability}`;
       if (isnewPatient) context += `; Is New Patient:${isnewPatient}`;
       // if (zipcode) context += `; Zipcode:${zipcode}`;
 
@@ -436,12 +444,9 @@ export default function Transcript() {
           interruption_threshold: callResponse.data.interruption_threshold,
           temperature: callResponse.data.temperature,
           model: callResponse.data.model,
-        }
-       setFormData(updatedFormData);
-       sessionStorage.setItem(
-        "formData",
-        JSON.stringify(updatedFormData)
-      );
+        };
+        setFormData(updatedFormData);
+        sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
       } catch (error) {
         console.log(error, "error initiating bland AI");
 
@@ -453,7 +458,7 @@ export default function Transcript() {
     []
   );
   const moveToNextDoctor = async (id: string, currentindex: number, request_id: string) => {
-    // console.log("request_id", request_id)
+    // console.log(id,currentindex,request_id)
     let newIndex = currentindex+1;
     if (id) {
       terminateCurrentCall(id);
@@ -468,7 +473,11 @@ export default function Transcript() {
       const phoneNumber = phoneNumbers[newIndex]; //+2348168968260
       const nameOfOrg = nextDoctor?.name; //+2348168968260
       if (phoneNumber) {
-        await initiateCall(phoneNumber, nameOfOrg, request_id??requestIdRef?.current);
+        await initiateCall(
+          phoneNumber,
+          nameOfOrg,
+          request_id ?? requestIdRef?.current
+        );
       } else {
         console.log("No phone number available for the next doctor.");
         toast.error("Next doctor has no phone number. Skipping...");
@@ -481,7 +490,7 @@ export default function Transcript() {
         isInitiated: false,
         ssid: "",
         email: "",
-      })
+      });
     }
   };
   const connectWebSocket = () => {
@@ -502,32 +511,35 @@ export default function Transcript() {
       // console.log("WebSocket Message:", data);
       if (data.event === "Welcome") {
         const formData = JSON.parse(sessionStorage.getItem("formData"));
-          const request_id =  data?.client_id
-          console.log(request_id)
-          logRequestInfo(request_id)
-         // console.log(formData)
-         const updatedFormData = {
-          ...formData, request_id
-         }
-          setFormData(updatedFormData);
-          sessionStorage.setItem(
-            "formData",
-            JSON.stringify(updatedFormData))
-          // initiate call
-          try {
-            setIsConfirmed(true); // Disable button and dragging
-            const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
-            await initiateCall(
-              firstDoctorPhoneNumber,
-              doctors[activeCallIndex]?.name,
-              request_id
-            );
-            return;
-          } catch (error) {
-            console.error("Error fetching phone numbers or initiating call:", error);
-            setIsConfirmed(false); // Re-enable button and dragging if there's an error
-          }
-        } if (data.event === "call_ended") {
+        const request_id = data?.client_id;
+        console.log(request_id);
+        logRequestInfo(request_id);
+        // console.log(formData)
+        const updatedFormData = {
+          ...formData,
+          request_id,
+        };
+        setFormData(updatedFormData);
+        sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
+        // initiate call
+        try {
+          setIsConfirmed(true); // Disable button and dragging
+          const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
+          await initiateCall(
+            firstDoctorPhoneNumber,
+            doctors[activeCallIndex]?.name,
+            request_id
+          );
+          return;
+        } catch (error) {
+          console.error(
+            "Error fetching phone numbers or initiating call:",
+            error
+          );
+          setIsConfirmed(false); // Re-enable button and dragging if there's an error
+        }
+      }
+      if (data.event === "call_ended") {
         // console.log("Call Ended Data:", data);
         setTimeout(async () => {
           const call_ended_result = await handleEndCall(data?.call_sid);
@@ -537,8 +549,9 @@ export default function Transcript() {
             const successMessage =
               call_ended_result?.confirmation_message ??
               "Appointment Booked Successfully";
-              sendSMS(successMessage);
-            const doctorPhone = doctors[activeCallIndexRef.current]?.phone_number;
+            sendSMS(successMessage);
+            const doctorPhone =
+              doctors[activeCallIndexRef.current]?.phone_number;
             // make the sms call to the patient
             setIsAppointmentBooked(true);
             wsRef?.current?.close();
@@ -554,7 +567,11 @@ export default function Transcript() {
             toast.warning(
               "Appointment could not be booked. Trying next doctor..."
             );
-            moveToNextDoctor(null,activeCallIndexRef.current, formData.request_id);
+            moveToNextDoctor(
+              null,
+              activeCallIndexRef.current,
+              formData.request_id
+            );
           }
         }, 5000);
       }
@@ -568,7 +585,7 @@ export default function Transcript() {
         // doctor did not pick call...move to next
         toast.info("Doctor did not pick call. Trying next doctor...");
 
-        moveToNextDoctor(null,activeCallIndexRef.current, formData.request_id);
+        moveToNextDoctor(null, activeCallIndexRef.current, formData.request_id);
       }
     };
 
@@ -590,7 +607,7 @@ export default function Transcript() {
   //   const distances = [];
   //   const ratings = [];
   //   const websites = [];
-  
+
   //   // Map through the doctors and phoneNumbers arrays
   //   for (let i = 0; i < doctors.length; i++) {
   //     // Add values to respective arrays, ensuring we handle potentially missing values
@@ -614,12 +631,12 @@ export default function Transcript() {
   //     ratings: ratings.join(','),
   //     websites: websites.join(',')
   //   };
-  
+
   //   console.log(result, 'log dr lists');
-  
+
   //   try {
   //     const resp = await axios.post(
-  //       `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`, 
+  //       `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
   //       result
   //     );
   //     // console.log(resp?.data)
@@ -637,19 +654,19 @@ export default function Transcript() {
       patient_dob: formData.dob,
       patient_email: formData.email,
       patient_number: formData.phoneNumber,
-      patient_zipcode: '',
+      patient_zipcode: "",
       doctor_speciality: formData.specialty,
       preferred_location: savedAddress,
       new_patient: formData.isNewPatient,
       time_of_appointment: formData.timeOfAppointment,
       patient_availability: formData.maxWait,
-      insurance_details: formData.insurer??'none',
+      insurance_details: formData.insurer ?? "none",
       medical_concerns: formData.objective,
-    }
+    };
     // console.log(data)
     try {
       const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`, 
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`,
         data
       );
       // console.log(resp)
@@ -658,7 +675,7 @@ export default function Transcript() {
       // console.error('Error logging call details:', error);
       return null;
     }
-  }
+  };
 
   const getDisplayTranscript = () => {
     if (transcriptArray.length > 0) {
@@ -671,9 +688,19 @@ export default function Transcript() {
     async (id: string, retries = 2): Promise<any> => {
       const index = activeCallIndexRef.current;
       // console.log('cuurentIndex',index)
-     // const formData = JSON.parse(sessionStorage.getItem("formData"));
+      // const formData = JSON.parse(sessionStorage.getItem("formData"));
       const context = sessionStorage.getItem("context");
-      const { email, phoneNumber, patientName, request_id, prompt, voice_used, interruption_threshold, temperature, model } = formData;
+      const {
+        email,
+        phoneNumber,
+        patientName,
+        request_id,
+        prompt,
+        voice_used,
+        interruption_threshold,
+        temperature,
+        model,
+      } = formData;
       const data = {
         call_id: id,
         request_id: request_id ?? requestIdRef?.current,
@@ -691,7 +718,7 @@ export default function Transcript() {
         voice_used: voice_used ?? "Alex",
         interruption_threshold: interruption_threshold ?? 70,
         temperature: temperature ?? 0.7,
-        model: model ?? "gpt-4-turbo"
+        model: model ?? "gpt-4-turbo",
       };
       // console.log(data, 'end call data');
 
@@ -715,7 +742,7 @@ export default function Transcript() {
         return true;
       }
     },
-    [doctors,formData]
+    [doctors, formData]
   );
   const terminateCurrentCall = async (id: string): Promise<any> => {
     // console.log(id,'xxx')
@@ -730,50 +757,50 @@ export default function Transcript() {
       return true;
     }
   };
-  const sendSMS = async ( message: string): Promise<any> => {
-    // console.log(id,'xxx')
-    const { phoneNumber } = formData;
-    try {
-      const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/send-sms`,
-        { to_number: phoneNumber, message_body: message }
-      );
-      return resp.data;
-    } catch (error) {
-      console.error("Error sending SMS:", error);
-      return true;
-    }
+  const toggleTranscript = () => {
+    setShowTranscript((prev) => !prev);
   };
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <Navbar />
 
       <div className="mt-5 w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4" />
-
       <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
-        <div className=" flex  w-full  text-[#333333] text-lg mt-20 ">
-          <h2 className=" w-2/3">Request Status</h2>
-          <h2 className="w-1/3 pl-8">Chat Transcript</h2>
+        <div className=" flex  w-full  text-[#333333] md:text-lg mt-20 ">
+          <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
+          <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
+          <button
+            onClick={toggleTranscript}
+            className="w-1/3 mt-6 md:mt-0 text-sm text whitespace-nowrap md:hidden text-[#FF6723] underline"
+          >
+            {showTranscript ? "Back to List" : "View Transcript"}
+          </button>
         </div>
 
         <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
           <div className="flex gap-5 h-full max-md:flex-col">
-            {/* Left column with doctor cards and terminate button */}
-            <div className="w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full">
+            <div
+              className={`w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full ${
+                showTranscript ? "hidden md:block" : "block"
+              }`}
+            >
               {/* Scrollable doctor cards container */}
-              <div className="overflow-y-auto pr-2 h-[calc(100%-60px)]">
-                {doctors.map((doctor, index) => (
-                  <DoctorCard
-                    key={index}
-                    index={index}
-                    activeCallIndex={activeCallIndex}
-                    doctor={doctor}
-                    callStatus={callStatus}
-                    isAppointmentBooked={isAppointmentBooked}
-                    onSkip={() => moveToNextDoctor(callStatus?.ssid,activeCallIndexRef.current, formData.request_id)} // Move to next doctor
-                  />
-                ))}
-              </div>
+
+                <div className="pr-2 h-[calc(100%-60px)]">
+                  <ScrollArea className="h-full w-full md:w-auto">
+                    {doctors.map((doctor, index) => (
+                      <DoctorCard
+                        key={index}
+                        index={index}
+                        activeCallIndex={activeCallIndex}
+                        doctor={doctor}
+                        callStatus={callStatus}
+                        isAppointmentBooked={isAppointmentBooked}
+                        onSkip={() => moveToNextDoctor(callStatus?.ssid,activeCallIndexRef.current, formData.request_id)} // Move to next doctor
+                      />
+                    ))}
+                  </ScrollArea>
+                </div>
 
               {/* Terminate Request Button - fixed at bottom */}
               {/* <div className="flex justify-center mt-4 pb-2">
@@ -804,7 +831,12 @@ export default function Transcript() {
               </div>
             </div>
 
-            <div className="ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full">
+            {/* Always show in desktop, conditionally in mobile */}
+            <div
+              className={`ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full ${
+                showTranscript ? "block" : "hidden md:block"
+              }`}
+            >
               {/* Note text updated with orange color */}
               {/* <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
                 <p>
@@ -812,7 +844,6 @@ export default function Transcript() {
                   confirmation will be sent to you over email and text.
                 </p>
               </div> */}
-
               <ChatSection
                 doctorName={doctors[activeCallIndex]?.name}
                 transcripts={getDisplayTranscript()}

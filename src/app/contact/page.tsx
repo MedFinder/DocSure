@@ -19,7 +19,9 @@ const validationSchema = Yup.object().shape({
   patientName: Yup.string().required("Patient name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
   phoneNumber: Yup.string().required("Phone number is required"),
-  dob: Yup.date().required("Date of birth is required").max(new Date(), "Date of birth cannot be in the future"),
+  dob: Yup.date()
+    .required("Date of birth is required")
+    .max(new Date(), "Date of birth cannot be in the future"),
   address: Yup.string().required("Address is required"),
 });
 
@@ -69,29 +71,38 @@ export default function Contact() {
       }
     }
   }, []);
+    // Utility function to format date without timezone issues
+    const formatDateToYYYYMMDD = (date) => {
+      const year = date.getFullYear();
+      // getMonth() is zero-based, so add 1
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
 
   const formik = useFormik({
     initialValues: {
       patientName: formData.patientName || "",
       phoneNumber: formData.phoneNumber || "",
       email: formData.email || "",
-      dob: formData.dob ? new Date(formData.dob) : null,
+      // dob: formData.dob ? formatDateToYYYYMMDD(formData.dob) : null,
       address: formData.address || "",
     },
     validationSchema,
     onSubmit: async (values) => {
       // Remove the manual empty fields check since formik will handle this
       // Use formik's built-in validation instead
-      
+
       if (!formik.isValid) {
         toast.error("Please fill up all the required information");
         return;
       }
-      
+
       setIsLoading(true);
       const updatedFormData = {
         ...formData, // Preserve existing data
         ...values, // Add new values
+        dob: formatDateToYYYYMMDD(values.dob),
         address: values.address || formData.address, // Keep existing address if unchanged
       };
       try {
@@ -114,24 +125,16 @@ export default function Contact() {
     validateOnBlur: true,
   });
 
-  // Utility function to format date without timezone issues
-  const formatDateToYYYYMMDD = (date) => {
-    const year = date.getFullYear();
-    // getMonth() is zero-based, so add 1
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
 
   // Force validation of all fields on submission attempt
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Touch all fields to show errors
-    Object.keys(formik.values).forEach(field => {
+    Object.keys(formik.values).forEach((field) => {
       formik.setFieldTouched(field, true);
     });
-    
+
     // Then submit if valid
     formik.handleSubmit(e);
   };
@@ -151,7 +154,7 @@ export default function Contact() {
   };
   // Custom handler for date picker
   const handleDateChange = (date) => {
-    formik.setFieldValue("dob", formatDateToYYYYMMDD(date));
+    formik.setFieldValue("dob", date);
   };
 
   return (
@@ -161,28 +164,32 @@ export default function Contact() {
         onSubmit={handleSubmit}
         className="h-screen flex flex-col justify-center items-center px-6 sm:px-10"
       >
-        <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg mt-12">
+        <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg mt-32 md:mt-12">
           <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
             One Last Step
           </p>
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label>Patient name <span className="text-red-500">*</span></Label>
+              <Label>Patient name</Label>
               <Input
-                className={formik.errors.patientName && formik.touched.patientName
-                  ? "border-red-500 rounded-none"
-                  : "rounded-none"}
+                className={
+                  formik.errors.patientName && formik.touched.patientName
+                    ? "border-red-500 rounded-none"
+                    : "rounded-none"
+                }
                 name="patientName"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.patientName}
               />
               {formik.errors.patientName && formik.touched.patientName && (
-                <div className="text-red-500 text-sm">{formik.errors.patientName}</div>
+                <div className="text-red-500 text-sm">
+                  {formik.errors.patientName}
+                </div>
               )}
             </div>
             <div className="space-y-2">
-              <Label>Date of Birth <span className="text-red-500">*</span></Label>
+              <Label>Date of Birth </Label>
               <div className="w-full">
                 <DatePicker
                   selected={formik.values.dob}
@@ -213,8 +220,8 @@ export default function Contact() {
             </div>
             <div className="space-y-2">
               <div className="flex flex-col space-y-4">
-                <Label htmlFor="address" className="w-auto font-semibold">
-                  Address <span className="text-red-500">*</span>
+                <Label htmlFor="address" className="w-auto ">
+                  Address
                 </Label>
                 {isLoaded && (
                   <StandaloneSearchBox
@@ -222,9 +229,11 @@ export default function Contact() {
                     onPlacesChanged={() => handleOnAddressChanged(0)}
                   >
                     <Input
-                      className={formik.errors.address && formik.touched.address
-                        ? "border-red-500 rounded-none"
-                        : "rounded-none"}
+                      className={
+                        formik.errors.address && formik.touched.address
+                          ? "border-red-500 rounded-none"
+                          : "rounded-none"
+                      }
                       placeholder="Search address.."
                       value={formik.values.address}
                       onChange={(e) => {
@@ -237,38 +246,48 @@ export default function Contact() {
                   </StandaloneSearchBox>
                 )}
                 {formik.errors.address && formik.touched.address && (
-                  <div className="text-red-500 text-sm">{formik.errors.address}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.address}
+                  </div>
                 )}
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Email address <span className="text-red-500">*</span></Label>
+              <Label>Email address</Label>
               <Input
                 name="email"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.email}
-                className={formik.errors.email && formik.touched.email
-                  ? "border-red-500 rounded-none"
-                  : "rounded-none"}
+                className={
+                  formik.errors.email && formik.touched.email
+                    ? "border-red-500 rounded-none"
+                    : "rounded-none"
+                }
               />
               {formik.errors.email && formik.touched.email && (
-                <div className="text-red-500 text-sm">{formik.errors.email}</div>
+                <div className="text-red-500 text-sm">
+                  {formik.errors.email}
+                </div>
               )}
             </div>
             <div className="space-y-2">
-              <Label>Phone number <span className="text-red-500">*</span></Label>
+              <Label>Phone number</Label>
               <Input
                 name="phoneNumber"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.phoneNumber}
-                className={formik.errors.phoneNumber && formik.touched.phoneNumber
-                  ? "border-red-500 rounded-none"
-                  : "rounded-none"}
+                className={
+                  formik.errors.phoneNumber && formik.touched.phoneNumber
+                    ? "border-red-500 rounded-none"
+                    : "rounded-none"
+                }
               />
               {formik.errors.phoneNumber && formik.touched.phoneNumber && (
-                <div className="text-red-500 text-sm">{formik.errors.phoneNumber}</div>
+                <div className="text-red-500 text-sm">
+                  {formik.errors.phoneNumber}
+                </div>
               )}
             </div>
           </div>
@@ -281,7 +300,7 @@ export default function Contact() {
             behalf.
           </span>
 
-          <div className="flex justify-center mt-12">
+          <div className="flex justify-center md:mt-12 mt-6">
             <Button
               type="submit"
               className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto"
