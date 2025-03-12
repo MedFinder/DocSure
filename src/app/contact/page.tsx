@@ -19,7 +19,9 @@ const validationSchema = Yup.object().shape({
   patientName: Yup.string().required("Patient name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
   phoneNumber: Yup.string().required("Phone number is required"),
-  dob: Yup.date().required("Date of birth is required").max(new Date(), "Date of birth cannot be in the future"),
+  dob: Yup.date()
+    .required("Date of birth is required")
+    .max(new Date(), "Date of birth cannot be in the future"),
   address: Yup.string().required("Address is required"),
 });
 
@@ -124,8 +126,8 @@ export default function Contact() {
   const formatDateToYYYYMMDD = (date) => {
     const year = date.getFullYear();
     // getMonth() is zero-based, so add 1
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
@@ -183,7 +185,7 @@ export default function Contact() {
       // console.error('Error logging call details:', error);
       return null;
     }
-  }
+  };
 
   // Custom handler for date picker
   const handleDateChange = (date) => {
@@ -203,9 +205,7 @@ export default function Contact() {
           </p>
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label>
-                Patient name 
-              </Label>
+              <Label>Patient name</Label>
               <Input
                 className={
                   formik.errors.patientName && formik.touched.patientName
@@ -224,7 +224,7 @@ export default function Contact() {
               )}
             </div>
             <div className="space-y-2">
-              <Label>Date of Birth <span className="text-red-500">*</span></Label>
+              <Label>Date of Birth </Label>
               <div className="w-full">
                 <DatePicker
                   selected={formik.values.dob}
@@ -288,9 +288,7 @@ export default function Contact() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>
-                Email address
-              </Label>
+              <Label>Email address</Label>
               <Input
                 name="email"
                 onChange={formik.handleChange}
@@ -309,9 +307,7 @@ export default function Contact() {
               )}
             </div>
             <div className="space-y-2">
-              <Label>
-                Phone number 
-              </Label>
+              <Label>Phone number</Label>
               <Input
                 name="phoneNumber"
                 onChange={formik.handleChange}
@@ -353,4 +349,3 @@ export default function Contact() {
     </>
   );
 }
-

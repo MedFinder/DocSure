@@ -94,14 +94,14 @@ export const Task: React.FC<TaskProps> = ({
 
             {/* Avatar with Dynamic Background Color */}
             <div
-              className="rounded-full text-black flex items-center justify-center font-bold w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+              className="rounded-full text-black flex items-center  justify-center font-bold w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
               style={{ backgroundColor: getAlternateColor(index) }}
             >
               {title.charAt(0)}
             </div>
 
             {/* Doctor Info */}
-            <div className="flex md:flex-col flex-row justify-between items-center text-center">
+            <div className="flex md:flex-col flex-row justify-between items-center md:text-center text-left">
               <a
                 href={website}
                 target="_blank"
@@ -112,7 +112,7 @@ export const Task: React.FC<TaskProps> = ({
                 {title}
               </a>
               {/* <span className="text-xs sm:text-sm text-gray-600">{doctorType}</span> */}
-              <span className="p-2 text-center md:hidden ml-auto ">
+              {/* <span className="p-2 text-center md:hidden ml-auto ">
                 <button
                   onClick={() => setOpen(true)}
                   className="md:hidden  self-end flex ml-8"
@@ -120,7 +120,7 @@ export const Task: React.FC<TaskProps> = ({
                 >
                   <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
                 </button>
-              </span>
+              </span> */}
             </div>
           </div>
         </td>
@@ -151,7 +151,7 @@ export const Task: React.FC<TaskProps> = ({
         <td className="p-2 text-center   ">
           <button
             onClick={() => setOpen(true)}
-            className="md:flex  self-end hidden"
+            className="flex  md:self-end ml-72  md:ml-0 "
             onPointerDown={(e) => e.stopPropagation()}
           >
             <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />

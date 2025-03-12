@@ -676,12 +676,12 @@ export default function Transcript() {
 
       <div className="mt-5 w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4" />
       <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
-        <div className=" flex  w-full  text-[#333333] text-lg mt-20 ">
+        <div className=" flex  w-full  text-[#333333] md:text-lg mt-20 ">
           <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
           <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
           <button
             onClick={toggleTranscript}
-            className="w-1/3 mt-6 md:mt-0 whitespace-nowrap md:hidden text-[#FF6723] underline"
+            className="w-1/3 mt-6 md:mt-0 text-sm text whitespace-nowrap md:hidden text-[#FF6723] underline"
           >
             {showTranscript ? "Back to List" : "View Transcript"}
           </button>
