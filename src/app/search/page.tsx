@@ -502,7 +502,7 @@ export default function SearchPage() {
         objective: values.objective,
         insurer: values.insurer,
         selectedOption: selectedInsurance === true ? "no" : "yes",
-        availability: customAvailability ?? availabilityOptions[0].label,
+        availability: customAvailability ? customAvailability: availabilityOptions[0].label,
         specialty: savedSpecialty,
         timeOfAppointment,
         maxWait: timeOfAppointment,
