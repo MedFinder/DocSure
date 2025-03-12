@@ -801,7 +801,7 @@ export default function SearchPage() {
         </ScrollArea>
       </DndContext> */}
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        <ScrollArea className="h-full w-full md:w-auto">
+        <ScrollArea className="h-full w-full md:w-auto pb-14 md:pb-0">
           <div className="flex flex-col md:flex-row w-full">
             <Column
               activeCallIndex={activeCallIndex}
