@@ -403,8 +403,10 @@ export default function Transcript() {
       if (insuranceType) context += `; Insurance type:${insuranceType}`;
       if (dob) context += `; Date of birth:${dob}`;
       if (address) context += `; Address of the patient:${address}`;
-      if (maxWait) context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;
-      if (availability) context += `; Availability of the patient:${availability}`;
+      if (maxWait)
+        context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;
+      if (availability)
+        context += `; Availability of the patient:${availability}`;
       if (isnewPatient) context += `; Is New Patient:${isnewPatient}`;
       // if (zipcode) context += `; Zipcode:${zipcode}`;
 
@@ -483,7 +485,7 @@ export default function Transcript() {
         isInitiated: false,
         ssid: "",
         email: "",
-      })
+      });
     }
   };
   const connectWebSocket = () => {
@@ -539,8 +541,9 @@ export default function Transcript() {
             const successMessage =
               call_ended_result?.confirmation_message ??
               "Appointment Booked Successfully";
-              sendSMS(successMessage);
-            const doctorPhone = doctors[activeCallIndexRef.current]?.phone_number;
+            sendSMS(successMessage);
+            const doctorPhone =
+              doctors[activeCallIndexRef.current]?.phone_number;
             // make the sms call to the patient
             setIsAppointmentBooked(true);
             wsRef?.current?.close();
@@ -732,53 +735,50 @@ export default function Transcript() {
       return true;
     }
   };
-  const sendSMS = async ( message: string): Promise<any> => {
-    // console.log(id,'xxx')
-    const { phoneNumber } = formData;
-    try {
-      const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/send-sms`,
-        { to_number: phoneNumber, message_body: message }
-      );
-      return resp.data;
-    } catch (error) {
-      console.error("Error sending SMS:", error);
-      return true;
-    }
+  const toggleTranscript = () => {
+    setShowTranscript((prev) => !prev);
   };
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <Navbar />
 
       <div className="mt-5 w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4" />
-
       <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
-        <div className=" flex  w-full  text-[#333333] text-lg mt-20 ">
-          <h2 className=" w-2/3">Request Status</h2>
-          <h2 className="w-1/3 pl-8">Chat Transcript</h2>
+        <div className=" flex  w-full  text-[#333333] md:text-lg mt-20 ">
+          <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
+          <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
+          <button
+            onClick={toggleTranscript}
+            className="w-1/3 mt-6 md:mt-0 text-sm text whitespace-nowrap md:hidden text-[#FF6723] underline"
+          >
+            {showTranscript ? "Back to List" : "View Transcript"}
+          </button>
         </div>
 
         <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
           <div className="flex gap-5 h-full max-md:flex-col">
-            {/* Left column with doctor cards and terminate button */}
-            <div className="w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full">
-              {/* Scrollable doctor cards container */}
-              <div className="overflow-y-auto pr-2 h-[calc(100%-60px)]">
-                {doctors.map((doctor, index) => (
-                  <DoctorCard
-                    key={index}
-                    index={index}
-                    activeCallIndex={activeCallIndex}
-                    doctor={doctor}
-                    callStatus={callStatus}
-                    isAppointmentBooked={isAppointmentBooked}
-                    onSkip={() => moveToNextDoctor(callStatus?.ssid,activeCallIndexRef.current, formData.request_id)} // Move to next doctor
-                  />
-                ))}
-              </div>
+            {!showTranscript && (
+              <div className="w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full">
+                {/* Scrollable doctor cards container */}
 
-              {/* Terminate Request Button - fixed at bottom */}
-              {/* <div className="flex justify-center mt-4 pb-2">
+                <div className="pr-2 h-[calc(100%-60px)]">
+                  <ScrollArea className="h-full w-full md:w-auto">
+                    {doctors.map((doctor, index) => (
+                      <DoctorCard
+                        key={index}
+                        index={index}
+                        activeCallIndex={activeCallIndex}
+                        doctor={doctor}
+                        callStatus={callStatus}
+                        isAppointmentBooked={isAppointmentBooked}
+                        onSkip={() => moveToNextDoctor(callStatus?.ssid, formData.request_id)} // Move to next doctor
+                      />
+                    ))}
+                  </ScrollArea>
+                </div>
+
+                {/* Terminate Request Button - fixed at bottom */}
+                {/* <div className="flex justify-center mt-4 pb-2">
                 <button
                   onClick={terminateRequest}
                   disabled={!callStatus?.isInitiated}
@@ -791,22 +791,27 @@ export default function Transcript() {
                   Terminate Request
                 </button>
               </div> */}
-              <div className="flex justify-center mt-4 pb-2">
-                <button
-                  onClick={handleTerminateRequest}
-                  disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
-                    callStatus?.isInitiated
-                      ? "bg-red-600 hover:bg-red-700 text-white"
-                      : "bg-red-300 cursor-not-allowed text-white opacity-70"
-                  }`}
-                >
-                  Terminate Request
-                </button>
+                <div className="flex justify-center mt-4 pb-2">
+                  <button
+                    onClick={handleTerminateRequest}
+                    disabled={!callStatus?.isInitiated}
+                    className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                      callStatus?.isInitiated
+                        ? "bg-red-600 hover:bg-red-700 text-white"
+                        : "bg-red-300 cursor-not-allowed text-white opacity-70"
+                    }`}
+                  >
+                    Terminate Request
+                  </button>
+                </div>
               </div>
-            </div>
-
-            <div className="ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full">
+            )}
+            {/* Always show in desktop, conditionally in mobile */}
+            <div
+              className={`ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full ${
+                showTranscript ? "block" : "hidden md:block"
+              }`}
+            >
               {/* Note text updated with orange color */}
               {/* <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
                 <p>
@@ -814,7 +819,6 @@ export default function Transcript() {
                   confirmation will be sent to you over email and text.
                 </p>
               </div> */}
-
               <ChatSection
                 doctorName={doctors[activeCallIndex]?.name}
                 transcripts={getDisplayTranscript()}

@@ -344,6 +344,8 @@ export default function SearchPage() {
   const [isNewPatient, setIsNewPatient] = useState(true);
   const [selectedOption, setSelectedOption] = useState("yes");
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [callStatus, setCallStatus] = useState({
     isInitiated: false,
     ssid: "",
@@ -489,42 +491,42 @@ export default function SearchPage() {
       subscriberId: "",
       groupId: "",
     },
-    // validationSchema,
+    validationSchema,
     onSubmit: async (values) => {
-      // console.log("here");
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      // console.log("Objective value:", values.objective);
+     // console.log("here");
+     const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+     // console.log("Objective value:", values.objective);
 
-      if (!values.objective || !values.objective.trim()) {
-        toast.error("Please fill up all the required information");
-        return;
-      }
+     if (!values.objective || !values.objective.trim()) {
+       toast.error("Please fill up all the required information");
+       return;
+     }
 
-      //console.log("Form values:", values);
+     //console.log("Form values:", values);
 
-      const updatedValues = {
-        groupId: values.groupId,
-        subscriberId: values.subscriberId,
-        objective: values.objective,
-        insurer: values.insurer,
-        selectedOption: selectedInsurance === true ? "no" : "yes",
-        availability: customAvailability ? customAvailability: availabilityOptions[0].label,
-        specialty: savedSpecialty,
-        timeOfAppointment,
-        insuranceType,
-        maxWait: timeOfAppointment,
-        isNewPatient: isNewPatient ? "yes" : "no",
-      };
+     const updatedValues = {
+       groupId: values.groupId,
+       subscriberId: values.subscriberId,
+       objective: values.objective,
+       insurer: values.insurer,
+       selectedOption: selectedInsurance === true ? "no" : "yes",
+       availability: customAvailability ? customAvailability: availabilityOptions[0].label,
+       specialty: savedSpecialty,
+       timeOfAppointment,
+       insuranceType,
+       maxWait: timeOfAppointment,
+       isNewPatient: isNewPatient ? "yes" : "no",
+     };
 
-      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+     sessionStorage.setItem("formData", JSON.stringify(updatedValues));
 
-      // console.log("Stored formData in sessionStorage:", updatedValues);
+     // console.log("Stored formData in sessionStorage:", updatedValues);
 
-      // Redirect to search page
-      setTimeout(() => {
-        router.push("/contact");
-      }, 500);
-    },
+     // Redirect to search page
+     setTimeout(() => {
+       router.push("/contact");
+     }, 500);
+   },
   });
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
@@ -542,7 +544,7 @@ export default function SearchPage() {
     <>
       <Navbar />
       {doctors.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-screen text-center">
+        <div className="flex flex-col items-center justify-center h-screen text-center ">
           <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
             No results found!
           </p>
@@ -556,14 +558,14 @@ export default function SearchPage() {
           </Link>
         </div>
       ) : (
-        <form onSubmit={formik.handleSubmit}>
+        <form onSubmit={formik.handleSubmit} className=" border border-t-2">
           {/* Filters Section */}
-          <div className="md:flex justify-between mt-24 px-8 text-[#595959] py-4 border-b-2 text-sm">
-            <div className="flex md:gap-4 md:flex-row flex-col gap-5">
+          <div className="md:flex  flex md:flex-row  flex-col justify-between md:mt-24 mt-36 px-8 text-[#595959] py-2 border-b-2 text-sm">
+            <div className="flex md:gap-4 flex-row gap-5  overflow-x-auto whitespace-nowrap scroll-smooth scrollbar-hide md:overflow-visible px-1 pb-2  md:pt-0">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="new-patient"
-                  checked={isNewPatient} // Use checked instead of value
+                  checked={isNewPatient}
                   onCheckedChange={(value) => setIsNewPatient(value)}
                   className="rounded-none"
                 />
@@ -574,52 +576,15 @@ export default function SearchPage() {
 
               {/* Health Concerns */}
               {/* <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="rounded-full">
-                  Health concerns
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 py-6 px-4 space-y-2">
-                <Textarea
-                  name="objective"
-                  placeholder="Knee pain, fever, skin rash..."
-                  onChange={formik.handleChange}
-                  value={formik.values.objective}
-                  className={
-                    formik.errors.objective && formik.touched.objective
-                      ? "border-red-500"
-                      : ""
-                  }
-                />
-                {formik.errors.objective && formik.touched.objective && (
-                  <div className="text-red-500">{formik.errors.objective}</div>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu> */}
-              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={`rounded-full ${
-                      formik.errors.objective && formik.touched.objective
-                        ? "border-red-500 text-red-500"
-                        : ""
-                    }`}
-                  >
+                  <Button variant="outline" className="rounded-full">
                     Health concerns{" "}
-                    <span className="text-red-500 text-xl flex items-center  self-center pt-1">
+                    <span className="text-red-500 text-xl flex items-center pt-1">
                       *
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
-
-                <DropdownMenuContent
-                  className={`w-56 py-6 px-4 space-y-2 ${
-                    formik.errors.objective && formik.touched.objective
-                      ? "border-red-500"
-                      : ""
-                  }`}
-                >
+                <DropdownMenuContent className="w-56 py-6 px-4 space-y-2">
                   <Textarea
                     name="objective"
                     placeholder="Knee pain, fever, skin rash..."
@@ -633,6 +598,45 @@ export default function SearchPage() {
                   />
                   {formik.errors.objective && formik.touched.objective && (
                     <div className="text-red-500">Required</div>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu> */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={`rounded-full transition-all duration-200 ${
+                      formik.errors.objective && formik.touched.objective
+                        ? "border-red-500 text-red-500 animate-shake"
+                        : "border-gray-300 text-gray-700"
+                    }`}
+                  >
+                    Health concerns
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className={`w-56 py-6 px-4 space-y-2 transition-all duration-200 ${
+                    formik.errors.objective && formik.touched.objective
+                      ? "border-red-500 text-red-500 animate-shake"
+                      : "border-gray-300 text-gray-700"
+                  }`}
+                >
+                  <Textarea
+                    name="objective"
+                    placeholder="Knee pain, fever, skin rash..."
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    value={formik.values.objective}
+                    className={`w-full border p-2 rounded-md transition-all duration-200 ${
+                      formik.errors.objective && formik.touched.objective
+                        ? "border-red-500 focus:ring-red-500 text-red-500 animate-shake"
+                        : "border-gray-300 focus:ring-gray-400 text-gray-700"
+                    }`}
+                  />
+                  {formik.errors.objective && formik.touched.objective && (
+                    <div className="text-red-500 text-sm animate-shake">
+                      {formik.errors.objective}
+                    </div>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -667,7 +671,7 @@ export default function SearchPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Availability */}
+              {/* Patient Availability (Horizontal Scroll on Mobile) */}
               <Select name="availability">
                 <SelectTrigger className="md:w-auto w-full rounded-full">
                   <SelectValue placeholder="Patient availability" />
@@ -779,7 +783,7 @@ export default function SearchPage() {
                   <div className="flex items-center gap-2 pt-2">
                     <Checkbox
                       id="noInsurance"
-                      checked={selectedInsurance} // Use checked instead of value
+                      checked={selectedInsurance}
                       onCheckedChange={(value) => setSelectedInsurance(value)}
                     />
                     <Label htmlFor="noInsurance">Don’t have insurance</Label>
@@ -787,32 +791,33 @@ export default function SearchPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+
             <div>
-              <p className="text-[#FF6723] mt-4 md:mt-0">
+              {/* <p className=" hidden md:block text-[#FF6723] mt-4 md:mt-0">
                 Tip: You can re-arrange the priority by dragging list items
-              </p>
+              </p> */}
             </div>
           </div>
 
           {/* Submit Section */}
-          <div className="bg-[#FFF6F2] p-4 px-7">
-            <div className="flex items-center  sm:gap-2">
+          <div className="bg-[#FFF6F2] p-4 px-7 hidden md:block">
+            <div className="flex items-center sm:gap-2">
               <p className="text-xs md:text-base">
                 Docsure AI will call the following recommended doctors in this
                 sequence and seek an appointment for you.
               </p>
               <Button
                 type="submit"
-                // disabled={isLoading}
                 className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2"
+                disabled={isLoading}
               >
-                Continue
+                {isLoading ? "Submitting..." : "Continue"}
               </Button>
             </div>
           </div>
         </form>
       )}
-      <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+      {/* <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
         <ScrollArea className="h-full md:w-full w-auto whitespace-nowrap">
           <Column
             activeCallIndex={activeCallIndex}
@@ -824,7 +829,141 @@ export default function SearchPage() {
           />
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
+      </DndContext> */}
+      <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+        <ScrollArea className="h-full w-full md:w-auto pb-14 md:pb-0">
+          <div className="flex flex-col md:flex-row w-full">
+            <Column
+              activeCallIndex={activeCallIndex}
+              tasks={doctors}
+              onDelete={handleDelete}
+              isDraggable={!isConfirmed}
+              callStatus={callStatus}
+              isAppointmentBooked={isAppointmentBooked}
+            />
+          </div>
+        </ScrollArea>
       </DndContext>
+
+      {/* Submit Section */}
+      <div className="bg-[#FFF6F2] p-4 px-7 block md:hidden fixed bottom-0 left-0 w-full md:mt-12">
+        <div className="flex items-center sm:gap-2">
+          <p className="text-xs md:text-base">
+            Docsure AI will call the following recommended doctors in this
+            sequence and seek an appointment for you.
+          </p>
+          <Button
+            type="button" // Prevents default form submission behavior since it's outside the form
+            onClick={formik.handleSubmit}
+            className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2 text-sm"
+            disabled={isLoading}
+          >
+            {isLoading ? "Submitting..." : "Continue"}
+          </Button>
+        </div>
+      </div>
     </>
   );
+}
+
+// <form
+//   onSubmit={formik.handleSubmit}
+//   className="hidden md:flex w-full max-w-[50rem] border border-gray-600 rounded-none shadow-sm"
+// >
+//   <div className="flex flex-grow items-center w-full">
+//     {/* Specialty section */}
+//     <div className="flex items-center flex-1">
+//       <div className="flex items-center justify-center px-3">
+//         <Search className="w-5 h-5 text-gray-500" />
+//       </div>
+//       <div className="flex-1 min-w-[180px]">
+//         <Autocomplete
+//           id="specialty"
+//           name="specialty"
+//           className="w-full"
+//           options={medicalSpecialtiesOptions}
+//           placeholder="Medical specialty"
+//           selected={specialty}
+//           onChange={(value) => {
+//             setSpecialty(value);
+//             formik.setFieldValue("specialty", value);
+//           }}
+//           clearable={false}
+//           navbar
+//         />
+//       </div>
+//     </div>
+
+//     {/* Location section */}
+//     <div className="flex items-center flex-1">
+//       <div className="flex items-center justify-center px-3">
+//         <MapPin className="w-5 h-5 text-gray-500" />
+//       </div>
+//       <div className="flex-1">
+//         {isLoaded && (
+//           <StandaloneSearchBox
+//             onLoad={(ref) => (inputRefs.current[0] = ref)}
+//             onPlacesChanged={() => handleOnPlacesChanged(0)}
+//           >
+//             <Input
+//               type="text"
+//               placeholder="Address, city, zip code"
+//               className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+//               value={addressLocation || ""}
+//               onChange={(e) => setAddressLocation(e.target.value)}
+//               autoComplete="off"
+//               aria-autocomplete="none"
+//             />
+//           </StandaloneSearchBox>
+//         )}
+//       </div>
+//     </div>
+//   </div>
+
+//   {/* Search Button - Properly aligned */}
+//   <Button className="bg-[#FF6723] text-white rounded-none h-12 px-6 flex-shrink-0">
+//     <Search className="text-white w-5 h-5" />
+//   </Button>
+// </form>;
+
+{
+  /* <DropdownMenu>
+<DropdownMenuTrigger asChild>
+  <Button
+    variant="outline"
+    className={`rounded-full transition-all duration-200 ${
+      formik.errors.objective && formik.touched.objective
+        ? "border-red-500 text-red-500 animate-shake"
+        : "border-gray-300 text-gray-700"
+    }`}
+  >
+    Health concerns
+  </Button>
+</DropdownMenuTrigger>
+<DropdownMenuContent
+  className={`w-56 py-6 px-4 space-y-2 transition-all duration-200 ${
+    formik.errors.objective && formik.touched.objective
+      ? "border-red-500 text-red-500 animate-shake"
+      : "border-gray-300 text-gray-700"
+  }`}
+>
+  <Textarea
+    name="objective"
+    placeholder="Knee pain, fever, skin rash..."
+    onChange={formik.handleChange}
+    onBlur={formik.handleBlur}
+    value={formik.values.objective}
+    className={`w-full border p-2 rounded-md transition-all duration-200 ${
+      formik.errors.objective && formik.touched.objective
+        ? "border-red-500 focus:ring-red-500 text-red-500 animate-shake"
+        : "border-gray-300 focus:ring-gray-400 text-gray-700"
+    }`}
+  />
+  {formik.errors.objective && formik.touched.objective && (
+    <div className="text-red-500 text-sm animate-shake">
+      {formik.errors.objective}
+    </div>
+  )}
+</DropdownMenuContent>
+</DropdownMenu> */
 }
