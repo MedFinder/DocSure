@@ -457,7 +457,7 @@ export default function Transcript() {
     []
   );
   const moveToNextDoctor = async (id: string, currentindex: number, request_id: string) => {
-    // console.log("request_id", request_id)
+    // console.log(id,currentindex,request_id)
     let newIndex = currentindex+1;
     if (id) {
       terminateCurrentCall(id);
@@ -771,7 +771,7 @@ export default function Transcript() {
                         doctor={doctor}
                         callStatus={callStatus}
                         isAppointmentBooked={isAppointmentBooked}
-                        onSkip={() => moveToNextDoctor(callStatus?.ssid, formData.request_id)} // Move to next doctor
+                        onSkip={() => moveToNextDoctor(callStatus?.ssid,activeCallIndexRef.current, formData.request_id)} // Move to next doctor
                       />
                     ))}
                   </ScrollArea>
