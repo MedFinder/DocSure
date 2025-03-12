@@ -323,6 +323,10 @@ const timingOptions = [
   { value: "two weeks", label: "Two weeks" },
   { value: "2+ weeks", label: "2+ weeks" },
 ];
+const insurance_types = [
+  { value: "PPO", label: "PPO" },
+  { value: "HMO", label: "HMO" },
+];
 export default function SearchPage() {
   const wsRef = useRef<WebSocket | null>(null);
   const router = useRouter();
@@ -335,6 +339,7 @@ export default function SearchPage() {
   const [selectedInsurance, setSelectedInsurance] = useState(true);
   const [customAvailability, setCustomAvailability] = useState("");
   const [timeOfAppointment, settimeOfAppointment] = useState("few days");
+  const [insuranceType, setinsuranceType] = useState("");
   const [searchData, setSearchData] = useState(null);
   const [isNewPatient, setIsNewPatient] = useState(true);
   const [selectedOption, setSelectedOption] = useState("yes");
@@ -470,6 +475,7 @@ export default function SearchPage() {
       formik.setFieldValue("subscriberId", "");
       formik.setFieldValue("groupId", "");
       formik.setFieldValue("insurer", "");
+      setinsuranceType("")
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedInsurance]);
@@ -505,6 +511,7 @@ export default function SearchPage() {
         availability: customAvailability ? customAvailability: availabilityOptions[0].label,
         specialty: savedSpecialty,
         timeOfAppointment,
+        insuranceType,
         maxWait: timeOfAppointment,
         isNewPatient: isNewPatient ? "yes" : "no",
       };
@@ -719,22 +726,15 @@ export default function SearchPage() {
                       onChange={formik.handleChange}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Group Number</Label>
-                    <Input
-                      name="groupId"
-                      value={formik.values.groupId}
-                      onChange={formik.handleChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Insurer (optional)</Label>
+                  <div className="space-y-2" style={{ marginBottom: "1rem" }}>
+                    <Label>Insurer</Label>
                     <Select
                       name="insurer"
                       value={formik.values.insurer}
                       onValueChange={(value) => {
                         formik.setFieldValue("insurer", value);
                         setSelectedInsurance(false); //patient has insurance
+                        setinsuranceType("PPO")
                       }}
                     >
                       <SelectTrigger>
@@ -748,6 +748,33 @@ export default function SearchPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <RadioGroup
+                    name="insurance_type"
+                    value={insuranceType}
+                    onValueChange={(value) => setinsuranceType(value)}
+                    className="flex flex-row gap-4"
+                  >
+                    {insurance_types.map((option) => (
+                      <div
+                        key={option.value}
+                        className="flex items-center gap-2"
+                      >
+                        <RadioGroupItem
+                          id={option.value}
+                          value={option.value}
+                        />
+                        <Label htmlFor={option.value}>{option.label}</Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                  <div className="space-y-2">
+                    <Label>Group Number(optional)</Label>
+                    <Input
+                      name="groupId"
+                      value={formik.values.groupId}
+                      onChange={formik.handleChange}
+                    />
                   </div>
                   <div className="flex items-center gap-2 pt-2">
                     <Checkbox

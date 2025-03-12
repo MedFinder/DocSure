@@ -69,13 +69,21 @@ export default function Contact() {
       }
     }
   }, []);
+    // Utility function to format date without timezone issues
+    const formatDateToYYYYMMDD = (date) => {
+      const year = date.getFullYear();
+      // getMonth() is zero-based, so add 1
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
 
   const formik = useFormik({
     initialValues: {
       patientName: formData.patientName || "",
       phoneNumber: formData.phoneNumber || "",
       email: formData.email || "",
-      dob: formData.dob ? new Date(formData.dob) : null,
+      // dob: formData.dob ? formatDateToYYYYMMDD(formData.dob) : null,
       address: formData.address || "",
     },
     validationSchema,
@@ -92,6 +100,7 @@ export default function Contact() {
       const updatedFormData = {
         ...formData, // Preserve existing data
         ...values, // Add new values
+        dob: formatDateToYYYYMMDD(values.dob),
         address: values.address || formData.address, // Keep existing address if unchanged
       };
       try {
@@ -114,14 +123,6 @@ export default function Contact() {
     validateOnBlur: true,
   });
 
-  // Utility function to format date without timezone issues
-  const formatDateToYYYYMMDD = (date) => {
-    const year = date.getFullYear();
-    // getMonth() is zero-based, so add 1
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
 
   // Force validation of all fields on submission attempt
   const handleSubmit = (e) => {
@@ -151,7 +152,7 @@ export default function Contact() {
   };
   // Custom handler for date picker
   const handleDateChange = (date) => {
-    formik.setFieldValue("dob", formatDateToYYYYMMDD(date));
+    formik.setFieldValue("dob", date);
   };
 
   return (

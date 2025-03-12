@@ -383,6 +383,7 @@ export default function Transcript() {
         address,
         selectedAvailability,
         timeOfAppointment,
+        insuranceType,
         isnewPatient,
         // zipcode,
         insurer,
@@ -397,8 +398,9 @@ export default function Transcript() {
         selectedOption;
 
       if (insurer) context += `; Insurance Provider:${insurer}`;
-      if (subscriberId) context += `; Subscriber Id:${subscriberId}`;
-      if (groupId) context += `; Group Id:${groupId}`;
+      if (subscriberId) context += `; Member Id:"${subscriberId}"`;
+      if (groupId) context += `; Group Number:${groupId}`;
+      if (insuranceType) context += `; Insurance type:${insuranceType}`;
       if (dob) context += `; Date of birth:${dob}`;
       if (address) context += `; Address of the patient:${address}`;
       if (maxWait) context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;

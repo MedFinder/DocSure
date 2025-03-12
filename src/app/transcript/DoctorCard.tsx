@@ -31,7 +31,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({ doctor,index, onSkip, ac
         >
           {doctor?.name.charAt(0)}
         </div>
-          <div className="flex flex-col self-start max-w-[60%]">
+          <div className="flex flex-col self-center">
             {doctor.isSponsored && (
               <span className="text-xs tracking-tight">Sponsored</span>
             )}
