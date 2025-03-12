@@ -379,6 +379,7 @@ export default function Transcript() {
       }
 
       const {
+        availability,
         email,
         phoneNumber,
         patientName,
@@ -408,11 +409,8 @@ export default function Transcript() {
       if (groupId) context += `; Group Id:${groupId}`;
       if (dob) context += `; Date of birth:${dob}`;
       if (address) context += `; Address of the patient:${address}`;
-      if (maxWait) context += `; Max Wait:${maxWait}`;
-      if (selectedAvailability)
-        context += `; Availability of the patient:${selectedAvailability}`;
-      if (timeOfAppointment)
-        context += `; Time Of Appointment:${timeOfAppointment}`;
+      if (maxWait) context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;
+      if (availability) context += `; Availability of the patient:${availability}`;
       if (isnewPatient) context += `; Is New Patient:${isnewPatient}`;
       // if (zipcode) context += `; Zipcode:${zipcode}`;
 
@@ -426,7 +424,7 @@ export default function Transcript() {
         doctor_number: doctorPhoneNumber,
       };
       sessionStorage.setItem("context", context);
-      // console.log(data);
+      console.log(data);
       try {
         const callResponse = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
@@ -447,21 +445,17 @@ export default function Transcript() {
     },
     []
   );
-
-  const moveToNextDoctor = async (id: string) => {
-    let newIndex = 0;
+  const moveToNextDoctor = async (id: string, currentindex: number) => {
+    let newIndex = currentindex+1;
     if (id) {
       terminateCurrentCall(id);
     }
     // Move to the next doctor
-    setActiveCallIndex((prevIndex) => {
-      newIndex = prevIndex + 1;
-      return newIndex;
-    });
-    // console.log(newIndex,activeCallIndex)
-    if (newIndex + 1 <= doctors.length) {
+    setActiveCallIndex(newIndex);
+    // console.log(newIndex,'newIndex');
+    if (newIndex < doctors.length) {
       const nextDoctor = doctors[newIndex];
-      //console.log("Calling next doctor:", nextDoctor);
+      // console.log("Calling next doctor:", nextDoctor);
 
       const phoneNumber = phoneNumbers[newIndex]; //+2348168968260
       const nameOfOrg = nextDoctor?.name; //+2348168968260
@@ -475,6 +469,11 @@ export default function Transcript() {
     } else {
       toast.success("All doctors have been called successfully..");
       setIsConfirmed(false);
+      setCallStatus({
+        isInitiated: false,
+        ssid: "",
+        email: "",
+      })
     }
   };
   const connectWebSocket = () => {
@@ -505,8 +504,9 @@ export default function Transcript() {
             const successMessage =
               call_ended_result?.confirmation_message ??
               "Appointment Booked Successfully";
-            const doctorPhone = doctors[activeCallIndex]?.phone_number;
-
+              sendSMS(successMessage);
+            const doctorPhone = doctors[activeCallIndexRef.current]?.phone_number;
+            // make the sms call to the patient
             setIsAppointmentBooked(true);
             wsRef?.current?.close();
 
@@ -521,7 +521,7 @@ export default function Transcript() {
             toast.warning(
               "Appointment could not be booked. Trying next doctor..."
             );
-            moveToNextDoctor();
+            moveToNextDoctor(null,activeCallIndexRef.current);
           }
         }, 5000);
       }
@@ -535,7 +535,7 @@ export default function Transcript() {
         // doctor did not pick call...move to next
         toast.info("Doctor did not pick call. Trying next doctor...");
 
-        moveToNextDoctor();
+        moveToNextDoctor(null,activeCallIndexRef.current);
       }
     };
 
@@ -624,6 +624,11 @@ export default function Transcript() {
         patient_name: patientName,
         patient_email: email,
         patient_number: phoneNumber,
+        prompt: "Has the appointment been booked?",
+        voice_used: "Alex",
+        interruption_threshold: 70,
+        temperature: 0.7,
+        model: "gpt-4-turbo"
       };
       console.log(data, "end call data");
 

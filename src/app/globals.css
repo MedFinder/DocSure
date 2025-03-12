@@ -140,3 +140,37 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Add these styles to your existing globals.css or create a new CSS file and import it */
+
+/* Make the datepicker container full width */
+.react-datepicker-wrapper {
+  width: 100%;
+  display: block;
+}
+
+/* Ensure the calendar popup is properly positioned */
+.react-datepicker-popper {
+  z-index: 10;
+}
+
+/* Improve the mobile experience */
+@media (max-width: 640px) {
+  .react-datepicker {
+    font-size: 0.9em;
+  }
+  .react-datepicker__day {
+    margin: 0.2em;
+  }
+  .react-datepicker__day-name {
+    margin: 0.2em;
+  }
+}
+
+/* Make the date input field more visible */
+.react-datepicker__input-container input {
+  width: 100%;
+  padding: 0.3rem;
+  border-radius: 0;
+  border: 1px solid #e2e8f0;
+}

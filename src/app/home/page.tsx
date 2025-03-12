@@ -21,16 +21,14 @@ import { medicalSpecialtiesOptions } from "@/constants/store-constants";
 import { Autocomplete } from "../../../components/ui/autocomplete";
 
 const doctorTypes = [
-  { value: "Dermatology", label: "Dermatologist" },
-  { value: "Cardiology", label: "Cardiologist" },
-  { value: "Neurology", label: "Neurologist" },
-  { value: "Pediatrics", label: "Pediatrician" },
+  { value: "Dermatologist", label: "Dermatologist" },
+  { value: "Cardiologist / Heart Doctor", label: "Cardiologist / Heart Doctor" },
+  { value: "Neurologist / Headache Specialist", label: "Neurologist / Headache Specialist" },
+  { value: "Pediatrician", label: "Pediatrician" },
   { value: "Dentist", label: "Dentist" },
-  { value: "Psychiatry", label: "Psychiatrist" },
-  { value: "Gynecology", label: "Gynecologist" },
-  { value: "Ophthalmology", label: "Ophthalmologist" },
-  { value: "Orthopedic Surgery", label: "Orthopedic" },
-  { value: "ENT", label: "ENT Specialist" },
+  { value: "Psychiatrist", label: "Psychiatrist" },
+  { value: "Ophthalmologist", label: "Ophthalmologist" },
+  { value: "Orthopedic Surgeon / Orthopedist", label: "Orthopedic Surgeon / Orthopedist" },
 ];
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required

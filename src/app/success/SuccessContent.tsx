@@ -12,16 +12,18 @@ export default function SuccessContent() {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   
   useEffect(() => {
-    // Get the parameters from URL
-    const message = searchParams.get("success_message");
-    const phone = searchParams.get("phone_number");
-    
-    if (message) {
-      setSuccessMessage(decodeURIComponent(message));
-    }
-    
-    if (phone) {
-      setPhoneNumber(decodeURIComponent(phone));
+    if (searchParams) {
+      // Get the parameters from URL
+      const message = searchParams.get("success_message");
+      const phone = searchParams.get("phone_number");
+      
+      if (message) {
+        setSuccessMessage(decodeURIComponent(message));
+      }
+      
+      if (phone) {
+        setPhoneNumber(decodeURIComponent(phone));
+      }
     }
   }, [searchParams]);
 
@@ -36,25 +38,25 @@ export default function SuccessContent() {
       </p>
       
       {/* Phone Number Display */}
-      {phoneNumber && (
+      {/* {phoneNumber && (
         <div className="mt-4 p-3 bg-gray-50 rounded">
           <p className="text-sm text-gray-600 mb-1">Doctor's Phone Number:</p>
           <p className="font-medium">{phoneNumber}</p>
         </div>
-      )}
+      )} */}
       
       {/* Buttons */}
       <div className="flex justify-center space-x-4 mt-12">
         {phoneNumber ? (
-          <a href={`tel:${phoneNumber}`}>
+          <a href={'/contact-us'}>
             <Button className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto">
-              Call Doctor's Office
+             Contact Us
             </Button>
           </a>
         ) : (
-          <Link href="#">
+          <Link href={'/contact-us'}>
             <Button className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto">
-              Call Doctor's Office
+              Contact Us
             </Button>
           </Link>
         )}
