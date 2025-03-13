@@ -188,6 +188,7 @@ export default function Transcript() {
   const [activeCallIndex, setActiveCallIndex] = useState(0);
   const activeCallIndexRef = useRef(activeCallIndex);
   const requestIdRef = useRef(formData?.request_id);
+  const callStatusRef = useRef(callStatus);
   const [context, setcontext] = useState("");
 
   const [openDialog, setOpenDialog] = useState(false);
@@ -207,6 +208,9 @@ export default function Transcript() {
   useEffect(() => {
     requestIdRef.current = formData?.request_id;
   }, [formData]);
+  useEffect(() => {
+    callStatusRef.current = callStatus;
+  }, [callStatus]);
 
   const getPhoneNumbers = () => {
     const numbers = doctors.map((doctor) => doctor.phone_number || null);
@@ -425,7 +429,7 @@ export default function Transcript() {
         doctor_number: doctorPhoneNumber,
       };
       sessionStorage.setItem("context", context);
-      console.log(data);
+      // console.log(data);
       try {
         const callResponse = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
@@ -461,6 +465,7 @@ export default function Transcript() {
     // console.log(id,currentindex,request_id)
     let newIndex = currentindex+1;
     if (id) {
+      // wsRef?.current?.close(); // temp solution; disconnect websocket and connect to a new one
       terminateCurrentCall(id);
     }
     // Move to the next doctor
@@ -484,6 +489,7 @@ export default function Transcript() {
         // setActiveCallIndex((prevIndex) => prevIndex + 1); // Move to the next doctor
       }
     } else {
+      wsRef?.current?.close();
       toast.success("All doctors have been called successfully..");
       setIsConfirmed(false);
       setCallStatus({
@@ -564,28 +570,38 @@ export default function Transcript() {
             );
             return;
           } else {
-            toast.warning(
-              "Appointment could not be booked. Trying next doctor..."
-            );
-            moveToNextDoctor(
-              null,
-              activeCallIndexRef.current,
-              formData.request_id
-            );
+            // console.log("call ended but not booked..this is where skip happens");
+            if(callStatusRef.current.ssid === data?.call_sid){
+              toast.warning(
+                "Appointment could not be booked. Trying next doctor..."
+              );
+              moveToNextDoctor(
+                null,
+                activeCallIndexRef.current,
+                formData.request_id
+              );
+            }
           }
         }, 5000);
       }
 
       if (data.event === "call_in_process") {
         const timestamp = new Date().toLocaleTimeString();
-        setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
+        if(callStatusRef.current.ssid === data?.call_sid){
+          setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
+        }
       }
 
       if (data.event === "call_not_picked") {
         // doctor did not pick call...move to next
-        toast.info("Doctor did not pick call. Trying next doctor...");
-
-        moveToNextDoctor(null, activeCallIndexRef.current, formData.request_id);
+        if(callStatusRef.current.ssid === data?.call_sid){
+          toast.info("Doctor did not pick call. Trying next doctor...");
+          moveToNextDoctor(
+            null,
+            activeCallIndexRef.current,
+            formData.request_id
+          );
+        }
       }
     };
 
@@ -599,6 +615,17 @@ export default function Transcript() {
       setTimeout(connectWebSocket, 5000);
     };
   };
+  // useEffect(() => {
+  //   // This function runs when the component is unmounted
+  //   return () => {
+  //     console.log("Component unmounting - closing WebSocket connection");
+  //     if (wsRef.current) {
+  //       wsRef.current.close();
+  //       wsRef.current = null;
+  //     }
+  //   };
+  // }, []); // Empty dependency array means this runs only on mount and unmount
+
   // const logDrLists = async () => {
   //   // Create arrays to collect the values
   //   const doctor_numbers = [];
@@ -753,7 +780,7 @@ export default function Transcript() {
       );
       return resp.data;
     } catch (error) {
-      console.error("Error ending call:", error);
+      // console.log("Error ending call:", error);
       return true;
     }
   };
