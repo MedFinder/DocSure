@@ -530,6 +530,30 @@ export default function SearchPage() {
      }, 500);
    },
   });
+  
+  // Add this function to handle manual submission with toast error
+  const handleFormSubmit = () => {
+    // Touch all fields to trigger validation
+    formik.validateForm().then(errors => {
+      // If there are validation errors
+      if (Object.keys(errors).length > 0) {
+        // Set all fields as touched to show validation errors
+        const touchedFields = {};
+        Object.keys(formik.values).forEach(key => {
+          touchedFields[key] = true;
+        });
+        formik.setTouched(touchedFields);
+        
+        // Show toast error
+        toast.error("Please fill up all the required information");
+        return;
+      }
+      
+      // If no errors, submit the form
+      formik.handleSubmit();
+    });
+  };
+
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
       const places = inputRefs.current[index].getPlaces();
@@ -809,7 +833,8 @@ export default function SearchPage() {
                 sequence and seek an appointment for you.
               </p>
               <Button
-                type="submit"
+                type="button"
+                onClick={handleFormSubmit}
                 className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2"
                 disabled={isLoading}
               >
@@ -856,7 +881,7 @@ export default function SearchPage() {
           </p>
           <Button
             type="button" // Prevents default form submission behavior since it's outside the form
-            onClick={formik.handleSubmit}
+            onClick={handleFormSubmit}
             className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2 text-sm"
             disabled={isLoading}
           >
