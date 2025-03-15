@@ -40,6 +40,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
+import { track } from "@vercel/analytics";
 
 const validationSchema = Yup.object().shape({
   objective: Yup.string().required("Required"),
@@ -493,6 +494,7 @@ export default function SearchPage() {
     },
     validationSchema,
     onSubmit: async (values) => {
+    track('Searchpage_Continue_Btn_Clicked');
      // console.log("here");
      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
      // console.log("Objective value:", values.objective);

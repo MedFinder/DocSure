@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { track } from "@vercel/analytics";
 
 const _doctors: Doctor[] = [
   {
@@ -360,6 +361,7 @@ export default function Transcript() {
     setOpenDialog(true);
   };
   const confirmTermination = () => {
+    track('Terminate_Request_Btn_Clicked');
     terminateRequest();
     setIsTerminated(true);
     setOpenDialog(false);
@@ -393,6 +395,7 @@ export default function Transcript() {
         timeOfAppointment,
         insuranceType,
         isnewPatient,
+        gender,
         // zipcode,
         insurer,
         maxWait,
@@ -407,6 +410,7 @@ export default function Transcript() {
 
       if (insurer) context += `; Insurance Provider:${insurer}`;
       if (subscriberId) context += `; Member Id:"${subscriberId}"`;
+      if (gender) context += `; Patient Gender:${gender}`;
       if (groupId) context += `; Group Number:${groupId}`;
       if (insuranceType) context += `; Insurance type:${insuranceType}`;
       if (dob) context += `; Date of birth:${dob}`;
@@ -435,6 +439,7 @@ export default function Transcript() {
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
           data
         );
+        track('Initiated_new_call_successfully');
         setCallStatus({
           isInitiated: true,
           ssid: callResponse.data.call_id,
@@ -452,6 +457,7 @@ export default function Transcript() {
         setFormData(updatedFormData);
         sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
       } catch (error) {
+        track('Initiated_new_call_failed');
         console.log(error, "error initiating bland AI");
 
         toast.error(error?.response?.data?.detail, {
@@ -823,7 +829,10 @@ export default function Transcript() {
                         doctor={doctor}
                         callStatus={callStatus}
                         isAppointmentBooked={isAppointmentBooked}
-                        onSkip={() => moveToNextDoctor(callStatus?.ssid,activeCallIndexRef.current, formData.request_id)} // Move to next doctor
+                        onSkip={() => {
+                          track('Skip_Call_Btn_Clicked');
+                          moveToNextDoctor(callStatus?.ssid,activeCallIndexRef.current, formData.request_id)
+                        }} // Move to next doctor
                       />
                     ))}
                   </ScrollArea>

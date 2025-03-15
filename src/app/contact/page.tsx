@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import * as Yup from "yup";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { track } from "@vercel/analytics";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 // Validation schema remains the same - all fields required
 const validationSchema = Yup.object().shape({
@@ -24,12 +26,17 @@ const validationSchema = Yup.object().shape({
     .max(new Date(), "Date of birth cannot be in the future"),
   address: Yup.string().required("Address is required"),
 });
-
+const genderOptions = [
+  { value: "Male", label: "Male" },
+  { value: "Female", label: "Female" },
+  { value: "Non-binary", label: "Non-binary" },
+];
 export default function Contact() {
   const [formData, setFormData] = useState({});
   const [searchData, setSearchData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [gender, setgender] = useState("");
   const router = useRouter();
   const addressRefs = useRef([]);
 
@@ -90,6 +97,7 @@ export default function Contact() {
     },
     validationSchema,
     onSubmit: async (values) => {
+      track('ContactPage_Btn_Clicked');
       // Remove the manual empty fields check since formik will handle this
       // Use formik's built-in validation instead
 
@@ -103,6 +111,7 @@ export default function Contact() {
         ...formData, // Preserve existing data
         ...values, // Add new values
         dob: formatDateToYYYYMMDD(values.dob),
+        gender,
         address: values.address || formData.address, // Keep existing address if unchanged
       };
       try {
@@ -217,6 +226,28 @@ export default function Contact() {
               {formik.errors.dob && formik.touched.dob && (
                 <div className="text-red-500 text-sm">{formik.errors.dob}</div>
               )}
+            </div>
+            <div className="space-y-2">
+              <Label>Gender</Label>
+              <RadioGroup
+                name="gender"
+                value={gender}
+                onValueChange={(value) => setgender(value)}
+                className="flex flex-row gap-4"
+              >
+                {genderOptions.map((option) => (
+                  <div
+                    key={option.value}
+                    className="flex items-center gap-2"
+                  >
+                    <RadioGroupItem
+                      id={option.value}
+                      value={option.value}
+                    />
+                    <Label htmlFor={option.value}>{option.label}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
             </div>
             <div className="space-y-2">
               <div className="flex flex-col space-y-4">

@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { track } from "@vercel/analytics";
 
 interface TaskProps {
   id: string;
@@ -107,7 +108,10 @@ export const Task: React.FC<TaskProps> = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="cursor-pointer font-medium text-sm sm:text-base"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) =>{
+                  e.stopPropagation()
+                  track('Dr_Website_Clicked');
+                }}
               >
                 {title}
               </a>

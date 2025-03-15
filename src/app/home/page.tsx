@@ -7,6 +7,7 @@ import { Loader2, LocateFixed, MapPin, Search } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { useFormik } from "formik";
+import { track } from '@vercel/analytics';
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import {
@@ -99,6 +100,7 @@ export default function Home() {
     },
     validationSchema,
     onSubmit: async (values) => {
+      track('Homepage_Search_Btn_Clicked');
       console.log(values);
       const updatedValues = { ...values };
 
