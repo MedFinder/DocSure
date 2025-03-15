@@ -23,6 +23,7 @@ import axios from "axios";
 import { ComboboxNav } from "../ui/combo-box-nav";
 import { medicalSpecialtiesOptions } from "@/constants/store-constants";
 import { Autocomplete } from "../../../components/ui/autocomplete";
+import { track } from "@vercel/analytics";
 
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
@@ -85,6 +86,7 @@ export default function Navbar() {
     validationSchema,
     onSubmit: async (values) => {
       console.log(values);
+      track('Navbar_Search_Btn_Clicked');
       const updatedValues = { ...values };
 
       setisLoading(true);
@@ -272,7 +274,7 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-8 items-center text-md font-normal">
-          <Link href="/contact-us" className="hover:text-gray-500">
+          <Link onClick={()=> track('Help_Btn_Clicked')} href="/contact-us" className="hover:text-gray-500">
             Help
           </Link>
         </div>

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import * as Yup from "yup";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { track } from "@vercel/analytics";
 
 // Validation schema remains the same - all fields required
 const validationSchema = Yup.object().shape({
@@ -90,6 +91,7 @@ export default function Contact() {
     },
     validationSchema,
     onSubmit: async (values) => {
+      track('ContactPage_Btn_Clicked');
       // Remove the manual empty fields check since formik will handle this
       // Use formik's built-in validation instead
 
