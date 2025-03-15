@@ -395,6 +395,7 @@ export default function Transcript() {
         timeOfAppointment,
         insuranceType,
         isnewPatient,
+        gender,
         // zipcode,
         insurer,
         maxWait,
@@ -409,6 +410,7 @@ export default function Transcript() {
 
       if (insurer) context += `; Insurance Provider:${insurer}`;
       if (subscriberId) context += `; Member Id:"${subscriberId}"`;
+      if (gender) context += `; Patient Gender:${gender}`;
       if (groupId) context += `; Group Number:${groupId}`;
       if (insuranceType) context += `; Insurance type:${insuranceType}`;
       if (dob) context += `; Date of birth:${dob}`;
