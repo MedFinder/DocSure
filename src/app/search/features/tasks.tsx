@@ -23,6 +23,7 @@ interface TaskProps {
   index: number;
   review?: number;
   vicinity: string;
+  formatted_address: string;
   doctorType?: string;
   activeCallIndex: number;
   address: string;
