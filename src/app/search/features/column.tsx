@@ -100,8 +100,8 @@ const Column: React.FC<ColumnProps> = ({
                   isAppointmentBooked={isAppointmentBooked}
                   callStatus={callStatus}
                   review={task.user_ratings_total}
-                  vicinity={task.vicinity}
-                  address={task.address}
+                  vicinity={task.formatted_address}
+                  address={task.formatted_address}
                   doctorType={doctorType}
                   onDelete={onDelete}
                 />
