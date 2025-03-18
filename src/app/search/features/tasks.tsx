@@ -64,6 +64,7 @@ export const Task: React.FC<TaskProps> = ({
     transition,
     transform: CSS.Transform.toString(transform),
   };
+
   return (
     <>
       <tr
@@ -80,9 +81,9 @@ export const Task: React.FC<TaskProps> = ({
         {/* Combined Number, Avatar, and Doctor Info all in one cell */}
         <td className="p-2">
           <div className="flex items-center gap-3">
-            {/* Number & More Icon */}
+            {/* Number & Input Design Element */}
             <div className="flex items-center mr-1">
-              <div className="md:flex items-center hidden  justify-center mr-2">
+              <div className="md:flex items-center hidden justify-center mr-2">
                 <img
                   src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
                   alt="Input design element"
@@ -96,7 +97,7 @@ export const Task: React.FC<TaskProps> = ({
 
             {/* Avatar with Dynamic Background Color */}
             <div
-              className="rounded-full text-black flex items-center  justify-center font-bold w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+              className="rounded-full text-black flex items-center justify-center font-bold w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
               style={{ backgroundColor: getAlternateColor(index) }}
             >
               {title.charAt(0)}
@@ -109,23 +110,13 @@ export const Task: React.FC<TaskProps> = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="cursor-pointer font-medium text-sm sm:text-base"
-                onClick={(e) =>{
-                  e.stopPropagation()
-                  track('Dr_Website_Clicked');
+                onClick={(e) => {
+                  e.stopPropagation();
+                  track("Dr_Website_Clicked");
                 }}
               >
                 {title}
               </a>
-              {/* <span className="text-xs sm:text-sm text-gray-600">{doctorType}</span> */}
-              {/* <span className="p-2 text-center md:hidden ml-auto ">
-                <button
-                  onClick={() => setOpen(true)}
-                  className="md:hidden  self-end flex ml-8"
-                  onPointerDown={(e) => e.stopPropagation()}
-                >
-                  <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
-                </button>
-              </span> */}
             </div>
           </div>
         </td>
@@ -153,10 +144,10 @@ export const Task: React.FC<TaskProps> = ({
         </td>
 
         {/* Delete Button */}
-        <td className="p-2 text-center   ">
+        <td className="p-2 text-center">
           <button
             onClick={() => setOpen(true)}
-            className="flex  md:self-end ml-72  md:ml-0 "
+            className="flex md:self-end ml-auto md:ml-0"
             onPointerDown={(e) => e.stopPropagation()}
           >
             <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
@@ -165,7 +156,7 @@ export const Task: React.FC<TaskProps> = ({
       </tr>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg  h-52">
+        <DialogContent className="sm:max-w-lg h-52">
           <DialogHeader>
             <DialogTitle>Remove from List</DialogTitle>
           </DialogHeader>
@@ -175,7 +166,7 @@ export const Task: React.FC<TaskProps> = ({
           <div className="flex justify-between gap-6">
             <Button
               variant="secondary"
-              className="w-1/2 rounded-md "
+              className="w-1/2 rounded-md"
               onClick={() => setOpen(false)}
               onPointerDown={(e) => e.stopPropagation()}
             >
@@ -183,7 +174,7 @@ export const Task: React.FC<TaskProps> = ({
             </Button>
             <Button
               variant="destructive"
-              className="w-1/2 rounded-md "
+              className="w-1/2 rounded-md"
               onClick={() => onDelete(id)} // Trigger delete
               onPointerDown={(e) => e.stopPropagation()}
             >

@@ -313,8 +313,8 @@ export default function Transcript() {
 
   const handleConfirmSequence = useCallback(async () => {
     const formData = JSON.parse(sessionStorage.getItem("formData"));
-    const request_id =  await logRequestInfo();
-    if (request_id){
+    const request_id = await logRequestInfo();
+    if (request_id) {
       // console.log(request_id);
       const updatedFormData = {
         ...formData,
@@ -333,64 +333,19 @@ export default function Transcript() {
         );
         return;
       } catch (error) {
-        console.error(
-          "Error initiating call:",
-          error
-        );
+        console.error("Error initiating call:", error);
         setIsConfirmed(false); // Re-enable button and dragging if there's an error
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCallIndex, doctors, phoneNumbers]);
   //console.log(phoneNumbers.length);
-  // useEffect(() => {
-  //   if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
-  //     setShowTranscript(true);
-  //     setTranscriptArray((prev) => [
-  //       ...prev,
-  //       `Calling ${doctors[activeCallIndex]?.name} to seek an appointment\n`,
-  //     ]);
-  //     console.log("ws listener added for id:", callStatus?.ssid);
-  //     if (wsRef.current.readyState !== WebSocket.OPEN) {
-  //       console.log("WebSocket not in OPEN state:", wsRef.current.readyState);
-  //       return;
-  //     }
-  //     try {
-  //       wsRef.current.send(
-  //         JSON.stringify({
-  //           event: "start",
-  //           transcription_id: callStatus.ssid,
-  //         })
-  //       );
-  //       // console.log('WebSocket message sent successfully');
-  //     } catch (error) {
-  //       console.log("Failed to send WebSocket message:", error);
-  //     }
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [callStatus, doctors, wsRef]);
   useEffect(() => {
     if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
       setShowTranscript(true);
       setTranscriptArray((prev) => [
         ...prev,
-        <div
-          key={prev.length} // Ensure unique key for React rendering
-          style={{
-            backgroundColor: doctors[activeCallIndex]?.name.includes(
-              "DocusureAI"
-            )
-              ? "#FFF6F2" // Light orange for "DocusureAI"
-              : doctors[activeCallIndex]?.name.includes("Doctor's Office")
-              ? "#E6F7FF" // Light blue for "Doctor's Office"
-              : "#F0F0F0", // Default light gray for other rows
-            padding: "8px",
-            borderRadius: "4px",
-            marginBottom: "8px",
-          }}
-        >
-          {`Calling ${doctors[activeCallIndex]?.name} to seek an appointment`}
-        </div>,
+        `Calling ${doctors[activeCallIndex]?.name} to seek an appointment\n`,
       ]);
       console.log("ws listener added for id:", callStatus?.ssid);
       if (wsRef.current.readyState !== WebSocket.OPEN) {
@@ -404,12 +359,54 @@ export default function Transcript() {
             transcription_id: callStatus.ssid,
           })
         );
+        // console.log('WebSocket message sent successfully');
       } catch (error) {
         console.log("Failed to send WebSocket message:", error);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callStatus, doctors, wsRef]);
+  // useEffect(() => {
+  //   if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
+  //     setShowTranscript(true);
+  //     setTranscriptArray((prev) => [
+  //       ...prev,
+  //       <p
+  //         key={prev.length} // Ensure unique key for React rendering
+  //         style={{
+  //           backgroundColor: doctors[activeCallIndex]?.name.includes(
+  //             "DocsureAI"
+  //           )
+  //             ? "#FFF6F2" // Light orange for "DocusureAI"
+  //             : doctors[activeCallIndex]?.name.includes("Doctor's Office")
+  //             ? "#E6F7FF" // Light blue for "Doctor's Office"
+  //             : "#F0F0F0", // Default light gray for other rows
+  //           padding: "8px",
+  //           borderRadius: "4px",
+  //           marginBottom: "8px",
+  //         }}
+  //       >
+  //         {`Calling ${doctors[activeCallIndex]?.name} to seek an appointment`}
+  //       </p>,
+  //     ]);
+  //     console.log("ws listener added for id:", callStatus?.ssid);
+  //     if (wsRef.current.readyState !== WebSocket.OPEN) {
+  //       console.log("WebSocket not in OPEN state:", wsRef.current.readyState);
+  //       return;
+  //     }
+  //     try {
+  //       wsRef.current.send(
+  //         JSON.stringify({
+  //           event: "start",
+  //           transcription_id: callStatus.ssid,
+  //         })
+  //       );
+  //     } catch (error) {
+  //       console.log("Failed to send WebSocket message:", error);
+  //     }
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [callStatus, doctors, wsRef]);
   const terminateRequest = () => {
     // sent ws event to cancel call
     wsRef?.current?.close();
@@ -504,7 +501,7 @@ export default function Transcript() {
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
           data
         );
-        track('Initiated_new_call_successfully');
+        track("Initiated_new_call_successfully");
         connectWebSocket(callResponse.data.call_id);
         setCallStatus({
           isInitiated: true,
@@ -582,11 +579,11 @@ export default function Transcript() {
     //   console.log("disconnect exisiting connection if it exists...");
     //   wsRef?.current?.close();
     // }
-    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${id ?? callStatusRef.current.ssid  }`;
-    console.log(url)
-    wsRef.current = new WebSocket(
-      url
-    );
+    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
+      id ?? callStatusRef.current.ssid
+    }`;
+    console.log(url);
+    wsRef.current = new WebSocket(url);
 
     wsRef.current.onopen = () => {
       console.log("WebSocket connected successfully and opened.");
@@ -835,8 +832,18 @@ export default function Transcript() {
   const toggleTranscript = () => {
     setShowTranscript((prev) => !prev);
   };
-  const handleTerminateAndCallMyself = () => {
+  const handleTerminateAndCallMyself = async () => {
     if (callStatus?.isInitiated) {
+      // Log that the call is being terminated
+      try {
+        await terminateCurrentCall(callStatus?.ssid);
+        console.log("Call has been terminated successfully.");
+      } catch (error) {
+        console.error("Failed to log call termination:", error);
+        toast.error("Failed to terminate the call. Please try again.");
+        return;
+      }
+
       // Terminate the current call
       terminateRequest();
 
@@ -851,15 +858,38 @@ export default function Transcript() {
       }
     }
   };
-  const handleModifyRequest = () => {
+  const handleModifyRequest = async () => {
     if (callStatus?.isInitiated) {
+      // Log that the call is being terminated
+      try {
+        await terminateCurrentCall(callStatus?.ssid);
+        console.log("Call has been terminated successfully.");
+      } catch (error) {
+        console.error("Failed to log call termination:", error);
+        toast.error("Failed to terminate the call. Please try again.");
+        return;
+      }
+
       // Terminate the current call
       terminateRequest();
 
-      // Redirect to the home page or doctor list page
-      router.push("/"); // Replace "/" with the correct route for the doctor list page
+      // Get the saved address and specialty from formData
+      const savedAddress = sessionStorage.getItem("selectedAddress");
+      const specialty = formData?.specialty;
+
+      // Redirect to the home page with query parameters
+      router.push(
+        `/?address=${encodeURIComponent(
+          savedAddress || ""
+        )}&specialty=${encodeURIComponent(specialty || "")}`
+      );
     }
   };
+
+  // const handleCall = () => {
+  //   window.location.href = `tel:${+2348167238042}`;
+  // };
+
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <Navbar />
@@ -923,11 +953,11 @@ export default function Transcript() {
                   Terminate Request
                 </button>
               </div> */}
-              <div className="flex gap-4 justify-center mt-4 pb-2">
+              <div className="flex flex-row md:flex-row gap-4 justify-start md:justify-center mt-4 pb-2 overflow-x-auto whitespace-nowrap">
                 <button
                   onClick={handleTerminateRequest}
                   disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
                     callStatus?.isInitiated
                       ? "bg-red-600 hover:bg-red-700 text-white"
                       : "bg-red-300 cursor-not-allowed text-white opacity-70"
@@ -938,7 +968,7 @@ export default function Transcript() {
                 <button
                   onClick={handleModifyRequest}
                   disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
                     callStatus?.isInitiated
                       ? "bg-blue-600 hover:bg-blue-700 text-white"
                       : "bg-blue-300 cursor-not-allowed text-white opacity-70"
@@ -949,7 +979,7 @@ export default function Transcript() {
                 <button
                   onClick={handleTerminateAndCallMyself}
                   disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
                     callStatus?.isInitiated
                       ? "bg-orange-600 hover:bg-orange-700 text-white"
                       : "bg-orange-300 cursor-not-allowed text-white opacity-70"
