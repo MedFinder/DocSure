@@ -223,7 +223,7 @@ export default function Transcript() {
     const storedData = sessionStorage.getItem("statusData");
     if (storedData) {
       const parsedData = JSON.parse(storedData);
-      const sortedData = parsedData.results.slice(0, 10).map((item, index) => {
+      const sortedData = parsedData.results.map((item, index) => {
         // Transform each Google Places API result into a Doctor type
         return {
           id: item.place_id, // Preserve the original id from place_id
@@ -237,13 +237,13 @@ export default function Transcript() {
           rating: item.rating || 0,
           reviews: item.user_ratings_total || 0,
           distance: item.distance || "Unknown distance",
-          address: item.vicinity || "Address unavailable",
+          address: item.formatted_address || "Address unavailable",
           status: "queue", // Default status
           waitTime: "Excellent wait time", // Default wait time
           appointments: "New patient appointments", // Default appointment text
           phone_number: item.phone_number || null,
           place_id: item.place_id,
-          vicinity: item.vicinity || "",
+          vicinity: item.formatted_address || "",
           website: item.website || "",
           isSponsored: false, // Default not sponsored
         };
@@ -312,10 +312,36 @@ export default function Transcript() {
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
 
   const handleConfirmSequence = useCallback(async () => {
-    // logDrLists()  //log doctor details
-    await connectWebSocket();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCallIndex, phoneNumbers, doctors]);
+    const formData = JSON.parse(sessionStorage.getItem("formData"));
+    const request_id =  await logRequestInfo();
+    if (request_id){
+      // console.log(request_id);
+      const updatedFormData = {
+        ...formData,
+        request_id,
+      };
+      setFormData(updatedFormData);
+      sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
+      // initiate call
+      try {
+        setIsConfirmed(true); // Disable button and dragging
+        const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
+        await initiateCall(
+          firstDoctorPhoneNumber,
+          doctors[activeCallIndex]?.name,
+          request_id
+        );
+        return;
+      } catch (error) {
+        console.error(
+          "Error initiating call:",
+          error
+        );
+        setIsConfirmed(false); // Re-enable button and dragging if there's an error
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCallIndex, doctors, phoneNumbers]);
   //console.log(phoneNumbers.length);
   // useEffect(() => {
   //   if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
@@ -414,7 +440,6 @@ export default function Transcript() {
       request_id?: string
     ) => {
       console.log("new call initiated for", doctorPhoneNumber, nameOfOrg);
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
       if (!formData) {
         console.error("No formData found in sessionStorage.");
         return;
@@ -479,7 +504,8 @@ export default function Transcript() {
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
           data
         );
-        track("Initiated_new_call_successfully");
+        track('Initiated_new_call_successfully');
+        connectWebSocket(callResponse.data.call_id);
         setCallStatus({
           isInitiated: true,
           ssid: callResponse.data.call_id,
@@ -505,7 +531,8 @@ export default function Transcript() {
         });
       }
     },
-    []
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [formData]
   );
   const moveToNextDoctor = async (
     id: string,
@@ -549,14 +576,16 @@ export default function Transcript() {
       });
     }
   };
-  const connectWebSocket = () => {
-    if (wsRef?.current) {
-      //check if exisiting connection exists and disconnect
-      console.log("disconnect exisiting connection if it exists...");
-      wsRef?.current?.close();
-    }
+  const connectWebSocket = (id?: string) => {
+    // if (wsRef?.current) {
+    //   //check if exisiting connection exists and disconnect
+    //   console.log("disconnect exisiting connection if it exists...");
+    //   wsRef?.current?.close();
+    // }
+    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${id ?? callStatusRef.current.ssid  }`;
+    console.log(url)
     wsRef.current = new WebSocket(
-      "wss://callai-backend-243277014955.us-central1.run.app/ws/notifications"
+      url
     );
 
     wsRef.current.onopen = () => {
@@ -565,36 +594,6 @@ export default function Transcript() {
     wsRef.current.onmessage = async (event) => {
       const data = JSON.parse(event.data);
       // console.log("WebSocket Message:", data);
-      if (data.event === "Welcome") {
-        const formData = JSON.parse(sessionStorage.getItem("formData"));
-        const request_id = data?.client_id;
-        console.log(request_id);
-        logRequestInfo(request_id);
-        // console.log(formData)
-        const updatedFormData = {
-          ...formData,
-          request_id,
-        };
-        setFormData(updatedFormData);
-        sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
-        // initiate call
-        try {
-          setIsConfirmed(true); // Disable button and dragging
-          const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
-          await initiateCall(
-            firstDoctorPhoneNumber,
-            doctors[activeCallIndex]?.name,
-            request_id
-          );
-          return;
-        } catch (error) {
-          console.error(
-            "Error fetching phone numbers or initiating call:",
-            error
-          );
-          setIsConfirmed(false); // Re-enable button and dragging if there's an error
-        }
-      }
       if (data.event === "call_ended") {
         // console.log("Call Ended Data:", data);
         setTimeout(async () => {
@@ -726,7 +725,6 @@ export default function Transcript() {
   const logRequestInfo = async (request_id) => {
     const savedAddress = sessionStorage.getItem("selectedAddress");
     const data = {
-      request_id,
       patient_name: formData.patientName,
       patient_dob: formData.dob,
       patient_email: formData.email,
@@ -785,7 +783,7 @@ export default function Transcript() {
         hospital_name: doctors[index]?.name,
         doctor_address: doctors[index]?.vicinity,
         distance: doctors[index]?.distance,
-        rating: doctors[index]?.rating,
+        rating: doctors[index]?.rating?.toString(),
         website: doctors[index]?.website,
         context,
         patient_name: patientName,

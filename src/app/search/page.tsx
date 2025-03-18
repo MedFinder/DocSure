@@ -410,7 +410,7 @@ export default function SearchPage() {
 
         const parsedData = JSON.parse(rawData);
         if (parsedData?.results?.length) {
-          const sortedData = parsedData.results.slice(0, 10).map((item) => ({
+          const sortedData = parsedData.results?.map((item) => ({
             ...item,
             id: item.place_id || item.id,
           }));
