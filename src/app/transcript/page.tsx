@@ -1001,10 +1001,18 @@ export default function Transcript() {
                   confirmation will be sent to you over email and text.
                 </p>
               </div> */}
-              <ChatSection
-                doctorName={doctors[activeCallIndex]?.name}
-                transcripts={getDisplayTranscript()}
-              />
+              {/* <ScrollArea className="h-full w-full md:w-auto">
+                <ChatSection
+                  doctorName={doctors[activeCallIndex]?.name}
+                  transcripts={getDisplayTranscript()}
+                />
+              </ScrollArea> */}
+              <div className="h-[900px] overflow-y-auto ">
+                <ChatSection
+                  doctorName={doctors[activeCallIndex]?.name}
+                  transcripts={getDisplayTranscript()}
+                />
+              </div>
             </div>
           </div>
         </div>

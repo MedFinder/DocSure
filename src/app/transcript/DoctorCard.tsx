@@ -32,12 +32,24 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
       <article className="hidden md:flex flex-col w-full mb-6 last:mb-0">
         <div className="flex gap-5 justify-between items-start mr-3 max-md:mr-2.5 max-md:max-w-full">
           <div className="flex gap-3 text-black">
-            <div
+            <div className="flex items-center mr-1">
+              {/* <div className="md:flex items-center hidden justify-center mr-2">
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
+                  alt="Input design element"
+                  className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3"
+                />
+              </div> */}
+              <span className="bg-[#00BA85] rounded-full w-5 h-5 sm:w-6 sm:h-6 text-white flex items-center justify-center text-xs sm:text-sm font-medium">
+                {index + 1}
+              </span>
+            </div>
+            {/* <div
               className="rounded-full text-white flex items-center justify-center font-bold w-10 h-10 sm:w-12 sm:h-12"
               style={{ backgroundColor: getAlternateColor(index) }}
             >
               {doctor?.name.charAt(0)}
-            </div>
+            </div> */}
             <div className="flex flex-col self-center">
               {doctor.isSponsored && (
                 <span className="text-xs tracking-tight">Sponsored</span>
@@ -79,11 +91,23 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
       <article className="flex md:hidden flex-col w-full bg-white shadow-md border-b-2 border-gray-200">
         {/* Top Section: Avatar + Name in a Card Style */}
         <div className="flex gap-4 py-2">
-          <div
+          {/* <div
             className="rounded-full text-white flex items-center justify-center font-bold w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
             style={{ backgroundColor: getAlternateColor(index) }}
           >
             {doctor?.name.charAt(0)}
+          </div> */}
+          <div className="flex items-center mr-1">
+            <div className="md:flex items-center hidden justify-center mr-2">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
+                alt="Input design element"
+                className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3"
+              />
+            </div>
+            <span className="bg-[#00BA85] rounded-full w-5 h-5 sm:w-6 sm:h-6 text-white flex items-center justify-center text-xs sm:text-sm font-medium">
+              {index + 1}
+            </span>
           </div>
           <div className="flex flex-col flex-grow">
             <h3 className="text-lg font-semibold mt-2 break-words">
