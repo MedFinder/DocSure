@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, LocateFixed, MapPin, Search } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useFormik } from "formik";
 import { track } from "@vercel/analytics";
 import * as Yup from "yup";
@@ -44,8 +44,9 @@ const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
 
-export default function Home() {
+function HomePage() {
   const router = useRouter();
+  const { query } = router;
   const searchParams = useSearchParams();
   const [selectedAvailability, setSelectedAvailability] = useState("anytime");
   const [timeOfAppointment, settimeOfAppointment] = useState("soonest");
@@ -79,27 +80,6 @@ export default function Home() {
   //     const placesNames = places.formatted_address;
   //   }
   // };
-  useEffect(() => {
-    const address = searchParams.get("address");
-    const specialty = searchParams.get("specialty");
-
-    if (address) {
-      setPrefilledAddress(address);
-      sessionStorage.setItem("selectedAddress", address);
-      setAddressLocation(address); // Set the address location for input field
-    }
-    if (specialty) {
-      setPrefilledSpecialty(specialty);
-      sessionStorage.setItem("selectedSpecialty", specialty);
-      formik.setFieldValue("specialty", specialty);
-    }
-
-    // Retrieve lat/lng if available
-    const savedLocation = sessionStorage.getItem("selectedLocation");
-    if (savedLocation) {
-      setSelectedLocation(JSON.parse(savedLocation));
-    }
-  }, [searchParams]);
 
   // const handleOnPlacesChanged = (index) => {
   //   if (inputRefs.current[index]) {
@@ -126,6 +106,48 @@ export default function Home() {
   //     }
   //   }
   // };
+  // useEffect(() => {
+  //   const address = query?.address; // Get the "address" query parameter
+  //   const specialty = query?.specialty;
+
+  //   if (address) {
+  //     setPrefilledAddress(address);
+  //     sessionStorage.setItem("selectedAddress", address);
+  //     setAddressLocation(address); // Set the address location for input field
+  //   }
+  //   if (specialty) {
+  //     setPrefilledSpecialty(specialty);
+  //     sessionStorage.setItem("selectedSpecialty", specialty);
+  //     // formik.setFieldValue("specialty", specialty);
+  //   }
+
+  //   // Retrieve lat/lng if available
+  //   const savedLocation = sessionStorage.getItem("selectedLocation");
+  //   if (savedLocation) {
+  //     setSelectedLocation(JSON.parse(savedLocation));
+  //   }
+  // }, [searchParams]);
+  useEffect(() => {
+    const address = searchParams.get("address");
+    const specialty = searchParams.get("specialty");
+
+    if (address) {
+      setPrefilledAddress(address);
+      sessionStorage.setItem("selectedAddress", address);
+      setAddressLocation(address); // Set the address location for input field
+    }
+    if (specialty) {
+      setPrefilledSpecialty(specialty);
+      sessionStorage.setItem("selectedSpecialty", specialty);
+      formik.setFieldValue("specialty", specialty);
+    }
+
+    // Retrieve lat/lng if available
+    const savedLocation = sessionStorage.getItem("selectedLocation");
+    if (savedLocation) {
+      setSelectedLocation(JSON.parse(savedLocation));
+    }
+  }, [searchParams]);
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
       const places = inputRefs.current[index].getPlaces();
@@ -365,6 +387,15 @@ export default function Home() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    // You could have a loading skeleton as the `fallback` too
+    <Suspense>
+      <HomePage />
+    </Suspense>
   );
 }
 // onSubmit: async (values) => {
