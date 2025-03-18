@@ -15,13 +15,13 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   //const initialMessage = !hasTranscripts || transcripts === "Waiting for conversation to begin...";
   const getBackgroundColor = (message: string) => {
     if (message.includes("Calling")) {
-      return "bg-white"; // Light green for "Calling doctor to seek an appointment"
+      return "bg-orange-50";
     } else if (message.includes("Docsure AI")) {
-      return "bg-orange-50"; // Light orange for "Docsure AI"
+      return "bg-white";
     } else if (message.includes("Doctor Office")) {
-      return "bg-gray-100"; // Light blue for "Doctor's Office"
+      return "bg-gray-100";
     }
-    return "bg-gray-100"; // Default light gray for other messages
+    return "bg-gray-100";
   };
 
   return (

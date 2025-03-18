@@ -844,7 +844,9 @@ export default function SearchPage() {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <Loader2 className="animate-spin w-5 h-5" />
+                  <span className="px-6">
+                    <Loader2 className="animate-spin w-5 h-5" />
+                  </span>
                 ) : (
                   "Continue"
                 )}

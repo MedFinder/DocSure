@@ -122,23 +122,32 @@ export const Task: React.FC<TaskProps> = ({
         </td>
 
         {/* Ratings & Location */}
-        <td className="p-2 min-w-[160px] md:ml-0 ml-10">
+        <td className="p-2 min-w-[160px]">
           <div className="flex flex-col text-[#333] text-xs sm:text-sm">
-            <div className="flex flex-row items-center gap-x-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
-                className="object-contain w-3 rounded-sm aspect-[1.09] max-md:mr-3.5"
+                className="object-contain w-3 rounded-sm"
                 alt="Rating star"
               />
-              <span>{rating !== undefined ? rating : "-"}</span>
+              <span className="whitespace-nowrap">
+                {rating !== undefined ? rating : "-"}
+              </span>
               <span>•</span>
-              <span>{review || 0} reviews</span>
+              <span className="whitespace-nowrap">{review || 0} reviews</span>
+              <span className="whitespace-nowrap md:hidden block">•</span>
+
+              <span className="whitespace-nowrap md:hidden block">
+                {distance || "-"}
+              </span>
             </div>
-            <div className="flex flex-row items-center gap-x-2 text-gray-500 text-xs">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-gray-500 text-xs">
               <MapPin size={13} />
-              <span>{distance || "-"}</span>
-              <span>•</span>
-              <span>{vicinity}</span>
+              <span className="whitespace-nowrap md:block hidden">
+                {distance || "-"}
+              </span>
+              <span className="whitespace-nowrap md:block hidden">•</span>
+              <span className="whitespace-nowrap">{vicinity}</span>
             </div>
           </div>
         </td>

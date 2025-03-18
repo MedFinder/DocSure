@@ -193,6 +193,9 @@ export default function Transcript() {
   const [context, setcontext] = useState("");
 
   const [openDialog, setOpenDialog] = useState(false);
+  const [openModifyDialog, setOpenModifyDialog] = useState(false); // Dialog for Modify Request
+  const [openTerminateAndCallDialog, setOpenTerminateAndCallDialog] =
+    useState(false); // Dialog for Terminate and Call Myself
   const [isTerminated, setIsTerminated] = useState(false);
 
   useEffect(() => {
@@ -832,9 +835,9 @@ export default function Transcript() {
   const toggleTranscript = () => {
     setShowTranscript((prev) => !prev);
   };
-  const handleTerminateAndCallMyself = async () => {
+  const confirmModifyRequest = async () => {
+    setOpenModifyDialog(false); // Close the dialog
     if (callStatus?.isInitiated) {
-      // Log that the call is being terminated
       try {
         await terminateCurrentCall(callStatus?.ssid);
         console.log("Call has been terminated successfully.");
@@ -844,45 +847,40 @@ export default function Transcript() {
         return;
       }
 
-      // Terminate the current call
       terminateRequest();
 
-      // Get the current doctor's phone number
-      const currentDoctorPhoneNumber = doctors[activeCallIndex]?.phone_number;
-
-      if (currentDoctorPhoneNumber) {
-        // Trigger the phone dialer
-        window.location.href = `tel:${currentDoctorPhoneNumber}`;
-      } else {
-        toast.error("No phone number available for the current doctor.");
-      }
-    }
-  };
-  const handleModifyRequest = async () => {
-    if (callStatus?.isInitiated) {
-      // Log that the call is being terminated
-      try {
-        await terminateCurrentCall(callStatus?.ssid);
-        console.log("Call has been terminated successfully.");
-      } catch (error) {
-        console.error("Failed to log call termination:", error);
-        toast.error("Failed to terminate the call. Please try again.");
-        return;
-      }
-
-      // Terminate the current call
-      terminateRequest();
-
-      // Get the saved address and specialty from formData
       const savedAddress = sessionStorage.getItem("selectedAddress");
       const specialty = formData?.specialty;
 
-      // Redirect to the home page with query parameters
       router.push(
         `/?address=${encodeURIComponent(
           savedAddress || ""
         )}&specialty=${encodeURIComponent(specialty || "")}`
       );
+    }
+  };
+
+  const confirmTerminateAndCallMyself = async () => {
+    setOpenTerminateAndCallDialog(false); // Close the dialog
+    if (callStatus?.isInitiated) {
+      try {
+        await terminateCurrentCall(callStatus?.ssid);
+        console.log("Call has been terminated successfully.");
+      } catch (error) {
+        console.error("Failed to log call termination:", error);
+        toast.error("Failed to terminate the call. Please try again.");
+        return;
+      }
+
+      terminateRequest();
+
+      const currentDoctorPhoneNumber = doctors[activeCallIndex]?.phone_number;
+
+      if (currentDoctorPhoneNumber) {
+        window.location.href = `tel:${currentDoctorPhoneNumber}`;
+      } else {
+        toast.error("No phone number available for the current doctor.");
+      }
     }
   };
 
@@ -966,9 +964,9 @@ export default function Transcript() {
                   Terminate Request
                 </button>
                 <button
-                  onClick={handleModifyRequest}
+                  onClick={() => setOpenModifyDialog(true)}
                   disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
                     callStatus?.isInitiated
                       ? "bg-blue-600 hover:bg-blue-700 text-white"
                       : "bg-blue-300 cursor-not-allowed text-white opacity-70"
@@ -977,9 +975,9 @@ export default function Transcript() {
                   Modify My Request
                 </button>
                 <button
-                  onClick={handleTerminateAndCallMyself}
+                  onClick={() => setOpenTerminateAndCallDialog(true)}
                   disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
                     callStatus?.isInitiated
                       ? "bg-orange-600 hover:bg-orange-700 text-white"
                       : "bg-orange-300 cursor-not-allowed text-white opacity-70"
@@ -1032,6 +1030,63 @@ export default function Transcript() {
               variant="destructive"
               className="w-1/2 rounded-md"
               onClick={confirmTermination}
+            >
+              Yes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={openModifyDialog} onOpenChange={setOpenModifyDialog}>
+        <DialogContent className="sm:max-w-lg h-52">
+          <DialogHeader>
+            <DialogTitle>Modify Request</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">
+            This will terminate your current request and redirect you to modify
+            your request. Continue?
+          </p>
+          <DialogFooter className="flex justify-between gap-6">
+            <Button
+              variant="secondary"
+              className="w-1/2 rounded-md"
+              onClick={() => setOpenModifyDialog(false)}
+            >
+              No
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-1/2 rounded-md"
+              onClick={confirmModifyRequest}
+            >
+              Yes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={openTerminateAndCallDialog}
+        onOpenChange={setOpenTerminateAndCallDialog}
+      >
+        <DialogContent className="sm:max-w-lg h-52">
+          <DialogHeader>
+            <DialogTitle>Terminate and Call Myself</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">
+            This will terminate your current request and allow you to call the
+            doctor directly. Continue?
+          </p>
+          <DialogFooter className="flex justify-between gap-6">
+            <Button
+              variant="secondary"
+              className="w-1/2 rounded-md"
+              onClick={() => setOpenTerminateAndCallDialog(false)}
+            >
+              No
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-1/2 rounded-md"
+              onClick={confirmTerminateAndCallMyself}
             >
               Yes
             </Button>
