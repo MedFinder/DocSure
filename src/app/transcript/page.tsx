@@ -317,12 +317,54 @@ export default function Transcript() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCallIndex, phoneNumbers, doctors]);
   //console.log(phoneNumbers.length);
+  // useEffect(() => {
+  //   if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
+  //     setShowTranscript(true);
+  //     setTranscriptArray((prev) => [
+  //       ...prev,
+  //       `Calling ${doctors[activeCallIndex]?.name} to seek an appointment\n`,
+  //     ]);
+  //     console.log("ws listener added for id:", callStatus?.ssid);
+  //     if (wsRef.current.readyState !== WebSocket.OPEN) {
+  //       console.log("WebSocket not in OPEN state:", wsRef.current.readyState);
+  //       return;
+  //     }
+  //     try {
+  //       wsRef.current.send(
+  //         JSON.stringify({
+  //           event: "start",
+  //           transcription_id: callStatus.ssid,
+  //         })
+  //       );
+  //       // console.log('WebSocket message sent successfully');
+  //     } catch (error) {
+  //       console.log("Failed to send WebSocket message:", error);
+  //     }
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [callStatus, doctors, wsRef]);
   useEffect(() => {
     if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
       setShowTranscript(true);
       setTranscriptArray((prev) => [
         ...prev,
-        `Calling ${doctors[activeCallIndex]?.name} to seek an appointment\n`,
+        <div
+          key={prev.length} // Ensure unique key for React rendering
+          style={{
+            backgroundColor: doctors[activeCallIndex]?.name.includes(
+              "DocusureAI"
+            )
+              ? "#FFF6F2" // Light orange for "DocusureAI"
+              : doctors[activeCallIndex]?.name.includes("Doctor's Office")
+              ? "#E6F7FF" // Light blue for "Doctor's Office"
+              : "#F0F0F0", // Default light gray for other rows
+            padding: "8px",
+            borderRadius: "4px",
+            marginBottom: "8px",
+          }}
+        >
+          {`Calling ${doctors[activeCallIndex]?.name} to seek an appointment`}
+        </div>,
       ]);
       console.log("ws listener added for id:", callStatus?.ssid);
       if (wsRef.current.readyState !== WebSocket.OPEN) {
@@ -336,14 +378,12 @@ export default function Transcript() {
             transcription_id: callStatus.ssid,
           })
         );
-        // console.log('WebSocket message sent successfully');
       } catch (error) {
         console.log("Failed to send WebSocket message:", error);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callStatus, doctors, wsRef]);
-
   const terminateRequest = () => {
     // sent ws event to cancel call
     wsRef?.current?.close();
@@ -361,7 +401,7 @@ export default function Transcript() {
     setOpenDialog(true);
   };
   const confirmTermination = () => {
-    track('Terminate_Request_Btn_Clicked');
+    track("Terminate_Request_Btn_Clicked");
     terminateRequest();
     setIsTerminated(true);
     setOpenDialog(false);
@@ -439,7 +479,7 @@ export default function Transcript() {
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
           data
         );
-        track('Initiated_new_call_successfully');
+        track("Initiated_new_call_successfully");
         setCallStatus({
           isInitiated: true,
           ssid: callResponse.data.call_id,
@@ -457,7 +497,7 @@ export default function Transcript() {
         setFormData(updatedFormData);
         sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
       } catch (error) {
-        track('Initiated_new_call_failed');
+        track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
 
         toast.error(error?.response?.data?.detail, {
@@ -467,9 +507,13 @@ export default function Transcript() {
     },
     []
   );
-  const moveToNextDoctor = async (id: string, currentindex: number, request_id: string) => {
+  const moveToNextDoctor = async (
+    id: string,
+    currentindex: number,
+    request_id: string
+  ) => {
     // console.log(id,currentindex,request_id)
-    let newIndex = currentindex+1;
+    let newIndex = currentindex + 1;
     if (id) {
       // wsRef?.current?.close(); // temp solution; disconnect websocket and connect to a new one
       terminateCurrentCall(id);
@@ -577,7 +621,7 @@ export default function Transcript() {
             return;
           } else {
             // console.log("call ended but not booked..this is where skip happens");
-            if(callStatusRef.current.ssid === data?.call_sid){
+            if (callStatusRef.current.ssid === data?.call_sid) {
               toast.warning(
                 "Appointment could not be booked. Trying next doctor..."
               );
@@ -593,14 +637,14 @@ export default function Transcript() {
 
       if (data.event === "call_in_process") {
         const timestamp = new Date().toLocaleTimeString();
-        if(callStatusRef.current.ssid === data?.call_sid){
+        if (callStatusRef.current.ssid === data?.call_sid) {
           setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
         }
       }
 
       if (data.event === "call_not_picked") {
         // doctor did not pick call...move to next
-        if(callStatusRef.current.ssid === data?.call_sid){
+        if (callStatusRef.current.ssid === data?.call_sid) {
           toast.info("Doctor did not pick call. Trying next doctor...");
           moveToNextDoctor(
             null,
@@ -793,6 +837,31 @@ export default function Transcript() {
   const toggleTranscript = () => {
     setShowTranscript((prev) => !prev);
   };
+  const handleTerminateAndCallMyself = () => {
+    if (callStatus?.isInitiated) {
+      // Terminate the current call
+      terminateRequest();
+
+      // Get the current doctor's phone number
+      const currentDoctorPhoneNumber = doctors[activeCallIndex]?.phone_number;
+
+      if (currentDoctorPhoneNumber) {
+        // Trigger the phone dialer
+        window.location.href = `tel:${currentDoctorPhoneNumber}`;
+      } else {
+        toast.error("No phone number available for the current doctor.");
+      }
+    }
+  };
+  const handleModifyRequest = () => {
+    if (callStatus?.isInitiated) {
+      // Terminate the current call
+      terminateRequest();
+
+      // Redirect to the home page or doctor list page
+      router.push("/"); // Replace "/" with the correct route for the doctor list page
+    }
+  };
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <Navbar />
@@ -819,24 +888,28 @@ export default function Transcript() {
             >
               {/* Scrollable doctor cards container */}
 
-                <div className="pr-2 h-[calc(100%-60px)]">
-                  <ScrollArea className="h-full w-full md:w-auto">
-                    {doctors.map((doctor, index) => (
-                      <DoctorCard
-                        key={index}
-                        index={index}
-                        activeCallIndex={activeCallIndex}
-                        doctor={doctor}
-                        callStatus={callStatus}
-                        isAppointmentBooked={isAppointmentBooked}
-                        onSkip={() => {
-                          track('Skip_Call_Btn_Clicked');
-                          moveToNextDoctor(callStatus?.ssid,activeCallIndexRef.current, formData.request_id)
-                        }} // Move to next doctor
-                      />
-                    ))}
-                  </ScrollArea>
-                </div>
+              <div className="pr-2 h-[calc(100%-60px)]">
+                <ScrollArea className="h-full w-full md:w-auto">
+                  {doctors.map((doctor, index) => (
+                    <DoctorCard
+                      key={index}
+                      index={index}
+                      activeCallIndex={activeCallIndex}
+                      doctor={doctor}
+                      callStatus={callStatus}
+                      isAppointmentBooked={isAppointmentBooked}
+                      onSkip={() => {
+                        track("Skip_Call_Btn_Clicked");
+                        moveToNextDoctor(
+                          callStatus?.ssid,
+                          activeCallIndexRef.current,
+                          formData.request_id
+                        );
+                      }} // Move to next doctor
+                    />
+                  ))}
+                </ScrollArea>
+              </div>
 
               {/* Terminate Request Button - fixed at bottom */}
               {/* <div className="flex justify-center mt-4 pb-2">
@@ -852,7 +925,7 @@ export default function Transcript() {
                   Terminate Request
                 </button>
               </div> */}
-              <div className="flex justify-center mt-4 pb-2">
+              <div className="flex gap-4 justify-center mt-4 pb-2">
                 <button
                   onClick={handleTerminateRequest}
                   disabled={!callStatus?.isInitiated}
@@ -863,6 +936,28 @@ export default function Transcript() {
                   }`}
                 >
                   Terminate Request
+                </button>
+                <button
+                  onClick={handleModifyRequest}
+                  disabled={!callStatus?.isInitiated}
+                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                    callStatus?.isInitiated
+                      ? "bg-blue-600 hover:bg-blue-700 text-white"
+                      : "bg-blue-300 cursor-not-allowed text-white opacity-70"
+                  }`}
+                >
+                  Modify My Request
+                </button>
+                <button
+                  onClick={handleTerminateAndCallMyself}
+                  disabled={!callStatus?.isInitiated}
+                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                    callStatus?.isInitiated
+                      ? "bg-orange-600 hover:bg-orange-700 text-white"
+                      : "bg-orange-300 cursor-not-allowed text-white opacity-70"
+                  }`}
+                >
+                  Terminate And Call Myself
                 </button>
               </div>
             </div>
