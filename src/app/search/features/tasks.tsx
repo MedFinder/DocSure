@@ -96,12 +96,12 @@ export const Task: React.FC<TaskProps> = ({
             </div>
 
             {/* Avatar with Dynamic Background Color */}
-            <div
+            {/* <div
               className="rounded-full text-black flex items-center justify-center font-bold w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
               style={{ backgroundColor: getAlternateColor(index) }}
             >
               {title.charAt(0)}
-            </div>
+            </div> */}
 
             {/* Doctor Info */}
             <div className="flex md:flex-col flex-row justify-between items-center md:text-center text-left">
