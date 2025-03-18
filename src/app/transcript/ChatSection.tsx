@@ -13,6 +13,16 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   // Check if transcripts is an array or a string
   const hasTranscripts = Array.isArray(transcripts) && transcripts.length > 0;
   //const initialMessage = !hasTranscripts || transcripts === "Waiting for conversation to begin...";
+  const getBackgroundColor = (message: string) => {
+    if (message.includes("Calling")) {
+      return "bg-orange-50";
+    } else if (message.includes("Docsure AI")) {
+      return "bg-white";
+    } else if (message.includes("Doctor Office")) {
+      return "bg-gray-100";
+    }
+    return "bg-gray-100";
+  };
 
   return (
     <aside className="flex flex-col px-7 py-9 w-full rounded bg-sky-600 bg-opacity-10 max-md:px-5 max-md:mt-6 max-md:max-w-full h-full overflow-hidden">
@@ -37,11 +47,22 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
         )} */}
 
         {/* Map through transcripts if available */}
-        {hasTranscripts &&
+        {/* {hasTranscripts &&
           transcripts.map((message, index) => (
             <div
               key={index}
               className="flex shrink-0 mt-3 bg-white p-3 min-h-[47px] items-center max-md:max-w-full"
+            >
+              <p className="text-sm text-gray-700">{message}</p>
+            </div>
+          ))} */}
+        {hasTranscripts &&
+          transcripts.map((message, index) => (
+            <div
+              key={index}
+              className={`flex shrink-0 mt-3 p-3 min-h-[47px] items-center max-md:max-w-full rounded ${getBackgroundColor(
+                message
+              )}`}
             >
               <p className="text-sm text-gray-700">{message}</p>
             </div>

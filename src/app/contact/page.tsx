@@ -15,6 +15,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { track } from "@vercel/analytics";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Loader2 } from "lucide-react";
 
 // Validation schema remains the same - all fields required
 const validationSchema = Yup.object().shape({
@@ -78,62 +79,60 @@ export default function Contact() {
       }
     }
   }, []);
-    // Utility function to format date without timezone issues
-    const formatDateToYYYYMMDD = (date) => {
-      const year = date.getFullYear();
-      // getMonth() is zero-based, so add 1
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
+  // Utility function to format date without timezone issues
+  const formatDateToYYYYMMDD = (date) => {
+    const year = date.getFullYear();
+    // getMonth() is zero-based, so add 1
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
 
   const formik = useFormik({
     initialValues: {
       patientName: formData.patientName || "",
       phoneNumber: formData.phoneNumber || "",
       email: formData.email || "",
-      // dob: formData.dob ? formatDateToYYYYMMDD(formData.dob) : null,
       address: formData.address || "",
     },
     validationSchema,
     onSubmit: async (values) => {
-      track('ContactPage_Btn_Clicked');
-      // Remove the manual empty fields check since formik will handle this
-      // Use formik's built-in validation instead
+      track("ContactPage_Btn_Clicked");
 
       if (!formik.isValid) {
         toast.error("Please fill up all the required information");
         return;
       }
 
-      setIsLoading(true);
+      setIsLoading(true); // Show spinner
       const updatedFormData = {
-        ...formData, // Preserve existing data
-        ...values, // Add new values
+        ...formData,
+        ...values,
         dob: formatDateToYYYYMMDD(values.dob),
         gender,
-        address: values.address || formData.address, // Keep existing address if unchanged
+        address: values.address || formData.address,
       };
+
       try {
+        // Simulate a 1-second delay
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
         window.sessionStorage.setItem(
           "formData",
           JSON.stringify(updatedFormData)
         );
 
-        router.push("/transcript?confirmed=true"); // Redirect immediately after confirming
+        router.push("/transcript?confirmed=true"); // Redirect after delay
       } catch (error) {
         console.error("Error submitting form:", error);
         toast.error("An error occurred. Please try again.");
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Hide spinner
       }
     },
-    // Enable validation on change
     validateOnChange: true,
-    // Add validation on blur
     validateOnBlur: true,
   });
-
 
   // Force validation of all fields on submission attempt
   const handleSubmit = (e) => {
@@ -236,14 +235,8 @@ export default function Contact() {
                 className="flex flex-row gap-4"
               >
                 {genderOptions.map((option) => (
-                  <div
-                    key={option.value}
-                    className="flex items-center gap-2"
-                  >
-                    <RadioGroupItem
-                      id={option.value}
-                      value={option.value}
-                    />
+                  <div key={option.value} className="flex items-center gap-2">
+                    <RadioGroupItem id={option.value} value={option.value} />
                     <Label htmlFor={option.value}>{option.label}</Label>
                   </div>
                 ))}
@@ -334,10 +327,16 @@ export default function Contact() {
           <div className="flex justify-center md:mt-12 mt-6">
             <Button
               type="submit"
-              className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto"
+              className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto flex items-center justify-center"
               disabled={isLoading}
             >
-              {isLoading ? "Submitting..." : "Continue"}
+              {isLoading ? (
+                <span className="px-6">
+                  <Loader2 className="animate-spin w-5 h-5" />
+                </span>
+              ) : (
+                "Continue"
+              )}
             </Button>
           </div>
         </div>

@@ -193,6 +193,9 @@ export default function Transcript() {
   const [context, setcontext] = useState("");
 
   const [openDialog, setOpenDialog] = useState(false);
+  const [openModifyDialog, setOpenModifyDialog] = useState(false); // Dialog for Modify Request
+  const [openTerminateAndCallDialog, setOpenTerminateAndCallDialog] =
+    useState(false); // Dialog for Terminate and Call Myself
   const [isTerminated, setIsTerminated] = useState(false);
 
   useEffect(() => {
@@ -313,8 +316,8 @@ export default function Transcript() {
 
   const handleConfirmSequence = useCallback(async () => {
     const formData = JSON.parse(sessionStorage.getItem("formData"));
-    const request_id =  await logRequestInfo();
-    if (request_id){
+    const request_id = await logRequestInfo();
+    if (request_id) {
       // console.log(request_id);
       const updatedFormData = {
         ...formData,
@@ -333,14 +336,11 @@ export default function Transcript() {
         );
         return;
       } catch (error) {
-        console.error(
-          "Error initiating call:",
-          error
-        );
+        console.error("Error initiating call:", error);
         setIsConfirmed(false); // Re-enable button and dragging if there's an error
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCallIndex, doctors, phoneNumbers]);
   //console.log(phoneNumbers.length);
   useEffect(() => {
@@ -369,7 +369,47 @@ export default function Transcript() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callStatus, doctors, wsRef]);
-
+  // useEffect(() => {
+  //   if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
+  //     setShowTranscript(true);
+  //     setTranscriptArray((prev) => [
+  //       ...prev,
+  //       <p
+  //         key={prev.length} // Ensure unique key for React rendering
+  //         style={{
+  //           backgroundColor: doctors[activeCallIndex]?.name.includes(
+  //             "DocsureAI"
+  //           )
+  //             ? "#FFF6F2" // Light orange for "DocusureAI"
+  //             : doctors[activeCallIndex]?.name.includes("Doctor's Office")
+  //             ? "#E6F7FF" // Light blue for "Doctor's Office"
+  //             : "#F0F0F0", // Default light gray for other rows
+  //           padding: "8px",
+  //           borderRadius: "4px",
+  //           marginBottom: "8px",
+  //         }}
+  //       >
+  //         {`Calling ${doctors[activeCallIndex]?.name} to seek an appointment`}
+  //       </p>,
+  //     ]);
+  //     console.log("ws listener added for id:", callStatus?.ssid);
+  //     if (wsRef.current.readyState !== WebSocket.OPEN) {
+  //       console.log("WebSocket not in OPEN state:", wsRef.current.readyState);
+  //       return;
+  //     }
+  //     try {
+  //       wsRef.current.send(
+  //         JSON.stringify({
+  //           event: "start",
+  //           transcription_id: callStatus.ssid,
+  //         })
+  //       );
+  //     } catch (error) {
+  //       console.log("Failed to send WebSocket message:", error);
+  //     }
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [callStatus, doctors, wsRef]);
   const terminateRequest = () => {
     // sent ws event to cancel call
     wsRef?.current?.close();
@@ -387,7 +427,7 @@ export default function Transcript() {
     setOpenDialog(true);
   };
   const confirmTermination = () => {
-    track('Terminate_Request_Btn_Clicked');
+    track("Terminate_Request_Btn_Clicked");
     terminateRequest();
     setIsTerminated(true);
     setOpenDialog(false);
@@ -464,7 +504,7 @@ export default function Transcript() {
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
           data
         );
-        track('Initiated_new_call_successfully');
+        track("Initiated_new_call_successfully");
         connectWebSocket(callResponse.data.call_id);
         setCallStatus({
           isInitiated: true,
@@ -483,7 +523,7 @@ export default function Transcript() {
         setFormData(updatedFormData);
         sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
       } catch (error) {
-        track('Initiated_new_call_failed');
+        track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
 
         toast.error(error?.response?.data?.detail, {
@@ -494,9 +534,13 @@ export default function Transcript() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [formData]
   );
-  const moveToNextDoctor = async (id: string, currentindex: number, request_id: string) => {
+  const moveToNextDoctor = async (
+    id: string,
+    currentindex: number,
+    request_id: string
+  ) => {
     // console.log(id,currentindex,request_id)
-    let newIndex = currentindex+1;
+    let newIndex = currentindex + 1;
     if (id) {
       // wsRef?.current?.close(); // temp solution; disconnect websocket and connect to a new one
       terminateCurrentCall(id);
@@ -538,11 +582,11 @@ export default function Transcript() {
     //   console.log("disconnect exisiting connection if it exists...");
     //   wsRef?.current?.close();
     // }
-    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${id ?? callStatusRef.current.ssid  }`;
-    console.log(url)
-    wsRef.current = new WebSocket(
-      url
-    );
+    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
+      id ?? callStatusRef.current.ssid
+    }`;
+    console.log(url);
+    wsRef.current = new WebSocket(url);
 
     wsRef.current.onopen = () => {
       console.log("WebSocket connected successfully and opened.");
@@ -576,7 +620,7 @@ export default function Transcript() {
             return;
           } else {
             // console.log("call ended but not booked..this is where skip happens");
-            if(callStatusRef.current.ssid === data?.call_sid){
+            if (callStatusRef.current.ssid === data?.call_sid) {
               toast.warning(
                 "Appointment could not be booked. Trying next doctor..."
               );
@@ -592,14 +636,14 @@ export default function Transcript() {
 
       if (data.event === "call_in_process") {
         const timestamp = new Date().toLocaleTimeString();
-        if(callStatusRef.current.ssid === data?.call_sid){
+        if (callStatusRef.current.ssid === data?.call_sid) {
           setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
         }
       }
 
       if (data.event === "call_not_picked") {
         // doctor did not pick call...move to next
-        if(callStatusRef.current.ssid === data?.call_sid){
+        if (callStatusRef.current.ssid === data?.call_sid) {
           toast.info("Doctor did not pick call. Trying next doctor...");
           moveToNextDoctor(
             null,
@@ -791,6 +835,59 @@ export default function Transcript() {
   const toggleTranscript = () => {
     setShowTranscript((prev) => !prev);
   };
+  const confirmModifyRequest = async () => {
+    setOpenModifyDialog(false); // Close the dialog
+    if (callStatus?.isInitiated) {
+      try {
+        await terminateCurrentCall(callStatus?.ssid);
+        console.log("Call has been terminated successfully.");
+      } catch (error) {
+        console.error("Failed to log call termination:", error);
+        toast.error("Failed to terminate the call. Please try again.");
+        return;
+      }
+
+      terminateRequest();
+
+      const savedAddress = sessionStorage.getItem("selectedAddress");
+      const specialty = formData?.specialty;
+
+      router.push(
+        `/?address=${encodeURIComponent(
+          savedAddress || ""
+        )}&specialty=${encodeURIComponent(specialty || "")}`
+      );
+    }
+  };
+
+  const confirmTerminateAndCallMyself = async () => {
+    setOpenTerminateAndCallDialog(false); // Close the dialog
+    if (callStatus?.isInitiated) {
+      try {
+        await terminateCurrentCall(callStatus?.ssid);
+        console.log("Call has been terminated successfully.");
+      } catch (error) {
+        console.error("Failed to log call termination:", error);
+        toast.error("Failed to terminate the call. Please try again.");
+        return;
+      }
+
+      terminateRequest();
+
+      const currentDoctorPhoneNumber = doctors[activeCallIndex]?.phone_number;
+
+      if (currentDoctorPhoneNumber) {
+        window.location.href = `tel:${currentDoctorPhoneNumber}`;
+      } else {
+        toast.error("No phone number available for the current doctor.");
+      }
+    }
+  };
+
+  // const handleCall = () => {
+  //   window.location.href = `tel:${+2348167238042}`;
+  // };
+
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <Navbar />
@@ -817,24 +914,28 @@ export default function Transcript() {
             >
               {/* Scrollable doctor cards container */}
 
-                <div className="pr-2 h-[calc(100%-60px)]">
-                  <ScrollArea className="h-full w-full md:w-auto">
-                    {doctors.map((doctor, index) => (
-                      <DoctorCard
-                        key={index}
-                        index={index}
-                        activeCallIndex={activeCallIndex}
-                        doctor={doctor}
-                        callStatus={callStatus}
-                        isAppointmentBooked={isAppointmentBooked}
-                        onSkip={() => {
-                          track('Skip_Call_Btn_Clicked');
-                          moveToNextDoctor(callStatus?.ssid,activeCallIndexRef.current, formData.request_id)
-                        }} // Move to next doctor
-                      />
-                    ))}
-                  </ScrollArea>
-                </div>
+              <div className="pr-2 h-[calc(100%-60px)]">
+                <ScrollArea className="h-full w-full md:w-auto">
+                  {doctors.map((doctor, index) => (
+                    <DoctorCard
+                      key={index}
+                      index={index}
+                      activeCallIndex={activeCallIndex}
+                      doctor={doctor}
+                      callStatus={callStatus}
+                      isAppointmentBooked={isAppointmentBooked}
+                      onSkip={() => {
+                        track("Skip_Call_Btn_Clicked");
+                        moveToNextDoctor(
+                          callStatus?.ssid,
+                          activeCallIndexRef.current,
+                          formData.request_id
+                        );
+                      }} // Move to next doctor
+                    />
+                  ))}
+                </ScrollArea>
+              </div>
 
               {/* Terminate Request Button - fixed at bottom */}
               {/* <div className="flex justify-center mt-4 pb-2">
@@ -850,17 +951,39 @@ export default function Transcript() {
                   Terminate Request
                 </button>
               </div> */}
-              <div className="flex justify-center mt-4 pb-2">
+              <div className="flex flex-row md:flex-row gap-4 justify-start md:justify-center mt-4 pb-2 overflow-x-auto whitespace-nowrap">
                 <button
                   onClick={handleTerminateRequest}
                   disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
                     callStatus?.isInitiated
                       ? "bg-red-600 hover:bg-red-700 text-white"
                       : "bg-red-300 cursor-not-allowed text-white opacity-70"
                   }`}
                 >
                   Terminate Request
+                </button>
+                <button
+                  onClick={() => setOpenModifyDialog(true)}
+                  disabled={!callStatus?.isInitiated}
+                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
+                    callStatus?.isInitiated
+                      ? "bg-blue-600 hover:bg-blue-700 text-white"
+                      : "bg-blue-300 cursor-not-allowed text-white opacity-70"
+                  }`}
+                >
+                  Modify My Request
+                </button>
+                <button
+                  onClick={() => setOpenTerminateAndCallDialog(true)}
+                  disabled={!callStatus?.isInitiated}
+                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
+                    callStatus?.isInitiated
+                      ? "bg-orange-600 hover:bg-orange-700 text-white"
+                      : "bg-orange-300 cursor-not-allowed text-white opacity-70"
+                  }`}
+                >
+                  Terminate And Call Myself
                 </button>
               </div>
             </div>
@@ -907,6 +1030,63 @@ export default function Transcript() {
               variant="destructive"
               className="w-1/2 rounded-md"
               onClick={confirmTermination}
+            >
+              Yes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={openModifyDialog} onOpenChange={setOpenModifyDialog}>
+        <DialogContent className="sm:max-w-lg h-52">
+          <DialogHeader>
+            <DialogTitle>Modify Request</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">
+            This will terminate your current request and redirect you to modify
+            your request. Continue?
+          </p>
+          <DialogFooter className="flex justify-between gap-6">
+            <Button
+              variant="secondary"
+              className="w-1/2 rounded-md"
+              onClick={() => setOpenModifyDialog(false)}
+            >
+              No
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-1/2 rounded-md"
+              onClick={confirmModifyRequest}
+            >
+              Yes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={openTerminateAndCallDialog}
+        onOpenChange={setOpenTerminateAndCallDialog}
+      >
+        <DialogContent className="sm:max-w-lg h-52">
+          <DialogHeader>
+            <DialogTitle>Terminate and Call Myself</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">
+            This will terminate your current request and allow you to call the
+            doctor directly. Continue?
+          </p>
+          <DialogFooter className="flex justify-between gap-6">
+            <Button
+              variant="secondary"
+              className="w-1/2 rounded-md"
+              onClick={() => setOpenTerminateAndCallDialog(false)}
+            >
+              No
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-1/2 rounded-md"
+              onClick={confirmTerminateAndCallMyself}
             >
               Yes
             </Button>
