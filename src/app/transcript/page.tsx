@@ -412,7 +412,7 @@ export default function Transcript() {
   // }, [callStatus, doctors, wsRef]);
   const terminateRequest = () => {
     // sent ws event to cancel call
-    wsRef?.current?.close();
+    // wsRef?.current?.close();
     setIsConfirmed(false);
     terminateCurrentCall(callStatus?.ssid);
     setTimeout(() => {
@@ -552,7 +552,7 @@ export default function Transcript() {
       const nextDoctor = doctors[newIndex];
       // console.log("Calling next doctor:", nextDoctor);
 
-      const phoneNumber = phoneNumbers[newIndex]; //+2348168968260
+      const phoneNumber = phoneNumbers[newIndex] ?? nextDoctor?.phone_number ; //+2348168968260
       const nameOfOrg = nextDoctor?.name; //+2348168968260
       if (phoneNumber) {
         await initiateCall(
