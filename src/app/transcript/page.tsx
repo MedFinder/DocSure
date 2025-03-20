@@ -23,7 +23,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { track } from "@vercel/analytics";
-import { sendGTMEvent } from "@next/third-parties/google";
 
 const _doctors: Doctor[] = [
   {
@@ -207,13 +206,6 @@ export default function Transcript() {
     }
   }, []);
   const pathname = usePathname();
-    useEffect(() => {
-        sendGTMEvent({
-            event: 'page_view',
-            page_location: window.location.href,
-            page_path: pathname,
-        });
-      }), [],
   useEffect(() => {
     activeCallIndexRef.current = activeCallIndex;
   }, [activeCallIndex]);
