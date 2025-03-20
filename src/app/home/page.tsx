@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { Combobox } from "@/components/ui/combo-box";
 import { medicalSpecialtiesOptions } from "@/constants/store-constants";
 import { Autocomplete } from "../../../components/ui/autocomplete";
-import { sendGTMEvent } from "@next/third-parties/google";
+import { trackConversion } from '../../../src/lib/gtag';
 
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
@@ -130,13 +130,6 @@ function HomePage() {
   // }, [searchParams]);
   const pathname = usePathname();
 
-    useEffect(() => {
-        sendGTMEvent({
-            event: 'page_view',
-            page_location: window.location.href,
-            page_path: pathname,
-        });
-      }), [],
   useEffect(() => {
     const address = searchParams.get("address");
     const specialty = searchParams.get("specialty");
@@ -257,10 +250,11 @@ function HomePage() {
       <div className="h-screen flex flex-col items-center justify-center md:px-6 px-0 ">
         {/* Centered Main Content */}
         <div className="text-start items-center space-y-4 w-full px-6 sm:px-20 lg:px-40   md:mt-0">
-          <p onClick={()=>       sendGTMEvent({
-        event: 'button_click',
-        button_id: 'my-button',
-      })} className="text-4xl sm:text-5xl text-left mb-8 text-[#333333]  font-medium md:font-normal">
+          <p onClick={()=>trackConversion('conversion', {
+      label: 'testing_conversion', // Optional, from Google Ads
+      value: 10.0,
+      currency: 'USD',
+    })} className="text-4xl sm:text-5xl text-left mb-8 text-[#333333]  font-medium md:font-normal">
             Book top rated doctors near me
           </p>
 
