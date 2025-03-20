@@ -8,7 +8,7 @@ import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Column from "../search/features/column";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { track } from "@vercel/analytics";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 const _doctors: Doctor[] = [
   {
@@ -205,7 +206,14 @@ export default function Transcript() {
       setFormData(JSON.parse(storedFormData));
     }
   }, []);
-
+  const pathname = usePathname();
+    useEffect(() => {
+        sendGTMEvent({
+            event: 'page_view',
+            page_location: window.location.href,
+            page_path: pathname,
+        });
+      }), [],
   useEffect(() => {
     activeCallIndexRef.current = activeCallIndex;
   }, [activeCallIndex]);
