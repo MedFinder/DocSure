@@ -9,7 +9,7 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useFormik } from "formik";
 import { track } from "@vercel/analytics";
 import * as Yup from "yup";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   GoogleMap,
   useJsApiLoader,
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Combobox } from "@/components/ui/combo-box";
 import { medicalSpecialtiesOptions } from "@/constants/store-constants";
 import { Autocomplete } from "../../../components/ui/autocomplete";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
@@ -127,6 +128,15 @@ function HomePage() {
   //     setSelectedLocation(JSON.parse(savedLocation));
   //   }
   // }, [searchParams]);
+  const pathname = usePathname();
+
+    useEffect(() => {
+        sendGTMEvent({
+            event: 'page_view',
+            page_location: window.location.href,
+            page_path: pathname,
+        });
+      }), [],
   useEffect(() => {
     const address = searchParams.get("address");
     const specialty = searchParams.get("specialty");
@@ -247,7 +257,10 @@ function HomePage() {
       <div className="h-screen flex flex-col items-center justify-center md:px-6 px-0 ">
         {/* Centered Main Content */}
         <div className="text-start items-center space-y-4 w-full px-6 sm:px-20 lg:px-40   md:mt-0">
-          <p className="text-4xl sm:text-5xl text-left mb-8 text-[#333333]  font-medium md:font-normal">
+          <p onClick={()=>       sendGTMEvent({
+        event: 'button_click',
+        button_id: 'my-button',
+      })} className="text-4xl sm:text-5xl text-left mb-8 text-[#333333]  font-medium md:font-normal">
             Book top rated doctors near me
           </p>
 
