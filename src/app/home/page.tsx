@@ -180,6 +180,11 @@ function HomePage() {
     validationSchema,
     onSubmit: async (values) => {
       track("Homepage_Search_Btn_Clicked");
+      trackConversion('conversion', {
+        label: 'x4dOCIyosK0aEP7Fg6Io', // Optional, from Google Ads
+        value: 10.0,
+        currency: 'USD',
+      })
       console.log(values);
       const updatedValues = { ...values };
 
@@ -251,7 +256,7 @@ function HomePage() {
         {/* Centered Main Content */}
         <div className="text-start items-center space-y-4 w-full px-6 sm:px-20 lg:px-40   md:mt-0">
           <p onClick={()=>trackConversion('conversion', {
-      label: 'testing_conversion', // Optional, from Google Ads
+      label: 'x4dOCIyosK0aEP7Fg6Io', // Optional, from Google Ads
       value: 10.0,
       currency: 'USD',
     })} className="text-4xl sm:text-5xl text-left mb-8 text-[#333333]  font-medium md:font-normal">
