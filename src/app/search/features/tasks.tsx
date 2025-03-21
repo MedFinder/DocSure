@@ -83,7 +83,7 @@ export const Task: React.FC<TaskProps> = ({
           <div className="flex items-center gap-3">
             {/* Number & Input Design Element */}
             <div className="flex items-center mr-1">
-              <div className="md:flex items-center hidden justify-center mr-2">
+              <div className="md:flex items-center hidden  mr-2">
                 <img
                   src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
                   alt="Input design element"
@@ -104,7 +104,7 @@ export const Task: React.FC<TaskProps> = ({
             </div> */}
 
             {/* Doctor Info */}
-            <div className="flex md:flex-col flex-row justify-between items-center md:text-center text-left">
+            <div className="flex md:flex-col flex-row justify-between items-center md:text-center">
               <a
                 href={website}
                 target="_blank"
