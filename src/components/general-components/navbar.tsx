@@ -86,7 +86,7 @@ export default function Navbar() {
     validationSchema,
     onSubmit: async (values) => {
       console.log(values);
-      track('Navbar_Search_Btn_Clicked');
+      track("Navbar_Search_Btn_Clicked");
       const updatedValues = { ...values };
 
       setisLoading(true);
@@ -274,7 +274,11 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-8 items-center text-md font-normal">
-          <Link onClick={()=> track('Help_Btn_Clicked')} href="/contact-us" className="hover:text-gray-500">
+          <Link
+            onClick={() => track("Help_Btn_Clicked")}
+            href="/contact-us"
+            className="hover:text-gray-500"
+          >
             Help
           </Link>
         </div>
@@ -302,71 +306,56 @@ export default function Navbar() {
 
       {/* Mobile Sidebar */}
 
-      <div
-        className={cn(
-          "fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out",
+      {/* Mobile Sidebar */}
+      {isOpen && (
+        <div className="fixed inset-0 md:hidden flex">
+          {/* Sidebar */}
+          <div
+            className={cn(
+              "fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out",
+              isOpen ? "translate-x-0" : "-translate-x-full"
+            )}
+            onClick={(e) => e.stopPropagation()} // Prevent sidebar clicks from closing it
+          >
+            <div className="flex justify-between items-center px-6 py-4 border-b">
+              <Link href="/" className="flex items-center gap-2">
+                <Image
+                  src="/Logo.png"
+                  alt="Docsure Logo"
+                  width={24}
+                  height={24}
+                  className="w-auto h-auto"
+                />
+                <span className="text-xl font-semibold text-[#FF6723]">
+                  DocSure
+                </span>
+              </Link>
+              <button onClick={closeSidebar}>
+                <X className="w-6 h-6 text-gray-700" />
+              </button>
+            </div>
 
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="flex justify-between items-center px-6 py-4 border-b">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/Logo.png" // Fixed path - removed "/public/" prefix
-              alt="Docsure Logo"
-              width={24}
-              height={24}
-              className="w-auto h-auto"
-            />
-
-            <span className="text-xl font-semibold text-[#FF6723]">
-              DocSure
-            </span>
+            <nav className="flex flex-col gap-6 p-6 text-lg">
+              {/* Ensure links don't close the sidebar unless explicitly intended */}
+              <Link
+                href="/contact-us"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent sidebar from closing
+                  router.push("/contact-us"); // Navigate to page
+                }}
+                className="hover:text-gray-500"
+              >
+                Help
+              </Link>
+            </nav>
           </div>
 
-          <button onClick={closeSidebar}>
-            <X className="w-6 h-6 text-gray-700" />
-          </button>
+          {/* Overlay (clicking outside will close sidebar) */}
+          <div
+            className="flex-1 bg-black bg-opacity-30"
+            onClick={closeSidebar} // Clicks outside sidebar close it
+          />
         </div>
-
-        <nav className="flex flex-col gap-6 p-6 text-lg">
-          {/* <Link href="/" onClick={closeSidebar}>
-
-            Browse
-
-          </Link> */}
-
-          <Link href="/contact-us" onClick={closeSidebar}>
-            Help
-          </Link>
-
-          {/* <Link href="" onClick={closeSidebar}>
-
-            Log In
-
-          </Link>
-
-          <Button
-
-            className="bg-[#0074BA] rounded-none w-full"
-
-            onClick={closeSidebar}
-
-          >
-
-            Sign Up
-
-          </Button> */}
-        </nav>
-      </div>
-
-      {/* Overlay when Sidebar is Open */}
-
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-30 md:hidden"
-          onClick={closeSidebar}
-        />
       )}
     </div>
   );
@@ -598,10 +587,10 @@ export default function Navbar() {
 //     }
 
 //     // Retrieve lat/lng if available
-    // const savedLocation = sessionStorage.getItem("selectedLocation");
-    // if (savedLocation) {
-    //   setSelectedLocation(JSON.parse(savedLocation));
-    // }
+// const savedLocation = sessionStorage.getItem("selectedLocation");
+// if (savedLocation) {
+//   setSelectedLocation(JSON.parse(savedLocation));
+// }
 //   }, [searchParams]);
 
 //   // const handleOnPlacesChanged = (index) => {
