@@ -57,7 +57,7 @@
 
   .task-table td {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     padding: 8px 10px;
     border-bottom: none;
   }
