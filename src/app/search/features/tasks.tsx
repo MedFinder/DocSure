@@ -139,9 +139,7 @@ export const Task: React.FC<TaskProps> = ({
                   </div>
                   <div className="flex flex-grow items-center gap-x-2 gap-y-1 text-gray-500 text-xs">
                     <MapPin size={13} />
-                    <span className=" md:block hidden">
-                      {distance || "-"}
-                    </span>
+                    <span className=" md:block hidden">{distance || "-"}</span>
                     <span className=" md:block hidden">•</span>
                     <span className="">{vicinity}</span>
                   </div>
@@ -244,14 +242,14 @@ export const Task: React.FC<TaskProps> = ({
       </tr>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg h-52">
+        <DialogContent className="sm:max-w-lg h-52 ">
           <DialogHeader>
             <DialogTitle>Remove from List</DialogTitle>
           </DialogHeader>
           <p className="text-gray-600">
             Are you sure you want to delete this item?
           </p>
-          <div className="flex justify-between gap-6">
+          <div className="md:flex  flex  justify-between gap-6">
             <Button
               variant="secondary"
               className="w-1/2 rounded-md"
