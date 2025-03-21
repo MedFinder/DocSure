@@ -137,13 +137,13 @@ export const Task: React.FC<TaskProps> = ({
                       {distance || "-"}
                     </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-gray-500 text-xs">
+                  <div className="flex flex-grow items-center gap-x-2 gap-y-1 text-gray-500 text-xs">
                     <MapPin size={13} />
-                    <span className="whitespace-nowrap md:block hidden">
+                    <span className=" md:block hidden">
                       {distance || "-"}
                     </span>
-                    <span className="whitespace-nowrap md:block hidden">•</span>
-                    <span className="whitespace-nowrap">{vicinity}</span>
+                    <span className=" md:block hidden">•</span>
+                    <span className="">{vicinity}</span>
                   </div>
                 </div>
               </div>
@@ -151,7 +151,7 @@ export const Task: React.FC<TaskProps> = ({
           </div>
           <button
             onClick={() => setOpen(true)}
-            className="flex self-end ml-auto md:ml-0 pl-4" 
+            className="flex mr-10 ml-auto md:ml-0 pl-4"
             onPointerDown={(e) => e.stopPropagation()}
           >
             <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
