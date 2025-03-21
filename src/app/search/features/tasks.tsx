@@ -151,7 +151,7 @@ export const Task: React.FC<TaskProps> = ({
           </div>
           <button
             onClick={() => setOpen(true)}
-            className="flex self-end ml-auto md:ml-0"
+            className="flex self-end ml-auto md:ml-0 pl-4" 
             onPointerDown={(e) => e.stopPropagation()}
           >
             <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
