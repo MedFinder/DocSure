@@ -26,7 +26,7 @@ export default function RootLayout({
           {children}
           {/* </Suspense> */}
           <Analytics />
-          <GTMAnalytics />
+          {/* <GTMAnalytics /> */}
           <Toaster richColors={true} position="top-right" />
         </body>
       </Providers>
