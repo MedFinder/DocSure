@@ -80,11 +80,11 @@ export default function Contact() {
         setSearchData(JSON.parse(storedSearchData));
       }
     }
-    trackConversion('conversion', {
-      label: 'FrmFCKr6g64aEP7Fg6Io', // Optional, from Google Ads
-      'value': 2.0,
-      'currency': 'USD'
-    });
+    // trackConversion('conversion', {
+    //   label: 'FrmFCKr6g64aEP7Fg6Io', // Optional, from Google Ads
+    //   'value': 2.0,
+    //   'currency': 'USD'
+    // });
   }, []);
   // Utility function to format date without timezone issues
   const formatDateToYYYYMMDD = (date) => {
@@ -105,11 +105,11 @@ export default function Contact() {
     validationSchema,
     onSubmit: async (values) => {
       track("ContactPage_Btn_Clicked");
-      trackConversion('conversion', {
-        label: 'FrmFCKr6g64aEP7Fg6Io', // Optional, from Google Ads
-        'value': 2.0,
-        'currency': 'USD'
-      });
+      // trackConversion('conversion', {
+      //   label: 'FrmFCKr6g64aEP7Fg6Io', // Optional, from Google Ads
+      //   'value': 2.0,
+      //   'currency': 'USD'
+      // });
 
       if (!formik.isValid) {
         toast.error("Please fill up all the required information");
@@ -185,11 +185,7 @@ export default function Contact() {
         className="h-screen flex flex-col justify-center items-center px-6 sm:px-10"
       >
         <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg mt-32 md:mt-12">
-          <p onClick={()=>     trackConversion('conversion', {
-      label: 'FrmFCKr6g64aEP7Fg6Io', // Optional, from Google Ads
-      'value': 2.0,
-      'currency': 'USD'
-    })} className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
+          <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
             One Last Step
           </p>
           <div className="space-y-6">
