@@ -21,6 +21,7 @@ import { Combobox } from "@/components/ui/combo-box";
 import { medicalSpecialtiesOptions } from "@/constants/store-constants";
 import { Autocomplete } from "../../../components/ui/autocomplete";
 import { trackConversion } from '../../../src/lib/gtag';
+import { sendGTMEvent } from "@next/third-parties/google";
 
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
@@ -180,11 +181,11 @@ function HomePage() {
     validationSchema,
     onSubmit: async (values) => {
       track("Homepage_Search_Btn_Clicked");
-      trackConversion('conversion', {
-        label: 'x4dOCIyosK0aEP7Fg6Io', // Optional, from Google Ads
-        value: 10.0,
-        currency: 'USD',
-      })
+      // trackConversion('conversion', {
+      //   label: 'x4dOCIyosK0aEP7Fg6Io', // Optional, from Google Ads
+      //   value: 10.0,
+      //   currency: 'USD',
+      // })
       console.log(values);
       const updatedValues = { ...values };
 
@@ -255,10 +256,9 @@ function HomePage() {
       <div className="h-screen flex flex-col items-center justify-center md:px-6 px-0 ">
         {/* Centered Main Content */}
         <div className="text-start items-center space-y-4 w-full px-6 sm:px-20 lg:px-40   md:mt-0">
-          <p onClick={()=>trackConversion('conversion', {
-      label: 'x4dOCIyosK0aEP7Fg6Io', // Optional, from Google Ads
-      value: 10.0,
-      currency: 'USD',
+          <p onClick={()=>sendGTMEvent({
+      event: 'button_click',
+      button_id: 'my-button',
     })} className="text-4xl sm:text-5xl text-left mb-8 text-[#333333]  font-medium md:font-normal">
             Book top rated doctors near me
           </p>
