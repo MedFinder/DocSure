@@ -38,14 +38,14 @@ export default function RootLayout({
           }}
         />
       </head>
-      <GoogleTagManager gtmId="AW-10808779518" />
+      {/* <GoogleTagManager gtmId="AW-10808779518" /> */}
       <Providers>
         <body className={`${lexendFont.className} font-sans`}>
           {/* <Suspense fallback={<div>Loading...</div>}> */}
           {children}
           {/* </Suspense> */}
           <Analytics />
-          <GTMAnalytics />
+          {/* <GTMAnalytics /> */}
           <Toaster richColors={true} position="top-right" />
         </body>
       </Providers>
