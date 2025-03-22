@@ -68,6 +68,7 @@ export default function Contact() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      window.gtag('config', 'AW-10808779518');
       const storedFormData = sessionStorage.getItem("formData");
       if (storedFormData) {
         setFormData(JSON.parse(storedFormData));
