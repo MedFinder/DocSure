@@ -552,7 +552,7 @@ export default function Transcript() {
       const nextDoctor = doctors[newIndex];
       // console.log("Calling next doctor:", nextDoctor);
 
-      const phoneNumber = phoneNumbers[newIndex] ?? nextDoctor?.phone_number ; //+2348168968260
+      const phoneNumber = phoneNumbers[newIndex] ?? nextDoctor?.phone_number; //+2348168968260
       const nameOfOrg = nextDoctor?.name; //+2348168968260
       if (phoneNumber) {
         await initiateCall(
@@ -951,7 +951,7 @@ export default function Transcript() {
                   Terminate Request
                 </button>
               </div> */}
-              <div className="flex flex-row md:flex-row gap-4 justify-start md:justify-center mt-4 pb-2 overflow-x-auto whitespace-nowrap">
+              <div className="flex flex-row md:flex-row gap-4 justify-start md:justify-center mt-4 pb-2 overflow-x-auto whitespace-nowrap ">
                 <button
                   onClick={handleTerminateRequest}
                   disabled={!callStatus?.isInitiated}
@@ -1018,7 +1018,7 @@ export default function Transcript() {
         </div>
       </section>
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="sm:max-w-lg h-52">
+        <DialogContent className="sm:max-w-lg h-52 px-4 ">
           <DialogHeader>
             <DialogTitle>Terminate Request</DialogTitle>
           </DialogHeader>
@@ -1026,7 +1026,7 @@ export default function Transcript() {
             This will terminate your appointment booking request and cannot be
             undone. Continue?
           </p>
-          <DialogFooter className="flex justify-between gap-6">
+          <div className="md:flex  flex  justify-between gap-6">
             <Button
               variant="secondary"
               className="w-1/2 rounded-md"
@@ -1041,7 +1041,7 @@ export default function Transcript() {
             >
               Yes
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
       <Dialog open={openModifyDialog} onOpenChange={setOpenModifyDialog}>
@@ -1053,7 +1053,7 @@ export default function Transcript() {
             This will terminate your current request and redirect you to modify
             your request. Continue?
           </p>
-          <DialogFooter className="flex justify-between gap-6">
+          <div className="md:flex flex justify-between gap-6">
             <Button
               variant="secondary"
               className="w-1/2 rounded-md"
@@ -1068,7 +1068,7 @@ export default function Transcript() {
             >
               Yes
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
       <Dialog
@@ -1083,7 +1083,7 @@ export default function Transcript() {
             This will terminate your current request and allow you to call the
             doctor directly. Continue?
           </p>
-          <DialogFooter className="flex justify-between gap-6">
+          <div className=" md:flex flex  justify-between gap-6">
             <Button
               variant="secondary"
               className="w-1/2 rounded-md"
@@ -1098,7 +1098,7 @@ export default function Transcript() {
             >
               Yes
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </main>
