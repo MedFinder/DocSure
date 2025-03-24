@@ -23,7 +23,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
-import { Loader2, MapPin, Search } from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
@@ -410,7 +410,7 @@ export default function SearchPage() {
 
         const parsedData = JSON.parse(rawData);
         if (parsedData?.results?.length) {
-          const sortedData = parsedData.results?.map((item) => ({
+          const sortedData = parsedData.results.map((item) => ({
             ...item,
             id: item.place_id || item.id,
           }));
@@ -478,7 +478,7 @@ export default function SearchPage() {
       formik.setFieldValue("subscriberId", "");
       formik.setFieldValue("groupId", "");
       formik.setFieldValue("insurer", "");
-      setinsuranceType("");
+      setinsuranceType("")
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedInsurance]);
@@ -494,68 +494,66 @@ export default function SearchPage() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      track("Searchpage_Continue_Btn_Clicked");
-      // console.log("here");
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      // console.log("Objective value:", values.objective);
+    track('Searchpage_Continue_Btn_Clicked');
+     // console.log("here");
+     const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+     const formData = JSON.parse(sessionStorage.getItem("formData"));
+     // console.log("Objective value:", values.objective);
 
-      if (!values.objective || !values.objective.trim()) {
-        toast.error("Please fill up all the required information");
-        return;
-      }
+     if (!values.objective || !values.objective.trim()) {
+       toast.error("Please fill up all the required information");
+       return;
+     }
 
-      //console.log("Form values:", values);
+     //console.log("Form values:", values);
 
-      const updatedValues = {
-        groupId: values.groupId,
-        subscriberId: values.subscriberId,
-        objective: values.objective,
-        insurer: values.insurer,
-        selectedOption: selectedInsurance === true ? "no" : "yes",
-        availability: customAvailability
-          ? customAvailability
-          : availabilityOptions[0].label,
-        specialty: savedSpecialty,
-        timeOfAppointment,
-        insuranceType,
-        maxWait: timeOfAppointment,
-        isNewPatient: isNewPatient ? "yes" : "no",
-      };
+     const updatedValues = {
+       groupId: values.groupId,
+       subscriberId: values.subscriberId,
+       objective: values.objective,
+       insurer: values.insurer,
+       selectedOption: selectedInsurance === true ? "no" : "yes",
+       availability: customAvailability ? customAvailability: availabilityOptions[0].label,
+       specialty: savedSpecialty,
+       timeOfAppointment,
+       insuranceType,
+       maxWait: timeOfAppointment,
+       isNewPatient: isNewPatient ? "yes" : "no",
+       request_id: formData?.request_id,
+     };
+     // console.log(updatedValues)
 
-      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+     sessionStorage.setItem("formData", JSON.stringify(updatedValues));
 
-      // console.log("Stored formData in sessionStorage:", updatedValues);
+     // console.log("Stored formData in sessionStorage:", updatedValues);
 
-      // Redirect to search page
-      setTimeout(() => {
-        router.push("/contact");
-      }, 500);
-    },
+     // Redirect to search page
+     setTimeout(() => {
+       router.push("/contact");
+     }, 500);
+   },
   });
-
+  
   // Add this function to handle manual submission with toast error
   const handleFormSubmit = () => {
     // Touch all fields to trigger validation
-    formik.validateForm().then((errors) => {
+    formik.validateForm().then(errors => {
       // If there are validation errors
       if (Object.keys(errors).length > 0) {
         // Set all fields as touched to show validation errors
         const touchedFields = {};
-        Object.keys(formik.values).forEach((key) => {
+        Object.keys(formik.values).forEach(key => {
           touchedFields[key] = true;
         });
         formik.setTouched(touchedFields);
-
+        
         // Show toast error
         toast.error("Please fill up all the required information");
         return;
       }
-
-      // If no errors, show spinner and submit the form
-      setIsLoading(true); // Show spinner
-      setTimeout(() => {
-        formik.handleSubmit(); // Submit the form after 2 seconds
-      }, 3000);
+      
+      // If no errors, submit the form
+      formik.handleSubmit();
     });
   };
 
@@ -769,7 +767,7 @@ export default function SearchPage() {
                       onValueChange={(value) => {
                         formik.setFieldValue("insurer", value);
                         setSelectedInsurance(false); //patient has insurance
-                        setinsuranceType("PPO");
+                        setinsuranceType("PPO")
                       }}
                     >
                       <SelectTrigger>
@@ -838,18 +836,12 @@ export default function SearchPage() {
                 sequence and seek an appointment for you.
               </p>
               <Button
-                type="button" // Prevents default form submission behavior since it's outside the form
+                type="button"
                 onClick={handleFormSubmit}
-                className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2 text-sm flex items-center justify-center"
+                className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2"
                 disabled={isLoading}
               >
-                {isLoading ? (
-                  <span className="px-6">
-                    <Loader2 className="animate-spin w-5 h-5" />
-                  </span>
-                ) : (
-                  "Continue"
-                )}
+                {isLoading ? "Submitting..." : "Continue"}
               </Button>
             </div>
           </div>
@@ -890,20 +882,13 @@ export default function SearchPage() {
             Docsure AI will call the following recommended doctors in this
             sequence and seek an appointment for you.
           </p>
-
           <Button
             type="button" // Prevents default form submission behavior since it's outside the form
             onClick={handleFormSubmit}
             className="bg-[#FF6723] text-white md:p-5 p-4 md:ml-2 text-sm"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <span className="px-6">
-                <Loader2 className="animate-spin w-5 h-5" />
-              </span>
-            ) : (
-              "Continue"
-            )}
+            {isLoading ? "Submitting..." : "Continue"}
           </Button>
         </div>
       </div>
