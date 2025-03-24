@@ -315,16 +315,6 @@ export default function Transcript() {
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
 
   const handleConfirmSequence = useCallback(async () => {
-    const formData = JSON.parse(sessionStorage.getItem("formData"));
-    const request_id = await logRequestInfo();
-    if (request_id) {
-      // console.log(request_id);
-      const updatedFormData = {
-        ...formData,
-        request_id,
-      };
-      setFormData(updatedFormData);
-      sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
       // initiate call
       try {
         setIsConfirmed(true); // Disable button and dragging
@@ -332,14 +322,13 @@ export default function Transcript() {
         await initiateCall(
           firstDoctorPhoneNumber,
           doctors[activeCallIndex]?.name,
-          request_id
+          requestIdRef?.current,
         );
         return;
       } catch (error) {
         console.error("Error initiating call:", error);
         setIsConfirmed(false); // Re-enable button and dragging if there's an error
       }
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCallIndex, doctors, phoneNumbers]);
   //console.log(phoneNumbers.length);
@@ -369,47 +358,6 @@ export default function Transcript() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callStatus, doctors, wsRef]);
-  // useEffect(() => {
-  //   if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
-  //     setShowTranscript(true);
-  //     setTranscriptArray((prev) => [
-  //       ...prev,
-  //       <p
-  //         key={prev.length} // Ensure unique key for React rendering
-  //         style={{
-  //           backgroundColor: doctors[activeCallIndex]?.name.includes(
-  //             "DocsureAI"
-  //           )
-  //             ? "#FFF6F2" // Light orange for "DocusureAI"
-  //             : doctors[activeCallIndex]?.name.includes("Doctor's Office")
-  //             ? "#E6F7FF" // Light blue for "Doctor's Office"
-  //             : "#F0F0F0", // Default light gray for other rows
-  //           padding: "8px",
-  //           borderRadius: "4px",
-  //           marginBottom: "8px",
-  //         }}
-  //       >
-  //         {`Calling ${doctors[activeCallIndex]?.name} to seek an appointment`}
-  //       </p>,
-  //     ]);
-  //     console.log("ws listener added for id:", callStatus?.ssid);
-  //     if (wsRef.current.readyState !== WebSocket.OPEN) {
-  //       console.log("WebSocket not in OPEN state:", wsRef.current.readyState);
-  //       return;
-  //     }
-  //     try {
-  //       wsRef.current.send(
-  //         JSON.stringify({
-  //           event: "start",
-  //           transcription_id: callStatus.ssid,
-  //         })
-  //       );
-  //     } catch (error) {
-  //       console.log("Failed to send WebSocket message:", error);
-  //     }
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [callStatus, doctors, wsRef]);
   const terminateRequest = () => {
     // sent ws event to cancel call
     // wsRef?.current?.close();
@@ -439,7 +387,7 @@ export default function Transcript() {
       nameOfOrg: string,
       request_id?: string
     ) => {
-      console.log("new call initiated for", doctorPhoneNumber, nameOfOrg);
+      console.log("new call initiated for", doctorPhoneNumber, nameOfOrg, request_id);
       if (!formData) {
         console.error("No formData found in sessionStorage.");
         return;
@@ -664,16 +612,6 @@ export default function Transcript() {
       setTimeout(connectWebSocket, 5000);
     };
   };
-  // useEffect(() => {
-  //   // This function runs when the component is unmounted
-  //   return () => {
-  //     console.log("Component unmounting - closing WebSocket connection");
-  //     if (wsRef.current) {
-  //       wsRef.current.close();
-  //       wsRef.current = null;
-  //     }
-  //   };
-  // }, []); // Empty dependency array means this runs only on mount and unmount
 
   // const logDrLists = async () => {
   //   // Create arrays to collect the values
@@ -722,36 +660,6 @@ export default function Transcript() {
   //     return null;
   //   }
   // };
-  const logRequestInfo = async (request_id) => {
-    const savedAddress = sessionStorage.getItem("selectedAddress");
-    const data = {
-      patient_name: formData.patientName,
-      patient_dob: formData.dob,
-      patient_email: formData.email,
-      patient_number: formData.phoneNumber,
-      patient_zipcode: "",
-      doctor_speciality: formData.specialty,
-      preferred_location: savedAddress,
-      new_patient: formData.isNewPatient,
-      time_of_appointment: formData.timeOfAppointment,
-      patient_availability: formData.maxWait,
-      insurance_details: formData.insurer ?? "none",
-      medical_concerns: formData.objective,
-    };
-    // console.log(data)
-    try {
-      const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`,
-        data
-      );
-      // console.log(resp)
-      return resp.data?.request_id;
-    } catch (error) {
-      // console.error('Error logging call details:', error);
-      return null;
-    }
-  };
-
   const getDisplayTranscript = () => {
     if (transcriptArray.length > 0) {
       // console.log(transcriptArray)
@@ -782,8 +690,10 @@ export default function Transcript() {
         doctor_number: doctors[index]?.phone_number, // phoneNumbers[index]
         hospital_name: doctors[index]?.name,
         doctor_address: doctors[index]?.vicinity,
+        hospital_address: doctors[index]?.vicinity,
         distance: doctors[index]?.distance,
         rating: doctors[index]?.rating?.toString(),
+        hospital_rating: doctors[index]?.rating?.toString(),
         website: doctors[index]?.website,
         context,
         patient_name: patientName,

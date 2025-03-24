@@ -17,6 +17,7 @@ import { track } from "@vercel/analytics";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2 } from "lucide-react";
 import { trackConversion } from "@/lib/gtag";
+import { request } from "http";
 
 // Validation schema remains the same - all fields required
 const validationSchema = Yup.object().shape({
@@ -94,6 +95,39 @@ export default function Contact() {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
+  const logPatientData = async (formData) => {
+    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const data = {
+      request_id: formData.request_id,
+      patient_name: formData.patientName,
+      patient_dob: formData.dob,
+      patient_email: formData.email,
+      patient_number: formData.phoneNumber,
+      patient_zipcode: "",
+      preferred_location: savedAddress,
+      new_patient: formData.isNewPatient,
+      time_of_appointment: formData.timeOfAppointment,
+      patient_availability: formData.maxWait,
+      medical_concerns: formData.objective,
+      member_id: formData?.subscriberId ?? '',
+      insurer: formData.insurer ?? "none",
+      insurance_type: formData?.insuranceType ??'',
+      group_number: formData.groupId ?? "",
+      has_insurance: !!formData.insurer
+    };
+    // console.log(data)
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata`,
+        data
+      );
+      // console.log(resp)
+      return
+    } catch (error) {
+      // console.error('Error logging call details:', error);
+      return null;
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -124,7 +158,7 @@ export default function Contact() {
         gender,
         address: values.address || formData.address,
       };
-
+      logPatientData(updatedFormData)
       try {
         // Simulate a 1-second delay
         await new Promise((resolve) => setTimeout(resolve, 3000));
