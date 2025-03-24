@@ -19,7 +19,14 @@ import { Loader2 } from "lucide-react";
 import { trackConversion } from "@/lib/gtag";
 import { request } from "http";
 
-// Validation schema remains the same - all fields required
+// Custom styles for DatePicker
+const customDatePickerStyles = `
+  .date-picker-error .react-datepicker__input-container input {
+    border-color: #ef4444 !important; /* red-500 */
+  }
+`;
+
+// Updated validation schema to include gender
 const validationSchema = Yup.object().shape({
   patientName: Yup.string().required("Patient name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -28,6 +35,7 @@ const validationSchema = Yup.object().shape({
     .required("Date of birth is required")
     .max(new Date(), "Date of birth cannot be in the future"),
   address: Yup.string().required("Address is required"),
+  gender: Yup.string().required("Please select a gender"),
 });
 const genderOptions = [
   { value: "Male", label: "Male" },
@@ -40,6 +48,7 @@ export default function Contact() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [gender, setgender] = useState("");
+  const [genderTouched, setGenderTouched] = useState(false);
   const router = useRouter();
   const addressRefs = useRef([]);
 
@@ -135,6 +144,8 @@ export default function Contact() {
       phoneNumber: formData.phoneNumber || "",
       email: formData.email || "",
       address: formData.address || "",
+      dob: formData.dob ? new Date(formData.dob) : null, // Initialize with null or parsed date
+      gender: formData.gender || "", // Add gender to formik values
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -155,7 +166,7 @@ export default function Contact() {
         ...formData,
         ...values,
         dob: formatDateToYYYYMMDD(values.dob),
-        gender,
+        gender: values.gender,
         address: values.address || formData.address,
       };
       logPatientData(updatedFormData)
@@ -180,7 +191,7 @@ export default function Contact() {
     validateOnBlur: true,
   });
 
-  // Force validation of all fields on submission attempt
+  // Update handleSubmit to include gender touch
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -188,9 +199,31 @@ export default function Contact() {
     Object.keys(formik.values).forEach((field) => {
       formik.setFieldTouched(field, true);
     });
+    
+    // Set gender as touched
+    setGenderTouched(true);
 
-    // Then submit if valid
-    formik.handleSubmit(e);
+    // Validate all fields
+    formik.validateForm().then((errors) => {
+      if (Object.keys(errors).length === 0 && gender) {
+        formik.handleSubmit(e);
+      } else {
+        // Force re-render to show all validation errors
+        if (!gender) {
+          formik.setFieldError('gender', 'Please select a gender');
+        }
+        formik.setErrors(errors);
+      }
+    });
+  };
+
+  // Update gender handler to set formik value too
+  const handleGenderChange = (value) => {
+    setgender(value);
+    formik.setFieldValue('gender', value);
+    if (!genderTouched) {
+      setGenderTouched(true);
+    }
   };
 
   const handleOnAddressChanged = (index) => {
@@ -209,11 +242,14 @@ export default function Contact() {
   // Custom handler for date picker
   const handleDateChange = (date) => {
     formik.setFieldValue("dob", date);
+    formik.setFieldTouched("dob", true); // Mark as touched when changed
   };
 
   return (
     <>
       <Navbar />
+      {/* Add style tag for custom DatePicker styling */}
+      <style jsx global>{customDatePickerStyles}</style>
       <form
         onSubmit={handleSubmit}
         className="flex flex-col justify-center items-center px-6 sm:px-10 mt-32 md:mt-16"
@@ -244,7 +280,7 @@ export default function Contact() {
             </div>
             <div className="space-y-2">
               <Label>Date of Birth </Label>
-              <div className="w-full">
+              <div className={`w-full ${formik.errors.dob && formik.touched.dob ? "date-picker-error" : ""}`}>
                 <DatePicker
                   selected={formik.values.dob}
                   onChange={handleDateChange}
@@ -258,13 +294,8 @@ export default function Contact() {
                   maxDate={new Date()}
                   autoComplete="off"
                   aria-autocomplete="none"
-                  // placeholderText="Select date of birth"
                   name="dob"
-                  className={`w-full p-2 border ${
-                    formik.errors.dob && formik.touched.dob
-                      ? "border-red-500 rounded-none"
-                      : "border-input rounded-none"
-                  }`}
+                  className="w-full p-2 border rounded-none"
                   wrapperClassName="w-full"
                 />
               </div>
@@ -277,7 +308,7 @@ export default function Contact() {
               <RadioGroup
                 name="gender"
                 value={gender}
-                onValueChange={(value) => setgender(value)}
+                onValueChange={handleGenderChange}
                 className="flex flex-row gap-4"
               >
                 {genderOptions.map((option) => (
@@ -287,6 +318,11 @@ export default function Contact() {
                   </div>
                 ))}
               </RadioGroup>
+              {(genderTouched && !gender) && (
+                <div className="text-red-500 text-sm">
+                  Please select a gender
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <div className="flex flex-col space-y-4">

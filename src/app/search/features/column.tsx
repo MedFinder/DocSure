@@ -5,7 +5,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import "./column.css";
-import { Task } from "./tasks";
+import { Task, TaskList } from "./tasks";
 interface TaskType {
   id: number;
   name: string;
@@ -83,30 +83,32 @@ const Column: React.FC<ColumnProps> = ({
       <table className="task-table w-full border-collapse md:table">
         <tbody className="block md:table-row-group">
           <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
-            {tasks.map((task, index) => {
-              const doctorType = task.types?.[0]
-                ? task.types[0].charAt(0).toUpperCase() + task.types[0].slice(1)
-                : "";
-              return (
-                <Task
-                  key={task.id}
-                  id={task.id.toString()}
-                  index={index}
-                  website={task.website === "NA" ? null : task.website}
-                  title={task.name}
-                  rating={task.rating}
-                  distance={task.distance}
-                  activeCallIndex={activeCallIndex}
-                  isAppointmentBooked={isAppointmentBooked}
-                  callStatus={callStatus}
-                  review={task.user_ratings_total}
-                  vicinity={task.formatted_address}
-                  address={task.formatted_address}
-                  doctorType={doctorType}
-                  onDelete={onDelete}
-                />
-              );
-            })}
+            <TaskList>
+              {tasks.map((task, index) => {
+                const doctorType = task.types?.[0]
+                  ? task.types[0].charAt(0).toUpperCase() + task.types[0].slice(1)
+                  : "";
+                return (
+                  <Task
+                    key={task.id}
+                    id={task.id.toString()}
+                    index={index}
+                    website={task.website === "NA" ? null : task.website}
+                    title={task.name}
+                    rating={task.rating}
+                    distance={task.distance}
+                    activeCallIndex={activeCallIndex}
+                    isAppointmentBooked={isAppointmentBooked}
+                    callStatus={callStatus}
+                    review={task.user_ratings_total}
+                    vicinity={task.formatted_address}
+                    address={task.formatted_address}
+                    doctorType={doctorType}
+                    onDelete={onDelete}
+                  />
+                );
+              })}
+            </TaskList>
           </SortableContext>
         </tbody>
       </table>

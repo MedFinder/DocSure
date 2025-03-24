@@ -1,9 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 //@ts-nocheck
-import { useState } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MapPin, Trash2 } from "lucide-react";
+import { MapPin, Trash2, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,25 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { track } from "@vercel/analytics";
+
+// Create a context to manage expanded rows
+const ExpandContext = createContext({
+  expandedId: null,
+  setExpandedId: () => {},
+});
+
+// Provider component to wrap the task list
+export const ExpandProvider = ({ children }) => {
+  const [expandedId, setExpandedId] = useState(null);
+  return (
+    <ExpandContext.Provider value={{ expandedId, setExpandedId }}>
+      {children}
+    </ExpandContext.Provider>
+  );
+};
+
+// Hook to use the expand context
+const useExpand = () => useContext(ExpandContext);
 
 interface TaskProps {
   id: string;
@@ -24,6 +44,7 @@ interface TaskProps {
   review?: number;
   vicinity: string;
   formatted_address: string;
+  place_id?: string;
   doctorType?: string;
   activeCallIndex: number;
   address: string;
@@ -32,11 +53,31 @@ interface TaskProps {
     isInitiated: boolean;
   };
   onDelete: (id: string) => void; // Function to delete item
+  description?: string; // Optional description/summary field
 }
 
 const getAlternateColor = (index: number) => {
   const colors = ["#F7D07D", "#A0F1C2"]; // Gold & Light Green
   return colors[index % 2]; // Alternate based on index
+};
+const getDrSummary = async (name: string, formatted_address: string, place_id: string) => {
+  const data = {
+    name,
+    formatted_address,
+    place_id
+  };
+  
+  try {
+    const resp = await axios.post(
+      `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_summary`,
+      data
+    );
+    // console.log(resp?.data)
+    return resp.data?.result?.summary || "No summary available for this provider.";
+  } catch (error) {
+    console.error('Error fetching doctor summary:', error);
+    return "Unable to fetch summary information.";
+  }
 };
 
 export const Task: React.FC<TaskProps> = ({
@@ -46,6 +87,8 @@ export const Task: React.FC<TaskProps> = ({
   review,
   vicinity,
   address,
+  formatted_address,
+  place_id,
   index,
   activeCallIndex,
   distance,
@@ -54,11 +97,46 @@ export const Task: React.FC<TaskProps> = ({
   callStatus,
   doctorType,
   onDelete,
+  description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
   const [isSelected, setIsSelected] = useState(true);
   const [open, setOpen] = useState(false);
+  
+  // Use the expand context instead of local state
+  const { expandedId, setExpandedId } = useExpand();
+  const isExpanded = expandedId === id;
+  
+  const [doctorSummary, setDoctorSummary] = useState(description);
+  const [isLoading, setIsLoading] = useState(false);
+  const [summaryFetched, setSummaryFetched] = useState(false);
+  
+  // Function to handle expanding and fetching summary
+  const handleExpand = async (e) => {
+    e.stopPropagation();
+    
+    // Toggle expanded state - close if already open, otherwise open this one and close others
+    if (isExpanded) {
+      setExpandedId(null);
+    } else {
+      setExpandedId(id);
+      
+      // If expanding and haven't fetched summary yet, get it
+      if (!summaryFetched) {
+        setIsLoading(true);
+        try {
+          const summary = await getDrSummary(title, formatted_address || address || vicinity, place_id || id);
+          setDoctorSummary(summary);
+          setSummaryFetched(true);
+        } catch (error) {
+          console.error("Error fetching doctor summary:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    }
+  };
 
   const style = {
     transition,
@@ -147,13 +225,41 @@ export const Task: React.FC<TaskProps> = ({
               </div>
             </div>
           </div>
-          <button
-            onClick={() => setOpen(true)}
-            className="flex mr-10 ml-auto md:ml-0 pl-4"
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleExpand}
+              className="flex items-center text-gray-500 text-xs hover:text-gray-700"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              {isExpanded ? "Hide details" : "Show details"}
+              {isLoading ? (
+                <Loader2 size={14} className="ml-1 animate-spin" />
+              ) : isExpanded ? (
+                <ChevronUp size={14} className="ml-1" />
+              ) : (
+                <ChevronDown size={14} className="ml-1" />
+              )}
+            </button>
+            <button
+              onClick={() => setOpen(true)}
+              className="flex mr-10 ml-auto md:ml-0 pl-4"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
+            </button>
+          </div>
+          {isExpanded && (
+            <div className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded-md">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 size={18} className="animate-spin mr-2" />
+                  <span>Loading summary...</span>
+                </div>
+              ) : (
+                doctorSummary
+              )}
+            </div>
+          )}
         </td>
         {/* Combined Number, Avatar, and Doctor Info all in one cell */}
         <td className="p-2 ">
@@ -181,7 +287,7 @@ export const Task: React.FC<TaskProps> = ({
             </div> */}
 
             {/* Doctor Info */}
-            <div className="flex md:flex-col flex-row justify-between items-center md:text-center">
+            <div className="flex md:flex-col flex-row justify-between items-center">
               <a
                 href={website}
                 target="_blank"
@@ -239,7 +345,42 @@ export const Task: React.FC<TaskProps> = ({
             <Trash2 className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer" />
           </button>
         </td>
+
+        {/* Expand/Collapse Button - New Column */}
+        <td className="p-2 text-center hidden md:table-cell">
+          <button
+            onClick={handleExpand}
+            className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer hidden md:block"
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            {isLoading ? (
+              <Loader2 className="mx-auto animate-spin" size={18} />
+            ) : isExpanded ? (
+              <ChevronUp className="mx-auto" size={18} />
+            ) : (
+              <ChevronDown className="mx-auto" size={18} />
+            )}
+          </button>
+        </td>
       </tr>
+
+      {/* Expandable Description Panel - only visible on desktop */}
+      {isExpanded && (
+        <tr className="!hidden md:!table-row">
+          <td colSpan={5} className="bg-gray-50 p-4 transition-all">
+            <div className="text-sm text-gray-600 animate-fadeIn">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 size={18} className="animate-spin mr-2" />
+                  <span>Loading summary...</span>
+                </div>
+              ) : (
+                doctorSummary
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg h-52 ">
@@ -271,4 +412,9 @@ export const Task: React.FC<TaskProps> = ({
       </Dialog>
     </>
   );
+};
+
+// Create a wrapper component for the task list
+export const TaskList = ({ children }) => {
+  return <ExpandProvider>{children}</ExpandProvider>;
 };
