@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef, useEffect } from "react";
 
 interface ChatSectionProps {
   doctorName: string;
@@ -10,9 +10,20 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   doctorName,
   transcripts,
 }) => {
+  // Chat container reference for scrolling
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  
   // Check if transcripts is an array or a string
   const hasTranscripts = Array.isArray(transcripts) && transcripts.length > 0;
-  //const initialMessage = !hasTranscripts || transcripts === "Waiting for conversation to begin...";
+  
+  // Auto-scroll to bottom when transcripts change
+  useEffect(() => {
+    if (chatContainerRef.current && hasTranscripts) {
+      const chatContainer = chatContainerRef.current;
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+  }, [transcripts, hasTranscripts]);
+
   const getBackgroundColor = (message: string) => {
     if (message.includes("to seek an appointment")) {
       return "bg-orange-50";
@@ -29,7 +40,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
       <p className="self-start text-xs tracking-tight text-zinc-800 ">
         {/* Calling {doctorName || "Doctor"}… */}
       </p>
-      <div className="flex-1 overflow-y-auto pr-2 ">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto pr-2 ">
         {/* Initial welcome message */}
         {/* <div className="flex shrink-0 mt-4 bg-white p-3 min-h-[47px] items-center max-md:max-w-full">
           <p className="text-sm text-gray-700">
