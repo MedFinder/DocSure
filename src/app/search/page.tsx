@@ -47,7 +47,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const availabilityOptions = [{ value: "yes", label: "Available anytime" }];
-export const insurerOptions = [
+ const insurerOptions = [
   { value: "Aetna", label: "Aetna" },
   { value: "Aflac", label: "Aflac" },
   { value: "Alignment Healthcare", label: "Alignment Healthcare" },

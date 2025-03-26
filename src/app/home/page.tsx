@@ -23,7 +23,7 @@ import { Autocomplete } from "../../../components/ui/autocomplete";
 import { trackConversion } from "../../../src/lib/gtag";
 import { sendGTMEvent } from "@next/third-parties/google";
 
-export const doctorTypes = [
+const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
   {
     value: "Cardiologist / Heart Doctor",
@@ -45,6 +45,7 @@ export const doctorTypes = [
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
+
 
 function HomePage() {
   const router = useRouter();
