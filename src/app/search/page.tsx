@@ -47,7 +47,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const availabilityOptions = [{ value: "yes", label: "Available anytime" }];
-const insurerOptions = [
+export const insurerOptions = [
   { value: "Aetna", label: "Aetna" },
   { value: "Aflac", label: "Aflac" },
   { value: "Alignment Healthcare", label: "Alignment Healthcare" },
@@ -478,7 +478,7 @@ export default function SearchPage() {
       formik.setFieldValue("subscriberId", "");
       formik.setFieldValue("groupId", "");
       formik.setFieldValue("insurer", "");
-      setinsuranceType("")
+      setinsuranceType("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedInsurance]);
@@ -494,64 +494,66 @@ export default function SearchPage() {
     },
     validationSchema,
     onSubmit: async (values) => {
-    track('Searchpage_Continue_Btn_Clicked');
-     // console.log("here");
-     const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-     const formData = JSON.parse(sessionStorage.getItem("formData"));
-     // console.log("Objective value:", values.objective);
+      track("Searchpage_Continue_Btn_Clicked");
+      // console.log("here");
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      // console.log("Objective value:", values.objective);
 
-     if (!values.objective || !values.objective.trim()) {
-       toast.error("Please fill up all the required information");
-       return;
-     }
+      if (!values.objective || !values.objective.trim()) {
+        toast.error("Please fill up all the required information");
+        return;
+      }
 
-     //console.log("Form values:", values);
+      //console.log("Form values:", values);
 
-     const updatedValues = {
-       groupId: values.groupId,
-       subscriberId: values.subscriberId,
-       objective: values.objective,
-       insurer: values.insurer,
-       selectedOption: selectedInsurance === true ? "no" : "yes",
-       availability: customAvailability ? customAvailability: availabilityOptions[0].label,
-       specialty: savedSpecialty,
-       timeOfAppointment,
-       insuranceType,
-       maxWait: timeOfAppointment,
-       isNewPatient: isNewPatient ? "yes" : "no",
-       request_id: formData?.request_id,
-     };
-     // console.log(updatedValues)
+      const updatedValues = {
+        groupId: values.groupId,
+        subscriberId: values.subscriberId,
+        objective: values.objective,
+        insurer: values.insurer,
+        selectedOption: selectedInsurance === true ? "no" : "yes",
+        availability: customAvailability
+          ? customAvailability
+          : availabilityOptions[0].label,
+        specialty: savedSpecialty,
+        timeOfAppointment,
+        insuranceType,
+        maxWait: timeOfAppointment,
+        isNewPatient: isNewPatient ? "yes" : "no",
+        request_id: formData?.request_id,
+      };
+      // console.log(updatedValues)
 
-     sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
 
-     // console.log("Stored formData in sessionStorage:", updatedValues);
+      // console.log("Stored formData in sessionStorage:", updatedValues);
 
-     // Redirect to search page
-     setTimeout(() => {
-       router.push("/contact");
-     }, 500);
-   },
+      // Redirect to search page
+      setTimeout(() => {
+        router.push("/contact");
+      }, 500);
+    },
   });
-  
+
   // Add this function to handle manual submission with toast error
   const handleFormSubmit = () => {
     // Touch all fields to trigger validation
-    formik.validateForm().then(errors => {
+    formik.validateForm().then((errors) => {
       // If there are validation errors
       if (Object.keys(errors).length > 0) {
         // Set all fields as touched to show validation errors
         const touchedFields = {};
-        Object.keys(formik.values).forEach(key => {
+        Object.keys(formik.values).forEach((key) => {
           touchedFields[key] = true;
         });
         formik.setTouched(touchedFields);
-        
+
         // Show toast error
         toast.error("Please fill up all the required information");
         return;
       }
-      
+
       // If no errors, submit the form
       formik.handleSubmit();
     });
@@ -767,7 +769,7 @@ export default function SearchPage() {
                       onValueChange={(value) => {
                         formik.setFieldValue("insurer", value);
                         setSelectedInsurance(false); //patient has insurance
-                        setinsuranceType("PPO")
+                        setinsuranceType("PPO");
                       }}
                     >
                       <SelectTrigger>
