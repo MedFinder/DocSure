@@ -569,7 +569,7 @@ export default function LandingPage() {
           />
         </section>
 
-        <section
+        {/* <section
           id="about"
           className="h-screen flex items-center justify-center bg-gray-200 border-b"
         >
@@ -604,7 +604,7 @@ export default function LandingPage() {
           <p className="max-w-2xl text-center">
             Reach out to us for any inquiries or collaborations.
           </p>
-        </section>
+        </section> */}
       </main>
     </div>
   );
