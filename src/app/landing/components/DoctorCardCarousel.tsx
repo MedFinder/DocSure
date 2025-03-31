@@ -83,7 +83,7 @@ const DoctorInfoCard = ({
   distance,
   color,
 }) => (
-  <article className="box-border px-6 py-5 bg-white rounded-lg w-60 h-[220px] flex-shrink-0 shadow-md">
+  <article className="box-border px-6 py-5 bg-white rounded-lg w-60 h-[220px] flex-shrink-0">
     <div className="flex flex-col items-center text-center">
       <div
         className={`mb-2.5 text-lg font-semibold ${color} rounded-full h-[50px] text-black w-[50px] flex items-center justify-center`}
