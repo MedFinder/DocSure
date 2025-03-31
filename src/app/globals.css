@@ -153,6 +153,9 @@ body {
 .react-datepicker-popper {
   z-index: 10;
 }
+* {
+  scroll-behavior: smooth;
+}
 
 /* Improve the mobile experience */
 @media (max-width: 640px) {
