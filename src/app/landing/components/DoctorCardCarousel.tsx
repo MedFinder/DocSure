@@ -75,7 +75,6 @@ const doctors = [
   },
 ];
 
-
 const DoctorInfoCard = ({
   initial,
   name,
@@ -114,7 +113,7 @@ const DoctorCardCarousel = () => {
     <div className="w-full overflow-hidden h-60">
       <Swiper
         slidesPerView={6} // Default for large screens
-        spaceBetween={20}
+        spaceBetween={150}
         autoplay={{ delay: 2500, disableOnInteraction: false }}
         pagination={{ el: ".swiper-pagination", clickable: true }}
         modules={[Autoplay, Pagination]}
@@ -122,7 +121,7 @@ const DoctorCardCarousel = () => {
         breakpoints={{
           320: { slidesPerView: 1.5, spaceBetween: 5 }, // Show 1.5 cards on mobile
           640: { slidesPerView: 2, spaceBetween: 10 }, // Tablets
-          1024: { slidesPerView: 5, spaceBetween: 15 }, // Desktop
+          1024: { slidesPerView: 6, spaceBetween: 150 }, // Desktop
         }}
       >
         {doctors.map((doc, index) => (
@@ -147,7 +146,6 @@ const DoctorCardCarousel = () => {
           width: 8px;
           height: 8px;
           margin: 0 4px; /* Reduced spacing */
-         
         }
         .swiper-pagination-bullet-active {
           background: #b32d1b !important;

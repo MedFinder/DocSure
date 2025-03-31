@@ -41,7 +41,7 @@ const testimony = [
 ];
 
 const TestimonialCard = ({ name, comment }) => (
-  <article className="box-border px-6 py-6 bg-white rounded-lg w-72 h-56 flex-shrink-0 shadow-md flex flex-col ">
+  <article className="box-border px-6 py-6 bg-white rounded-lg w-80 h-56 flex-shrink-0 shadow-md flex flex-col ">
     {/* Apostrophe Image */}
     <div className="relative w-8 h-8 mb-2 ">
       <Image
@@ -62,7 +62,7 @@ const TestimonialCard = ({ name, comment }) => (
   </article>
 );
 const TestimonialCardB = ({ name, comment }) => (
-  <article className="box-border px-6 py-6 bg-white rounded-lg w-72 h-56 flex-shrink-0 shadow-md md:flex flex-col hidden ">
+  <article className="box-border px-6 py-6 bg-white rounded-lg w-80 h-56 flex-shrink-0 shadow-md md:flex flex-col hidden ">
     {/* Apostrophe Image */}
     <div className="relative w-8 h-8 mb-2 ">
       <Image
@@ -100,7 +100,7 @@ const TestimonialCarousel = () => {
           320: { slidesPerView: 1, spaceBetween: 5 }, // Mobile
           640: { slidesPerView: 2, spaceBetween: 10 }, // Tablets
           1024: { slidesPerView: 3, spaceBetween: 15 }, // Medium Screens
-          1280: { slidesPerView: 4, spaceBetween: 20 }, // Larger Screens
+          1280: { slidesPerView: 5, spaceBetween: 200 }, // Larger Screens
         }}
       >
         {testimony.map((testimonial, index) => (

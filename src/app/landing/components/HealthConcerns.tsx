@@ -17,7 +17,7 @@ export default function HealthConcerns() {
         {/* Medical - Open by default */}
         <Accordion type="single" defaultValue="medical" collapsible>
           <AccordionItem value="medical">
-            <AccordionTrigger className="text-lg font-medium">
+            <AccordionTrigger className="text-base font-medium">
               Medical
             </AccordionTrigger>
             <AccordionContent>
@@ -39,7 +39,7 @@ export default function HealthConcerns() {
         {/* Dental - Closed by Default */}
         <Accordion type="single" collapsible>
           <AccordionItem value="dental">
-            <AccordionTrigger className="text-lg font-medium">
+            <AccordionTrigger className="text-base font-medium">
               Dental
             </AccordionTrigger>
             <AccordionContent>
@@ -56,7 +56,7 @@ export default function HealthConcerns() {
         {/* Mental Health - Closed by Default */}
         <Accordion type="single" collapsible>
           <AccordionItem value="mental-health">
-            <AccordionTrigger className="text-lg font-medium">
+            <AccordionTrigger className="text-base font-medium">
               Mental Health
             </AccordionTrigger>
             <AccordionContent>
@@ -73,7 +73,7 @@ export default function HealthConcerns() {
         {/* Vision - Closed by Default */}
         <Accordion type="single" collapsible>
           <AccordionItem value="vision">
-            <AccordionTrigger className="text-lg font-medium">
+            <AccordionTrigger className="text-base font-medium">
               Vision
             </AccordionTrigger>
             <AccordionContent>

@@ -369,9 +369,9 @@ export default function LandingPage() {
     { src: "/image 13.svg", alt: "Insurance Network 1" },
   ];
   return (
-    <div className="min-h-screen w-full bg-[#F4E6D2]  ">
+    <div className="min-h-screen w-full bg-[#FCF8F1]  ">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full bg-[#F4E6D2] shadow-sm p-4 flex justify-between items-center z-50">
+      <nav className="fixed top-0 w-full bg-[#FCF8F1] shadow-sm p-4 flex justify-between items-center z-50  text-sm">
         <div className="flex justify-between items-center gap-6">
           <Image
             src="/web-new-logo.svg"
@@ -380,6 +380,13 @@ export default function LandingPage() {
             height={0}
             className="w-auto h-auto hidden md:flex  "
           />
+          {/* <Image
+            src="/web-new-logo.svg"
+            alt="New Logo"
+            width={169}
+            height={36}
+            className="hidden md:flex  "
+          /> */}
           <Image
             src="/mobile-new-logo.svg"
             alt="New Logo"
@@ -485,7 +492,7 @@ export default function LandingPage() {
       <main className="">
         <section
           id="home"
-          className="md:h-screen h-[70vh] flex flex-col items-center justify-center bg-[#F4E6D2] border-b relative"
+          className="md:h-screen h-[70vh] flex flex-col items-center justify-center bg-[#FCF8F1]  border-b relative"
         >
           <div className="flex flex-col text-center items-center w-full px-6 sm:px-20 lg:px-40 space-y-8 z-10">
             <div className="space-y-2">
@@ -1089,7 +1096,7 @@ export default function LandingPage() {
           </div>
         </section>
         <section className="bg-white h-[88px]"></section>
-        <section className="flex flex-col items-center justify-center gap-10 bg-[#F4E6D24D]  border-b md:pt-16 md:pb-16 py-8 px-0   ">
+        <section className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2]  border-b md:pt-16 md:pb-16 py-8 px-0   ">
           <h2 className="text-3xl md:px-44 mb-4 ">Browse Locations</h2>
           <Places />
           <div className="px-20 bg-white  border-lg py-14 flex flex-col items-center justify-center">
@@ -1134,7 +1141,6 @@ export default function LandingPage() {
             </Link>
           </div>
           <div>
-            
             <HealthConcerns />
           </div>
         </section>
