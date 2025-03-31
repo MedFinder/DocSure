@@ -1,10 +1,10 @@
 //@ts-nocheck
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
-import { Autoplay, Pagination } from "swiper/modules";
+import { Autoplay, Pagination, Virtual } from "swiper/modules";
 import Image from "next/image";
 
 const testimony = [
@@ -84,17 +84,20 @@ const TestimonialCardB = ({ name, comment }) => (
 );
 
 const TestimonialCarousel = () => {
+  const [swiperRef, setSwiperRef] = useState(null);
+
   return (
     <div className="w-full overflow-hidden py-6">
       <Swiper
+        onSwiper={setSwiperRef} // Capture Swiper instance
         slidesPerView={5} // Default for large screens
         spaceBetween={20}
         autoplay={{ delay: 2500, disableOnInteraction: false }}
         pagination={{ el: ".swiper-pagination", clickable: true }}
-        modules={[Autoplay, Pagination]}
-        className="w-full"
+        modules={[Autoplay, Pagination, Virtual]}
+        virtual
         grid={{
-          rows: 2,
+          rows: 2, // Grid layout with 2 rows
         }}
         breakpoints={{
           320: { slidesPerView: 1, spaceBetween: 5 }, // Mobile
@@ -104,7 +107,7 @@ const TestimonialCarousel = () => {
         }}
       >
         {testimony.map((testimonial, index) => (
-          <SwiperSlide key={index} className="">
+          <SwiperSlide key={index} virtualIndex={index}>
             <div className="flex flex-col gap-4">
               <TestimonialCard {...testimonial} />
               <TestimonialCardB {...testimonial} />
@@ -128,7 +131,6 @@ const TestimonialCarousel = () => {
           width: 8px;
           height: 8px;
           margin: 0 4px;
-          // opacity: 0.6;
         }
         .swiper-pagination-bullet-active {
           background: #b32d1b !important;

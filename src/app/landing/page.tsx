@@ -378,15 +378,8 @@ export default function LandingPage() {
             alt="New Logo"
             width={0}
             height={0}
-            className="w-auto h-auto hidden md:flex  "
+            className="w-28 h-auto hidden md:flex"
           />
-          {/* <Image
-            src="/web-new-logo.svg"
-            alt="New Logo"
-            width={169}
-            height={36}
-            className="hidden md:flex  "
-          /> */}
           <Image
             src="/mobile-new-logo.svg"
             alt="New Logo"
@@ -395,28 +388,28 @@ export default function LandingPage() {
             className="w-auto h-auto block md:hidden"
           />
           <div className="space-x-6 hidden md:block">
-            <a href="#home" className="hover:text-[#E5573F]">
+            <Link href="#doctors" className="hover:text-[#E5573F]">
               Doctors
-            </a>
-            <a href="#home" className="hover:text-[#E5573F]">
+            </Link>
+            <Link href="#specialties" className="hover:text-[#E5573F]">
               Specialties
-            </a>
+            </Link>
           </div>
         </div>
 
         <div className="hidden md:flex space-x-6 items-center">
-          <a href="#home" className="hover:text-[#E5573F]">
+          <Link href="#how_it_works" className="hover:text-[#E5573F]">
             How it works
-          </a>
-          <a href="#about" className="hover:text-[#E5573F]">
+          </Link>
+          <Link href="#locations" className="hover:text-[#E5573F]">
             Locations
-          </a>
-          <a href="#services" className="hover:text-[#E5573F]">
+          </Link>
+          <Link href="#insurance_plans" className="hover:text-[#E5573F]">
             Insurance Plans
-          </a>
-          <a href="#portfolio" className="hover:text-[#E5573F]">
+          </Link>
+          <Link href="#home" className="hover:text-[#E5573F]">
             Help
-          </a>
+          </Link>
           <Button className="text-white bg-[#0074BA] rounded-md">
             Get Started
           </Button>
@@ -447,34 +440,34 @@ export default function LandingPage() {
             </button>
 
             <nav className="flex flex-col space-y-4">
-              <a
-                href="#home"
+              <Link
+                href="#how_it_works"
                 className="hover:text-[#E5573F]"
                 onClick={() => setIsOpen(false)}
               >
                 How it works
-              </a>
-              <a
-                href="#about"
+              </Link>
+              <Link
+                href="#locations"
                 className="hover:text-[#E5573F]"
                 onClick={() => setIsOpen(false)}
               >
                 Locations
-              </a>
-              <a
-                href="#services"
+              </Link>
+              <Link
+                href="#insurance_plans"
                 className="hover:text-[#E5573F]"
                 onClick={() => setIsOpen(false)}
               >
                 Insurance Plans
-              </a>
-              <a
-                href="#portfolio"
+              </Link>
+              <Link
+                href="#home"
                 className="hover:text-[#E5573F]"
                 onClick={() => setIsOpen(false)}
               >
                 Help
-              </a>
+              </Link>
 
               {/* <a
                 href="#contact"
@@ -499,7 +492,7 @@ export default function LandingPage() {
               <h2 className="text-4xl text-[#E5573F]">
                 Book top rated doctors near you
               </h2>
-              <h2 className="text-xl">
+              <h2 className="text-xl font-normal">
                 Let AI call doctors and secure appointments for you.
               </h2>
             </div>
@@ -978,7 +971,7 @@ export default function LandingPage() {
         </section>
 
         <section
-          id="services"
+          id="how_it_works"
           className="flex flex-col items-center justify-center gap-10 bg-[#0074BA] border-b md:py-16 py-8 px-0 md:px-44 text-white  "
         >
           <h2 className="text-3xl ">How it works</h2>
@@ -1047,7 +1040,7 @@ export default function LandingPage() {
           </div>
         </section>
         <section
-          id="portfolio"
+          id="doctors"
           className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2] border-b md:pt-16 md:pb-16 py-8 pb-16 px-0   "
         >
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
@@ -1061,7 +1054,10 @@ export default function LandingPage() {
           </h2>
           <TestimonialCarousel />
         </section>
-        <section className="relative flex flex-col items-center justify-center gap-10 bg-white  md:pt-16 md:pb-16 pt-8 px-0  pb-0">
+        <section
+          id="specialties"
+          className="relative flex flex-col items-center justify-center gap-10 bg-white  md:pt-16 md:pb-16 pt-8 px-0  pb-0"
+        >
           {/* Section Heading */}
           <h2 className="text-3xl md:px-44 px-4 flex text-center">
             Browse specialties
@@ -1096,10 +1092,16 @@ export default function LandingPage() {
           </div>
         </section>
         <section className="bg-white h-[88px]"></section>
-        <section className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2]  border-b md:pt-16 md:pb-16 py-8 px-0   ">
+        <section
+          id="locations"
+          className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2]  border-b md:pt-16 md:pb-16 py-8 px-0   "
+        >
           <h2 className="text-3xl md:px-44 mb-4 ">Browse Locations</h2>
           <Places />
-          <div className="px-20 bg-white  border-lg py-14 flex flex-col items-center justify-center">
+          <div
+            id="insurance_plans"
+            className="px-20 bg-white  border-lg py-14 flex flex-col items-center justify-center"
+          >
             <h2 className="text-2xl mb-4 whitespace-nowrap ">
               Browse insurance plans
             </h2>
