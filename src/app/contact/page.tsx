@@ -105,7 +105,6 @@ export default function Contact() {
     return `${year}-${month}-${day}`;
   };
   const logPatientData = async (formData) => {
-    const savedAddress = sessionStorage.getItem("selectedAddress");
     const data = {
       request_id: formData.request_id,
       patient_name: formData.patientName,
@@ -113,16 +112,6 @@ export default function Contact() {
       patient_email: formData.email,
       patient_number: formData.phoneNumber,
       patient_zipcode: "",
-      preferred_location: savedAddress,
-      new_patient: formData.isNewPatient,
-      time_of_appointment: formData.timeOfAppointment,
-      patient_availability: formData.maxWait,
-      medical_concerns: formData.objective,
-      member_id: formData?.subscriberId ?? '',
-      insurer: formData.insurer ?? "none",
-      insurance_type: formData?.insuranceType ??'',
-      group_number: formData.groupId ?? "",
-      has_insurance: !!formData.insurer
     };
     // console.log(data)
     try {

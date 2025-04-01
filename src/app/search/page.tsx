@@ -41,6 +41,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
 import { track } from "@vercel/analytics";
+import axios from "axios";
 
 const validationSchema = Yup.object().shape({
   objective: Yup.string().required("Required"),
@@ -366,31 +367,66 @@ export default function SearchPage() {
     // console.log(numbers)
     setPhoneNumbers(numbers);
   };
-
-  // useEffect(() => {
-  //   const storedData = sessionStorage.getItem("statusData");
-  //   const storedDataNav = sessionStorage.getItem("statusDataNav");
-
-  //   if (storedData || storedDataNav) {
-  //     const parsedData = JSON.parse(storedData || storedDataNav);
-  //     const sortedData = parsedData.results.slice(0, 10).map((item, index) => ({
-  //       ...item,
-  //       id: item.place_id, // Keep unique ID
-  //     }));
-
-  //     // if (typeof window !== "undefined") {
-  //     //   const storedSearchData = sessionStorage.getItem("searchData");
-  //     //   if (storedSearchData) {
-  //     //     const parsedDataB = JSON.parse(storedSearchData);
-  //     //     setSearchData(parsedData);
-  //     //     console.log("Retrieved Data:", parsedDataB); // Logs when the component mounts
-  //     //   }
-  //     // }
-  //     setDoctors(sortedData);
-  //   } else {
-  //     router.push("/");
-  //   }
-  // }, [router]);
+  const logPatientData = async (updatedValues) => {
+    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const data = {
+      request_id: updatedValues.request_id,
+      preferred_location: savedAddress,
+      new_patient: updatedValues.isNewPatient,
+      time_of_appointment: updatedValues.timeOfAppointment,
+      patient_availability: updatedValues.maxWait,
+      medical_concerns: updatedValues.objective,
+      member_id: updatedValues?.subscriberId ?? '',
+      insurer: updatedValues.insurer ?? "none",
+      insurance_type: updatedValues?.insuranceType ??'',
+      group_number: updatedValues.groupId ?? "",
+      has_insurance: !!updatedValues.insurer
+    };
+    console.log(data)
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata`,
+        data
+      );
+      // console.log(resp)
+      return
+    } catch (error) {
+      // console.error('Error logging call details:', error);
+      return null;
+    }
+  };
+  const logDrLists = async (data) => {
+    console.log("Logging dr lists:", data);
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
+        data
+      );
+      return;
+    } catch (error) {
+      console.error('Error dr details:', error);
+      return null;
+    }
+  };
+  useEffect(() => {
+    async function fetchAndLogData() {
+      const drsData = sessionStorage.getItem("statusData");
+      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      console.log(formData)
+      if (drsData) {
+        const parsedDrsData = JSON.parse(drsData);
+        // console.log(parsedDrsData)
+        const payload = {
+          request_id: formData?.request_id,
+          ...parsedDrsData,
+        };
+       //  console.log(payload)
+        await logDrLists(payload);
+      }
+    }
+    
+    fetchAndLogData();
+  }, [router]);
   useEffect(() => {
     const updateDoctorsList = () => {
       try {
@@ -524,6 +560,7 @@ export default function SearchPage() {
         request_id: formData?.request_id,
       };
       // console.log(updatedValues)
+      logPatientData(updatedValues)
 
       sessionStorage.setItem("formData", JSON.stringify(updatedValues));
 
