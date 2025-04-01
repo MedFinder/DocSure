@@ -377,15 +377,15 @@ export default function SearchPage() {
       patient_availability: updatedValues.maxWait,
       medical_concerns: updatedValues.objective,
       member_id: updatedValues?.subscriberId ?? '',
-      insurer: updatedValues.insurer ?? "none",
+      // insurer: updatedValues.insurer ?? "none",
       insurance_type: updatedValues?.insuranceType ??'',
       group_number: updatedValues.groupId ?? "",
       has_insurance: !!updatedValues.insurer
     };
     console.log(data)
     try {
-      const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata`,
+      const resp = await axios.put(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata/${updatedValues.request_id}`,
         data
       );
       // console.log(resp)

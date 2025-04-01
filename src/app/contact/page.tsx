@@ -76,13 +76,26 @@ export default function Contact() {
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
   });
-
   useEffect(() => {
     if (typeof window !== "undefined") {
-     //  window.gtag('config', 'AW-10808779518');
       const storedFormData = sessionStorage.getItem("formData");
       if (storedFormData) {
-        setFormData(JSON.parse(storedFormData));
+        const parsedFormData = JSON.parse(storedFormData);
+        setFormData(parsedFormData);
+
+        // Prefill formik values
+        formik.setValues({
+          patientName: parsedFormData.patientName || "",
+          phoneNumber: parsedFormData.phoneNumber || "",
+          email: parsedFormData.email || "",
+          address: parsedFormData.address || "",
+          dob: parsedFormData.dob ? new Date(parsedFormData.dob) : null,
+          gender: parsedFormData.gender || "",
+        });
+        setgender(parsedFormData.gender || "");
+
+        // Revalidate the form and mark fields as touched
+        formik.validateForm();
       }
 
       const storedSearchData = sessionStorage.getItem("searchData");
@@ -90,11 +103,7 @@ export default function Contact() {
         setSearchData(JSON.parse(storedSearchData));
       }
     }
-    // trackConversion('conversion', {
-    //   label: 'FrmFCKr6g64aEP7Fg6Io', // Optional, from Google Ads
-    //   'value': 2.0,
-    //   'currency': 'USD'
-    // });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // Utility function to format date without timezone issues
   const formatDateToYYYYMMDD = (date) => {
@@ -115,8 +124,8 @@ export default function Contact() {
     };
     // console.log(data)
     try {
-      const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata`,
+      const resp = await axios.put(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata/${formData.request_id}`,
         data
       );
       // console.log(resp)

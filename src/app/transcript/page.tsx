@@ -763,9 +763,7 @@ export default function Transcript() {
       const specialty = formData?.specialty;
 
       router.push(
-        `/?address=${encodeURIComponent(
-          savedAddress || ""
-        )}&specialty=${encodeURIComponent(specialty || "")}`
+        "/contact"
       );
     }
   };
