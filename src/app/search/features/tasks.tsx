@@ -4,6 +4,7 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MapPin, Trash2, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import axios from "axios";
 import {
   Dialog,
@@ -14,6 +15,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { track } from "@vercel/analytics";
+import useTypewriterEffect from "@/hooks/useTypewriterEffect";
+
+const LoadingSumamry = dynamic(() => import("../../../components/Loading/LoadingSummary"), {
+  ssr: false, // Disable SSR for this component
+});
 
 // Create a context to manage expanded rows
 const ExpandContext = createContext({
@@ -97,7 +103,8 @@ export const Task: React.FC<TaskProps> = ({
   callStatus,
   doctorType,
   onDelete,
-  description = "No additional information available for this provider.", // Default description
+  description = ''
+  //description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
@@ -142,6 +149,7 @@ export const Task: React.FC<TaskProps> = ({
     transition,
     transform: CSS.Transform.toString(transform),
   };
+  const renderedSummary = useTypewriterEffect(doctorSummary, 20);
 
   return (
     <>
@@ -252,11 +260,10 @@ export const Task: React.FC<TaskProps> = ({
             <div className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded-md">
               {isLoading ? (
                 <div className="flex items-center justify-center py-4">
-                  <Loader2 size={18} className="animate-spin mr-2" />
-                  <span>Loading summary...</span>
+                  <LoadingSumamry/>
                 </div>
               ) : (
-                doctorSummary
+                <span className="text-xs tracking-tight leading-5s text-zinc-800">{doctorSummary}</span>
               )}
             </div>
           )}
@@ -371,11 +378,10 @@ export const Task: React.FC<TaskProps> = ({
             <div className="text-sm text-gray-600 animate-fadeIn">
               {isLoading ? (
                 <div className="flex items-center justify-center py-4">
-                  <Loader2 size={18} className="animate-spin mr-2" />
-                  <span>Loading summary...</span>
+                 <LoadingSumamry/>
                 </div>
               ) : (
-                doctorSummary
+                <span className="text-xs tracking-tight leading-5  text-zinc-800">{renderedSummary}</span>
               )}
             </div>
           </td>

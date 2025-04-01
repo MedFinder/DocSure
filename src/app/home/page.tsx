@@ -46,7 +46,6 @@ const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
 
-
 function HomePage() {
   const router = useRouter();
   const { query } = router;
@@ -70,66 +69,6 @@ function HomePage() {
     libraries: ["places"],
   });
 
-  // const handleOnPlacesChanged = (index) => {
-  //   if (inputRefs.current[index]) {
-  //     const places = inputRefs.current[index].getPlaces();
-  //     if (places.length > 0) {
-  //       const place = places[0];
-  //       const lat = place.geometry.location.lat();
-  //       const lng = place.geometry.location.lng();
-
-  //       setSelectedLocation({ lat, lng });
-  //     }
-  //     const placesNames = places.formatted_address;
-  //   }
-  // };
-
-  // const handleOnPlacesChanged = (index) => {
-  //   if (inputRefs.current[index]) {
-  //     const places = inputRefs.current[index].getPlaces();
-  //     if (places.length > 0) {
-  //       const place = places[0];
-  //       const lat = place.geometry.location.lat();
-  //       const lng = place.geometry.location.lng();
-  //       const formattedAddress = place.formatted_address; // Get formatted address
-
-  //       // Set selected location state (if needed)
-  //       setSelectedLocation({ lat, lng });
-
-  //       // Store formatted address separately in sessionStorage
-  //       sessionStorage.setItem("selectedAddress", formattedAddress);
-
-  //       // Store lat/lng in sessionStorage
-  //       sessionStorage.setItem(
-  //         "selectedLocation",
-  //         JSON.stringify({ lat, lng })
-  //       );
-
-  //       console.log("Formatted Address Stored:", formattedAddress);
-  //     }
-  //   }
-  // };
-  // useEffect(() => {
-  //   const address = query?.address; // Get the "address" query parameter
-  //   const specialty = query?.specialty;
-
-  //   if (address) {
-  //     setPrefilledAddress(address);
-  //     sessionStorage.setItem("selectedAddress", address);
-  //     setAddressLocation(address); // Set the address location for input field
-  //   }
-  //   if (specialty) {
-  //     setPrefilledSpecialty(specialty);
-  //     sessionStorage.setItem("selectedSpecialty", specialty);
-  //     // formik.setFieldValue("specialty", specialty);
-  //   }
-
-  //   // Retrieve lat/lng if available
-  //   const savedLocation = sessionStorage.getItem("selectedLocation");
-  //   if (savedLocation) {
-  //     setSelectedLocation(JSON.parse(savedLocation));
-  //   }
-  // }, [searchParams]);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -152,6 +91,7 @@ function HomePage() {
     if (savedLocation) {
       setSelectedLocation(JSON.parse(savedLocation));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
@@ -180,16 +120,13 @@ function HomePage() {
       doctor_speciality: formik.values.specialty,
       preferred_location: savedAddress,
     };
-    // console.log(data)
     try {
       const resp = await axios.post(
         `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`,
         data
       );
-      // console.log(resp)
       return resp.data?.request_id;
     } catch (error) {
-      // console.error('Error logging call details:', error);
       return null;
     }
   };
@@ -201,7 +138,6 @@ function HomePage() {
       );
       return;
     } catch (error) {
-      // console.error('Error logging call details:', error);
       return null;
     }
   };
@@ -213,14 +149,6 @@ function HomePage() {
     validationSchema,
     onSubmit: async (values) => {
       track("Homepage_Search_Btn_Clicked");
-      // trackConversion('conversion', {
-      //   label: 'x4dOCIyosK0aEP7Fg6Io', // Optional, from Google Ads
-      //   value: 10.0,
-      //   currency: 'USD',
-      // })
-      // console.log(values);
-      // const updatedValues = { ...values };
-
       setisLoading(true);
       if (!selectedLocation) {
         toast.error("No location selected");
@@ -229,31 +157,27 @@ function HomePage() {
 
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-        console.log(lat, lng);
         sessionStorage.setItem("selectedSpecialty", values.specialty);
-        // sessionStorage.setItem(
-        //   "selectedLocation",
-        //   JSON.stringify({ lat, lng })
-        // );
         sessionStorage.setItem(
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
-        const request_id = await logRequestInfo();
-        // Add request_id to updatedValues if it exists
-        let updatedValues = { ...values };
-        if (request_id) {
-          updatedValues.request_id = request_id;
-        }
+
+        // Call logRequestInfo without awaiting
+        const requestIdPromise = logRequestInfo();
+
         const response = await axios.get(
           `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
         );
-        const payload = {
-          request_id,
-          ...response.data,
-        };
-        logDrLists(payload);
-        sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+
+        // Handle request_id when the promise resolves
+        requestIdPromise.then((request_id) => {
+          if (request_id) {
+            const updatedValues = { ...values, request_id };
+            sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+          }
+        });
+
         sessionStorage.setItem("statusData", JSON.stringify(response.data));
         sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
 
@@ -264,21 +188,11 @@ function HomePage() {
     },
   });
 
-  // useEffect(() => {
-  //   if (selectedOption === "no") {
-  //     formik.setFieldValue("subscriberId", "");
-  //     formik.setFieldValue("groupId", "");
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [selectedOption]);
-
   const handleOnAddressChanged = (index) => {
     if (addressRefs.current[index]) {
       const places = addressRefs.current[index].getPlaces();
       if (places && places.length > 0) {
-        // <-- Added defensive check
         const address = places[0];
-        //console.log(address)
         formik.setFieldValue("address", address?.formatted_address);
       }
     }
@@ -403,25 +317,6 @@ function HomePage() {
           </div>
 
           {/* Top Searches Section */}
-          {/* <div className="flex flex-col gap-4 pt-4">
-            <span className="text-xs text-gray-900 ">Top searches</span>
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
-              {doctorTypes.map((value, index) => (
-                <Button
-                  key={index}
-                  className={`rounded-full text-xs px-3 py-2 w-full sm:w-auto ${
-                    selectedDoctorType === value.value ||
-                    formik.values.specialty === value.value
-                      ? "bg-slate-800 text-white" // Selected state
-                      : "bg-[#EFF2F4] text-[#595959] hover:text-white hover:bg-slate-800" // Normal state
-                  }`}
-                  onClick={() => handleDoctorTypeClick(value.value)}
-                >
-                  {value.label}
-                </Button>
-              ))}
-            </div>
-          </div> */}
           <div className="flex flex-col gap-4 md:pt-4 pt-0">
             <span className="text-xs text-gray-900">Top searches</span>
             <div className="sm:flex-wrap sm:gap-3 flex gap-2 overflow-x-auto whitespace-nowrap scroll-smooth scrollbar-hide md:overflow-visible px-1 pb-2">
@@ -441,8 +336,6 @@ function HomePage() {
               ))}
             </div>
           </div>
-
-          {/* ...existing code... */}
         </div>
       </div>
     </>
