@@ -83,8 +83,8 @@ const DoctorInfoCard = ({
   distance,
   color,
 }) => (
-  <article className="box-border px-6 py-5 bg-white rounded-lg w-60 h-[220px] flex-shrink-0">
-    <div className="flex flex-col items-center text-center">
+  <article className="box-border px-6 py-10 bg-white rounded-lg w-[238px] h-[244px] flex-shrink-0">
+    <div className="flex flex-col items-center text-center justify-center">
       <div
         className={`mb-2.5 text-lg font-semibold ${color} rounded-full h-[50px] text-black w-[50px] flex items-center justify-center`}
       >
@@ -112,16 +112,20 @@ const DoctorCardCarousel = () => {
   return (
     <div className="w-full overflow-hidden h-60">
       <Swiper
-        slidesPerView={6} // Default for large screens
-        spaceBetween={150}
-        autoplay={{ delay: 2500, disableOnInteraction: false }}
-        pagination={{ el: ".swiper-pagination", clickable: true }}
+        slidesPerView={7} // Default for large screens
+        spaceBetween={30}
+        pagination={{ clickable: true, el: ".swiper-pagination" }}
         modules={[Autoplay, Pagination]}
         className="w-full"
         breakpoints={{
-          320: { slidesPerView: 1.5, spaceBetween: 5 }, // Show 1.5 cards on mobile
-          640: { slidesPerView: 2, spaceBetween: 10 }, // Tablets
-          1024: { slidesPerView: 6, spaceBetween: 150 }, // Desktop
+          320: { slidesPerView: 1.5, spaceBetween: 5 }, // Show 1.2 slides on small phones
+          480: { slidesPerView: 1.8, spaceBetween: 5 }, // Show 1.5 slides on slightly larger phones
+          640: { slidesPerView: 2, spaceBetween: 15 }, // Tablets
+          768: { slidesPerView: 3, spaceBetween: 20 }, // Small Laptops
+          1024: { slidesPerView: 5, spaceBetween: 25 }, // Desktops
+          1280: { slidesPerView: 6, spaceBetween: 10 }, // Large Screens
+          1380: { slidesPerView: 7, spaceBetween: 60 }, // Large Screens
+          // 1440: { slidesPerView: 6, spaceBetween: 30 }, // Large Screens
         }}
       >
         {doctors.map((doc, index) => (
@@ -132,7 +136,9 @@ const DoctorCardCarousel = () => {
       </Swiper>
 
       {/* Pagination Dots Centered for Mobile & Tablet */}
-      <div className="swiper-pagination mt-8 flex justify-center md:hidden px-36"></div>
+      {/* <div className="swiper-pagination mt-8 flex justify-center md:hidden px-36"></div> */}
+      {/* Pagination Dots (Only on Mobile) */}
+      <div className="swiper-pagination md:hidden"></div>
 
       {/* Global Styles for Pagination Dots */}
       <style jsx global>{`
@@ -150,6 +156,7 @@ const DoctorCardCarousel = () => {
         .swiper-pagination-bullet-active {
           background: #b32d1b !important;
           opacity: 1;
+          margin-top: 0px;
         }
       `}</style>
     </div>
