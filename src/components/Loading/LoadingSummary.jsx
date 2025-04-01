@@ -1,7 +1,7 @@
 // components/LoadingSummary.jsx
 "use client";
 import Lottie from "lottie-react";
-import animationData from "/public/lottie/loading-summary"; // Adjust path as needed
+import animationData from "../../../loading-summary.json"; // Adjust path as needed
 
 const LoadingSummary = () => {
   return (
