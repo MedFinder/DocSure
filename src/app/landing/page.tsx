@@ -1,6 +1,6 @@
 //@ts-nocheck
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AlignLeft,
   ArrowRight,
@@ -22,10 +22,17 @@ import Link from "next/link";
 import DoctorCard from "./DoctorCard";
 import DoctorCardCarousel from "./components/DoctorCardCarousel";
 import TestSwiper from "./components/test";
+import axios from "axios";
 import TestimonialCarousel from "./components/Testimonial";
 import TestimonialGrid from "./components/Testimonial";
 import Places from "./components/Places";
 import HealthConcerns from "./components/HealthConcerns";
+import * as Yup from "yup";
+import { track } from "@vercel/analytics";
+import { useFormik } from "formik";
+import { toast } from "sonner";
+import { useRouter, useSearchParams } from "next/navigation";
+
 
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
@@ -72,7 +79,9 @@ const moreDoctorTypes = [
     label: "Nephrologist / Kidney Specialist",
   },
 ];
-
+const validationSchema = Yup.object().shape({
+  specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
+});
 const scrollToSection = (id: string, offset: number) => {
   const element = document.getElementById(id);
   if (element) {
@@ -82,10 +91,20 @@ const scrollToSection = (id: string, offset: number) => {
 };
 
 export default function LandingPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
+  const [isLoading, setisLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [prefilledAddress, setPrefilledAddress] = useState(""); // State for prefilled address
+  const [prefilledSpecialty, setPrefilledSpecialty] = useState(""); // State for prefilled specialty
+  const [addressLocation, setAddressLocation] = useState(null);
+  const inputRefs = useRef([]);
+  const addressRefs = useRef([]);
 
   const handleDoctorTypeClick = (value: any) => {
+    formik.setFieldValue("specialty", value);
     setSelectedSpecialty(value); // Update specialty when button is clicked
   };
   const { isLoaded } = useJsApiLoader({
@@ -106,6 +125,117 @@ export default function LandingPage() {
     { src: "/image 12.svg", alt: "Insurance Network 1" },
     { src: "/image 13.svg", alt: "Insurance Network 1" },
   ];
+    useEffect(() => {
+      const address = searchParams.get("address");
+      const specialty = searchParams.get("specialty");
+  
+      if (address) {
+        setPrefilledAddress(address);
+        sessionStorage.setItem("selectedAddress", address);
+        setAddressLocation(address); // Set the address location for input field
+      }
+      if (specialty) {
+        setPrefilledSpecialty(specialty);
+        sessionStorage.setItem("selectedSpecialty", specialty);
+        formik.setFieldValue("specialty", specialty);
+      }
+  
+      // Retrieve lat/lng if available
+      const savedLocation = sessionStorage.getItem("selectedLocation");
+      if (savedLocation) {
+        setSelectedLocation(JSON.parse(savedLocation));
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]);
+  const logRequestInfo = async () => {
+    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const data = {
+      doctor_speciality: formik.values.specialty,
+      preferred_location: savedAddress,
+    };
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`,
+        data
+      );
+      return resp.data?.request_id;
+    } catch (error) {
+      return null;
+    }
+  };
+  const formik = useFormik({
+    initialValues: {
+      specialty: prefilledSpecialty || "",
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      track("Homepage_Search_Btn_Clicked");
+      setisLoading(true);
+      if (!selectedLocation) {
+        toast.error("No location selected");
+        return;
+      }
+      try {
+        const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
+        sessionStorage.setItem("selectedSpecialty", values.specialty);
+        sessionStorage.setItem(
+          "searchData",
+          JSON.stringify({ lat, lng, specialty: values.specialty })
+        );
+
+        // Call logRequestInfo without awaiting
+        const requestIdPromise = logRequestInfo();
+
+        const response = await axios.get(
+          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
+        );
+
+        // Handle request_id when the promise resolves
+        requestIdPromise.then((request_id) => {
+          if (request_id) {
+            const updatedValues = { ...values, request_id };
+            sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+          }
+        });
+
+        sessionStorage.setItem("statusData", JSON.stringify(response.data));
+        sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
+        router.push("/search");
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      }
+    },
+  });
+  const handleOnAddressChanged = (index) => {
+    if (addressRefs.current[index]) {
+      const places = addressRefs.current[index].getPlaces();
+      if (places && places.length > 0) {
+        const address = places[0];
+        formik.setFieldValue("address", address?.formatted_address);
+      }
+    }
+  };
+  const handleOnPlacesChanged = (index) => {
+    if (inputRefs.current[index]) {
+      const places = inputRefs.current[index].getPlaces();
+      if (places.length > 0) {
+        const place = places[0];
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        const formattedAddress = place.formatted_address; // Get formatted address
+
+        setSelectedLocation({ lat, lng });
+        setAddressLocation(formattedAddress); // Update input field state
+
+        // Store in sessionStorage
+        sessionStorage.setItem("selectedAddress", formattedAddress);
+        sessionStorage.setItem(
+          "selectedLocation",
+          JSON.stringify({ lat, lng })
+        );
+      }
+    }
+  };
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  ">
       {/* Navbar */}
@@ -286,7 +416,7 @@ export default function LandingPage() {
               </h2>
             </div>
 
-            <div className="flex gap-2 w-full pt-4">
+            <form onSubmit={formik.handleSubmit} className="flex gap-2 w-full pt-4">
               <div className="flex flex-col md:flex-row w-full bg-white rounded-md border border-black">
                 {/* Specialty and location inputs */}
                 <div className="flex flex-col sm:flex-row flex-grow w-full">
@@ -303,8 +433,11 @@ export default function LandingPage() {
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
                         value={selectedSpecialty}
-                        selected={selectedSpecialty}
-                        onChange={(value) => setSelectedSpecialty(value)}
+                        selected={formik.values.specialty}
+                        onChange={(value) => {
+                          formik.setFieldValue("specialty", value);
+                          setSelectedSpecialty(value)
+                        }}
                         clearable={false}
                       />
                     </div>
@@ -333,11 +466,16 @@ export default function LandingPage() {
                     </div>
                     <div className="flex-1">
                       {isLoaded && (
-                        <StandaloneSearchBox>
+                        <StandaloneSearchBox
+                          onLoad={(ref) => (inputRefs.current[0] = ref)}
+                          onPlacesChanged={() => handleOnPlacesChanged(0)}
+                        >
                           <Input
                             type="text"
                             placeholder="Address, city, zip code"
                             className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+                            value={addressLocation || ""}
+                            onChange={(e) => setAddressLocation(e.target.value)}
                             autoComplete="off"
                             aria-autocomplete="none"
                           />
@@ -352,10 +490,26 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
-              <Button className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 h-12 md:flex items-center justify-center w-full md:w-auto hidden">
-                <Search className="w-5 h-5 text-white" /> Search
+              <Button
+                  disabled={
+                    isLoading || !formik.values.specialty || !selectedLocation
+                  }
+                onClick={formik.handleSubmit} // Explicitly trigger form submission
+                type="submit"
+                className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 h-12 md:flex items-center justify-center w-full md:w-auto hidden"
+              >
+                {/* <Search className="w-5 h-5 text-white" /> Search */}
+                {isLoading ? (
+                  <>
+                   <Loader2 className="w-5 h-5 text-white animate-spin" /> Searching
+                  </>
+                ) : (
+                  <>
+                  <Search className="w-5 h-5 text-white" /> Search
+                  </>
+                )}
               </Button>
-            </div>
+            </form>
 
             {/* Specialty Selection */}
             <div className="md:flex gap-4 md:pt-4 pt-0 hidden">
