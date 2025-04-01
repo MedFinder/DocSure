@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { track } from "@vercel/analytics";
 import LoadingSumamry from "@/components/Loading/LoadingSummary";
+import useTypewriterEffect from "@/hooks/useTypewriterEffect";
 
 // Create a context to manage expanded rows
 const ExpandContext = createContext({
@@ -98,7 +99,8 @@ export const Task: React.FC<TaskProps> = ({
   callStatus,
   doctorType,
   onDelete,
-  description = "No additional information available for this provider.", // Default description
+  description = ''
+  //description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
@@ -143,6 +145,7 @@ export const Task: React.FC<TaskProps> = ({
     transition,
     transform: CSS.Transform.toString(transform),
   };
+  const renderedSummary = useTypewriterEffect(doctorSummary, 20);
 
   return (
     <>
@@ -256,7 +259,7 @@ export const Task: React.FC<TaskProps> = ({
                   <LoadingSumamry/>
                 </div>
               ) : (
-                <span className="text-xs text-zinc-800">{doctorSummary}</span>
+                <span className="text-xs tracking-tight leading-5s text-zinc-800">{doctorSummary}</span>
               )}
             </div>
           )}
@@ -374,7 +377,7 @@ export const Task: React.FC<TaskProps> = ({
                  <LoadingSumamry/>
                 </div>
               ) : (
-                <span className="text-xs  text-zinc-800">{doctorSummary}</span>
+                <span className="text-xs tracking-tight leading-5  text-zinc-800">{renderedSummary}</span>
               )}
             </div>
           </td>
