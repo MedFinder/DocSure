@@ -4,6 +4,7 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MapPin, Trash2, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import axios from "axios";
 import {
   Dialog,
@@ -14,8 +15,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { track } from "@vercel/analytics";
-import LoadingSumamry from "@/components/Loading/LoadingSummary";
 import useTypewriterEffect from "@/hooks/useTypewriterEffect";
+
+const LoadingSumamry = dynamic(() => import("../../../components/Loading/LoadingSummary"), {
+  ssr: false, // Disable SSR for this component
+});
 
 // Create a context to manage expanded rows
 const ExpandContext = createContext({
