@@ -28,20 +28,41 @@ const LocationColumn: React.FC<LocationColumnProps> = ({ locations }) => {
 };
 
 const Places: React.FC = () => {
-  const locations = [
-    "New York City",
-    "Brooklyn",
-    "Queens",
-    "Bronx",
-    "Long Island",
+  const locations1 = [
+    "Charlotte, North Carolina",
+    "Chicago, Illinois",
+    "Columbus, Ohio",
+    "Dallas, Texas",
+    "Denver, Colorado",
+  ];
+  const locations2 = [
+    "Fort Worth, Texas",
+    "Houston, Texas",
+    "Indianapolis, Indiana",
+    "Jacksonville, Florida",
+    "Los Angeles, California",
+  ];
+  const locations3 = [
+    "New York City, New York",
+    "Philadelphia, Pennsylvania",
+    "Phoenix, Arizona",
+    "San Antonio, Texas",
+    "San Diego, California",
+  ];
+  const locations4 = [
+    "San Francisco, California",
+    "San Jose, California",
+    "Phoenix, Arizona",
+    "Seattle, Washington",
+    "Washington, D.C.",
   ];
 
   return (
     <section className="md:flex flex-wrap md:gap-4 justify-center p-5 mx-auto my-0 md:max-w-[1200px] max-md:max-w-[991px] max-sm:w-full max-sm:px-8 grid grid-cols-2 gap-4">
-      <LocationColumn locations={locations} />
-      <LocationColumn locations={locations} />
-      <LocationColumn locations={locations} />
-      <LocationColumn locations={locations} />
+      <LocationColumn locations={locations1} />
+      <LocationColumn locations={locations2} />
+      <LocationColumn locations={locations3} />
+      <LocationColumn locations={locations4} />
     </section>
   );
 };

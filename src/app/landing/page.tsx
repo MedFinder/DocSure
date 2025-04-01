@@ -422,6 +422,10 @@ export default function LandingPage() {
                 ))}
               </div>
               <Link
+                onClick={(e)=>  {
+                  e.preventDefault()
+                  scrollToSection("home", 40)
+                }} 
                 href=""
                 className=" text-[#E5573F] flex gap-1 pt-12 hover:text-black"
               >
@@ -526,6 +530,10 @@ export default function LandingPage() {
                 ))}
               </div>
               <Link
+              onClick={(e)=>  {
+                e.preventDefault()
+                scrollToSection("home", 40)
+                }} 
                 href=""
                 className=" text-[#E5573F] flex gap-1 pt-12 hover:text-black"
               >
@@ -540,6 +548,10 @@ export default function LandingPage() {
                 Same-day and last-minute appointments
               </p>
               <Link
+                onClick={(e)=>  {
+                  e.preventDefault()
+                  scrollToSection("home", 40)
+                }} 
                 href=""
                 className=" text-[#E5573F] flex gap-1 pt-16 hover:text-black"
               >
@@ -614,6 +626,10 @@ export default function LandingPage() {
               ))}
             </div>
             <Link
+              onClick={(e)=>  {
+                e.preventDefault()
+                scrollToSection("home", 40)
+              }} 
               href=""
               className="text-[#E5573F] flex gap-1 pt-8 md:pt-12 hover:text-black"
             >
@@ -700,6 +716,10 @@ export default function LandingPage() {
                 ))}
               </div>
               <Link
+                onClick={(e)=>  {
+                  e.preventDefault()
+                  scrollToSection("home", 40)
+                }} 
                 href=""
                 className="text-[#E5573F] flex gap-1 pt-4 md:pt-12 hover:text-black"
               >
@@ -748,6 +768,10 @@ export default function LandingPage() {
               </p>
               <p className="pt-2 ">Same-day and last-minute appointments</p>
               <Link
+                onClick={(e)=>  {
+                  e.preventDefault()
+                  scrollToSection("home", 40)
+                }} 
                 href=""
                 className="text-[#E5573F] flex gap-1 pt-6 md:pt-16 hover:text-black"
               >
@@ -923,6 +947,10 @@ export default function LandingPage() {
               </div>
             </div>
             <Link
+              onClick={(e)=>  {
+                e.preventDefault()
+                scrollToSection("home", 40)
+              }}
               href=""
               className=" flex justify-center gap-1 pt-12 hover:text-gray-700"
             >
