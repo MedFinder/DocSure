@@ -426,7 +426,7 @@ export default function SearchPage() {
     }
     
     fetchAndLogData();
-  }, [router]);
+  }, []);
   useEffect(() => {
     const updateDoctorsList = () => {
       try {

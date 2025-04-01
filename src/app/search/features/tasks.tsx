@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { track } from "@vercel/analytics";
+import LoadingSumamry from "@/components/Loading/LoadingSummary";
 
 // Create a context to manage expanded rows
 const ExpandContext = createContext({
@@ -252,11 +253,10 @@ export const Task: React.FC<TaskProps> = ({
             <div className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded-md">
               {isLoading ? (
                 <div className="flex items-center justify-center py-4">
-                  <Loader2 size={18} className="animate-spin mr-2" />
-                  <span>Loading summary...</span>
+                  <LoadingSumamry/>
                 </div>
               ) : (
-                doctorSummary
+                <span className="text-xs text-zinc-800">{doctorSummary}</span>
               )}
             </div>
           )}
@@ -371,11 +371,10 @@ export const Task: React.FC<TaskProps> = ({
             <div className="text-sm text-gray-600 animate-fadeIn">
               {isLoading ? (
                 <div className="flex items-center justify-center py-4">
-                  <Loader2 size={18} className="animate-spin mr-2" />
-                  <span>Loading summary...</span>
+                 <LoadingSumamry/>
                 </div>
               ) : (
-                doctorSummary
+                <span className="text-xs  text-zinc-800">{doctorSummary}</span>
               )}
             </div>
           </td>
