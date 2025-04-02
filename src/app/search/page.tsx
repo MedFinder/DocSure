@@ -547,7 +547,7 @@ export default function SearchPage() {
         groupId: values.groupId,
         subscriberId: values.subscriberId,
         objective: values.objective,
-        insurer: values.insurer,
+        insurer: values.insurer, // formData?.insurance_carrier
         selectedOption: selectedInsurance === true ? "no" : "yes",
         availability: customAvailability
           ? customAvailability

@@ -134,6 +134,7 @@ function HomePage() {
   const formik = useFormik({
     initialValues: {
       specialty: prefilledSpecialty || "",
+      insurance_carrier: "",
     },
     validationSchema,
     onSubmit: async (values) => {

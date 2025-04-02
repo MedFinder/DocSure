@@ -239,6 +239,7 @@ export default function LandingPage() {
   const formik = useFormik({
     initialValues: {
       specialty: prefilledSpecialty || "",
+      insurance_carrier: "",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -537,7 +538,11 @@ export default function LandingPage() {
                         className="w-full"
                         options={insuranceCarrierOptions}
                         placeholder="Insurance carrier (optional)"
-                        onChange={() => {}}
+                        value={formik.values.insurance_carrier}
+                        selected={formik.values.insurance_carrier}
+                        onChange={(value) => {
+                          formik.setFieldValue("insurance_carrier", value);
+                        }}
                         clearable={false}
                       />
                     </div>
