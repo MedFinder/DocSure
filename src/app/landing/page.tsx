@@ -33,7 +33,6 @@ import { useFormik } from "formik";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 
-
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
   {
@@ -71,9 +70,9 @@ const moreDoctorTypes = [
     value: "Orthopedic Surgeon / Orthopedist",
     label: "Orthopedic Surgeon / Orthopedist",
   },
-  { value: "Endocrinologist", label: "Endocrinologist" },
+  { value: "Endocrinologist / Diabetes Specialist", label: "Endocrinologist / Diabetes Specialist" },
   { value: "Gastroenterologist", label: "Gastroenterologist" },
-  { value: "Hematologist", label: "Hematologist" },
+  { value: "Hematologist / Blood Specialist", label: "Hematologist / Blood Specialist" },
   {
     value: "Nephrologist / Kidney Specialist",
     label: "Nephrologist / Kidney Specialist",
@@ -100,6 +99,7 @@ export default function LandingPage() {
   const [prefilledAddress, setPrefilledAddress] = useState(""); // State for prefilled address
   const [prefilledSpecialty, setPrefilledSpecialty] = useState(""); // State for prefilled specialty
   const [addressLocation, setAddressLocation] = useState(null);
+  const [populardoctors, setpopulardoctors] = useState([]);
   const inputRefs = useRef([]);
   const addressRefs = useRef([]);
 
@@ -147,6 +147,45 @@ export default function LandingPage() {
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams]);
+  useEffect(() => {
+    fetchUserLocationAndPopularDrs();
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, []);
+   const getPopularDrs = async (lat, lng) => {
+    try {
+      const response = await axios.get(
+        `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=Primary Care Physician`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching popular doctors:", error);
+      return [];
+    }
+  };
+  
+  const fetchUserLocationAndPopularDrs = async () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+  
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log(latitude, longitude);
+        const popularDoctors = await getPopularDrs(latitude, longitude);
+        console.log("Popular Doctors:", popularDoctors?.results);
+        if(popularDoctors?.results?.length > 0) { 
+          setpopulardoctors(popularDoctors?.results?.slice(0, 10));
+        }
+        // Handle popularDoctors data (e.g., update state or display)
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        toast.error("Unable to retrieve your location");
+      }
+    );
+  };
   const logRequestInfo = async () => {
     const savedAddress = sessionStorage.getItem("selectedAddress");
     const data = {
@@ -236,6 +275,12 @@ export default function LandingPage() {
       }
     }
   };
+
+  const PrefillLocation = (location: string) => {
+    scrollToSection("home", 40);
+    setAddressLocation(location);
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  ">
       {/* Navbar */}
@@ -1011,7 +1056,7 @@ export default function LandingPage() {
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
             Top-rated doctors in your area
           </h2>
-          <DoctorCardCarousel />
+          <DoctorCardCarousel doctors={populardoctors} />
         </section>
         <section className="flex flex-col items-center justify-center gap-10 bg-[#E5573F] text-white border-b md:pt-16 md:pb-16 py-8 px-0   ">
           <h2 className="text-3xl md:px-44 mb-4 text-white ">
@@ -1038,7 +1083,10 @@ export default function LandingPage() {
                     ? "bg-slate-800 text-white" // Selected state
                     : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800" // Normal state
                 }`}
-                onClick={() => handleDoctorTypeClick(value.value)}
+                onClick={() => {
+                  scrollToSection("home", 40)
+                  handleDoctorTypeClick(value.value)
+                }}
               >
                 {value.label}
               </Button>
@@ -1046,7 +1094,7 @@ export default function LandingPage() {
           </div>
 
           {/* Positioned Image Slightly Above Bottom with No Extra Space Below */}
-          <div className="absolute bottom-[-90px] left-0 w-full flex justify-start pl-12">
+          <div className="absolute bottom-[-90px] left-0 w-full flex justify-start pl-12 pointer-events-none">
             <Image
               src="/OBJECTS.svg"
               alt="Decorative Star"
@@ -1062,7 +1110,7 @@ export default function LandingPage() {
           className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2]  border-b md:pt-16 md:pb-16 py-8 px-0   "
         >
           <h2 className="text-3xl md:px-44 mb-4 ">Browse Locations</h2>
-          <Places />
+          <Places PrefillLocation={PrefillLocation} addressLocation={addressLocation} />
           <div
             id="insurance_plans"
             className="px-20 bg-white  border-lg py-14 flex flex-col items-center justify-center"
