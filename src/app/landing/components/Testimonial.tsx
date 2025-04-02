@@ -1,10 +1,6 @@
 //@ts-nocheck
 "use client";
-import React, { useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
-import { Autoplay, Pagination, Virtual } from "swiper/modules";
+import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 
 const testimony = [
@@ -38,6 +34,7 @@ const testimony = [
     comment: "Love it! Even helped me find a doctor who accepts my insurance. No back-and-forth.",
   },
 ];
+
 const testimony2 = [
   {
     index: 0,
@@ -77,9 +74,9 @@ const testimony2 = [
 ];
 
 const TestimonialCard = ({ name, comment }) => (
-  <article className="px-6 py-12 bg-[#FCF8F2] rounded-lg md:w-[405px] md:h-[204px] w-[381px] h-[248px]  flex-shrink-0 flex flex-col">
+  <article className="px-6 py-8 bg-[#FCF8F2] rounded-lg  w-[320px] h-[218px] flex-shrink-0 flex flex-col">
     {/* Apostrophe Image */}
-    <div className="relative w-8 h-8 mb-2 ">
+    <div className="relative w-8 h-8 mb-2">
       <Image
         src="/apostrophe.svg"
         alt="Apostrophe Icon"
@@ -92,89 +89,49 @@ const TestimonialCard = ({ name, comment }) => (
     <p className="text-sm text-gray-700 mb-4 line-clamp-3 pt-4 overflow-hidden">
       {comment}
     </p>
-
-    {/* Name */}
-    {/* <span className="text-sm font-semibold text-gray-900 ">{name}</span> */}
   </article>
 );
 
-const TestimonialCardB = ({ index, name, comment }) => {
-  return (
-    <article className="px-6 py-12 bg-[#FCF8F2] rounded-lg md:w-[405px] md:h-[204px] w-[381px] h-[248px]  flex-shrink-0 flex flex-col">
-      {/* Apostrophe Image */}
-      <div className="relative w-8 h-8 mb-2 ">
-        <Image
-          src="/apostrophe.svg"
-          alt="Apostrophe Icon"
-          layout="fill"
-          objectFit="contain"
-        />
-      </div>
-
-      {/* Truncated Testimonial Text */}
-      <p className="text-sm text-gray-700 mb-4 line-clamp-3 pt-4 overflow-hidden">
-        {comment}
-      </p>
-
-      {/* Name */}
-      {/* <span className="text-sm font-semibold text-gray-900 ">{name}</span> */}
-    </article>
-  );
-};
-
 const TestimonialCarousel = () => {
-  const [swiperRef, setSwiperRef] = useState(null);
+  const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    const scrollInterval = setInterval(() => {
+      if (scrollContainerRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+        if (scrollLeft + clientWidth >= scrollWidth) {
+          scrollContainerRef.current.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          scrollContainerRef.current.scrollBy({ left: 200, behavior: "smooth" });
+        }
+      }
+    }, 3000); // Scroll every 3 seconds
+
+    return () => clearInterval(scrollInterval); // Cleanup on unmount
+  }, []);
 
   return (
     <div className="w-full overflow-hidden py-6">
-      <Swiper
-        onSwiper={setSwiperRef} // Capture Swiper instance
-        slidesPerView={4} // Default for large screens
-        spaceBetween={60}
-        autoplay={{ delay: 2500, disableOnInteraction: false }}
-        pagination={{ el: ".swiper-pagination", clickable: true }}
-        modules={[Autoplay, Pagination, Virtual]}
-        virtual
-        grid={{
-          rows: 2, // Grid layout with 2 rows
-        }}
-        breakpoints={{
-          320: { slidesPerView: 1, spaceBetween: 5 }, // Mobile
-          480: { slidesPerView: 1, spaceBetween: 5 },
-          640: { slidesPerView: 2, spaceBetween: 10 }, // Tablets
-          1024: { slidesPerView: 3, spaceBetween: 15 }, // Medium Screens
-          1280: { slidesPerView: 4.2, spaceBetween: 30 }, // Larger Screens
-        }}
+      <div
+        ref={scrollContainerRef}
+        className="flex gap-4 overflow-x-scroll scrollbar-hide scroll-smooth"
       >
         {testimony.map((testimonial, index) => (
-          <SwiperSlide key={index} virtualIndex={index}>
-            <div className="flex flex-col gap-4">
-              <TestimonialCard {...testimonial} />
-              <TestimonialCardB {...testimony2[index]} />
-            </div>
-          </SwiperSlide>
+          <div key={index} className="flex flex-col gap-4 flex-shrink-0">
+            <TestimonialCard {...testimonial} />
+            <TestimonialCard {...testimony2[index]} />
+          </div>
         ))}
-      </Swiper>
+      </div>
 
-      {/* Pagination Dots Centered for Mobile & Tablet */}
-      <div className="swiper-pagination mt-6 flex justify-center md:hidden"></div>
-
-      {/* Global Styles for Pagination Dots */}
+      {/* Global Styles for Custom Scrollbar */}
       <style jsx global>{`
-        .swiper-pagination {
-          display: flex;
-          justify-content: center;
-          align-items: center;
+        .scrollbar-hide {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
         }
-        .swiper-pagination-bullet {
-          background: #ffff !important;
-          width: 8px;
-          height: 8px;
-          margin: 0 4px;
-        }
-        .swiper-pagination-bullet-active {
-          background: #b32d1b !important;
-          opacity: 1;
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, and Opera */
         }
       `}</style>
     </div>
