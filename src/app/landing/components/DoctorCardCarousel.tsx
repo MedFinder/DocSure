@@ -90,8 +90,26 @@ const DoctorInfoCard = ({
       >
         {initial}
       </div>
-      <h2 className="mb-1.5 text-base font-medium text-black">{name}</h2>
-      <address className="mb-1.5 text-xs leading-5 text-zinc-800 not-italic">
+      <h2
+        className="mb-1.5 text-base font-medium text-black line-clamp-1"
+        style={{
+          display: "-webkit-box",
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+          WebkitLineClamp: 1,
+        }}
+      >
+        {name}
+      </h2>
+      <address
+        className="mb-1.5 text-xs leading-5 text-zinc-800 not-italic line-clamp-2"
+        style={{
+          display: "-webkit-box",
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+          WebkitLineClamp: 2,
+        }}
+      >
         {address}
       </address>
       <div className="flex gap-2 justify-center items-center mb-3">
@@ -101,14 +119,19 @@ const DoctorInfoCard = ({
           <span>{distance}</span>
         </div>
       </div>
-      <a href="#" className="text-xs text-[#E5573F] underline">
+      <a href="/coming-soon" className="text-xs text-[#E5573F] underline">
         Check Availability &gt;
       </a>
     </div>
   </article>
 );
 
-const DoctorCardCarousel = () => {
+const getRandomColor = () => {
+  const colors = ["bg-yellow-300", "bg-blue-300", "bg-pink-300"];
+  return colors[Math.floor(Math.random() * colors.length)];
+};
+
+const DoctorCardCarousel = ({ doctors }) => {
   return (
     <div className="w-full overflow-hidden h-60">
       <Swiper
@@ -130,7 +153,14 @@ const DoctorCardCarousel = () => {
       >
         {doctors.map((doc, index) => (
           <SwiperSlide key={index}>
-            <DoctorInfoCard {...doc} />
+            <DoctorInfoCard
+              initial={doc.name?.charAt(0) || "D"}
+              name={doc.name || "Unknown Doctor"}
+              address={doc.formatted_address || "Unknown Address"}
+              rating={doc.rating || "N/A"}
+              distance={doc.distance || "N/A"}
+              color={getRandomColor()} // Randomized color
+            />
           </SwiperSlide>
         ))}
       </Swiper>

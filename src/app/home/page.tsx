@@ -130,21 +130,11 @@ function HomePage() {
       return null;
     }
   };
-  const logDrLists = async (data) => {
-    try {
-      const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
-        data
-      );
-      return;
-    } catch (error) {
-      return null;
-    }
-  };
 
   const formik = useFormik({
     initialValues: {
       specialty: prefilledSpecialty || "",
+      insurance_carrier: "",
     },
     validationSchema,
     onSubmit: async (values) => {
