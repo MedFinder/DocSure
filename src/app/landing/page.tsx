@@ -167,20 +167,19 @@ export default function LandingPage() {
       toast.error("Geolocation is not supported by your browser. Using default location.");
       const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
       if (popularDoctors?.results?.length > 0) {
-        const doctorlists = popularDoctors?.results?.slice(0, 10);
+        const doctorlists = popularDoctors?.results?.slice(0, 20);
         setpopulardoctors(doctorlists);
         sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
       }
       return;
     }
-  
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
         console.log(latitude, longitude);
         const popularDoctors = await getPopularDrs(latitude, longitude);
         if (popularDoctors?.results?.length > 0) {
-          const doctorlists = popularDoctors?.results?.slice(0, 10);
+          const doctorlists = popularDoctors?.results?.slice(0, 20);
           setpopulardoctors(doctorlists);
           sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
         }
@@ -190,7 +189,7 @@ export default function LandingPage() {
         // toast.error("Unable to retrieve your location. Using default location.");
         const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
         if (popularDoctors?.results?.length > 0) {
-          const doctorlists = popularDoctors?.results?.slice(0, 10);
+          const doctorlists = popularDoctors?.results?.slice(0, 20);
           setpopulardoctors(doctorlists);
           sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
         }
