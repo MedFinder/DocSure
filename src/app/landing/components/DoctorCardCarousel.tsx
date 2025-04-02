@@ -119,7 +119,7 @@ const DoctorInfoCard = ({
           <span>{distance}</span>
         </div>
       </div>
-      <a href="#" className="text-xs text-[#E5573F] underline">
+      <a href="/coming-soon" className="text-xs text-[#E5573F] underline">
         Check Availability &gt;
       </a>
     </div>

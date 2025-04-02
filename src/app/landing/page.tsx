@@ -174,8 +174,26 @@ export default function LandingPage() {
   };
   
   const fetchUserLocationAndPopularDrs = async () => {
+    const storedDoctors = sessionStorage.getItem("popularDoctors");
+    if (storedDoctors) {
+      const parsedDoctors = JSON.parse(storedDoctors);
+      if (parsedDoctors?.length > 0) {
+        setpopulardoctors(parsedDoctors);
+        return;
+      }
+    }
+
+    const defaultLat = 37.7749; // Default latitude (e.g., San Francisco)
+    const defaultLng = -122.4194; // Default longitude (e.g., San Francisco)
+
     if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
+      toast.error("Geolocation is not supported by your browser. Using default location.");
+      const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
+      if (popularDoctors?.results?.length > 0) {
+        const doctorlists = popularDoctors?.results?.slice(0, 10);
+        setpopulardoctors(doctorlists);
+        sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+      }
       return;
     }
   
@@ -184,15 +202,21 @@ export default function LandingPage() {
         const { latitude, longitude } = position.coords;
         console.log(latitude, longitude);
         const popularDoctors = await getPopularDrs(latitude, longitude);
-        console.log("Popular Doctors:", popularDoctors?.results);
-        if(popularDoctors?.results?.length > 0) { 
-          setpopulardoctors(popularDoctors?.results?.slice(0, 10));
+        if (popularDoctors?.results?.length > 0) {
+          const doctorlists = popularDoctors?.results?.slice(0, 10);
+          setpopulardoctors(doctorlists);
+          sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
         }
-        // Handle popularDoctors data (e.g., update state or display)
       },
-      (error) => {
+      async (error) => {
         console.error("Error getting location:", error);
-        toast.error("Unable to retrieve your location");
+        // toast.error("Unable to retrieve your location. Using default location.");
+        const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
+        if (popularDoctors?.results?.length > 0) {
+          const doctorlists = popularDoctors?.results?.slice(0, 10);
+          setpopulardoctors(doctorlists);
+          sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+        }
       }
     );
   };
@@ -219,6 +243,10 @@ export default function LandingPage() {
     validationSchema,
     onSubmit: async (values) => {
       track("Homepage_Search_Btn_Clicked");
+      if(values.specialty === "unsure" || values.specialty === "Other"){
+        router.push("/coming-soon");
+        return;
+      }
       setisLoading(true);
       if (!selectedLocation) {
         toast.error("No location selected");
@@ -586,7 +614,7 @@ export default function LandingPage() {
             </div>
 
             <Link
-              href="/search"
+              href="/coming-soon"
               className="text-[#E5573F] md:flex space-x-2 items-center hidden"
             >
               <p>Search for a doctor, hospital or medical group</p>

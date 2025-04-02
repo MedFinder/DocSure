@@ -2,6 +2,7 @@ export const StoreQueryTagEnum = {
   USER: "USER",
 };
 export const medicalSpecialtiesOptions = [
+  { value: "unsure", label: "I am unsure" },
   { value: "Acupuncturist", label: "Acupuncturist" },
   { value: "Allergist / Immunologist", label: "Allergist / Immunologist" },
   { value: "Anesthesiologist", label: "Anesthesiologist" },
@@ -39,6 +40,7 @@ export const medicalSpecialtiesOptions = [
   { value: "Oral Surgeon", label: "Oral Surgeon" },
   { value: "Orthodontist", label: "Orthodontist" },
   { value: "Orthopedic Surgeon / Orthopedist", label: "Orthopedic Surgeon / Orthopedist" },
+  { value: "Other", label: "Other" },
   { value: "Pain Management Specialist", label: "Pain Management Specialist" },
   { value: "Pediatric Dentist", label: "Pediatric Dentist" },
   { value: "Pediatric Surgeon", label: "Pediatric Surgeon" },
@@ -49,6 +51,7 @@ export const medicalSpecialtiesOptions = [
   { value: "Plastic Surgeon", label: "Plastic Surgeon" },
   { value: "Podiatrist / Foot and Ankle Specialist", label: "Podiatrist / Foot and Ankle Specialist" },
   { value: "Primary Care Physician (PCP) / Family Practice Physician", label: "Primary Care Physician (PCP) / Family Practice Physician" },
+  { value: "Primary Care Physician (PCP)", label: "Prescription / Refill" },
   { value: "Prosthodontist", label: "Prosthodontist" },
   { value: "Psychiatrist", label: "Psychiatrist" },
   { value: "Psychologist", label: "Psychologist" },
