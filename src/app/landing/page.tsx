@@ -31,7 +31,7 @@ import * as Yup from "yup";
 import { track } from "@vercel/analytics";
 import { useFormik } from "formik";
 import { toast } from "sonner";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
@@ -91,7 +91,6 @@ const scrollToSection = (id: string, offset: number) => {
 
 export default function LandingPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [isLoading, setisLoading] = useState(false);
@@ -135,28 +134,6 @@ export default function LandingPage() {
     { src: "/HCSC.png", alt: "Insurance Network 1" },
     { src: "/elevance.png", alt: "Insurance Network 1" },
   ];
-    useEffect(() => {
-      const address = searchParams.get("address");
-      const specialty = searchParams.get("specialty");
-  
-      if (address) {
-        setPrefilledAddress(address);
-        sessionStorage.setItem("selectedAddress", address);
-        setAddressLocation(address); // Set the address location for input field
-      }
-      if (specialty) {
-        setPrefilledSpecialty(specialty);
-        sessionStorage.setItem("selectedSpecialty", specialty);
-        formik.setFieldValue("specialty", specialty);
-      }
-  
-      // Retrieve lat/lng if available
-      const savedLocation = sessionStorage.getItem("selectedLocation");
-      if (savedLocation) {
-        setSelectedLocation(JSON.parse(savedLocation));
-      }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchParams]);
   useEffect(() => {
     fetchUserLocationAndPopularDrs();
    // eslint-disable-next-line react-hooks/exhaustive-deps
