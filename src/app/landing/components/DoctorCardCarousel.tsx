@@ -3,9 +3,11 @@
 import React, { useRef, useEffect } from "react";
 import StarRating from "./StarRating";
 import LocationPin from "./LocationPin";
-import LoadingSummary from "@/components/Loading/LoadingSummary";
+import dynamic from "next/dynamic";
 
-
+const LoadingSumamry = dynamic(() => import("../../../components/Loading/LoadingSummary"), {
+  ssr: false, // Disable SSR for this component
+});
 const DoctorInfoCard = ({
   initial,
   name,
@@ -93,7 +95,7 @@ const DoctorCardCarousel = ({ doctors }) => { // Accept doctors as a prop
   if (!doctors || doctors.length === 0) { // Add null/undefined check for doctors
     return (
       <div className="flex items-center justify-center h-60">
-        <LoadingSummary customstyle={{ height: "200px", width: "200px" }} /> {/* Pass custom style props */}
+        <LoadingSumamry customstyle={{ height: "200px", width: "200px" }} /> {/* Pass custom style props */}
       </div>
     );
   }
