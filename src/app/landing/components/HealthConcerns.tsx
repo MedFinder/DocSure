@@ -7,7 +7,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-export default function HealthConcerns() {
+interface HealthConcernsProps {
+  onClickAction: (value: string) => void;
+}
+
+export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
   return (
     <section className="max-w-6xl mx-auto p-6">
       <h2 className="text-2xl text-start mb-6">Common health concerns</h2>
@@ -22,15 +26,54 @@ export default function HealthConcerns() {
             </AccordionTrigger>
             <AccordionContent>
               <ul className="list-disc pl-5 space-y-2">
-                <li>Nexplanon removal</li>
-                <li>OB-GYN emergency</li>
-                <li>IUD removal</li>
-                <li>IUD insertion</li>
-                <li>Annual physical</li>
-                <li>COVID-19 testing</li>
-                <li>Online doctors</li>
-                <li>Hair loss</li>
-                <li>Ozempic / Wegovy Consultation</li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
+                >
+                  Nexplanon removal
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
+                >
+                  OB-GYN emergency
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
+                >
+                  IUD removal
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
+                >
+                  IUD insertion
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Primary Care Physician (PCP) / Family Practice Physician")}
+                >
+                  Annual physical
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Primary Care Physician (PCP) / Family Practice Physician")}
+                >
+                  COVID-19 testing
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Dermatologist")}
+                >
+                  Hair loss
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Endocrinologist / Diabetes Specialist")}
+                >
+                  Ozempic / Wegovy Consultation
+                </li>
               </ul>
             </AccordionContent>
           </AccordionItem>
@@ -44,10 +87,30 @@ export default function HealthConcerns() {
             </AccordionTrigger>
             <AccordionContent>
               <ul className="list-disc pl-5 space-y-2">
-                <li>Teeth cleaning</li>
-                <li>Cavity filling</li>
-                <li>Tooth extraction</li>
-                <li>Braces consultation</li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Dentist")}
+                >
+                  Teeth cleaning
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Dentist")}
+                >
+                  Cavity filling
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Dentist")}
+                >
+                  Tooth extraction
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Cosmetic Dentist")}
+                >
+                  Braces consultation
+                </li>
               </ul>
             </AccordionContent>
           </AccordionItem>
@@ -61,10 +124,30 @@ export default function HealthConcerns() {
             </AccordionTrigger>
             <AccordionContent>
               <ul className="list-disc pl-5 space-y-2">
-                <li>Therapy sessions</li>
-                <li>Depression counseling</li>
-                <li>Anxiety management</li>
-                <li>Psychiatrist consultation</li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Therapist / Counselor")}
+                >
+                  Therapy sessions
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Therapist / Counselor")}
+                >
+                  Depression counseling
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Therapist / Counselor")}
+                >
+                  Anxiety management
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Psychiatrist")}
+                >
+                  Psychiatrist consultation
+                </li>
               </ul>
             </AccordionContent>
           </AccordionItem>
@@ -78,10 +161,30 @@ export default function HealthConcerns() {
             </AccordionTrigger>
             <AccordionContent>
               <ul className="list-disc pl-5 space-y-2">
-                <li>Eye exam</li>
-                <li>Contact lens fitting</li>
-                <li>LASIK consultation</li>
-                <li>Glasses prescription</li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Ophthalmologist")}
+                >
+                  Eye exam
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Optometrist")}
+                >
+                  Contact lens fitting
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Ophthalmologist")}
+                >
+                  LASIK consultation
+                </li>
+                <li
+                  className="hover:underline hover:cursor-pointer"
+                  onClick={() => onClickAction("Optometrist")}
+                >
+                  Glasses prescription
+                </li>
               </ul>
             </AccordionContent>
           </AccordionItem>

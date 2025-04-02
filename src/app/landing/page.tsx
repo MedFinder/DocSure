@@ -120,10 +120,20 @@ export default function LandingPage() {
     { src: "/image 8.svg", alt: "Insurance Network 6" },
   ];
   const insuranceSecondLogos = [
-    { src: "/image 6.svg", alt: "Insurance Network 1" },
     { src: "/image 11.svg", alt: "Insurance Network 1" },
     { src: "/image 12.svg", alt: "Insurance Network 1" },
     { src: "/image 13.svg", alt: "Insurance Network 1" },
+  ];
+  const insuranceThirdLogos = [
+    { src: "/humana.png", alt: "Insurance Network 1" },
+    { src: "/centene.png", alt: "Insurance Network 1" },
+    { src: "/Highmark.png", alt: "Insurance Network 1" },
+    { src: "/BCBS.png", alt: "Insurance Network 1" },
+  ];
+  const insuranceFourthLogos = [
+    { src: "/signa.png", alt: "Insurance Network 1" },
+    { src: "/HCSC.png", alt: "Insurance Network 1" },
+    { src: "/elevance.png", alt: "Insurance Network 1" },
   ];
     useEffect(() => {
       const address = searchParams.get("address");
@@ -1147,6 +1157,32 @@ export default function LandingPage() {
                   />
                 ))}
               </div>
+              {/* Third Row - 3 Columns */}
+              <div className="flex gap-4 justify-center pt-6">
+                {insuranceThirdLogos.map((logo, index) => (
+                  <Image
+                    key={index}
+                    src={logo.src}
+                    alt={logo.alt}
+                    width={80}
+                    height={80}
+                    className="w-auto h-auto hidden md:flex"
+                  />
+                ))}
+              </div>
+              {/* Fourth Row - 3 Columns */}
+              <div className="flex gap-4 justify-center pt-6">
+                {insuranceFourthLogos.map((logo, index) => (
+                  <Image
+                    key={index}
+                    src={logo.src}
+                    alt={logo.alt}
+                    width={80}
+                    height={80}
+                    className="w-auto h-auto hidden md:flex"
+                  />
+                ))}
+              </div>
             </div>
             <Link
               onClick={(e)=>  {
@@ -1160,7 +1196,10 @@ export default function LandingPage() {
             </Link>
           </div>
           <div>
-            <HealthConcerns />
+            <HealthConcerns onClickAction={(speciality: string) => {
+              scrollToSection("home", 40)
+              handleDoctorTypeClick(speciality)
+            }} />
           </div>
         </section>
         <section className="bg-white py-8 flex flex-col  justify-center items-center">
