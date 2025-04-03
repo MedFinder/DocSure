@@ -17,7 +17,10 @@ import { Button } from "@/components/ui/button";
 import { Autocomplete } from "../../../components/ui/autocomplete";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import { Input } from "@/components/ui/input";
-import { insuranceCarrierOptions, medicalSpecialtiesOptions } from "@/constants/store-constants";
+import {
+  insuranceCarrierOptions,
+  medicalSpecialtiesOptions,
+} from "@/constants/store-constants";
 import Link from "next/link";
 import DoctorCard from "./DoctorCard";
 import DoctorCardCarousel from "./components/DoctorCardCarousel";
@@ -32,6 +35,7 @@ import { track } from "@vercel/analytics";
 import { useFormik } from "formik";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
@@ -70,9 +74,15 @@ const moreDoctorTypes = [
     value: "Orthopedic Surgeon / Orthopedist",
     label: "Orthopedic Surgeon / Orthopedist",
   },
-  { value: "Endocrinologist / Diabetes Specialist", label: "Endocrinologist / Diabetes Specialist" },
+  {
+    value: "Endocrinologist / Diabetes Specialist",
+    label: "Endocrinologist / Diabetes Specialist",
+  },
   { value: "Gastroenterologist", label: "Gastroenterologist" },
-  { value: "Hematologist / Blood Specialist", label: "Hematologist / Blood Specialist" },
+  {
+    value: "Hematologist / Blood Specialist",
+    label: "Hematologist / Blood Specialist",
+  },
   {
     value: "Nephrologist / Kidney Specialist",
     label: "Nephrologist / Kidney Specialist",
@@ -136,9 +146,9 @@ export default function LandingPage() {
   ];
   useEffect(() => {
     fetchUserLocationAndPopularDrs();
-   // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, []);
-   const getPopularDrs = async (lat, lng) => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const getPopularDrs = async (lat, lng) => {
     try {
       const response = await axios.get(
         `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=Primary Care Physician`
@@ -149,7 +159,7 @@ export default function LandingPage() {
       return [];
     }
   };
-  
+
   const fetchUserLocationAndPopularDrs = async () => {
     const storedDoctors = sessionStorage.getItem("popularDoctors");
     if (storedDoctors) {
@@ -164,7 +174,9 @@ export default function LandingPage() {
     const defaultLng = -122.4194; // Default longitude (e.g., San Francisco)
 
     if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser. Using default location.");
+      toast.error(
+        "Geolocation is not supported by your browser. Using default location."
+      );
       const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
       if (popularDoctors?.results?.length > 0) {
         const doctorlists = popularDoctors?.results?.slice(0, 20);
@@ -220,7 +232,7 @@ export default function LandingPage() {
     validationSchema,
     onSubmit: async (values) => {
       track("Homepage_Search_Btn_Clicked");
-      if(values.specialty === "unsure" || values.specialty === "Other"){
+      if (values.specialty === "unsure" || values.specialty === "Other") {
         router.push("/coming-soon");
         return;
       }
@@ -377,10 +389,13 @@ export default function LandingPage() {
           >
             Help
           </Link>
-          <Button onClick={(e) => {
+          <Button
+            onClick={(e) => {
               e.preventDefault();
               scrollToSection("home", 40);
-            }} className="text-white bg-[#0074BA] rounded-md">
+            }}
+            className="text-white bg-[#0074BA] rounded-md"
+          >
             Get Started
           </Button>
         </div>
@@ -476,7 +491,10 @@ export default function LandingPage() {
               </h2>
             </div>
 
-            <form onSubmit={formik.handleSubmit} className="flex gap-2 w-full pt-4">
+            <form
+              onSubmit={formik.handleSubmit}
+              className="flex gap-2 w-full pt-4"
+            >
               <div className="flex flex-col md:flex-row w-full bg-white rounded-md border border-black">
                 {/* Specialty and location inputs */}
                 <div className="flex flex-col sm:flex-row flex-grow w-full">
@@ -496,7 +514,7 @@ export default function LandingPage() {
                         selected={formik.values.specialty}
                         onChange={(value) => {
                           formik.setFieldValue("specialty", value);
-                          setSelectedSpecialty(value)
+                          setSelectedSpecialty(value);
                         }}
                         clearable={false}
                       />
@@ -555,9 +573,9 @@ export default function LandingPage() {
                 </div>
               </div>
               <Button
-                  disabled={
-                    isLoading || !formik.values.specialty || !selectedLocation
-                  }
+                disabled={
+                  isLoading || !formik.values.specialty || !selectedLocation
+                }
                 onClick={formik.handleSubmit} // Explicitly trigger form submission
                 type="submit"
                 className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 h-12 md:flex items-center justify-center w-full md:w-auto hidden"
@@ -565,19 +583,20 @@ export default function LandingPage() {
                 {/* <Search className="w-5 h-5 text-white" /> Search */}
                 {isLoading ? (
                   <>
-                   <Loader2 className="w-5 h-5 text-white animate-spin" /> Searching
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />{" "}
+                    Searching
                   </>
                 ) : (
                   <>
-                  <Search className="w-5 h-5 text-white" /> Search
+                    <Search className="w-5 h-5 text-white" /> Search
                   </>
                 )}
               </Button>
             </form>
 
             {/* Specialty Selection */}
-            <div className="md:flex gap-4 md:pt-4 pt-0 hidden">
-              <div className="sm:flex-wrap sm:gap-3 flex gap-2 overflow-x-auto whitespace-nowrap scroll-smooth scrollbar-hide md:overflow-visible px-1 pb-2">
+            <ScrollArea className="w-full whitespace-nowrap md:flex gap-4 md:pt-4 pt-0 hidden">
+              <div className="flex gap-4 px-1 pb-2 md:max-w-full max-w-[50%]">
                 {doctorTypes.map((value, index) => (
                   <Button
                     key={index}
@@ -592,7 +611,12 @@ export default function LandingPage() {
                   </Button>
                 ))}
               </div>
-            </div>
+              <ScrollBar
+                orientation="horizontal"
+                className="block md:block lg:hidden"
+              />
+            </ScrollArea>
+            <div></div>
 
             <Link
               href="/coming-soon"
@@ -640,10 +664,10 @@ export default function LandingPage() {
                 ))}
               </div>
               <Link
-                onClick={(e)=>  {
-                  e.preventDefault()
-                  scrollToSection("home", 40)
-                }} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection("home", 40);
+                }}
                 href=""
                 className=" text-[#E5573F] flex gap-1 pt-12 hover:text-black"
               >
@@ -748,10 +772,10 @@ export default function LandingPage() {
                 ))}
               </div>
               <Link
-              onClick={(e)=>  {
-                e.preventDefault()
-                scrollToSection("home", 40)
-                }} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection("home", 40);
+                }}
                 href=""
                 className=" text-[#E5573F] flex gap-1 pt-12 hover:text-black"
               >
@@ -766,10 +790,10 @@ export default function LandingPage() {
                 Same-day and last-minute appointments
               </p>
               <Link
-                onClick={(e)=>  {
-                  e.preventDefault()
-                  scrollToSection("home", 40)
-                }} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection("home", 40);
+                }}
                 href=""
                 className=" text-[#E5573F] flex gap-1 pt-16 hover:text-black"
               >
@@ -844,10 +868,10 @@ export default function LandingPage() {
               ))}
             </div>
             <Link
-              onClick={(e)=>  {
-                e.preventDefault()
-                scrollToSection("home", 40)
-              }} 
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection("home", 40);
+              }}
               href=""
               className="text-[#E5573F] flex gap-1 pt-8 md:pt-12 hover:text-black"
             >
@@ -934,10 +958,10 @@ export default function LandingPage() {
                 ))}
               </div>
               <Link
-                onClick={(e)=>  {
-                  e.preventDefault()
-                  scrollToSection("home", 40)
-                }} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection("home", 40);
+                }}
                 href=""
                 className="text-[#E5573F] flex gap-1 pt-4 md:pt-12 hover:text-black"
               >
@@ -986,10 +1010,10 @@ export default function LandingPage() {
               </p>
               <p className="pt-2 ">Same-day and last-minute appointments</p>
               <Link
-                onClick={(e)=>  {
-                  e.preventDefault()
-                  scrollToSection("home", 40)
-                }} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection("home", 40);
+                }}
                 href=""
                 className="text-[#E5573F] flex gap-1 pt-6 md:pt-16 hover:text-black"
               >
@@ -1103,8 +1127,8 @@ export default function LandingPage() {
                     : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800" // Normal state
                 }`}
                 onClick={() => {
-                  scrollToSection("home", 40)
-                  handleDoctorTypeClick(value.value)
+                  scrollToSection("home", 40);
+                  handleDoctorTypeClick(value.value);
                 }}
               >
                 {value.label}
@@ -1129,7 +1153,10 @@ export default function LandingPage() {
           className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2]  border-b md:pt-16 md:pb-16 py-8 px-0   "
         >
           <h2 className="text-3xl md:px-44 mb-4 ">Browse Locations</h2>
-          <Places PrefillLocation={PrefillLocation} addressLocation={addressLocation} />
+          <Places
+            PrefillLocation={PrefillLocation}
+            addressLocation={addressLocation}
+          />
           <div
             id="insurance_plans"
             className="px-20 bg-white  border-lg py-14 flex flex-col items-center justify-center"
@@ -1194,9 +1221,9 @@ export default function LandingPage() {
               </div>
             </div>
             <Link
-              onClick={(e)=>  {
-                e.preventDefault()
-                scrollToSection("home", 40)
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection("home", 40);
               }}
               href=""
               className=" flex justify-center gap-1 pt-12 hover:text-gray-700"
@@ -1205,10 +1232,12 @@ export default function LandingPage() {
             </Link>
           </div>
           <div>
-            <HealthConcerns onClickAction={(speciality: string) => {
-              scrollToSection("home", 40)
-              handleDoctorTypeClick(speciality)
-            }} />
+            <HealthConcerns
+              onClickAction={(speciality: string) => {
+                scrollToSection("home", 40);
+                handleDoctorTypeClick(speciality);
+              }}
+            />
           </div>
         </section>
         <section className="bg-white py-8 flex flex-col  justify-center items-center">

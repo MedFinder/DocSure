@@ -5,9 +5,12 @@ import StarRating from "./StarRating";
 import LocationPin from "./LocationPin";
 import dynamic from "next/dynamic";
 
-const LoadingSumamry = dynamic(() => import("../../../components/Loading/LoadingSummary"), {
-  ssr: false, // Disable SSR for this component
-});
+const LoadingSumamry = dynamic(
+  () => import("../../../components/Loading/LoadingSummary"),
+  {
+    ssr: false, // Disable SSR for this component
+  }
+);
 const DoctorInfoCard = ({
   initial,
   name,
@@ -64,7 +67,8 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
-const DoctorCardCarousel = ({ doctors }) => { // Accept doctors as a prop
+const DoctorCardCarousel = ({ doctors }) => {
+  // Accept doctors as a prop
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -72,7 +76,8 @@ const DoctorCardCarousel = ({ doctors }) => { // Accept doctors as a prop
 
     const scrollMarquee = () => {
       if (scrollContainerRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+        const { scrollLeft, scrollWidth, clientWidth } =
+          scrollContainerRef.current;
         const maxScrollLeft = scrollWidth - clientWidth;
         if (scrollLeft >= maxScrollLeft) {
           cancelAnimationFrame(animationFrameId); // Stop scrolling
@@ -92,10 +97,12 @@ const DoctorCardCarousel = ({ doctors }) => { // Accept doctors as a prop
     return () => cancelAnimationFrame(animationFrameId); // Cleanup on unmount
   }, []);
 
-  if (!doctors || doctors.length === 0) { // Add null/undefined check for doctors
+  if (!doctors || doctors.length === 0) {
+    // Add null/undefined check for doctors
     return (
       <div className="flex items-center justify-center h-60">
-        <LoadingSumamry customstyle={{ height: "200px", width: "200px" }} /> {/* Pass custom style props */}
+        <LoadingSumamry customstyle={{ height: "200px", width: "200px" }} />{" "}
+        {/* Pass custom style props */}
       </div>
     );
   }
@@ -112,7 +119,7 @@ const DoctorCardCarousel = ({ doctors }) => { // Accept doctors as a prop
             initial={doc.name?.charAt(0) || "D"}
             name={doc.name || "Unknown Doctor"}
             address={doc.formatted_address || "Unknown Address"}
-            rating={doc.rating || "N/A"}
+            rating={doc.rating || 0}
             distance={doc.distance || "N/A"}
             color={getRandomColor()}
           />
