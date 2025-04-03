@@ -162,6 +162,13 @@ export default function LandingPage() {
 
   const fetchUserLocationAndPopularDrs = async () => {
     const storedDoctors = sessionStorage.getItem("popularDoctors");
+    const storedAddress = sessionStorage.getItem("selectedAddress");
+    const storedLocation = sessionStorage.getItem("selectedLocation");
+    if (storedAddress) { 
+      setAddressLocation(storedAddress); 
+      const { latitude, longitude } = JSON.parse(storedLocation);
+      setSelectedLocation({ latitude, longitude });
+     }
     if (storedDoctors) {
       const parsedDoctors = JSON.parse(storedDoctors);
       if (parsedDoctors?.length > 0) {
@@ -189,11 +196,31 @@ export default function LandingPage() {
       async (position) => {
         const { latitude, longitude } = position.coords;
         console.log(latitude, longitude);
-        const popularDoctors = await getPopularDrs(latitude, longitude);
-        if (popularDoctors?.results?.length > 0) {
-          const doctorlists = popularDoctors?.results?.slice(0, 20);
-          setpopulardoctors(doctorlists);
-          sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+
+        try {
+          // Fetch the address using Google Maps Geocoding API
+          const geocodeResponse = await axios.get(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
+          );
+
+          const address = geocodeResponse.data.results[0]?.formatted_address || "";
+          console.log(address)
+          setSelectedLocation({ latitude, longitude });
+          setAddressLocation(address); // Set the fetched address
+          sessionStorage.setItem("selectedAddress", address);
+          sessionStorage.setItem(
+            "selectedLocation",
+            JSON.stringify({ latitude, longitude })
+          );
+
+          const popularDoctors = await getPopularDrs(latitude, longitude);
+          if (popularDoctors?.results?.length > 0) {
+            const doctorlists = popularDoctors?.results?.slice(0, 20);
+            setpopulardoctors(doctorlists);
+            sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+          }
+        } catch (error) {
+          console.error("Error fetching address or popular doctors:", error);
         }
       },
       async (error) => {
@@ -487,7 +514,7 @@ export default function LandingPage() {
                 Book top rated doctors near you
               </h2>
               <h2 className="text-xl font-normal">
-                Let AI call doctors and secure appointments for you.
+                Let our AI call clinics and secure your appointment for free.
               </h2>
             </div>
 
