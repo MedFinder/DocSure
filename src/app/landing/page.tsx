@@ -163,8 +163,10 @@ export default function LandingPage() {
     const storedLocation = sessionStorage.getItem("selectedLocation");
     if (storedAddress) { 
       setAddressLocation(storedAddress); 
-      const { latitude, longitude } = JSON.parse(storedLocation);
-      setSelectedLocation({ latitude, longitude });
+     }
+     if (storedLocation) { 
+      const { lat, lng } = JSON.parse(storedLocation);
+      setSelectedLocation({ lat, lng });
      }
     if (storedDoctors) {
       const parsedDoctors = JSON.parse(storedDoctors);
@@ -191,26 +193,26 @@ export default function LandingPage() {
     }
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        const { latitude, longitude } = position.coords;
-        console.log(latitude, longitude);
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
 
         try {
           // Fetch the address using Google Maps Geocoding API
           const geocodeResponse = await axios.get(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
           );
 
           const address = geocodeResponse.data.results[0]?.formatted_address || "";
-          console.log(address)
-          setSelectedLocation({ latitude, longitude });
+          // console.log(address)
+          setSelectedLocation({ lat, lng });
           setAddressLocation(address); // Set the fetched address
           sessionStorage.setItem("selectedAddress", address);
           sessionStorage.setItem(
             "selectedLocation",
-            JSON.stringify({ latitude, longitude })
+            JSON.stringify({ lat, lng })
           );
 
-          const popularDoctors = await getPopularDrs(latitude, longitude);
+          const popularDoctors = await getPopularDrs(lat, lng);
           if (popularDoctors?.results?.length > 0) {
             const doctorlists = popularDoctors?.results?.slice(0, 20);
             setpopulardoctors(doctorlists);

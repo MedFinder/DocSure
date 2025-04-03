@@ -51,7 +51,7 @@ export const medicalSpecialtiesOptions = [
   { value: "Plastic Surgeon", label: "Plastic Surgeon" },
   { value: "Podiatrist / Foot and Ankle Specialist", label: "Podiatrist / Foot and Ankle Specialist" },
   { value: "Primary Care Physician (PCP) / Family Practice Physician", label: "Primary Care Physician (PCP) / Family Practice Physician" },
-  { value: "Primary Care Physician (PCP)", label: "Prescription / Refill" },
+  { value: "Primary Care Physician (PCP) / Family Practice Physician", label: "Prescription / Refill" },
   { value: "Prosthodontist", label: "Prosthodontist" },
   { value: "Psychiatrist", label: "Psychiatrist" },
   { value: "Psychologist", label: "Psychologist" },
