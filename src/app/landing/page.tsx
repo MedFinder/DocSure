@@ -277,9 +277,10 @@ export default function LandingPage() {
 
         // Call logRequestInfo without awaiting
         const requestIdPromise = logRequestInfo();
+        const speciality_value = formik.values.specialty === 'Prescription / Refill' ? 'Primary Care Physician (PCP) / Family Practice Physician' : formik.values.specialty;
 
         const response = await axios.get(
-          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
+          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${speciality_value}`
         );
 
         // Handle request_id when the promise resolves
