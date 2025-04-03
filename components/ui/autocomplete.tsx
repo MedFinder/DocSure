@@ -196,9 +196,9 @@ export function Autocomplete({
       >
         {filteredOptions.length > 0 ? (
           <ul className="py-1">
-            {filteredOptions.map((option) => (
+            {filteredOptions.map((option,index) => (
               <li 
-                key={option.value}
+                key={index}
                 onClick={() => handleSelectOption(option.value)}
                 className={cn(
                   "px-3 py-2 text-sm cursor-pointer hover:bg-gray-100",
