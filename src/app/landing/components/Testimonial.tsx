@@ -117,9 +117,13 @@ const TestimonialCarousel = () => {
         className="flex gap-4 overflow-x-scroll scrollbar-hide scroll-smooth"
       >
         {testimony.map((testimonial, index) => (
-          <div key={index} className="flex flex-col gap-4 flex-shrink-0">
-            <TestimonialCard {...testimonial} />
-            <TestimonialCard {...testimony2[index]} />
+          <div key={index} className="relative flex-shrink-0 w-[320px] h-[450px]">
+            <div className="absolute top-0 left-0">
+              <TestimonialCard {...testimonial} />
+            </div>
+            <div className="absolute bottom-0 left-0 ml-10">
+              <TestimonialCard {...testimony2[index]} />
+            </div>
           </div>
         ))}
       </div>
