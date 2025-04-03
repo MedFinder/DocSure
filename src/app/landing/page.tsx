@@ -36,6 +36,7 @@ import { useFormik } from "formik";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { log } from "console";
 
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
@@ -121,28 +122,24 @@ export default function LandingPage() {
     libraries: ["places"],
   });
   const insuranceFirstLogos = [
-    { src: "/image 6.svg", alt: "Insurance Network 1" },
-    { src: "/image 7.svg", alt: "Insurance Network 2" },
-    { src: "/image 18 (1).svg", alt: "Insurance Network 3" },
-    { src: "/image 9.svg", alt: "Insurance Network 4" },
-    { src: "/image 17 (1).svg", alt: "Insurance Network 5" },
-    { src: "/image 8.svg", alt: "Insurance Network 6" },
+    { src: "/image 18 (1).svg", alt: "Insurance Network 3", url: "https://www.unitedhealthgroup.com" },
+    { src: "/elevance.png", alt: "Insurance Network 1", width: 65, url: "https://www.elevancehealth.com/" },
+    { src: "/image 17 (1).svg", alt: "Insurance Network 5", url: "https://www.aetna.com/" },
+    { src: "/cigna.png", alt: "Insurance Network 5", width: 80, url: "https://www.cigna.com/" },
+    { src: "/image 6.svg", alt: "Insurance Network 1", url: "https://healthy.kaiserpermanente.org/front-door" },
+    // { src: "/image 7.svg", alt: "Insurance Network 2", url: "https://www.anthem.com/" },
+    // { src: "/image 9.svg", alt: "Insurance Network 4", url: "https://www.healthnet.com/content/healthnet/en_us.html" },
+    // { src: "/image 8.svg", alt: "Insurance Network 6", url: "https://www.blueshieldca.com/" },
   ];
   const insuranceSecondLogos = [
-    { src: "/image 11.svg", alt: "Insurance Network 1" },
-    { src: "/image 12.svg", alt: "Insurance Network 1" },
-    { src: "/image 13.svg", alt: "Insurance Network 1" },
-  ];
-  const insuranceThirdLogos = [
-    { src: "/humana.png", alt: "Insurance Network 1" },
-    { src: "/centene.png", alt: "Insurance Network 1" },
-    { src: "/Highmark.png", alt: "Insurance Network 1" },
-    { src: "/BCBS.png", alt: "Insurance Network 1" },
-  ];
-  const insuranceFourthLogos = [
-    { src: "/signa.png", alt: "Insurance Network 1" },
-    { src: "/HCSC.png", alt: "Insurance Network 1" },
-    { src: "/elevance.png", alt: "Insurance Network 1" },
+    { src: "/HCSC.png", width: 175, alt: "Insurance Network 1", url: 'https://www.hcsc.com' },
+    { src: "/BCBS.png", width: 175, alt: "Insurance Network 1", url: 'https://www.bcbs.com ' },
+    { src: "/Highmark.png",width: 279, alt: "Insurance Network 1", url: 'https://www.highmark.com' },
+    { src: "/centene.png", width: 222, alt: "Insurance Network 1", url: 'https://www.centene.com' },
+    { src: "/humana.png", alt: "Insurance Network 4", width: 175, url: "https://www.humana.com" },
+    // { src: "/image 11.svg", alt: "Insurance Network 1", url: "https://example7.com" },
+    // { src: "/image 12.svg", alt: "Insurance Network 2", url: "https://example8.com" },
+    // { src: "/image 13.svg", alt: "Insurance Network 3", url: "https://example9.com" },
   ];
   useEffect(() => {
     fetchUserLocationAndPopularDrs();
@@ -162,6 +159,13 @@ export default function LandingPage() {
 
   const fetchUserLocationAndPopularDrs = async () => {
     const storedDoctors = sessionStorage.getItem("popularDoctors");
+    const storedAddress = sessionStorage.getItem("selectedAddress");
+    const storedLocation = sessionStorage.getItem("selectedLocation");
+    if (storedAddress) { 
+      setAddressLocation(storedAddress); 
+      const { latitude, longitude } = JSON.parse(storedLocation);
+      setSelectedLocation({ latitude, longitude });
+     }
     if (storedDoctors) {
       const parsedDoctors = JSON.parse(storedDoctors);
       if (parsedDoctors?.length > 0) {
@@ -189,11 +193,31 @@ export default function LandingPage() {
       async (position) => {
         const { latitude, longitude } = position.coords;
         console.log(latitude, longitude);
-        const popularDoctors = await getPopularDrs(latitude, longitude);
-        if (popularDoctors?.results?.length > 0) {
-          const doctorlists = popularDoctors?.results?.slice(0, 20);
-          setpopulardoctors(doctorlists);
-          sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+
+        try {
+          // Fetch the address using Google Maps Geocoding API
+          const geocodeResponse = await axios.get(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
+          );
+
+          const address = geocodeResponse.data.results[0]?.formatted_address || "";
+          console.log(address)
+          setSelectedLocation({ latitude, longitude });
+          setAddressLocation(address); // Set the fetched address
+          sessionStorage.setItem("selectedAddress", address);
+          sessionStorage.setItem(
+            "selectedLocation",
+            JSON.stringify({ latitude, longitude })
+          );
+
+          const popularDoctors = await getPopularDrs(latitude, longitude);
+          if (popularDoctors?.results?.length > 0) {
+            const doctorlists = popularDoctors?.results?.slice(0, 20);
+            setpopulardoctors(doctorlists);
+            sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+          }
+        } catch (error) {
+          console.error("Error fetching address or popular doctors:", error);
         }
       },
       async (error) => {
@@ -487,7 +511,7 @@ export default function LandingPage() {
                 Book top rated doctors near you
               </h2>
               <h2 className="text-xl font-normal">
-                Let AI call doctors and secure appointments for you.
+                Let our AI call clinics and secure your appointment for free.
               </h2>
             </div>
 
@@ -596,7 +620,7 @@ export default function LandingPage() {
 
             {/* Specialty Selection */}
             <ScrollArea className="w-full whitespace-nowrap md:flex gap-4 md:pt-4 pt-0 hidden">
-              <div className="flex gap-4 px-1 pb-2 md:max-w-full max-w-[50%]">
+              <div className="flex gap-4 px-1 pb-2 md:max-w-full max-w-[50%] justify-center">
                 {doctorTypes.map((value, index) => (
                   <Button
                     key={index}
@@ -657,8 +681,8 @@ export default function LandingPage() {
                     key={index}
                     src={logo.src}
                     alt={logo.alt}
-                    width={0}
-                    height={0}
+                    width={logo?.width ?? 0}
+                    height={logo?.height ?? 0}
                     className="w-auto h-auto hidden md:flex"
                   />
                 ))}
@@ -765,8 +789,8 @@ export default function LandingPage() {
                     key={index}
                     src={logo.src}
                     alt={logo.alt}
-                    width={0}
-                    height={0}
+                    width={logo?.width ?? 0}
+                    height={logo?.height ?? 0}
                     className="w-auto h-auto hidden md:flex"
                   />
                 ))}
@@ -861,8 +885,8 @@ export default function LandingPage() {
                   key={index}
                   src={logo.src}
                   alt={logo.alt}
-                  width={0}
-                  height={0}
+                  width={logo?.width ?? 0}
+                  height={logo?.heigt ?? 0}
                   className="w-auto h-auto"
                 />
               ))}
@@ -951,8 +975,8 @@ export default function LandingPage() {
                     key={index}
                     src={logo.src}
                     alt={logo.alt}
-                    width={0}
-                    height={0}
+                    width={logo?.width ?? 0}
+                    height={logo?.height ?? 0}
                     className="w-auto h-8 md:h-auto flex"
                   />
                 ))}
@@ -1167,15 +1191,18 @@ export default function LandingPage() {
 
             <div className="flex flex-col pt-4">
               {/* First Row - 6 Columns */}
-              <div className="grid md:grid-cols-6 grid-cols-2 gap-8 md:gap-0 justify-center pt-4">
+              <div className="flex flex-wrap gap-4 md:justify-center">
+              {/* <div className="grid md:grid-cols-6 grid-cols-2 gap-8 md:gap-0 justify-center pt-4"> */}
+
                 {insuranceFirstLogos.map((logo, index) => (
                   <Image
                     key={index}
                     src={logo.src}
                     alt={logo.alt}
-                    width={0}
-                    height={0}
-                    className="w-auto h-auto  md:flex"
+                    width={logo?.width ?? 0}
+                    height={logo?.height ?? 0}
+                    onClick={() => window.open(logo.url, "_blank")}
+                    className="w-auto h-auto  md:flex cursor-pointer"
                   />
                 ))}
               </div>
@@ -1187,35 +1214,10 @@ export default function LandingPage() {
                     key={index}
                     src={logo.src}
                     alt={logo.alt}
-                    width={0}
-                    height={0}
-                    className="w-auto h-auto hidden md:flex"
-                  />
-                ))}
-              </div>
-              {/* Third Row - 3 Columns */}
-              <div className="flex gap-4 justify-center pt-6">
-                {insuranceThirdLogos.map((logo, index) => (
-                  <Image
-                    key={index}
-                    src={logo.src}
-                    alt={logo.alt}
-                    width={80}
-                    height={80}
-                    className="w-auto h-auto hidden md:flex"
-                  />
-                ))}
-              </div>
-              {/* Fourth Row - 3 Columns */}
-              <div className="flex gap-4 justify-center pt-6">
-                {insuranceFourthLogos.map((logo, index) => (
-                  <Image
-                    key={index}
-                    src={logo.src}
-                    alt={logo.alt}
-                    width={80}
-                    height={80}
-                    className="w-auto h-auto hidden md:flex"
+                    width={logo?.width ?? 0}
+                    height={logo?.height ?? 0}
+                    onClick={() => window.open(logo.url, "_blank")}
+                    className="w-auto h-auto hidden md:flex cursor-pointer"
                   />
                 ))}
               </div>
@@ -1240,6 +1242,7 @@ export default function LandingPage() {
             />
           </div>
         </section>
+        {/* Footer Section */}
         <section className="bg-white py-8 flex flex-col  justify-center items-center">
           <Image
             src="/Vector (9).svg"
@@ -1250,10 +1253,10 @@ export default function LandingPage() {
           />
           <p>© 2025 Docure AI Inc.</p>
           <div className="flex gap-2">
-            <Link href="">Terms</Link>
-            <Link href="">Privacy</Link>
-            <Link href="">Home</Link>
-            <Link href="">Contact Us</Link>
+            <Link href="" className="hover:underline">Terms</Link>
+            <Link href="" className="hover:underline">Privacy</Link>
+            <Link href="/" className="hover:underline">Home</Link>
+            <Link href="/contact-us" className="hover:underline">Contact Us</Link>
           </div>
         </section>
       </main>

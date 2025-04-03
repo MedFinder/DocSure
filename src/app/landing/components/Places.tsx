@@ -73,7 +73,6 @@ const Places: React.FC<PlacesProps> = ({ PrefillLocation, addressLocation }) => 
   const locations4 = [
     "San Francisco, California",
     "San Jose, California",
-    "Phoenix, Arizona",
     "Seattle, Washington",
     "Washington, D.C.",
   ];
