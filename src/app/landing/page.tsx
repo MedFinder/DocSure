@@ -1291,8 +1291,8 @@ export default function LandingPage() {
           />
           <p>© 2025 Docure AI Inc.</p>
           <div className="flex gap-2">
-            <Link href="" className="hover:underline">Terms</Link>
-            <Link href="" className="hover:underline">Privacy</Link>
+            <Link href="/terms" className="hover:underline">Terms</Link>
+            <Link href="/privacy-policy" className="hover:underline">Privacy</Link>
             <Link href="/" className="hover:underline">Home</Link>
             <Link href="/contact-us" className="hover:underline">Contact Us</Link>
           </div>

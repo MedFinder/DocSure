@@ -44,27 +44,27 @@ const testimony2 = [
   },
   {
     index: 1,
+    name: "Liam Martinez",
+    comment:
+      "The AI called multiple clinics until it found one—felt like having a personal assistant.",
+  },
+  {
+    index: 2,
     name: "Sophia Carter",
     comment:
       "Booked an urgent care appointment without waiting on hold. Docsure is now my go-to.",
   },
   {
-    index: 2,
+    index: 3,
     name: "Michael Johnson",
     comment:
       "I got an appointment faster through Docsure than by calling the clinic myself. Highly recommend!",
   },
   {
-    index: 3,
+    index: 4,
     name: "Emma Davis",
     comment:
       "Was skeptical at first, but it actually worked! Found a slot the same day.",
-  },
-  {
-    index: 4,
-    name: "Liam Martinez",
-    comment:
-      "Docsure saved me hours! It found an appointment when every clinic said they were full.",
   },
   {
     index: 5,
