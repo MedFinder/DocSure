@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <GoogleTagManager gtmId="GTM-TK9TF844" />
+      <GoogleTagManager gtmId="GTM-TLWLQGKV" />
       <Providers>
         <body className={`${lexendFont.className} font-sans`}>
           {/* <Suspense fallback={<div>Loading...</div>}> */}
@@ -33,3 +33,4 @@ export default function RootLayout({
     </html>
   );
 }
+ {/*GTM-TK9TF844 */}

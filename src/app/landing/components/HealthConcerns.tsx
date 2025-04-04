@@ -18,14 +18,14 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
 
       {/* Accordions Side by Side */}
       <div className="grid grid-cols-4 gap-4">
-        {/* Medical - Open by default */}
-        <Accordion type="single" defaultValue="medical" collapsible>
-          <AccordionItem value="medical">
-            <AccordionTrigger className="text-base font-medium">
+        {/* Medical - Disabled open/close */}
+        <div>
+          <div>
+            {/* <AccordionTrigger className="text-base font-medium"> */}
               Medical
-            </AccordionTrigger>
-            <AccordionContent>
-              <ul className="list-disc pl-5 space-y-2">
+            {/* </AccordionTrigger> */}
+            <div>
+              <ul className="pt-4 text-sm space-y-2 underline">
                 <li
                   className="hover:underline hover:cursor-pointer"
                   onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
@@ -52,13 +52,13 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
                 </li>
                 <li
                   className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Primary Care Physician (PCP) / Family Practice Physician")}
+                  onClick={() => onClickAction("Primary Care Physician")}
                 >
                   Annual physical
                 </li>
                 <li
                   className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Primary Care Physician (PCP) / Family Practice Physician")}
+                  onClick={() => onClickAction("Primary Care Physician")}
                 >
                   COVID-19 testing
                 </li>
@@ -75,18 +75,18 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
                   Ozempic / Wegovy Consultation
                 </li>
               </ul>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+            </div>
+          </div>
+        </div>
 
-        {/* Dental - Closed by Default */}
-        <Accordion type="single" collapsible>
-          <AccordionItem value="dental">
-            <AccordionTrigger className="text-base font-medium">
+        {/* Dental - Disabled open/close */}
+        <div>
+          <div>
+            {/* <AccordionTrigger className="text-base font-medium"> */}
               Dental
-            </AccordionTrigger>
-            <AccordionContent>
-              <ul className="list-disc pl-5 space-y-2">
+            {/* </AccordionTrigger> */}
+            <div>
+              <ul className="pt-4 text-sm space-y-2 underline">
                 <li
                   className="hover:underline hover:cursor-pointer"
                   onClick={() => onClickAction("Dentist")}
@@ -112,18 +112,18 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
                   Braces consultation
                 </li>
               </ul>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+            </div>
+          </div>
+        </div>
 
-        {/* Mental Health - Closed by Default */}
-        <Accordion type="single" collapsible>
-          <AccordionItem value="mental-health">
-            <AccordionTrigger className="text-base font-medium">
-              Mental Health
-            </AccordionTrigger>
-            <AccordionContent>
-              <ul className="list-disc pl-5 space-y-2">
+        {/* Mental Health - Disabled open/close */}
+          <div>
+            {/* <AccordionTrigger className="text-base font-medium"> */}
+            <span className="">Mental Health</span>
+             
+            {/* </AccordionTrigger> */}
+            <div>
+              <ul className="space-y-2 pt-4 text-sm underline">
                 <li
                   className="hover:underline hover:cursor-pointer"
                   onClick={() => onClickAction("Therapist / Counselor")}
@@ -149,18 +149,17 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
                   Psychiatrist consultation
                 </li>
               </ul>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+            </div>
+          </div>
 
-        {/* Vision - Closed by Default */}
-        <Accordion type="single" collapsible>
-          <AccordionItem value="vision">
-            <AccordionTrigger className="text-base font-medium">
+        {/* Vision - Disabled open/close */}
+        <div>
+          <div>
+            {/* <AccordionTrigger className="text-base font-medium"> */}
               Vision
-            </AccordionTrigger>
-            <AccordionContent>
-              <ul className="list-disc pl-5 space-y-2">
+            {/* </AccordionTrigger> */}
+            <div>
+              <ul className="space-y-2 pt-4 text-sm underline">
                 <li
                   className="hover:underline hover:cursor-pointer"
                   onClick={() => onClickAction("Ophthalmologist")}
@@ -186,9 +185,9 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
                   Glasses prescription
                 </li>
               </ul>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

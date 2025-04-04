@@ -33,6 +33,14 @@ const testimony = [
     name: "Sarah Connor",
     comment: "Love it! Even helped me find a doctor who accepts my insurance. No back-and-forth.",
   },
+  {
+    name: "Sarah Connor",
+    comment: "I booked a pediatrician for my daughter in minutes. Way easier than calling around.",
+  },
+  {
+    name: "Sarah Connor",
+    comment: "Amazing tool for busy people. I handled my appointment during a lunch break—no stress at all.",
+  },
 ];
 
 const testimony2 = [
@@ -44,32 +52,42 @@ const testimony2 = [
   },
   {
     index: 1,
+    name: "Liam Martinez",
+    comment:
+      "The AI called multiple clinics until it found one—felt like having a personal assistant.",
+  },
+  {
+    index: 2,
     name: "Sophia Carter",
     comment:
       "Booked an urgent care appointment without waiting on hold. Docsure is now my go-to.",
   },
   {
-    index: 2,
+    index: 3,
     name: "Michael Johnson",
     comment:
       "I got an appointment faster through Docsure than by calling the clinic myself. Highly recommend!",
   },
   {
-    index: 3,
+    index: 4,
     name: "Emma Davis",
     comment:
       "Was skeptical at first, but it actually worked! Found a slot the same day.",
   },
   {
-    index: 4,
-    name: "Liam Martinez",
-    comment:
-      "Docsure saved me hours! It found an appointment when every clinic said they were full.",
-  },
-  {
     index: 5,
     name: "Sarah Connor",
-    comment: "Finally got my mom an appointment without endless calling. Docsure did it in minutes—so grateful!",
+    comment: "It’s like having a healthcare concierge. Fast, accurate, and no awkward phone calls.",
+  },
+  {
+    index: 6,
+    name: "Sarah Connor",
+    comment: "Thought it was too good to be true—but it actually works! Booked my appointment instantly.",
+  },
+  {
+    index: 7,
+    name: "Sarah Connor",
+    comment: "No more calling five clinics to find one opening—Docsure does the heavy lifting for you.",
   },
 ];
 
@@ -117,9 +135,13 @@ const TestimonialCarousel = () => {
         className="flex gap-4 overflow-x-scroll scrollbar-hide scroll-smooth"
       >
         {testimony.map((testimonial, index) => (
-          <div key={index} className="flex flex-col gap-4 flex-shrink-0">
-            <TestimonialCard {...testimonial} />
-            <TestimonialCard {...testimony2[index]} />
+          <div key={index} className="relative flex-shrink-0 w-[320px] h-[450px]">
+            <div className="absolute top-0 left-0">
+              <TestimonialCard {...testimonial} />
+            </div>
+            <div className="absolute bottom-0 left-0 ml-10">
+              <TestimonialCard {...testimony2[index]} />
+            </div>
           </div>
         ))}
       </div>

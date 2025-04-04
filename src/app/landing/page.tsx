@@ -36,6 +36,7 @@ import { useFormik } from "formik";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { log } from "console";
 
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
@@ -116,33 +117,42 @@ export default function LandingPage() {
     formik.setFieldValue("specialty", value);
     setSelectedSpecialty(value); // Update specialty when button is clicked
   };
+  const checkPrefillAvailability = (value:string) => {
+    scrollToSection("home", 40); // Scroll to the "home" section
+    handleDoctorTypeClick('Primary Care Physician'); // Call handleDoctorTypeClick with the provided value
+   formik.handleSubmit(); // Trigger formik's onSubmit function
+  };
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
   });
   const insuranceFirstLogos = [
-    { src: "/image 6.svg", alt: "Insurance Network 1" },
-    { src: "/image 7.svg", alt: "Insurance Network 2" },
-    { src: "/image 18 (1).svg", alt: "Insurance Network 3" },
-    { src: "/image 9.svg", alt: "Insurance Network 4" },
-    { src: "/image 17 (1).svg", alt: "Insurance Network 5" },
-    { src: "/image 8.svg", alt: "Insurance Network 6" },
+    { src: "/image 18 (1).svg", alt: "Insurance Network 3", carrier: "UnitedHealthcare" },
+    { src: "/elevance.svg", alt: "Insurance Network 1", carrier: "Elevance Health" },
+    { src: "/image 17 (1).svg", alt: "Insurance Network 5", carrier: "Aetna" },
+    { src: "/cigna.svg", alt: "Insurance Network 5", carrier: "Cigna" },
+    { src: "/image 6.svg", alt: "Insurance Network 1", carrier: "Kaiser Permanente" },
   ];
   const insuranceSecondLogos = [
-    { src: "/image 11.svg", alt: "Insurance Network 1" },
-    { src: "/image 12.svg", alt: "Insurance Network 1" },
-    { src: "/image 13.svg", alt: "Insurance Network 1" },
+    { src: "/HCSC.svg", alt: "Insurance Network 1", carrier: 'The HSC Health Care System' },
+    { src: "/BCBS.svg", alt: "Insurance Network 1", carrier: 'Blue Cross Blue Shield' },
+    { src: "/Highmark.svg", alt: "Insurance Network 1", carrier: 'Highmark Blue Cross Blue Shield' },
+    { src: "/centene.svg",  alt: "Insurance Network 1", carrier: 'Centennial Care' },
+    { src: "/humana.svg", alt: "Insurance Network 4", carrier: "Humana" },
   ];
-  const insuranceThirdLogos = [
-    { src: "/humana.png", alt: "Insurance Network 1" },
-    { src: "/centene.png", alt: "Insurance Network 1" },
-    { src: "/Highmark.png", alt: "Insurance Network 1" },
-    { src: "/BCBS.png", alt: "Insurance Network 1" },
+  const insuranceLeftLogos = [
+    { src: "/image 6.svg", alt: "Insurance Network 1", carrier: "https://healthy.kaiserpermanente.org/front-door" },
+    { src: "/image 7.svg", alt: "Insurance Network 2", carrier: "https://www.anthem.com/" },
+    { src: "/image 8.svg", alt: "Insurance Network 6", carrier: "https://www.blueshieldca.com/" },
+    { src: "/image 9.svg", alt: "Insurance Network 4", carrier: "https://www.healthnet.com/content/healthnet/en_us.html" },
+    { src: "/image 17 (1).svg", alt: "Insurance Network 5", carrier: "https://www.aetna.com/" },
+    { src: "/image 18.svg", alt: "Insurance Network 1", carrier: "https://example7.com" },
   ];
-  const insuranceFourthLogos = [
-    { src: "/signa.png", alt: "Insurance Network 1" },
-    { src: "/HCSC.png", alt: "Insurance Network 1" },
-    { src: "/elevance.png", alt: "Insurance Network 1" },
+  const insuranceRightLogos = [
+    { src: "/image 6.svg", alt: "Insurance Network 1", carrier: "https://healthy.kaiserpermanente.org/front-door" },
+    { src: "/image 11.svg", alt: "Insurance Network 1", carrier: "https://example7.com" },
+    { src: "/image 12.svg", alt: "Insurance Network 2", carrier: "https://example8.com" },
+    { src: "/image 13.svg", alt: "Insurance Network 3", carrier: "https://example9.com" },
   ];
   useEffect(() => {
     fetchUserLocationAndPopularDrs();
@@ -162,6 +172,15 @@ export default function LandingPage() {
 
   const fetchUserLocationAndPopularDrs = async () => {
     const storedDoctors = sessionStorage.getItem("popularDoctors");
+    const storedAddress = sessionStorage.getItem("selectedAddress");
+    const storedLocation = sessionStorage.getItem("selectedLocation");
+    if (storedAddress) { 
+      setAddressLocation(storedAddress); 
+     }
+     if (storedLocation) { 
+      const { lat, lng } = JSON.parse(storedLocation);
+      setSelectedLocation({ lat, lng });
+     }
     if (storedDoctors) {
       const parsedDoctors = JSON.parse(storedDoctors);
       if (parsedDoctors?.length > 0) {
@@ -187,13 +206,33 @@ export default function LandingPage() {
     }
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        const { latitude, longitude } = position.coords;
-        console.log(latitude, longitude);
-        const popularDoctors = await getPopularDrs(latitude, longitude);
-        if (popularDoctors?.results?.length > 0) {
-          const doctorlists = popularDoctors?.results?.slice(0, 20);
-          setpopulardoctors(doctorlists);
-          sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        try {
+          // Fetch the address using Google Maps Geocoding API
+          const geocodeResponse = await axios.get(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
+          );
+
+          const address = geocodeResponse.data.results[0]?.formatted_address || "";
+          // console.log(address)
+          setSelectedLocation({ lat, lng });
+          setAddressLocation(address); // Set the fetched address
+          sessionStorage.setItem("selectedAddress", address);
+          sessionStorage.setItem(
+            "selectedLocation",
+            JSON.stringify({ lat, lng })
+          );
+
+          const popularDoctors = await getPopularDrs(lat, lng);
+          if (popularDoctors?.results?.length > 0) {
+            const doctorlists = popularDoctors?.results?.slice(0, 20);
+            setpopulardoctors(doctorlists);
+            sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+          }
+        } catch (error) {
+          console.error("Error fetching address or popular doctors:", error);
         }
       },
       async (error) => {
@@ -251,9 +290,10 @@ export default function LandingPage() {
 
         // Call logRequestInfo without awaiting
         const requestIdPromise = logRequestInfo();
+        const speciality_value = formik.values.specialty === 'Prescription / Refill' ? 'Primary Care Physician' : formik.values.specialty;
 
         const response = await axios.get(
-          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
+          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${speciality_value}`
         );
 
         // Handle request_id when the promise resolves
@@ -318,14 +358,22 @@ export default function LandingPage() {
             alt="New Logo"
             width={0}
             height={0}
-            className="w-28 h-auto hidden md:flex"
+            className="w-28 h-auto hidden md:flex cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault(); // Prevent default anchor behavior
+              scrollToSection("home", 40); // Scroll to 'doctors' section with 80px offset
+            }}
           />
           <Image
             src="/mobile-new-logo.svg"
             alt="New Logo"
             width={0}
             height={0}
-            className="w-auto h-auto block md:hidden"
+            className="w-auto h-auto block md:hidden cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault(); // Prevent default anchor behavior
+              scrollToSection("home", 40); // Scroll to 'doctors' section with 80px offset
+            }}
           />
           <div className="space-x-6 hidden md:block">
             <Link
@@ -479,7 +527,7 @@ export default function LandingPage() {
       <main className="">
         <section
           id="home"
-          className="md:h-screen h-auto md:pt-24 pt-36 flex flex-col items-center justify-center bg-[#FCF8F1]  border-b relative"
+          className="md:h-[65vh] h-auto md:pt-24 pt-36 flex flex-col items-center justify-center bg-[#FCF8F1]  border-b relative"
         >
           <div className="flex flex-col text-center items-center w-full px-6 sm:px-20 lg:px-40 space-y-8 z-10">
             <div className="space-y-2">
@@ -487,7 +535,7 @@ export default function LandingPage() {
                 Book top rated doctors near you
               </h2>
               <h2 className="text-xl font-normal">
-                Let AI call doctors and secure appointments for you.
+                Let our AI call clinics and secure your appointment for free.
               </h2>
             </div>
 
@@ -633,7 +681,7 @@ export default function LandingPage() {
             alt="Doctor"
             width={0}
             height={0}
-            className="absolute bottom-0 left-0 w-auto h-auto max-w-[180px] md:max-w-[250px] hidden md:block"
+            className="absolute bottom-0 left-0 w-auto h-auto max-w-[180px] md:max-w-[180px] hidden md:block"
           />
           <Image
             src="/serious-mature-doctor-eyeglasses-sitting-table-typing-laptop-computer-office 1.svg"
@@ -651,14 +699,14 @@ export default function LandingPage() {
           <div className="flex gap-12 px-14">
             <div className="pt-24 px-4">
               <p className="text-2xl ">Find doctors in any insurance network</p>
-              <div className="grid grid-cols-3 gap-4 pt-4">
-                {insuranceFirstLogos.map((logo, index) => (
+              <div className="flex flex-wrap gap-4 pt-6">
+                {insuranceLeftLogos.map((logo, index) => (
                   <Image
                     key={index}
                     src={logo.src}
                     alt={logo.alt}
-                    width={0}
-                    height={0}
+                    width={logo?.width ?? 0}
+                    height={logo?.height ?? 0}
                     className="w-auto h-auto hidden md:flex"
                   />
                 ))}
@@ -674,7 +722,7 @@ export default function LandingPage() {
                 Get Started <ArrowRight />
               </Link>
             </div>
-            <div>
+            <div className="relative">
               <Image
                 src="/Group 233.svg"
                 alt="doctor"
@@ -682,6 +730,10 @@ export default function LandingPage() {
                 height={600}
                 className=""
               />
+              <div className="absolute top-20 left-4 max-w-[40%] text-white py-2">
+                <h2 className="text-2xl">Over 1M doctors</h2>
+                <p className="py-4 text-sm">Largest selection of providers across<br/><span className="font-bold">60+ specialities</span></p>
+              </div>
             </div>
           </div>{" "}
           <div className="flex gap-12 px-14">
@@ -758,15 +810,15 @@ export default function LandingPage() {
             </div>
 
             <div className="pt-10 px-4">
-              <p className="text-3xl ">Find providers at top health systems</p>
-              <div className="grid grid-cols-3 gap-4 pt-4">
-                {insuranceSecondLogos.map((logo, index) => (
+              <p className="text-2xl ">Find providers at top health systems</p>
+              <div className="flex flex-wrap gap-4 pt-6">
+                {insuranceRightLogos.map((logo, index) => (
                   <Image
                     key={index}
                     src={logo.src}
                     alt={logo.alt}
-                    width={0}
-                    height={0}
+                    width={logo?.width ?? 0}
+                    height={logo?.height ?? 0}
                     className="w-auto h-auto hidden md:flex"
                   />
                 ))}
@@ -841,7 +893,7 @@ export default function LandingPage() {
         >
           {/* First Section */}
           <div className="flex flex-col md:flex-row gap-12 px-4 md:px-14">
-            <div className="flex justify-center">
+            <div className="flex justify-center relative">
               <Image
                 src="/Group 233.svg"
                 alt="doctor"
@@ -849,6 +901,10 @@ export default function LandingPage() {
                 height={400}
                 className="md:w-[600px] md:h-[600px]"
               />
+              <div className="absolute top-20 left-4 max-w-[40%] text-white py-5">
+                <h2 className="text-2xl">Over 1M doctors</h2>
+                <p className="py-4">Largest selection of providers across <span className="font-bold">60+ specialities</span></p>
+              </div>
             </div>
           </div>
           <div className="pt-10 px-4 ">
@@ -856,13 +912,13 @@ export default function LandingPage() {
               Find doctors in any insurance network
             </p>
             <div className="grid grid-cols-3 gap-4 pt-6">
-              {insuranceFirstLogos.map((logo, index) => (
+              {insuranceLeftLogos.map((logo, index) => (
                 <Image
                   key={index}
                   src={logo.src}
                   alt={logo.alt}
-                  width={0}
-                  height={0}
+                  width={logo?.width ?? 0}
+                  height={logo?.heigt ?? 0}
                   className="w-auto h-auto"
                 />
               ))}
@@ -946,13 +1002,13 @@ export default function LandingPage() {
             <div className="pt-6 text-left">
               <p className="text-2xl">Find providers at top health systems</p>
               <div className="grid grid-cols-3 gap-2 md:gap-4 pt-6 md:pt-4">
-                {insuranceSecondLogos.map((logo, index) => (
+                {insuranceRightLogos.map((logo, index) => (
                   <Image
                     key={index}
                     src={logo.src}
                     alt={logo.alt}
-                    width={0}
-                    height={0}
+                    width={logo?.width ?? 0}
+                    height={logo?.height ?? 0}
                     className="w-auto h-8 md:h-auto flex"
                   />
                 ))}
@@ -1099,7 +1155,7 @@ export default function LandingPage() {
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
             Top-rated doctors in your area
           </h2>
-          <DoctorCardCarousel doctors={populardoctors} />
+          <DoctorCardCarousel doctors={populardoctors} checkPrefillAvailability={checkPrefillAvailability} />
         </section>
         <section className="flex flex-col items-center justify-center gap-10 bg-[#E5573F] text-white border-b md:pt-16 md:pb-16 py-8 px-0   ">
           <h2 className="text-3xl md:px-44 mb-4 text-white ">
@@ -1167,15 +1223,21 @@ export default function LandingPage() {
 
             <div className="flex flex-col pt-4">
               {/* First Row - 6 Columns */}
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 justify-center">
+              {/* <div className="grid md:grid-cols-6 grid-cols-2 gap-8 md:gap-0 justify-center pt-4"> */}
+
                 {insuranceFirstLogos.map((logo, index) => (
                   <Image
                     key={index}
                     src={logo.src}
                     alt={logo.alt}
-                    width={0}
-                    height={0}
-                    className="w-auto h-auto md:flex"
+                    width={logo?.width ?? 0}
+                    height={logo?.height ?? 0}
+                    onClick={() => {
+                      scrollToSection("home", 40);
+                      formik.setFieldValue("insurance_carrier", logo?.carrier);
+                    }}
+                    className="w-auto h-auto  md:flex cursor-pointer"
                   />
                 ))}
               </div>
@@ -1187,35 +1249,13 @@ export default function LandingPage() {
                     key={index}
                     src={logo.src}
                     alt={logo.alt}
-                    width={0}
-                    height={0}
-                    className="w-auto h-auto hidden md:flex"
-                  />
-                ))}
-              </div>
-              {/* Third Row - 3 Columns */}
-              <div className="flex gap-4 justify-center pt-6">
-                {insuranceThirdLogos.map((logo, index) => (
-                  <Image
-                    key={index}
-                    src={logo.src}
-                    alt={logo.alt}
-                    width={80}
-                    height={80}
-                    className="w-auto h-auto hidden md:flex"
-                  />
-                ))}
-              </div>
-              {/* Fourth Row - 3 Columns */}
-              <div className="flex gap-4 justify-center pt-6">
-                {insuranceFourthLogos.map((logo, index) => (
-                  <Image
-                    key={index}
-                    src={logo.src}
-                    alt={logo.alt}
-                    width={80}
-                    height={80}
-                    className="w-auto h-auto hidden md:flex"
+                    width={logo?.width ?? 0}
+                    height={logo?.height ?? 0}
+                    onClick={() => {
+                      scrollToSection("home", 40);
+                      formik.setFieldValue("insurance_carrier", logo?.carrier);
+                    }}
+                    className="w-auto h-auto hidden md:flex cursor-pointer"
                   />
                 ))}
               </div>
@@ -1240,6 +1280,7 @@ export default function LandingPage() {
             />
           </div>
         </section>
+        {/* Footer Section */}
         <section className="bg-white py-8 flex flex-col  justify-center items-center">
           <Image
             src="/Vector (9).svg"
@@ -1250,10 +1291,10 @@ export default function LandingPage() {
           />
           <p>© 2025 Docure AI Inc.</p>
           <div className="flex gap-2">
-            <Link href="">Terms</Link>
-            <Link href="">Privacy</Link>
-            <Link href="">Home</Link>
-            <Link href="">Contact Us</Link>
+            <Link href="/terms" className="hover:underline">Terms</Link>
+            <Link href="/privacy-policy" className="hover:underline">Privacy</Link>
+            <Link href="/" className="hover:underline">Home</Link>
+            <Link href="/contact-us" className="hover:underline">Contact Us</Link>
           </div>
         </section>
       </main>

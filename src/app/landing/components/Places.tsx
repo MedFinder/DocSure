@@ -50,30 +50,30 @@ interface PlacesProps {
 
 const Places: React.FC<PlacesProps> = ({ PrefillLocation, addressLocation }) => {
   const locations1 = [
+    "Austin, Texas",
     "Charlotte, North Carolina",
     "Chicago, Illinois",
     "Columbus, Ohio",
     "Dallas, Texas",
-    "Denver, Colorado",
   ];
   const locations2 = [
+    "Denver, Colorado",
     "Fort Worth, Texas",
     "Houston, Texas",
     "Indianapolis, Indiana",
     "Jacksonville, Florida",
-    "Los Angeles, California",
   ];
   const locations3 = [
+    "Los Angeles, California",
     "New York City, New York",
     "Philadelphia, Pennsylvania",
     "Phoenix, Arizona",
     "San Antonio, Texas",
-    "San Diego, California",
   ];
   const locations4 = [
+    "San Diego, California",
     "San Francisco, California",
     "San Jose, California",
-    "Phoenix, Arizona",
     "Seattle, Washington",
     "Washington, D.C.",
   ];
