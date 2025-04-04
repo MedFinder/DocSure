@@ -479,7 +479,7 @@ export default function LandingPage() {
       <main className="">
         <section
           id="home"
-          className="md:h-screen h-[70vh] flex flex-col items-center justify-center bg-[#FCF8F1]  border-b relative"
+          className="md:h-screen h-auto md:pt-24 pt-36 flex flex-col items-center justify-center bg-[#FCF8F1]  border-b relative"
         >
           <div className="flex flex-col text-center items-center w-full px-6 sm:px-20 lg:px-40 space-y-8 z-10">
             <div className="space-y-2">
@@ -596,7 +596,7 @@ export default function LandingPage() {
 
             {/* Specialty Selection */}
             <ScrollArea className="w-full whitespace-nowrap md:flex gap-4 md:pt-4 pt-0 hidden">
-              <div className="flex gap-4 px-1 pb-2 md:max-w-full max-w-[50%]">
+              <div className="flex gap-4 px-1 pb-2 md:max-w-full max-w-[50%] justify-center">
                 {doctorTypes.map((value, index) => (
                   <Button
                     key={index}
@@ -646,7 +646,7 @@ export default function LandingPage() {
 
         <section
           id="about"
-          className=" md:flex flex-col items-center justify-center gap-24 bg-white border-b md:py-12 px-0 md:px-64 hidden"
+          className=" md:flex flex-col items-center justify-center gap-24 bg-white border-b md:py-12 px-0 md:px-6 px-hidden"
         >
           <div className="flex gap-12 px-14">
             <div className="pt-24 px-4">
@@ -1167,7 +1167,7 @@ export default function LandingPage() {
 
             <div className="flex flex-col pt-4">
               {/* First Row - 6 Columns */}
-              <div className="grid md:grid-cols-6 grid-cols-2 gap-8 md:gap-0 justify-center pt-4">
+              <div className="flex flex-wrap gap-4">
                 {insuranceFirstLogos.map((logo, index) => (
                   <Image
                     key={index}
@@ -1175,7 +1175,7 @@ export default function LandingPage() {
                     alt={logo.alt}
                     width={0}
                     height={0}
-                    className="w-auto h-auto  md:flex"
+                    className="w-auto h-auto md:flex"
                   />
                 ))}
               </div>
