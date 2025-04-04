@@ -52,13 +52,13 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
                 </li>
                 <li
                   className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Primary Care Physician (PCP) / Family Practice Physician")}
+                  onClick={() => onClickAction("Primary Care Physician")}
                 >
                   Annual physical
                 </li>
                 <li
                   className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Primary Care Physician (PCP) / Family Practice Physician")}
+                  onClick={() => onClickAction("Primary Care Physician")}
                 >
                   COVID-19 testing
                 </li>

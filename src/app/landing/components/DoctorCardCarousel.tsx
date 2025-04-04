@@ -18,6 +18,7 @@ const DoctorInfoCard = ({
   rating,
   distance,
   color,
+  checkPrefillAvailability, // Add checkPrefillAvailability prop
 }) => (
   <article className="box-border px-6 py-4 bg-white rounded-lg w-[238px] h-[244px] flex-shrink-0">
     <div className="flex flex-col items-center text-center justify-center">
@@ -55,7 +56,10 @@ const DoctorInfoCard = ({
           <span>{distance}</span>
         </div>
       </div>
-      <a href="/coming-soon" className="text-xs text-[#E5573F] underline">
+      <a
+        className="text-xs text-[#E5573F] underline"
+        onClick={() => checkPrefillAvailability && checkPrefillAvailability(name)} // Use the function
+      >
         Check Availability &gt;
       </a>
     </div>
@@ -67,8 +71,7 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
-const DoctorCardCarousel = ({ doctors }) => {
-  // Accept doctors as a prop
+const DoctorCardCarousel = ({ doctors, checkPrefillAvailability }) => { // Accept checkPrefillAvailability as a prop
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -122,6 +125,7 @@ const DoctorCardCarousel = ({ doctors }) => {
             rating={doc.rating || 0}
             distance={doc.distance || "N/A"}
             color={getRandomColor()}
+            checkPrefillAvailability={checkPrefillAvailability} // Pass the function to DoctorInfoCard
           />
         ))}
       </div>
