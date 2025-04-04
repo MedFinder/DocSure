@@ -33,6 +33,14 @@ const testimony = [
     name: "Sarah Connor",
     comment: "Love it! Even helped me find a doctor who accepts my insurance. No back-and-forth.",
   },
+  {
+    name: "Sarah Connor",
+    comment: "I booked a pediatrician for my daughter in minutes. Way easier than calling around.",
+  },
+  {
+    name: "Sarah Connor",
+    comment: "Amazing tool for busy people. I handled my appointment during a lunch break—no stress at all.",
+  },
 ];
 
 const testimony2 = [
@@ -69,7 +77,17 @@ const testimony2 = [
   {
     index: 5,
     name: "Sarah Connor",
-    comment: "Finally got my mom an appointment without endless calling. Docsure did it in minutes—so grateful!",
+    comment: "It’s like having a healthcare concierge. Fast, accurate, and no awkward phone calls.",
+  },
+  {
+    index: 6,
+    name: "Sarah Connor",
+    comment: "Thought it was too good to be true—but it actually works! Booked my appointment instantly.",
+  },
+  {
+    index: 7,
+    name: "Sarah Connor",
+    comment: "No more calling five clinics to find one opening—Docsure does the heavy lifting for you.",
   },
 ];
 
