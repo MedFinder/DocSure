@@ -37,13 +37,28 @@ import {
   OverlayViewF,
   Polyline,
   useJsApiLoader,
+  InfoWindow,
 } from "@react-google-maps/api";
-import { LoaderCircle } from "lucide-react";
+import { ChevronDown, LoaderCircle, Star } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SelectContent } from "@radix-ui/react-select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "../lib/utils";
 // import { GOOGLE_MAP_API_KEY } from "@/constants/global";
 const validationSchema = Yup.object().shape({
   objective: Yup.string().required("Required"),
 });
 const availabilityOptions = [{ value: "yes", label: "Available anytime" }];
+const distanceOptions = ["< 2 miles", "< 5 miles", "< 10 miles", "< 20 miles"];
 export default function SearchDoctorPage() {
   const wsRef = useRef<WebSocket | null>(null);
   const router = useRouter();
@@ -62,7 +77,20 @@ export default function SearchDoctorPage() {
   const [selectedOption, setSelectedOption] = useState("yes");
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  const [selectedDistance, setSelectedDistance] = useState<string | null>(null);
+  const [isDistanceOpen, setIsDistanceOpen] = useState(false);
+  const [isRatingOpen, setIsRatingOpen] = useState(false);
+  const [hoveredDoctor, setHoveredDoctor] = useState(null);
+  const [isMapView, setIsMapView] = useState(false);
+  const distanceOptions = [
+    "< 2 miles",
+    "< 5 miles",
+    "< 10 miles",
+    "< 20 miles",
+  ];
   const [callStatus, setCallStatus] = useState({
     isInitiated: false,
     ssid: "",
@@ -164,6 +192,10 @@ export default function SearchDoctorPage() {
           const sortedData = parsedData.results.map((item) => ({
             ...item,
             id: item.place_id || item.id,
+            location: {
+              lat: item.geometry?.location?.lat || item.lat,
+              lng: item.geometry?.location?.lng || item.lng,
+            },
           }));
 
           setDoctors(sortedData);
@@ -316,8 +348,8 @@ export default function SearchDoctorPage() {
       const places = inputRefs.current[index].getPlaces();
       if (places.length > 0) {
         const place = places[0];
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
+        const lat = places.geometry.location.lat();
+        const lng = places.geometry.location.lng();
         setSelectedLocation({ lat, lng });
       }
     }
@@ -337,27 +369,332 @@ export default function SearchDoctorPage() {
     lng: 3.395833,
   };
 
+  const ratings = [5, 4, 3, 2, 1];
+  const handleSelectRating = (rating: number) => {
+    setSelectedRating(rating);
+    setIsRatingOpen(false);
+  };
+
+  const handleSelectDistance = (distance: string) => {
+    setSelectedDistance(distance);
+    setIsDistanceOpen(false);
+  };
+
+  console.log(doctors);
+
   return (
+    // <section>
+    //   <NavbarSection />
+    //   {/* {doctors?.length === 0 ? (
+    //     <div className="flex flex-col items-center justify-center h-screen text-center ">
+    //       <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
+    //         No results found!
+    //       </p>
+    //       <p className="text-gray-500 mt-2">
+    //         We could not find any doctors that meet this criteria.
+    //       </p>
+    //       <Link href="/">
+    //         <Button className=" bg-[#7DA1B7] text-white px-6 py-5 mt-8 w-full sm:w-auto">
+    //           Search Again
+    //         </Button>
+    //       </Link>
+    //     </div>
+    //   ) : ( */}
+    //   <form className="">
+    //     <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3 border border-t-0  border-b-1 text-sm">
+    //       <div className="flex gap-2 items-center">
+    //         <Image
+    //           src="/Group 198.svg"
+    //           alt="Verified Logo"
+    //           width={0}
+    //           height={0}
+    //           className="w-5 h-auto"
+    //         />
+    //         <p>425 verified doctors in your area</p>
+    //       </div>
+    //       <p className="text-[#E5573F] underline md:hidden block text-sm">
+    //         View Map
+    //       </p>
+    //       <p className="text-[#E5573F] hidden md:block">
+    //         Tip: You can re-arrange the priority by dragging list items
+    //       </p>
+    //     </div>
+    //     <div className="flex">
+    //       <div className="md:w-[65%] w-full md:block">
+    //         <div className="md:flex hidden justify-between px-4 py-2 text-sm items-center ">
+    //           <p className="">
+    //             Docsure AI will call the selected doctors in this sequence, seek
+    //             an appointment for you, and enquire about insurance
+    //           </p>
+    //           <Button className="bg-[#E5573F] text-white rounded-md">
+    //             Continue
+    //           </Button>
+    //         </div>
+
+    //         <div className="flex md:hidden px-2 py-2 text-sm items-center border">
+    //           <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
+    //             <Checkbox
+    //               id="open-now"
+    //               onCheckedChange={(value) => setIsNewPatient(value)}
+    //               className=""
+    //             />
+    //             <Label htmlFor="open-now" className="font-medium ">
+    //               Open Now
+    //             </Label>
+    //           </div>
+    //           <div className="flex gap-2 pl-2">
+    //             {/* Rating Dropdown */}
+    //             <DropdownMenu onOpenChange={(open) => setIsRatingOpen(open)}>
+    //               <DropdownMenuTrigger asChild>
+    //                 <Button
+    //                   variant="outline"
+    //                   className={cn(
+    //                     "flex items-center justify-between gap-2 px-4 py-2 rounded-full border w-auto",
+    //                     isRatingOpen
+    //                       ? "bg-black text-white"
+    //                       : "bg-white text-black"
+    //                   )}
+    //                 >
+    //                   <span>
+    //                     {selectedRating ? `${selectedRating} Stars` : "Rating"}
+    //                   </span>
+    //                   <ChevronDown
+    //                     size={16}
+    //                     className={cn(
+    //                       isRatingOpen && "rotate-180 transition-transform"
+    //                     )}
+    //                   />
+    //                 </Button>
+    //               </DropdownMenuTrigger>
+
+    //               <DropdownMenuContent className="w-60 py-2 px-4 space-y-2">
+    //                 {ratings.map((rating) => (
+    //                   <DropdownMenuItem
+    //                     key={rating}
+    //                     className={cn(
+    //                       "flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-black hover:text-white",
+    //                       selectedRating === rating && "bg-black text-white"
+    //                     )}
+    //                     onSelect={(e) => {
+    //                       e.preventDefault();
+    //                       setSelectedRating(rating);
+    //                       setIsRatingOpen(false); // Close on select
+    //                     }}
+    //                   >
+    //                     <Checkbox
+    //                       checked={selectedRating === rating}
+    //                       onCheckedChange={() => {
+    //                         setSelectedRating(rating);
+    //                         setIsRatingOpen(false); // Close on check
+    //                       }}
+    //                       className="rounded-sm pointer-events-none"
+    //                     />
+    //                     <Label className="flex items-center gap-1 cursor-pointer">
+    //                       {Array.from({ length: rating }).map((_, i) => (
+    //                         <Star
+    //                           key={i}
+    //                           size={16}
+    //                           fill="#FFA703"
+    //                           stroke="#FFA703"
+    //                         />
+    //                       ))}
+    //                     </Label>
+    //                   </DropdownMenuItem>
+    //                 ))}
+    //               </DropdownMenuContent>
+    //             </DropdownMenu>
+
+    //             {/* Distance Dropdown */}
+    //             <DropdownMenu onOpenChange={setIsDistanceOpen}>
+    //               <DropdownMenuTrigger asChild>
+    //                 <Button
+    //                   variant="outline"
+    //                   className={cn(
+    //                     "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
+    //                     isDistanceOpen
+    //                       ? "bg-black text-white"
+    //                       : "bg-white text-black"
+    //                   )}
+    //                 >
+    //                   <span>{selectedDistance || "Distance"}</span>
+    //                   <ChevronDown
+    //                     size={16}
+    //                     className={cn(
+    //                       isDistanceOpen && "rotate-180 transition-transform"
+    //                     )}
+    //                   />
+    //                 </Button>
+    //               </DropdownMenuTrigger>
+    //               <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
+    //                 {distanceOptions.map((option) => (
+    //                   <DropdownMenuItem
+    //                     key={option}
+    //                     className={cn(
+    //                       "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+    //                       selectedDistance === option && "bg-black text-white"
+    //                     )}
+    //                     onSelect={(e) => {
+    //                       e.preventDefault();
+    //                       handleSelectDistance(option);
+    //                     }}
+    //                   >
+    //                     <Checkbox
+    //                       checked={selectedDistance === option}
+    //                       onCheckedChange={() => handleSelectDistance(option)}
+    //                       className="pointer-events-none rounded-sm"
+    //                     />
+    //                     <span className="text-sm">{option}</span>
+    //                   </DropdownMenuItem>
+    //                 ))}
+    //               </DropdownMenuContent>
+    //             </DropdownMenu>
+    //           </div>
+    //         </div>
+
+    //         <DndContext
+    //           onDragEnd={handleDragEnd}
+    //           collisionDetection={closestCenter}
+    //         >
+    //           <ScrollArea className="h-full w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0">
+    //             <div className="flex flex-col md:flex-row w-full">
+    //               <Column
+    //                 activeCallIndex={activeCallIndex}
+    //                 tasks={doctors}
+    //                 onDelete={handleDelete}
+    //                 isDraggable={!isConfirmed}
+    //                 callStatus={callStatus}
+    //                 isAppointmentBooked={isAppointmentBooked}
+    //               />
+    //             </div>
+    //           </ScrollArea>
+    //         </DndContext>
+    //       </div>
+
+    //       {/* Parent div with h-screen */}
+    //       <div className="md:w-[35%] w-full h-screen relative hidden md:block">
+    //         {/* Parent div with h-screen */}
+    //         {!isLoaded ? (
+    //           <div className="flex items-center justify-center h-full">
+    //             <LoaderCircle className="w-8 h-8 text-gray-500 animate-spin" />
+    //           </div>
+    //         ) : (
+    //           <GoogleMap
+    //             mapContainerStyle={{ width: "100%", height: "100%" }} // Full height for the map
+    //             center={center}
+    //             zoom={12}
+    //             options={{ disableDefaultUI: true, zoomControl: true }}
+    //           >
+    //             {/* Marker for the inputted location */}
+    //             {selectedLocation && (
+    //               <Marker
+    //                 position={selectedLocation}
+    //                 title="Your Selected Location"
+    //                 icon={{
+    //                   url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", // Custom icon for the inputted location
+    //                 }}
+    //               />
+    //             )}
+
+    //             {/* Markers for the first 10 doctors */}
+    //             {doctors.slice(0, 10).map((doctor, index) => (
+    //               <Marker
+    //                 key={doctor.id || index}
+    //                 position={{
+    //                   lat: doctor.geometry?.location?.lat || 0,
+    //                   lng: doctor.geometry?.location?.lng || 0,
+    //                 }}
+    //                 title={doctor.name || "Doctor Location"}
+    //                 icon={{
+    //                   url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png", // Custom icon for doctors
+    //                 }}
+    //               />
+    //             ))}
+
+    //             {/* Add Distance Matrix Service */}
+    //             <DistanceMatrixService
+    //               options={{
+    //                 origins: [
+    //                   selectedLocation || { lat: 6.453056, lng: 3.395833 },
+    //                 ],
+    //                 destinations: doctors.slice(0, 10).map((doctor) => ({
+    //                   lat: doctor.geometry?.location?.lat || 0,
+    //                   lng: doctor.geometry?.location?.lng || 0,
+    //                 })),
+    //                 travelMode: "DRIVING",
+    //               }}
+    //               callback={(response) => {
+    //                 console.log("Distance Matrix Response:", response);
+    //               }}
+    //             />
+    //           </GoogleMap>
+
+    //           //uncomment here to check the map pins
+    //           // <GoogleMap
+    //           //   mapContainerStyle={{ width: "100%", height: "100%" }}
+    //           //   center={selectedLocation || center}
+    //           //   zoom={12}
+    //           //   options={{ disableDefaultUI: true, zoomControl: true }}
+    //           // >
+    //           //   {/* User Location Marker */}
+    //           //   {selectedLocation && (
+    //           //     <Marker
+    //           //       position={selectedLocation}
+    //           //       title="Your Location"
+    //           //       icon={{
+    //           //         url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+    //           //       }}
+    //           //       label={{
+    //           //         text: "Me",
+    //           //         color: "white",
+    //           //         fontWeight: "bold",
+    //           //       }}
+    //           //     />
+    //           //   )}
+
+    //           //   {/* Doctor Markers */}
+    //           //   {doctors.slice(0, 10).map((doctor, index) => {
+    //           //     const latLngMatch =
+    //           //       doctor?.geometry?.location || doctor?.location;
+    //           //     const position = {
+    //           //       lat: latLngMatch?.lat,
+    //           //       lng: latLngMatch?.lng,
+    //           //     };
+
+    //           //     return (
+    //           //       <Marker
+    //           //         key={doctor.id || index}
+    //           //         position={position}
+    //           //         onMouseOver={() => setHoveredDoctor(doctor)}
+    //           //         onMouseOut={() => setHoveredDoctor(null)}
+    //           //         icon={{
+    //           //           url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+    //           //         }}
+    //           //       >
+    //           //         {hoveredDoctor?.id === doctor.id && (
+    //           //           <InfoWindow position={position}>
+    //           //             <div className="text-sm font-medium">
+    //           //               <p>{doctor.name}</p>
+    //           //               <p>{doctor.formatted_address}</p>
+    //           //               <p>Rating: {doctor.rating} ⭐</p>
+    //           //               <p>{doctor.phone_number}</p>
+    //           //             </div>
+    //           //           </InfoWindow>
+    //           //         )}
+    //           //       </Marker>
+    //           //     );
+    //           //   })}
+    //           // </GoogleMap>
+    //         )}
+    //       </div>
+    //     </div>
+    //   </form>
+    //   {/* )} */}
+    // </section>
     <section>
       <NavbarSection />
-      {/* {doctors?.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-screen text-center ">
-          <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
-            No results found!
-          </p>
-          <p className="text-gray-500 mt-2">
-            We could not find any doctors that meet this criteria.
-          </p>
-          <Link href="/">
-            <Button className=" bg-[#7DA1B7] text-white px-6 py-5 mt-8 w-full sm:w-auto">
-              Search Again
-            </Button>
-          </Link>
-        </div>
-      ) : ( */}
       <form className="">
-        <div className="flex justify-between md:mt-24 mt-52 px-4 py-2 border border-t-0  border-b-1 text-sm">
-          <div className="flex gap-2">
+        <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3 border border-t-0 border-b-1 text-sm">
+          <div className="flex gap-2 items-center">
             <Image
               src="/Group 198.svg"
               alt="Verified Logo"
@@ -368,14 +705,29 @@ export default function SearchDoctorPage() {
             <p>425 verified doctors in your area</p>
           </div>
 
+          {/* "View Map" button on mobile */}
+          <button
+            type="button"
+            onClick={() => setIsMapView(!isMapView)} // Toggle map view on click
+            className="text-[#E5573F] underline md:hidden block text-sm cursor-pointer"
+          >
+            {isMapView ? "Back to List" : "View Map"} {/* Toggle button text */}
+          </button>
+
           <p className="text-[#E5573F] hidden md:block">
             Tip: You can re-arrange the priority by dragging list items
           </p>
         </div>
+
         <div className="flex">
-          <div className="md:w-[65%] w-full md:block">
-            <div className="flex justify-between px-4 py-2 text-sm items-center">
-              <p className="whitespace-nowrap">
+          {/* Table view */}
+          <div
+            className={`md:w-[65%] w-full ${
+              isMapView ? "hidden md:block" : "block"
+            }`}
+          >
+            <div className="md:flex hidden justify-between px-4 py-2 text-sm items-center">
+              <p className="">
                 Docsure AI will call the selected doctors in this sequence, seek
                 an appointment for you, and enquire about insurance
               </p>
@@ -383,11 +735,12 @@ export default function SearchDoctorPage() {
                 Continue
               </Button>
             </div>
+
             <DndContext
               onDragEnd={handleDragEnd}
               collisionDetection={closestCenter}
             >
-              <ScrollArea className="h-full w-full md:w-auto pb-14 md:pb-0">
+              <ScrollArea className="h-full w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0">
                 <div className="flex flex-col md:flex-row w-full">
                   <Column
                     activeCallIndex={activeCallIndex}
@@ -402,9 +755,13 @@ export default function SearchDoctorPage() {
             </DndContext>
           </div>
 
-          {/* Parent div with h-screen */}
-          <div className="md:w-[35%] w-full h-screen relative">
-            {/* Parent div with h-screen */}
+          {/* Map view */}
+          <div
+            className={`md:w-[35%] w-full h-screen relative px-4 md:px-0 ${
+              isMapView ? "block" : "hidden"
+            } md:block`}
+          >
+            {/* Google Map (visible only on mobile when map view is true) */}
             {!isLoaded ? (
               <div className="flex items-center justify-center h-full">
                 <LoaderCircle className="w-8 h-8 text-gray-500 animate-spin" />
@@ -416,7 +773,6 @@ export default function SearchDoctorPage() {
                 zoom={12}
                 options={{ disableDefaultUI: true, zoomControl: true }}
               >
-                {/* Marker for the inputted location */}
                 {selectedLocation && (
                   <Marker
                     position={selectedLocation}
@@ -427,7 +783,6 @@ export default function SearchDoctorPage() {
                   />
                 )}
 
-                {/* Markers for the first 10 doctors */}
                 {doctors.slice(0, 10).map((doctor, index) => (
                   <Marker
                     key={doctor.id || index}
@@ -442,7 +797,6 @@ export default function SearchDoctorPage() {
                   />
                 ))}
 
-                {/* Add Distance Matrix Service */}
                 <DistanceMatrixService
                   options={{
                     origins: [
@@ -463,7 +817,6 @@ export default function SearchDoctorPage() {
           </div>
         </div>
       </form>
-      {/* )} */}
     </section>
   );
 }

@@ -268,10 +268,6 @@ export default function NavbarSection() {
                   <Search className="w-5 h-5 font-semibold text-white md:text-gray-500 md:hover:text-white" />
                 </button>
               </div>
-
-              <p className="text-[#E5573F] underline self-end pt-2 md:hidden block text-sm">
-                View Map
-              </p>
             </form>
           )}
         </div>

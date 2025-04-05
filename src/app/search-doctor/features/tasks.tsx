@@ -184,27 +184,47 @@ export const Task: React.FC<TaskProps> = ({
         {...listeners}
         className="transition-all duration-300 w-full py-4 "
       >
-        <td className="flex  md:table-cell">
-          <div className="flex gap-2 ">
-            <div className="flex gap-2">
-              <div className="flex gap-2">
-                {index < 10 ? (
-                  <span className="bg-[#0074BA] rounded-full w-8 h-8 my-4 sm:w-6 sm:h-6 text-white flex items-center justify-center text-xs sm:text-sm font-medium">
-                    {index + 1}
-                  </span>
-                ) : (
-                  <span className="w-8 h-8 my-4 sm:w-6 sm:h-6" /> // Empty space with same dimensions
-                )}
-              </div>
-            </div>
-            <TooltipProvider>
-              <div className="bg-[#F2F6F9] py-4 px-2 rounded-md flex gap-4 w-full hover:bg-gray-200">
+        <td className="flex  md:table-cell    ">
+          <TooltipProvider>
+            <div className="flex  md:gap-2 gap-2 ">
+              <div className="flex md:gap-2 gap-0">
+                <div className="flex  md:gap-2 gap-0 items-center">
+                  {index < 10 ? (
+                    <span className="hidden bg-[#0074BA] rounded-full w-8 h-8 my-4 sm:w-6 sm:h-6 text-white md:flex items-center justify-center text-xs sm:text-sm font-medium">
+                      {index + 1}
+                    </span>
+                  ) : (
+                    <span className="md:w-6 md:h-6 md:my-4 " /> // Empty space with same dimensions
+                  )}
+                </div>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <img
                       src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
                       alt="Input design element"
-                      className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3"
+                      className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3 md:hidden block"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
+                  >
+                    <span className="font-semibold">Tooltip example:</span>
+                    <span>
+                      Lorem Ipsum is simply dummy text of the printing and
+                      typesetting industry.
+                    </span>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+
+              <div className="bg-[#F2F6F9] py-4 md:px-2  px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0 hover:bg-gray-200">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <img
+                      src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
+                      alt="Input design element"
+                      className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3 hidden md:block"
                     />
                   </TooltipTrigger>
                   <TooltipContent
@@ -220,11 +240,32 @@ export const Task: React.FC<TaskProps> = ({
                 </Tooltip>
                 <div className="flex flex-col gap-2 font-normal w-full">
                   <div className="flex justify-between ">
+                    <div className="flex items-start gap-2 md:hidden w-full ">
+                      {index < 10 ? (
+                        <span className="bg-[#0074BA] rounded-full w-4 h-4 text-white flex items-center justify-center text-xs font-medium mt-[2px] shrink-0">
+                          {index + 1}
+                        </span>
+                      ) : null}
+
+                      <a
+                        href={website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cursor-pointer font-medium  text-base leading-snug break-words w-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          track("Dr_Website_Clicked");
+                        }}
+                      >
+                        {title}
+                      </a>
+                    </div>
+
                     <a
                       href={website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="cursor-pointer font-medium text-base sm:text-base"
+                      className="cursor-pointer font-medium text-base sm:text-base hidden md:block "
                       onClick={(e) => {
                         e.stopPropagation();
                         track("Dr_Website_Clicked");
@@ -233,7 +274,7 @@ export const Task: React.FC<TaskProps> = ({
                       {title}
                     </a>
                     <div className="flex gap-16 pr-2">
-                      <div className="flex gap-1 font-normal text-[#333333] text-sm items-center">
+                      <div className="md:flex gap-1 font-normal text-[#333333] text-sm items-center hidden">
                         <img
                           src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
                           className="object-contain w-3 rounded-sm"
@@ -247,7 +288,7 @@ export const Task: React.FC<TaskProps> = ({
                           {review || 0} reviews
                         </span>
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="md:flex hidden items-center gap-1">
                         <MapPin size={13} />
                         <span className="whitespace-nowrap text-[#333333] text-sm">
                           {distance || "-"}
@@ -277,10 +318,39 @@ export const Task: React.FC<TaskProps> = ({
                       </Tooltip>
                     </div>
                   </div>
-                  <span className="whitespace-nowrap text-sm text-[#333333]">
+                  <span className="whitespace-nowrap text-sm text-[#636465]">
                     {vicinity}
                   </span>
-                  <div className="flex gap-1 text-sm text-[#333333] ">
+                  <div className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden">
+                    <img
+                      src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
+                      className="object-contain w-3 rounded-sm"
+                      alt="Rating star"
+                    />
+                    <span className="whitespace-nowrap">
+                      {rating !== undefined ? rating : "-"}
+                    </span>
+                    <span>•</span>
+                    <span className="whitespace-nowrap underline">
+                      {review || 0} reviews
+                    </span>
+                    <span className="px-1">|</span>
+
+                    <div className="md:hidden gap-1 text-sm text-[#333333] flex  ">
+                      <span
+                        className={
+                          openingStatus === "Open"
+                            ? "text-[#00BA85]"
+                            : "text-[#E5573F]"
+                        }
+                      >
+                        {openingStatus}
+                      </span>
+                      <span>•</span>
+                      <span>{openingTimeInfo}</span>
+                    </div>
+                  </div>
+                  <div className="md:flex gap-1 text-sm text-[#333333]  hidden ">
                     <span
                       className={
                         openingStatus === "Open"
@@ -293,11 +363,11 @@ export const Task: React.FC<TaskProps> = ({
                     <span>•</span>
                     <span>{openingTimeInfo}</span>
                   </div>
-                  <div className="hidden md:table-cell">
+                  <div className=" md:table-cell">
                     <button
                       type="button"
                       onClick={handleExpand}
-                      className=" hover:text-gray-700 transition-colors cursor-pointer hidden md:block"
+                      className=" hover:text-gray-700 transition-colors cursor-pointer  block"
                       onPointerDown={(e) => e.stopPropagation()}
                     >
                       {isLoading ? (
@@ -314,7 +384,7 @@ export const Task: React.FC<TaskProps> = ({
                     </button>
                   </div>
                   {isExpanded && (
-                    <div className="!hidden md:!table-row w-full">
+                    <div className="md:!table-row w-full">
                       <div
                         colSpan={5}
                         className="bg-gray-50 p-4 transition-all"
@@ -346,8 +416,8 @@ export const Task: React.FC<TaskProps> = ({
                   )}
                 </div>
               </div>
-            </TooltipProvider>
-          </div>
+            </div>
+          </TooltipProvider>
         </td>
 
         {/* Expand/Collapse Button - New Column */}
@@ -402,7 +472,6 @@ export const Task: React.FC<TaskProps> = ({
   );
 };
 
-// Create a wrapper component for the task list
 export const TaskList = ({ children }) => {
   return <ExpandProvider>{children}</ExpandProvider>;
 };
