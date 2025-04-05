@@ -527,7 +527,7 @@ export default function LandingPage() {
       <main className="">
         <section
           id="home"
-          className="md:h-[65vh] h-auto md:pt-24 pt-36 flex flex-col items-center justify-center bg-[#FCF8F1]  border-b relative"
+          className="md:h-screen h-auto md:pt-24 pt-36 flex flex-col items-center justify-center bg-[#FCF8F1]  border-b relative"
         >
           <div className="flex flex-col text-center items-center w-full px-6 sm:px-20 lg:px-40 space-y-8 z-10">
             <div className="space-y-2">

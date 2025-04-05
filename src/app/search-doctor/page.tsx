@@ -1,7 +1,6 @@
 //@ts-nocheck
 "use client";
 import Navbar from "@/components/general-components/navbar";
-
 import Link from "next/link";
 import React, {
   Suspense,
@@ -28,7 +27,7 @@ import NavbarSection from "@/components/general-components/navbar-section";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Image from "next/image";
-import Column from "./features copy/column";
+import Column from "./features/column";
 import {
   DistanceMatrixService,
   GoogleMap,
