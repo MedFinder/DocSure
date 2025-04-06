@@ -12,8 +12,8 @@ const ContentRightWrapper = styled.div`
   .about_content_right-42 {
     width: 42%;
   }
-  .about_content_left-50 {
-    width: 50%;
+  .about_content_left-54 {
+    width: 470px;
   }
 
   .about_wrapper_inner {
@@ -22,13 +22,6 @@ const ContentRightWrapper = styled.div`
   }
   .about_content_right-42 .about_content_wrap {
     margin-right: auto;
-    max-width: 350px;
-  }
-
-  @media only screen and (min-width: 992px) and (max-width: 1024px) {
-    .about_content_right-42 .about_content_wrap {
-      max-width: 368px;
-    }
   }
 
   @media only screen and (max-width: 991px) {
@@ -37,7 +30,7 @@ const ContentRightWrapper = styled.div`
     }
 
     .about_content_right-42,
-    .about_content_left-50 {
+    .about_content_left-54 {
       width: 100%;
     }
 
@@ -82,7 +75,7 @@ const AboutContentLeft: React.FC<ContentRightProps> = ({
   return (
     <ContentRightWrapper>
       <div className="about_wrapper_inner flex justify-between items-center">
-        <div className="about_content_left-50">
+        <div className="about_content_left-54">
           <div className="bg-[#0074BA] rounded-2xl relative img-bg flex justify-between items-center h-80">
             {/* Left Content - Texts and Stars */}
             <div className="flex flex-col justify-start text-left pl-6 gap-4">
@@ -131,7 +124,7 @@ const AboutContentLeft: React.FC<ContentRightProps> = ({
           </div>
         </div>
 
-        <div className="about_content_right-42">
+        <div className="about_content_right-42 ml-8">
           <div className="about_content_wrap">
             <p className="text-3xl mb-4">{title}</p>
 

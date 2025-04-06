@@ -22,33 +22,28 @@ const ContentLeftWrapper = styled.div`
     left: 1rem;
   }
   .about_content_left-50 {
-    width: 50%;
+    width: 385px;
   }
 
   .about_wrapper_inner {
     display: flex;
     transform: translate3d(0px, 0px, 0px);
   }
-    
+
   .about_content_right-42 .about_content_wrap {
-    // margin-left: auto;
     margin-right: auto;
     max-width: 350px;
   }
 
   .doc-smiling_img {
-    height: 115%;
-    object-fit: fill;
+    height: 110%;
+    object-fit: cover;
+    top: -10%;
   }
 
   @media only screen and (min-width: 992px) and (max-width: 1024px) {
     .about_content_right-42 .about_content_wrap {
       max-width: 368px;
-    }
-    .doc-smiling_img {
-      height: 110%;
-      object-fit: cover;
-      top: -10%;
     }
   }
 

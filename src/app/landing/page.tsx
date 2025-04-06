@@ -771,7 +771,7 @@ export default function LandingPage() {
         </section>
 
         <section id="about" className=" bg-white">
-          <div className="md:w-[75%] mx-auto py-[7%] px-[10px]">
+          <div className="about_wrapper mx-auto py-[7%] px-[10px]">
             <AboutContentLeft
               scrollToSection={scrollToSection}
               insuranceLeftLogos={insuranceLeftLogos}
