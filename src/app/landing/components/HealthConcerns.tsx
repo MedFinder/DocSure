@@ -14,24 +14,18 @@ interface HealthConcernsProps {
 export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
   return (
     <section className="max-w-6xl mx-auto p-6">
-      <h2 className="text-2xl text-start mb-6">Common health concerns</h2>
+      <h2 className="text-2xl text-start mb-6 ml-4">Common health concerns</h2>
 
       {/* Accordions Side by Side */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-4 accordion-mb">
         {/* Medical - Disabled open/close */}
-        <div>
+        <div className="border-b">
           <div>
             {/* <AccordionTrigger className="text-base font-medium"> */}
               Medical
             {/* </AccordionTrigger> */}
             <div>
               <ul className="pt-4 text-sm space-y-2 underline">
-                <li
-                  className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
-                >
-                  Nexplanon removal
-                </li>
                 <li
                   className="hover:underline hover:cursor-pointer"
                   onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
@@ -68,19 +62,13 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
                 >
                   Hair loss
                 </li>
-                <li
-                  className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Endocrinologist / Diabetes Specialist")}
-                >
-                  Ozempic / Wegovy Consultation
-                </li>
               </ul>
             </div>
           </div>
         </div>
 
         {/* Dental - Disabled open/close */}
-        <div>
+        <div className="border-b">
           <div>
             {/* <AccordionTrigger className="text-base font-medium"> */}
               Dental
@@ -117,7 +105,7 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
         </div>
 
         {/* Mental Health - Disabled open/close */}
-          <div>
+          <div className="border-b">
             {/* <AccordionTrigger className="text-base font-medium"> */}
             <span className="">Mental Health</span>
              
@@ -153,7 +141,7 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
           </div>
 
         {/* Vision - Disabled open/close */}
-        <div>
+        <div className="border-b">
           <div>
             {/* <AccordionTrigger className="text-base font-medium"> */}
               Vision

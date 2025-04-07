@@ -10,7 +10,7 @@ interface LocationItemProps {
 const LocationItem: React.FC<LocationItemProps> = ({ name, onClick, addressLocation }) => {
   return (
     <li
-      className={`px-3 py-4 text-sm tracking-tight text-black rounded-lg bg-[#EFEADE] text-center cursor-pointer ${
+      className={`flex-1 flex items-center justify-center px-3 py-4 text-sm tracking-tight text-black rounded-lg bg-[#EFEADE] text-center cursor-pointer ${
         addressLocation === name
           ? "bg-slate-800 text-white" // Selected state
           : "hover:text-white hover:bg-slate-800" // Normal state
@@ -30,7 +30,7 @@ interface LocationColumnProps {
 
 const LocationColumn: React.FC<LocationColumnProps> = ({ locations, onLocationClick, addressLocation }) => {
   return (
-    <ul className="flex flex-col gap-3 w-[200px] max-md:w-[calc(50%-8px)] max-sm:w-full">
+    <ul className="flex flex-col gap-3 w-[200px] max-md:w-[calc(100%-8px)] max-sm:w-full">
       {locations.map((location, index) => (
         <LocationItem
           key={`${location}-${index}`}

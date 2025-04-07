@@ -37,6 +37,9 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { log } from "console";
+import "./components/style.css";
+import AboutContentRight from "./components/AboutContentRight";
+import AboutContentLeft from "./components/AboutContentLeft";
 
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
@@ -117,42 +120,110 @@ export default function LandingPage() {
     formik.setFieldValue("specialty", value);
     setSelectedSpecialty(value); // Update specialty when button is clicked
   };
-  const checkPrefillAvailability = (value:string) => {
+  const checkPrefillAvailability = (value: string) => {
     scrollToSection("home", 40); // Scroll to the "home" section
-    handleDoctorTypeClick('Primary Care Physician'); // Call handleDoctorTypeClick with the provided value
-   formik.handleSubmit(); // Trigger formik's onSubmit function
+    handleDoctorTypeClick("Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
+    formik.handleSubmit(); // Trigger formik's onSubmit function
   };
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
   });
   const insuranceFirstLogos = [
-    { src: "/image 18 (1).svg", alt: "Insurance Network 3", carrier: "UnitedHealthcare" },
-    { src: "/elevance.svg", alt: "Insurance Network 1", carrier: "Elevance Health" },
+    {
+      src: "/image 18 (1).svg",
+      alt: "Insurance Network 3",
+      carrier: "UnitedHealthcare",
+    },
+    {
+      src: "/elevance.svg",
+      alt: "Insurance Network 1",
+      carrier: "Elevance Health",
+    },
     { src: "/image 17 (1).svg", alt: "Insurance Network 5", carrier: "Aetna" },
     { src: "/cigna.svg", alt: "Insurance Network 5", carrier: "Cigna" },
-    { src: "/image 6.svg", alt: "Insurance Network 1", carrier: "Kaiser Permanente" },
+    {
+      src: "/image 6.svg",
+      alt: "Insurance Network 1",
+      carrier: "Kaiser Permanente",
+    },
   ];
   const insuranceSecondLogos = [
-    { src: "/HCSC.svg", alt: "Insurance Network 1", carrier: 'The HSC Health Care System' },
-    { src: "/BCBS.svg", alt: "Insurance Network 1", carrier: 'Blue Cross Blue Shield' },
-    { src: "/Highmark.svg", alt: "Insurance Network 1", carrier: 'Highmark Blue Cross Blue Shield' },
-    { src: "/centene.svg",  alt: "Insurance Network 1", carrier: 'Centennial Care' },
+    {
+      src: "/HCSC.svg",
+      alt: "Insurance Network 1",
+      carrier: "The HSC Health Care System",
+    },
+    {
+      src: "/BCBS.svg",
+      alt: "Insurance Network 1",
+      carrier: "Blue Cross Blue Shield",
+    },
+    {
+      src: "/Highmark.svg",
+      alt: "Insurance Network 1",
+      carrier: "Highmark Blue Cross Blue Shield",
+    },
+    {
+      src: "/centene.svg",
+      alt: "Insurance Network 1",
+      carrier: "Centennial Care",
+    },
     { src: "/humana.svg", alt: "Insurance Network 4", carrier: "Humana" },
   ];
   const insuranceLeftLogos = [
-    { src: "/image 6.svg", alt: "Insurance Network 1", carrier: "https://healthy.kaiserpermanente.org/front-door" },
-    { src: "/image 7.svg", alt: "Insurance Network 2", carrier: "https://www.anthem.com/" },
-    { src: "/image 8.svg", alt: "Insurance Network 6", carrier: "https://www.blueshieldca.com/" },
-    { src: "/image 9.svg", alt: "Insurance Network 4", carrier: "https://www.healthnet.com/content/healthnet/en_us.html" },
-    { src: "/image 17 (1).svg", alt: "Insurance Network 5", carrier: "https://www.aetna.com/" },
-    { src: "/image 18.svg", alt: "Insurance Network 1", carrier: "https://example7.com" },
+    {
+      src: "/image 6.svg",
+      alt: "Insurance Network 1",
+      carrier: "https://healthy.kaiserpermanente.org/front-door",
+    },
+    {
+      src: "/image 7.svg",
+      alt: "Insurance Network 2",
+      carrier: "https://www.anthem.com/",
+    },
+    {
+      src: "/image 8.svg",
+      alt: "Insurance Network 6",
+      carrier: "https://www.blueshieldca.com/",
+    },
+    {
+      src: "/image 9.svg",
+      alt: "Insurance Network 4",
+      carrier: "https://www.healthnet.com/content/healthnet/en_us.html",
+    },
+    {
+      src: "/image 17 (1).svg",
+      alt: "Insurance Network 5",
+      carrier: "https://www.aetna.com/",
+    },
+    {
+      src: "/image 18.svg",
+      alt: "Insurance Network 1",
+      carrier: "https://example7.com",
+    },
   ];
   const insuranceRightLogos = [
-    { src: "/image 6.svg", alt: "Insurance Network 1", carrier: "https://healthy.kaiserpermanente.org/front-door" },
-    { src: "/image 11.svg", alt: "Insurance Network 1", carrier: "https://example7.com" },
-    { src: "/image 12.svg", alt: "Insurance Network 2", carrier: "https://example8.com" },
-    { src: "/image 13.svg", alt: "Insurance Network 3", carrier: "https://example9.com" },
+    {
+      src: "/image 6.svg",
+      alt: "Insurance Network 1",
+      carrier: "https://healthy.kaiserpermanente.org/front-door",
+    },
+    {
+      src: "/image 11.svg",
+      alt: "Insurance Network 1",
+      carrier: "https://example7.com",
+    },
+    {
+      src: "/image 12.svg",
+      alt: "Insurance Network 2",
+      carrier: "https://example8.com",
+    },
+    {
+      src: "/image 13.svg",
+      alt: "Insurance Network 3",
+      carrier: "https://example9.com",
+    },
   ];
   useEffect(() => {
     fetchUserLocationAndPopularDrs();
@@ -174,13 +245,13 @@ export default function LandingPage() {
     const storedDoctors = sessionStorage.getItem("popularDoctors");
     const storedAddress = sessionStorage.getItem("selectedAddress");
     const storedLocation = sessionStorage.getItem("selectedLocation");
-    if (storedAddress) { 
-      setAddressLocation(storedAddress); 
-     }
-     if (storedLocation) { 
+    if (storedAddress) {
+      setAddressLocation(storedAddress);
+    }
+    if (storedLocation) {
       const { lat, lng } = JSON.parse(storedLocation);
       setSelectedLocation({ lat, lng });
-     }
+    }
     if (storedDoctors) {
       const parsedDoctors = JSON.parse(storedDoctors);
       if (parsedDoctors?.length > 0) {
@@ -215,7 +286,8 @@ export default function LandingPage() {
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
           );
 
-          const address = geocodeResponse.data.results[0]?.formatted_address || "";
+          const address =
+            geocodeResponse.data.results[0]?.formatted_address || "";
           // console.log(address)
           setSelectedLocation({ lat, lng });
           setAddressLocation(address); // Set the fetched address
@@ -229,7 +301,10 @@ export default function LandingPage() {
           if (popularDoctors?.results?.length > 0) {
             const doctorlists = popularDoctors?.results?.slice(0, 20);
             setpopulardoctors(doctorlists);
-            sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+            sessionStorage.setItem(
+              "popularDoctors",
+              JSON.stringify(doctorlists)
+            );
           }
         } catch (error) {
           console.error("Error fetching address or popular doctors:", error);
@@ -290,7 +365,10 @@ export default function LandingPage() {
 
         // Call logRequestInfo without awaiting
         const requestIdPromise = logRequestInfo();
-        const speciality_value = formik.values.specialty === 'Prescription / Refill' ? 'Primary Care Physician' : formik.values.specialty;
+        const speciality_value =
+          formik.values.specialty === "Prescription / Refill"
+            ? "Primary Care Physician"
+            : formik.values.specialty;
 
         const response = await axios.get(
           `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${speciality_value}`
@@ -351,14 +429,14 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  ">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full bg-[#FCF8F1] shadow-sm p-4 flex justify-between items-center z-50  text-sm">
-        <div className="flex justify-between items-center gap-6">
+      <nav className="fixed top-0 w-full bg-[#FCF8F1] shadow-sm p-4 flex justify-between items-center z-50  text-sm nav-header">
+        <div className="flex justify-between items-center gap-6 ">
           <Image
             src="/web-new-logo.svg"
             alt="New Logo"
             width={0}
             height={0}
-            className="w-28 h-auto hidden md:flex cursor-pointer"
+            className="w-28 h-auto md:flex cursor-pointer web"
             onClick={(e) => {
               e.preventDefault(); // Prevent default anchor behavior
               scrollToSection("home", 40); // Scroll to 'doctors' section with 80px offset
@@ -369,13 +447,13 @@ export default function LandingPage() {
             alt="New Logo"
             width={0}
             height={0}
-            className="w-auto h-auto block md:hidden cursor-pointer"
+            className="w-auto h-auto block cursor-pointer mobile"
             onClick={(e) => {
               e.preventDefault(); // Prevent default anchor behavior
               scrollToSection("home", 40); // Scroll to 'doctors' section with 80px offset
             }}
           />
-          <div className="space-x-6 hidden md:block">
+          <div className="space-x-6 md:block web">
             <Link
               href="#"
               className="hover:text-[#E5573F]"
@@ -399,7 +477,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="hidden md:flex space-x-6 items-center">
+        <div className="hidden md:flex space-x-6 items-center web">
           <Link
             href="#"
             className="hover:text-[#E5573F]"
@@ -448,11 +526,11 @@ export default function LandingPage() {
           </Button>
         </div>
 
-        <div className="md:hidden flex space-x-4">
-          <Button className="text-white bg-[#0074BA] rounded-md block md:hidden text-xs ">
+        <div className="flex space-x-4 mobile">
+          <Button className="text-white bg-[#0074BA] rounded-md block text-xs ">
             Get Started
           </Button>
-          <button className="md:hidden" onClick={() => setIsOpen(true)}>
+          <button className="" onClick={() => setIsOpen(true)}>
             <AlignLeft size={24} />
           </button>
         </div>
@@ -524,7 +602,7 @@ export default function LandingPage() {
       )}
 
       {/* Sections */}
-      <main className="">
+      <main className="w-full overflow-x-hidden">
         <section
           id="home"
           className="md:h-screen h-auto md:pt-24 pt-36 flex flex-col items-center justify-center bg-[#FCF8F1]  border-b relative"
@@ -603,7 +681,7 @@ export default function LandingPage() {
                           <Input
                             type="text"
                             placeholder="Address, city, zip code"
-                            className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+                            className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none text-ellipsis"
                             value={addressLocation || ""}
                             onChange={(e) => setAddressLocation(e.target.value)}
                             autoComplete="off"
@@ -664,11 +742,11 @@ export default function LandingPage() {
                 className="block md:block lg:hidden"
               />
             </ScrollArea>
-            <div></div>
+            {/* <div></div> */}
 
             <Link
               href="/coming-soon"
-              className="text-[#E5573F] md:flex space-x-2 items-center hidden"
+              className="text-[#E5573F] md:flex space-x-2 mt-2 items-center hidden"
             >
               <p>Search for a doctor, hospital or medical group</p>
               <ArrowRight />
@@ -692,455 +770,90 @@ export default function LandingPage() {
           />
         </section>
 
-        <section
-          id="about"
-          className=" md:flex flex-col items-center justify-center gap-24 bg-white border-b md:py-12 px-0 md:px-64 hidden"
-        >
-          <div className="flex gap-12 px-14">
-            <div className="pt-24 px-4">
-              <p className="text-2xl ">Find doctors in any insurance network</p>
-              <div className="flex flex-wrap gap-4 pt-6">
-                {insuranceLeftLogos.map((logo, index) => (
-                  <Image
-                    key={index}
-                    src={logo.src}
-                    alt={logo.alt}
-                    width={logo?.width ?? 0}
-                    height={logo?.height ?? 0}
-                    className="w-auto h-auto hidden md:flex"
-                  />
-                ))}
-              </div>
-              <Link
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection("home", 40);
-                }}
-                href=""
-                className=" text-[#E5573F] flex gap-1 pt-12 hover:text-black"
-              >
-                Get Started <ArrowRight />
-              </Link>
-            </div>
-            <div className="relative">
-              <Image
-                src="/Group 233.svg"
-                alt="doctor"
-                width={600}
-                height={600}
-                className=""
-              />
-              <div className="absolute top-20 left-4 max-w-[40%] text-white py-2">
-                <h2 className="text-2xl">Over 1M doctors</h2>
-                <p className="py-4 text-sm">Largest selection of providers across<br/><span className="font-bold">60+ specialities</span></p>
-              </div>
-            </div>
-          </div>{" "}
-          <div className="flex gap-12 px-14">
-            <div className="bg-[#0074BA] rounded-2xl relative flex justify-between items-center">
-              {/* Left Content - Texts and Stars */}
-              <div className="flex flex-col justify-start text-left pl-6 gap-4">
-                <p className="text-white text-3xl">Top-rated providers</p>
-                <p className="text-white">
-                  Compare across hundreds of public reviews
-                </p>
-
-                {/* Star Container */}
-                <div className="relative w-full flex flex-col items-center pr-16 mt-4">
-                  {/* Top 3 Stars */}
-                  <div className="flex gap-4">
-                    <Image
-                      src="/Star 7.svg"
-                      alt="Star"
-                      width={20}
-                      height={20}
-                    />
-                    <Image
-                      src="/Star 7.svg"
-                      alt="Star"
-                      width={20}
-                      height={20}
-                    />
-                    <Image
-                      src="/Star 7.svg"
-                      alt="Star"
-                      width={20}
-                      height={20}
-                    />
-                  </div>
-
-                  {/* Bottom 2 Stars */}
-                  <div className="flex gap-4 mt-2">
-                    <Image
-                      src="/Star 7.svg"
-                      alt="Star"
-                      width={20}
-                      height={20}
-                    />
-                    <Image
-                      src="/Star 7.svg"
-                      alt="Star"
-                      width={20}
-                      height={20}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Content - Images */}
-              <div className="relative h-full w-[70%] flex items-center justify-center">
-                {/* Background Mask Group - Full Width & Height */}
-                <Image
-                  src="/Mask group (1).svg"
-                  alt="Background Decoration"
-                  layout="fill"
-                  objectFit="cover"
-                  className="absolute top-0 left-0 w-full h-full rounded-lg"
-                />
-
-                {/* Foreground Group 167 - Full Height */}
-                <Image
-                  src="/Group 167.svg"
-                  alt="Doctor Illustration"
-                  width={300}
-                  height={800}
-                  className="relative h-full object-contain"
-                />
-              </div>
-            </div>
-
-            <div className="pt-10 px-4">
-              <p className="text-2xl ">Find providers at top health systems</p>
-              <div className="flex flex-wrap gap-4 pt-6">
-                {insuranceRightLogos.map((logo, index) => (
-                  <Image
-                    key={index}
-                    src={logo.src}
-                    alt={logo.alt}
-                    width={logo?.width ?? 0}
-                    height={logo?.height ?? 0}
-                    className="w-auto h-auto hidden md:flex"
-                  />
-                ))}
-              </div>
-              <Link
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection("home", 40);
-                }}
-                href=""
-                className=" text-[#E5573F] flex gap-1 pt-12 hover:text-black"
-              >
-                Get Started <ArrowRight />
-              </Link>
-            </div>
-          </div>
-          <div className="flex  px-14">
-            <div className="pt-20 w-[50%] ">
-              <p className="text-3xl ">Find doctors accepting new patients</p>
-              <p className="pt-4 text-sm">
-                Same-day and last-minute appointments
-              </p>
-              <Link
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection("home", 40);
-                }}
-                href=""
-                className=" text-[#E5573F] flex gap-1 pt-16 hover:text-black"
-              >
-                Get Started <ArrowRight />
-              </Link>
-            </div>
-            <div className="bg-[#2CA07F] rounded-2xl relative flex items-center h-80 overflow-hidden w-[60%]">
-              {/* Left Content - Texts (Slightly Overlapping Images) */}
-              <div className="absolute bottom-6 left-6 z-10 flex flex-col text-left gap-2 bg-opacity-50 ">
-                <p className="text-white text-3xl  leading-tight w-[65%]">
-                  No insurance, no problem
-                </p>
-                <p className="text-white w-1/2">
-                  Find doctors that accept self-pay
-                </p>
-              </div>
-
-              {/* Right Content - Images Fully to the Right */}
-              <div className="relative w-full h-full flex justify-end ">
-                {/* Background Mask - Covers Right Half */}
-                <Image
-                  src="/Mask group.svg"
-                  alt="Background Decoration"
-                  layout="fill"
-                  objectFit="cover"
-                  className="absolute top-0 right-0 w-full h-full"
-                />
-
-                {/* Foreground - Doctor Image (Right-Aligned & Text Overlap) */}
-                <Image
-                  src="/doc-and-nurse.svg"
-                  alt="Doctor Illustration"
-                  width={400}
-                  height={500}
-                  className="relative h-full object-cover ml-auto"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-        {/* mobile view for 2nd section */}
-        <section
-          id="about"
-          className=" flex-col items-center justify-center gap-24 bg-white border-b pt-6 md:px-64 md:hidden block text-left"
-        >
-          {/* First Section */}
-          <div className="flex flex-col md:flex-row gap-12 px-4 md:px-14">
-            <div className="flex justify-center relative">
-              <Image
-                src="/Group 233.svg"
-                alt="doctor"
-                width={400}
-                height={400}
-                className="md:w-[600px] md:h-[600px]"
-              />
-              <div className="absolute top-20 left-4 max-w-[40%] text-white py-5">
-                <h2 className="text-2xl">Over 1M doctors</h2>
-                <p className="py-4">Largest selection of providers across <span className="font-bold">60+ specialities</span></p>
-              </div>
-            </div>
-          </div>
-          <div className="pt-10 px-4 ">
-            <p className="text-2xl md:text-3xl">
-              Find doctors in any insurance network
-            </p>
-            <div className="grid grid-cols-3 gap-4 pt-6">
-              {insuranceLeftLogos.map((logo, index) => (
-                <Image
-                  key={index}
-                  src={logo.src}
-                  alt={logo.alt}
-                  width={logo?.width ?? 0}
-                  height={logo?.heigt ?? 0}
-                  className="w-auto h-auto"
-                />
-              ))}
-            </div>
-            <Link
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToSection("home", 40);
-              }}
-              href=""
-              className="text-[#E5573F] flex gap-1 pt-8 md:pt-12 hover:text-black"
-            >
-              Get Started <ArrowRight />
-            </Link>
-          </div>
-
-          {/* Second Section */}
-          <div className="flex flex-col md:flex-row gap-6 px-4 pt-8 ">
-            <div
-              className="bg-[#0074BA] rounded-2xl relative flex h-64
-             md:flex-row justify-between items-center pl-4 md:p-6"
-            >
-              {/* Left Content */}
-              <div className="flex flex-col justify-start text-left gap-1 md:gap-2 md:pl-6 w-full">
-                <p className="text-white text-2xl md:text-3xl">
-                  Top-rated providers
-                </p>
-                <p className="text-white text-sm pt-2">
-                  Compare across hundreds of public reviews
-                </p>
-
-                {/* Star Container */}
-                <div
-                  className="relative flex flex-col items-center pr-8
-                  md:pr-16 mt-1 md:mt-4"
-                >
-                  <div className="flex gap-4 pt-2">
-                    {[...Array(3)].map((_, i) => (
-                      <Image
-                        key={i}
-                        src="/Star 7.svg"
-                        alt="Star"
-                        width={16}
-                        height={16}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex gap-4  mt-1 md:mt-2">
-                    {[...Array(2)].map((_, i) => (
-                      <Image
-                        key={i}
-                        src="/Star 7.svg"
-                        alt="Star"
-                        width={16}
-                        height={16}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Content */}
-              <div className="relative w-full md:w-[70%] flex items-center justify-center h-full">
-                <Image
-                  src="/Mask group (1).svg"
-                  alt="Background Decoration"
-                  layout="fill"
-                  objectFit="cover"
-                  className="absolute top-0 left-0 w-full h-full rounded-lg"
-                />
-                <Image
-                  src="/Group 167.svg"
-                  alt="Doctor Illustration"
-                  width={180}
-                  height={400}
-                  className="relative h-full  md:max-h-none object-contain"
-                />
-              </div>
-            </div>
-
-            <div className="pt-6 text-left">
-              <p className="text-2xl">Find providers at top health systems</p>
-              <div className="grid grid-cols-3 gap-2 md:gap-4 pt-6 md:pt-4">
-                {insuranceRightLogos.map((logo, index) => (
-                  <Image
-                    key={index}
-                    src={logo.src}
-                    alt={logo.alt}
-                    width={logo?.width ?? 0}
-                    height={logo?.height ?? 0}
-                    className="w-auto h-8 md:h-auto flex"
-                  />
-                ))}
-              </div>
-              <Link
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection("home", 40);
-                }}
-                href=""
-                className="text-[#E5573F] flex gap-1 pt-4 md:pt-12 hover:text-black"
-              >
-                Get Started <ArrowRight />
-              </Link>
-            </div>
-          </div>
-
-          {/* Third Section */}
-          <div className="flex flex-col md:flex-row gap-12 px-4 md:px-14 pt-8">
-            <div className="bg-[#2CA07F] rounded-2xl relative flex items-center h-64 w-full md:w-[60%] overflow-hidden">
-              {/* Left Content - Slightly Overlapping Images */}
-              <div
-                className="absolute 
-               left-2 w-56 z-10 flex flex-col text-left gap-1 md:gap-2"
-              >
-                <p className="text-white text-2xl md:text-3xl leading-tight w-[80%] md:w-[65%]">
-                  No insurance, no problem
-                </p>
-                <p className="text-white w-4/5 md:w-2/3 text-sm md:text-base">
-                  Find doctors that accept self-pay
-                </p>
-              </div>
-
-              {/* Right Content - Images Fully to the Right */}
-              <div className="relative w-full h-full flex justify-end">
-                <Image
-                  src="/Mask group.svg"
-                  alt="Background Decoration"
-                  layout="fill"
-                  objectFit="cover"
-                  className="absolute top-0 right-0 w-full h-full"
-                />
-                <Image
-                  src="/doc-and-nurse.svg"
-                  alt="Doctor Illustration"
-                  width={250}
-                  height={500}
-                  className="relative h-full object-cover ml-auto"
-                />
-              </div>
-            </div>
-            <div className=" md:pt-20 w-full md:w-[50%] text-left pb-14">
-              <p className="text-2xl md:text-3xl">
-                Find doctors accepting new patients
-              </p>
-              <p className="pt-2 ">Same-day and last-minute appointments</p>
-              <Link
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection("home", 40);
-                }}
-                href=""
-                className="text-[#E5573F] flex gap-1 pt-6 md:pt-16 hover:text-black"
-              >
-                Get Started <ArrowRight />
-              </Link>
-            </div>
+        <section id="about" className=" bg-white">
+          <div className="about_wrapper mx-auto py-[7%] px-[10px]">
+            <AboutContentLeft
+              scrollToSection={scrollToSection}
+              insuranceLeftLogos={insuranceLeftLogos}
+              title="Find doctors in any insurance network"
+              ImgDisplayFor="InsuranceNetwork"
+            />
+            <AboutContentRight
+              scrollToSection={scrollToSection}
+              insuranceRightLogos={insuranceRightLogos}
+              title="Find providers at top health systems"
+            />
+            <AboutContentLeft
+              scrollToSection={scrollToSection}
+              title="Find doctors accepting new patients"
+              subtitle="Same-day and last-minute appointments"
+              ImgDisplayFor="NewPatient"
+            />
           </div>
         </section>
 
+        {/* md:px-44 */}
         <section
           id="how_it_works"
-          className="flex flex-col items-center justify-center gap-10 bg-[#0074BA] border-b md:py-16 py-8 px-0 md:px-44 text-white  "
+          className="flex bg-[#0074BA] border-b md:py-16 py-8 px-0 text-white"
         >
-          <h2 className="text-3xl ">How it works</h2>
-          <p className="md:max-w-lg px-8 md:px-0 text-center">
-            Skip the hassle of calling multiple doctor's offices. Our AI takes
-            care of your scheduling needs.
-          </p>
-          <div className="md:grid grid-cols-3 flex flex-col px-4 gap-12 md:pt-4 pt-0">
-            <div className="relative flex justify-center">
-              <div className="bg-[#0C679F] rounded-xl px-12 pb-6 relative">
-                {/* Floating Image (Slightly Above) */}
-                <Image
-                  src="/Group 189.svg"
-                  alt="call Logo"
-                  width={220}
-                  height={320}
-                  className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[10%] w-60 h-auto"
-                />
+          <div className="inner flex flex-col items-center justify-center gap-10 w-[85%] mx-auto">
+            <h2 className="text-3xl ">How it works</h2>
+            <p className="md:max-w-lg px-8 md:px-0 text-center">
+              Skip the hassle of calling multiple doctor's offices. Our AI takes
+              care of your scheduling needs.
+            </p>
 
-                {/* Text Content */}
-                <div className=" pt-40 ">
-                  <p className=" text-center pt-4">
+            <div className="flex flex-col gap-12 md:pt-4 pt-0 md:grid grid-cols-3 gap-8 lg:gap-12 md:w-[100%]">
+              <div className="flex flex-col justify-between bg-[#0C679F] h-[245px] items-center rounded-xl px-8 pb-6  md:w-358 md:px-6 md:h-[auto] it_works_card">
+                <div className="w-233">
+                  <Image
+                    src="/Group 189.svg"
+                    alt="call Logo"
+                    width={233}
+                    height={320}
+                    className="relative top-0 left-1/2 -translate-x-1/2 -translate-y-[10%]  h-auto max-w[100%]"
+                  />
+                </div>
+
+                <div className="flex justify-center h-[46px] mb-4">
+                  <p className="text-center text-sm lg:text-base basis-[180px]">
                     Enter your appointment details
                   </p>
                 </div>
               </div>
-            </div>{" "}
-            <div className="relative flex justify-center">
-              <div className="bg-[#0C679F] rounded-xl px-24 pb-12 relative">
-                {/* Floating Image (Slightly Above) */}
-                <Image
-                  src="/Group 190.svg"
-                  alt="call Logo"
-                  width={220}
-                  height={320}
-                  className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[10%] w-60 h-auto"
-                />
+              <div className="flex flex-col justify-between bg-[#0C679F] h-[245px] items-center rounded-xl px-8 pb-6  md:w-358 md:px-6 md:h-[auto] it_works_card">
+                <div className="w-233">
+                  <Image
+                    src="/Group 190.svg"
+                    alt="call Logo"
+                    // width={220}
+                    width={233}
+                    height={320}
+                    className="relative top-0 left-1/2 -translate-x-1/2 -translate-y-[10%] h-auto max-w[100%]"
+                  />
+                </div>
 
                 {/* Text Content */}
-                <div className=" pt-40">
-                  <p className=" text-center pt-4">
+                <div className="flex justify-center mb-4">
+                  <p className="text-center text-sm lg:text-base basis-[190px] md:basis-[215px]">
                     Our AI makes the calls and books the appointment
                   </p>
                 </div>
-              </div>
-            </div>{" "}
-            <div className="relative flex justify-center">
-              <div className="bg-[#0C679F] rounded-xl px-20 pb-12 relative">
-                {/* Floating Image (Slightly Above) */}
-                <Image
-                  src="/Group 191.svg"
-                  alt="call Logo"
-                  width={220}
-                  height={320}
-                  className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[10%]  w-48 h-auto"
-                />
+              </div>{" "}
+              <div className="flex flex-col bg-[#0C679F] items-center h-[245px] rounded-xl px-8 pb-6  md:w-358 md:px-6 md:h-[auto] it_works_card">
+                <div className="w-233">
+                  <Image
+                    src="/Group 191.svg"
+                    alt="call Logo"
+                    width={233}
+                    height={320}
+                    className="relative top-0 left-1/2 -translate-x-1/2 -translate-y-[20%] max-w[100%] img-instant-confirm"
+                  />
+                </div>
 
-                {/* Text Content */}
-                <div className=" pt-40">
-                  <p className=" text-center pt-6">
+                <div className="flex justify-center mb-4">
+                  <p className="text-center text-sm lg:text-base basis-[180px]">
                     Receive instant confirmation
                   </p>
                 </div>
@@ -1148,6 +861,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
         <section
           id="doctors"
           className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2] border-b md:pt-16 md:pb-16 py-8 pb-16 px-0"
@@ -1155,14 +869,20 @@ export default function LandingPage() {
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
             Top-rated doctors in your area
           </h2>
-          <DoctorCardCarousel doctors={populardoctors} checkPrefillAvailability={checkPrefillAvailability} />
+
+          <DoctorCardCarousel
+            doctors={populardoctors}
+            checkPrefillAvailability={checkPrefillAvailability}
+          />
         </section>
+
         <section className="flex flex-col items-center justify-center gap-10 bg-[#E5573F] text-white border-b md:pt-16 md:pb-16 py-8 px-0   ">
           <h2 className="text-3xl md:px-44 mb-4 text-white ">
             Patients love Docsure
           </h2>
           <TestimonialCarousel />
         </section>
+
         <section
           id="specialties"
           className="relative flex flex-col items-center justify-center gap-10 bg-white  md:pt-16 md:pb-16 pt-8 px-0  pb-0"
@@ -1193,17 +913,19 @@ export default function LandingPage() {
           </div>
 
           {/* Positioned Image Slightly Above Bottom with No Extra Space Below */}
-          <div className="absolute bottom-[-90px] left-0 w-full flex justify-start pl-12 pointer-events-none">
+          <div className="absolute bottom-[-90px] left-0 w-full flex justify-start pl-8 pointer-events-none">
             <Image
               src="/OBJECTS.svg"
               alt="Decorative Star"
               width={200}
               height={200}
-              className="hidden md:block"
+              className="hidden md:block height-browser-icon"
             />
           </div>
         </section>
+
         <section className="bg-white h-[88px]"></section>
+
         <section
           id="locations"
           className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2]  border-b md:pt-16 md:pb-16 py-8 px-0   "
@@ -1213,6 +935,7 @@ export default function LandingPage() {
             PrefillLocation={PrefillLocation}
             addressLocation={addressLocation}
           />
+
           <div
             id="insurance_plans"
             className="px-20 bg-white  border-lg py-14 flex flex-col items-center justify-center"
@@ -1224,7 +947,7 @@ export default function LandingPage() {
             <div className="flex flex-col pt-4">
               {/* First Row - 6 Columns */}
               <div className="flex flex-wrap gap-4 justify-center">
-              {/* <div className="grid md:grid-cols-6 grid-cols-2 gap-8 md:gap-0 justify-center pt-4"> */}
+                {/* <div className="grid md:grid-cols-6 grid-cols-2 gap-8 md:gap-0 justify-center pt-4"> */}
 
                 {insuranceFirstLogos.map((logo, index) => (
                   <Image
@@ -1271,7 +994,8 @@ export default function LandingPage() {
               Get Started <ArrowRight />
             </Link>
           </div>
-          <div>
+
+          <div className="w-[100%] md:w-[80%]">
             <HealthConcerns
               onClickAction={(speciality: string) => {
                 scrollToSection("home", 40);
@@ -1280,6 +1004,7 @@ export default function LandingPage() {
             />
           </div>
         </section>
+
         {/* Footer Section */}
         <section className="bg-white py-8 flex flex-col  justify-center items-center">
           <Image
@@ -1291,10 +1016,18 @@ export default function LandingPage() {
           />
           <p>© 2025 Docure AI Inc.</p>
           <div className="flex gap-2">
-            <Link href="/terms" className="hover:underline">Terms</Link>
-            <Link href="/privacy-policy" className="hover:underline">Privacy</Link>
-            <Link href="/" className="hover:underline">Home</Link>
-            <Link href="/contact-us" className="hover:underline">Contact Us</Link>
+            <Link href="/terms" className="hover:underline">
+              Terms
+            </Link>
+            <Link href="/privacy-policy" className="hover:underline">
+              Privacy
+            </Link>
+            <Link href="/" className="hover:underline">
+              Home
+            </Link>
+            <Link href="/contact-us" className="hover:underline">
+              Contact Us
+            </Link>
           </div>
         </section>
       </main>
