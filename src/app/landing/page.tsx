@@ -427,7 +427,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FCF8F1]  ">
+    <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">
       {/* Navbar */}
       <nav className="fixed top-0 w-full bg-[#FCF8F1] shadow-sm p-4 flex justify-between items-center z-50  text-sm nav-header">
         <div className="flex justify-between items-center gap-6 ">
@@ -629,7 +629,7 @@ export default function LandingPage() {
                     <div className="flex items-center justify-center px-3">
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1 border-b border-gray-400 md:border-none">
+                    <div className="flex-1  border-gray-400 md:border-none">
                       <Autocomplete
                         id="specialty"
                         name="specialty"
@@ -651,7 +651,7 @@ export default function LandingPage() {
                     <div className="flex items-center justify-center px-3">
                       <BookText className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1 border-b border-gray-400 md:border-none">
+                    <div className="flex-1  border-gray-400 md:border-none">
                       <Autocomplete
                         id="insurer"
                         name="insurer"
@@ -770,7 +770,7 @@ export default function LandingPage() {
           />
         </section>
 
-        <section id="about" className=" bg-white">
+        <section id="about" className=" bg-white my-section">
           <div className="about_wrapper mx-auto py-[7%] px-[10px]">
             <AboutContentLeft
               scrollToSection={scrollToSection}
@@ -795,7 +795,7 @@ export default function LandingPage() {
         {/* md:px-44 */}
         <section
           id="how_it_works"
-          className="flex bg-[#0074BA] border-b md:py-16 py-8 px-0 text-white"
+          className="flex bg-[#0074BA] border-b md:py-16 py-8 px-0 text-white my-section"
         >
           <div className="inner flex flex-col items-center justify-center gap-10 w-[85%] mx-auto">
             <h2 className="text-3xl ">How it works</h2>
@@ -804,7 +804,7 @@ export default function LandingPage() {
               care of your scheduling needs.
             </p>
 
-            <div className="flex flex-col gap-12 md:pt-4 pt-0 md:grid grid-cols-3 gap-8 lg:gap-12 md:w-[100%]">
+            <div className="flex flex-col  md:pt-4 pt-0 md:grid grid-cols-3 gap-8 lg:gap-12 md:w-[100%]">
               <div className="flex flex-col justify-between bg-[#0C679F] h-[245px] items-center rounded-xl px-8 pb-6  md:w-358 md:px-6 md:h-[auto] it_works_card">
                 <div className="w-233">
                   <Image

@@ -8,7 +8,7 @@ body {
 }
 
 body {
-  background: #eee;
+  /* background: #eee; */
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 14px;
   color: #000;
@@ -43,16 +43,16 @@ body {
   max-height: 160px;
 }
 
-.border-b {
-  border-bottom: 1px;
-  border-style: solid;
-  border-color: #e5e7eb;
+/* Scoped utility */
+.my-section .border-b {
+  border-bottom: 1px solid #e5e7eb;
   padding-bottom: 1rem;
 }
 
-.border-b:last-child {
+.my-section .border-b:last-child {
   border-bottom-width: 0px;
 }
+
 .about_wrapper {
   width: 100%; /* Default for all screen sizes */
 }
