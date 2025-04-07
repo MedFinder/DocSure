@@ -149,7 +149,7 @@ export const Task: React.FC<TaskProps> = ({
     transition,
     transform: CSS.Transform.toString(transform),
   };
-  const renderedSummary = useTypewriterEffect(doctorSummary, 20);
+  // const renderedSummary = useTypewriterEffect(doctorSummary, 20);
 
   return (
     <>
@@ -381,7 +381,7 @@ export const Task: React.FC<TaskProps> = ({
                  <LoadingSumamry/>
                 </div>
               ) : (
-                <span className="text-xs tracking-tight leading-5  text-zinc-800">{renderedSummary}</span>
+                <span className="text-xs tracking-tight leading-5  text-zinc-800">{doctorSummary}</span>
               )}
             </div>
           </td>

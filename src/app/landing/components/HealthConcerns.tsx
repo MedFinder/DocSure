@@ -14,39 +14,39 @@ interface HealthConcernsProps {
 export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
   return (
     <section className="max-w-6xl mx-auto p-6">
-      <h2 className="text-2xl text-start mb-6">Common health concerns</h2>
+      <h2 className="text-2xl text-start mb-6 ">Common health concerns</h2>
 
       {/* Accordions Side by Side */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-4 accordion-mb">
         {/* Medical - Disabled open/close */}
-        <div>
+        <div className="border-b">
           <div>
             {/* <AccordionTrigger className="text-base font-medium"> */}
-              Medical
+            Medical
             {/* </AccordionTrigger> */}
             <div>
               <ul className="pt-4 text-sm space-y-2 underline">
                 <li
                   className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
-                >
-                  Nexplanon removal
-                </li>
-                <li
-                  className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
+                  onClick={() =>
+                    onClickAction("OB-GYN (Obstetrician-Gynecologist)")
+                  }
                 >
                   OB-GYN emergency
                 </li>
                 <li
                   className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
+                  onClick={() =>
+                    onClickAction("OB-GYN (Obstetrician-Gynecologist)")
+                  }
                 >
                   IUD removal
                 </li>
                 <li
                   className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
+                  onClick={() =>
+                    onClickAction("OB-GYN (Obstetrician-Gynecologist)")
+                  }
                 >
                   IUD insertion
                 </li>
@@ -70,9 +70,11 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
                 </li>
                 <li
                   className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Endocrinologist / Diabetes Specialist")}
+                  onClick={() =>
+                    onClickAction("OB-GYN (Obstetrician-Gynecologist)")
+                  }
                 >
-                  Ozempic / Wegovy Consultation
+                  Annual Pap Smear
                 </li>
               </ul>
             </div>
@@ -80,10 +82,10 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
         </div>
 
         {/* Dental - Disabled open/close */}
-        <div>
+        <div className="border-b">
           <div>
             {/* <AccordionTrigger className="text-base font-medium"> */}
-              Dental
+            Dental
             {/* </AccordionTrigger> */}
             <div>
               <ul className="pt-4 text-sm space-y-2 underline">
@@ -117,46 +119,46 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
         </div>
 
         {/* Mental Health - Disabled open/close */}
+        <div className="border-b">
+          {/* <AccordionTrigger className="text-base font-medium"> */}
+          <span className="">Mental Health</span>
+
+          {/* </AccordionTrigger> */}
           <div>
-            {/* <AccordionTrigger className="text-base font-medium"> */}
-            <span className="">Mental Health</span>
-             
-            {/* </AccordionTrigger> */}
-            <div>
-              <ul className="space-y-2 pt-4 text-sm underline">
-                <li
-                  className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Therapist / Counselor")}
-                >
-                  Therapy sessions
-                </li>
-                <li
-                  className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Therapist / Counselor")}
-                >
-                  Depression counseling
-                </li>
-                <li
-                  className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Therapist / Counselor")}
-                >
-                  Anxiety management
-                </li>
-                <li
-                  className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Psychiatrist")}
-                >
-                  Psychiatrist consultation
-                </li>
-              </ul>
-            </div>
+            <ul className="space-y-2 pt-4 text-sm underline">
+              <li
+                className="hover:underline hover:cursor-pointer"
+                onClick={() => onClickAction("Therapist / Counselor")}
+              >
+                Therapy sessions
+              </li>
+              <li
+                className="hover:underline hover:cursor-pointer"
+                onClick={() => onClickAction("Therapist / Counselor")}
+              >
+                Depression counseling
+              </li>
+              <li
+                className="hover:underline hover:cursor-pointer"
+                onClick={() => onClickAction("Therapist / Counselor")}
+              >
+                Anxiety management
+              </li>
+              <li
+                className="hover:underline hover:cursor-pointer"
+                onClick={() => onClickAction("Psychiatrist")}
+              >
+                Psychiatrist consultation
+              </li>
+            </ul>
           </div>
+        </div>
 
         {/* Vision - Disabled open/close */}
-        <div>
+        <div className="border-b">
           <div>
             {/* <AccordionTrigger className="text-base font-medium"> */}
-              Vision
+            Vision
             {/* </AccordionTrigger> */}
             <div>
               <ul className="space-y-2 pt-4 text-sm underline">
