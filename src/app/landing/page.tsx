@@ -40,24 +40,34 @@ import { log } from "console";
 import "./components/style.css";
 import AboutContentRight from "./components/AboutContentRight";
 import AboutContentLeft from "./components/AboutContentLeft";
+import { Footer } from "react-day-picker";
+import FooterSection from "./components/FooterSection";
 
 const doctorTypes = [
-  { value: "Dermatologist", label: "Dermatologist" },
+  { value: "Primary care doctor", label: "Primary care doctor" },
   {
-    value: "Cardiologist / Heart Doctor",
-    label: "Cardiologist / Heart Doctor",
+    value: "Dermatologist",
+    label: "Dermatologist",
   },
   {
-    value: "Neurologist / Headache Specialist",
-    label: "Neurologist / Headache Specialist",
+    value: "OB-GYN (Obstetrician-Gynecologist)",
+    label: "OB-GYN (Obstetrician-Gynecologist)",
   },
-  { value: "Pediatrician", label: "Pediatrician" },
   { value: "Dentist", label: "Dentist" },
   { value: "Psychiatrist", label: "Psychiatrist" },
-  { value: "Ophthalmologist", label: "Ophthalmologist" },
+  { value: "Psychologist", label: "Psychologist" },
+  { value: "Optometrist", label: "Optometrist" },
+  {
+    value: "Podiatrist / Foot and Ankle Specialist",
+    label: "Podiatrist / Foot and Ankle Specialist",
+  },
   {
     value: "Orthopedic Surgeon / Orthopedist",
     label: "Orthopedic Surgeon / Orthopedist",
+  },
+  {
+    value: "Chiropractor",
+    label: "Chiropractor",
   },
 ];
 const moreDoctorTypes = [
@@ -1006,30 +1016,7 @@ export default function LandingPage() {
         </section>
 
         {/* Footer Section */}
-        <section className="bg-white py-8 flex flex-col  justify-center items-center">
-          <Image
-            src="/Vector (9).svg"
-            alt="New Logo"
-            width={40}
-            height={40}
-            className=""
-          />
-          <p>© 2025 Docure AI Inc.</p>
-          <div className="flex gap-2">
-            <Link href="/terms" className="hover:underline">
-              Terms
-            </Link>
-            <Link href="/privacy-policy" className="hover:underline">
-              Privacy
-            </Link>
-            <Link href="/" className="hover:underline">
-              Home
-            </Link>
-            <Link href="/contact-us" className="hover:underline">
-              Contact Us
-            </Link>
-          </div>
-        </section>
+        <FooterSection />
       </main>
     </div>
   );
