@@ -130,7 +130,7 @@ export const Task: React.FC<TaskProps> = ({
     useSortable({ id });
   const [isSelected, setIsSelected] = useState(true);
   const [open, setOpen] = useState(false);
-  const [isChecked, setIsChecked] = useState(openingStatus === "Open");
+  const [isChecked, setIsChecked] = useState(() => openingStatus === "Open");
   // Use the expand context instead of local state
   const { expandedId, setExpandedId } = useExpand();
   const isExpanded = expandedId === id;
@@ -240,7 +240,7 @@ export const Task: React.FC<TaskProps> = ({
                 </Tooltip>
                 <div className="flex flex-col gap-2 font-normal w-full">
                   <div className="flex justify-between ">
-                    <div className="flex items-start gap-2 md:hidden w-full ">
+                    <div className="flex flex-grow items-start gap-2 md:hidden w-full  ">
                       {index < 10 ? (
                         <span className="bg-[#0074BA] rounded-full w-4 h-4 text-white flex items-center justify-center text-xs font-medium mt-[2px] shrink-0">
                           {index + 1}
@@ -251,7 +251,7 @@ export const Task: React.FC<TaskProps> = ({
                         href={website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="cursor-pointer font-medium  text-base leading-snug break-words w-full"
+                        className="block w-full  sm:max-w-full whitespace-normal overflow-hidden text-ellipsis cursor-pointer font-medium text-base leading-snug break-words"
                         onClick={(e) => {
                           e.stopPropagation();
                           track("Dr_Website_Clicked");
@@ -274,7 +274,7 @@ export const Task: React.FC<TaskProps> = ({
                       {title}
                     </a>
                     <div className="flex gap-16 pr-2">
-                      <div className="md:flex gap-1 font-normal text-[#333333] text-sm items-center hidden">
+                      <div className="md:flex  gap-1 font-normal text-[#333333] text-sm items-center hidden">
                         <img
                           src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
                           className="object-contain w-3 rounded-sm"
@@ -294,14 +294,49 @@ export const Task: React.FC<TaskProps> = ({
                           {distance || "-"}
                         </span>
                       </div>
+
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <input
-                            type="checkbox"
-                            className="w-8 h-5 accent-[#00BA85] rounded-md checked:text-white"
-                            checked={isChecked}
-                            onChange={() => setIsChecked(!isChecked)}
-                          />
+                          <label>
+                            <TooltipTrigger asChild>
+
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <div className="relative w-6 h-6">
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        e.stopPropagation();
+                                        setIsChecked(e.target.checked);
+                                      }}
+                                      onPointerDown={(e) => e.stopPropagation()}
+                                      className="appearance-none w-full h-full bg-white border border-gray-300 rounded-md 
+                 checked:bg-[#00BA85] checked:border-transparent"
+                                    />
+
+                                    {/* White checkmark */}
+                                    {isChecked && (
+                                      <svg
+                                        className="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="3"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M5 13l4 4L19 7"
+                                        />
+                                      </svg>
+                                    )}
+                                  </div>
+                                </label>
+
+                                {/* White checkmark overlay */}
+                               
+                            </TooltipTrigger>
+                          </label>
                         </TooltipTrigger>
                         <TooltipContent
                           side="left"
@@ -318,10 +353,8 @@ export const Task: React.FC<TaskProps> = ({
                       </Tooltip>
                     </div>
                   </div>
-                  <span className="whitespace-nowrap text-sm text-[#636465]">
-                    {vicinity}
-                  </span>
-                  <div className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden">
+                  <span className=" text-sm text-[#636465]">{vicinity}</span>
+                  <div className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words">
                     <img
                       src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
                       className="object-contain w-3 rounded-sm"
@@ -377,25 +410,25 @@ export const Task: React.FC<TaskProps> = ({
                           view less
                         </span>
                       ) : (
-                        <span className="mx-auto text-sm underline">
+                        <span className="mx-auto text-sm underline ">
                           view more
                         </span>
                       )}
                     </button>
                   </div>
                   {isExpanded && (
-                    <div className="md:!table-row w-full">
+                    <div className="md:!table-row w-full bg-[#F2F6F9]  ">
                       <div
                         colSpan={5}
-                        className="bg-gray-50 p-4 transition-all"
+                        className=" p-4 transition-all bg-[#F2F6F9]"
                       >
-                        <div className="text-sm text-gray-600 animate-fadeIn">
+                        <div className="text-sm text-gray-600 animate-fadeIn bg-[#F2F6F9]">
                           {isLoading ? (
-                            <div className="flex items-center justify-center py-4">
+                            <div className="flex items-center justify-center py-4 bg-[#F2F6F9] ">
                               <LoadingSumamry />
                             </div>
                           ) : (
-                            <span className="text-xs tracking-tight leading-5  text-zinc-800">
+                            <span className="text-xs tracking-tight leading-5  text-zinc-800 bg-[#F2F6F9]  ">
                               {renderedSummary}
                             </span>
                           )}

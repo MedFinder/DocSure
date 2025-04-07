@@ -180,7 +180,7 @@ export default function NavbarSection() {
               alt="New Logo"
               width={0}
               height={0}
-              className="w-36 h-auto hidden md:flex"
+              className="w-28 h-auto hidden md:flex"
             />
           </div>
           {pathname !== "/" && (

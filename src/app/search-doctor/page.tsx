@@ -714,9 +714,9 @@ export default function SearchDoctorPage() {
             {isMapView ? "Back to List" : "View Map"} {/* Toggle button text */}
           </button>
 
-          <p className="text-[#E5573F] hidden md:block">
+          {/* <p className="text-[#E5573F] hidden md:block">
             Tip: You can re-arrange the priority by dragging list items
-          </p>
+          </p> */}
         </div>
 
         <div className="flex">
