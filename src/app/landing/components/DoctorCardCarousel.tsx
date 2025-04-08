@@ -111,7 +111,7 @@ const DoctorCardCarousel = ({ doctors, checkPrefillAvailability }) => { // Accep
   }
 
   return (
-    <div className="w-full overflow-hidden h-60 py-6">
+    <div className="w-full overflow-hidden h-60 py-6 pl-4">
       <div
         ref={scrollContainerRef}
         className="flex gap-4 overflow-x-scroll scrollbar-hide"

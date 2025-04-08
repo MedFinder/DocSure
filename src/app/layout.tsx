@@ -5,9 +5,11 @@ import { Toaster } from "sonner";
 import Providers from "@/providers/permission-provider";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleTagManager } from "@next/third-parties/google";
+import { StyledComponentsRegistry } from "@/lib/styled-components-registry";
 import GTMAnalytics from "./GTMAnalytics";
 import { Suspense } from "react";
 import Script from "next/script";
+
 export const metadata: Metadata = {
   title: "Docsure | Book top rated doctors near me",
   description: "Docsure | Book top rated doctors near me",
@@ -23,7 +25,7 @@ export default function RootLayout({
       <Providers>
         <body className={`${lexendFont.className} font-sans`}>
           {/* <Suspense fallback={<div>Loading...</div>}> */}
-          {children}
+          <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
           {/* </Suspense> */}
           <Analytics />
           {/* <GTMAnalytics /> */}
@@ -33,4 +35,6 @@ export default function RootLayout({
     </html>
   );
 }
- {/*GTM-TK9TF844 */}
+{
+  /*GTM-TK9TF844 */
+}
