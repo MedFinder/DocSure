@@ -77,6 +77,7 @@ export default function SearchDoctorPage() {
   const [selectedOption, setSelectedOption] = useState("yes");
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCountLoading, setIsCountLoading] = useState(false);
   const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
@@ -85,6 +86,7 @@ export default function SearchDoctorPage() {
   const [isRatingOpen, setIsRatingOpen] = useState(false);
   const [hoveredDoctor, setHoveredDoctor] = useState(null);
   const [isMapView, setIsMapView] = useState(false);
+  const [totalDoctorsCount, setTotalDoctorsCount] = useState('');
   const distanceOptions = [
     "< 2 miles",
     "< 5 miles",
@@ -110,6 +112,41 @@ export default function SearchDoctorPage() {
     // console.log(numbers)
     setPhoneNumbers(numbers);
   };
+  const getTotalDoctorsList = async () => {
+    setIsCountLoading(true);
+    const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const addressParts = savedAddress?.split(',') || [];
+    const cityName = addressParts.slice(-2).join(',').trim();
+    //console.log(cityName)
+    try {
+      const response = await axios.get(
+        `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_count?medical_speciality=${savedSpecialty}&area=${cityName}`
+      );
+      console.log("Response:", response);
+      setIsCountLoading(false);
+      if (response.data && response.data.total_doctors) {
+        setTotalDoctorsCount(response.data.total_doctors);
+        // if(response.data.total_doctors > 0) {
+        //   console.log("Total doctors count:", response.data.total_doctors);
+        // } else {
+        //   setIsConfirmed(false);
+        //   toast.info(response.data.total_doctors);
+        // }
+        return response.data.total_doctors;
+      } else {
+        console.log("Invalid response format:", response.data);
+        return 'Could not fetch doctors count';
+      }
+    } catch (error) {
+      setIsCountLoading(false);
+      console.error("Error fetching doctors count:", error);
+      return 0;
+    } finally {
+      setIsCountLoading(false);
+    }
+  };
+
   const logPatientData = async (updatedValues) => {
     const savedAddress = sessionStorage.getItem("selectedAddress");
     const data = {
@@ -207,6 +244,7 @@ export default function SearchDoctorPage() {
         console.error("Error parsing sessionStorage data:", error);
         setDoctors([]);
       }
+      getTotalDoctorsList()
     };
 
     // Initial load
@@ -341,18 +379,6 @@ export default function SearchDoctorPage() {
       // If no errors, submit the form
       formik.handleSubmit();
     });
-  };
-
-  const handleOnPlacesChanged = (index) => {
-    if (inputRefs.current[index]) {
-      const places = inputRefs.current[index].getPlaces();
-      if (places.length > 0) {
-        const place = places[0];
-        const lat = places.geometry.location.lat();
-        const lng = places.geometry.location.lng();
-        setSelectedLocation({ lat, lng });
-      }
-    }
   };
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A", // Replace with your API key

@@ -153,7 +153,11 @@ export default function NavbarSection() {
 
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
-        // sessionStorage.setItem("selectedAddress", formattedAddress); // Store in session
+        sessionStorage.setItem("selectedAddress", formattedAddress);
+        sessionStorage.setItem(
+          "selectedLocation",
+          JSON.stringify({ lat, lng })
+        );
       }
     }
   };

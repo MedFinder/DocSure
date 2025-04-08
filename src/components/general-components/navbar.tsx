@@ -151,6 +151,11 @@ export default function Navbar() {
 
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
+        sessionStorage.setItem("selectedAddress", formattedAddress);
+        sessionStorage.setItem(
+          "selectedLocation",
+          JSON.stringify({ lat, lng })
+        );
         // sessionStorage.setItem("selectedAddress", formattedAddress); // Store in session
       }
     }

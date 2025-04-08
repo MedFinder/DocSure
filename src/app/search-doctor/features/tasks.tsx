@@ -173,7 +173,7 @@ export const Task: React.FC<TaskProps> = ({
     transition,
     transform: CSS.Transform.toString(transform),
   };
-  const renderedSummary = useTypewriterEffect(doctorSummary, 20);
+  //const renderedSummary = useTypewriterEffect(doctorSummary, 20);
 
   return (
     <>
@@ -209,10 +209,9 @@ export const Task: React.FC<TaskProps> = ({
                     side="right"
                     className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
                   >
-                    <span className="font-semibold">Tooltip example:</span>
+                    {/* <span className="font-semibold">Tooltip example:</span> */}
                     <span>
-                      Lorem Ipsum is simply dummy text of the printing and
-                      typesetting industry.
+                      Select doctors to call for an appointment.
                     </span>
                   </TooltipContent>
                 </Tooltip>
@@ -231,10 +230,9 @@ export const Task: React.FC<TaskProps> = ({
                     side="right"
                     className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
                   >
-                    <span className="font-semibold">Tooltip example:</span>
+                    {/* <span className="font-semibold">Tooltip example:</span> */}
                     <span>
-                      Lorem Ipsum is simply dummy text of the printing and
-                      typesetting industry.
+                      Drag items to reorder the priority.
                     </span>
                   </TooltipContent>
                 </Tooltip>
@@ -340,12 +338,11 @@ export const Task: React.FC<TaskProps> = ({
                           side="left"
                           className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
                         >
-                          <span className="font-semibold">
+                          {/* <span className="font-semibold">
                             Tooltip example:
-                          </span>
+                          </span> */}
                           <span>
-                            Lorem Ipsum is simply dummy text of the printing and
-                            typesetting industry.
+                            {isChecked ? "Deselect doctors you don’t want us to call." : "Select doctors to call for an appointment."}
                           </span>
                         </TooltipContent>
                       </Tooltip>
@@ -427,7 +424,7 @@ export const Task: React.FC<TaskProps> = ({
                             </div>
                           ) : (
                             <span className="text-xs tracking-tight leading-5  text-zinc-800 bg-[#F2F6F9]  ">
-                              {renderedSummary}
+                              {doctorSummary}
                             </span>
                           )}
                         </div>
