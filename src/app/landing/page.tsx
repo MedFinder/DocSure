@@ -394,7 +394,7 @@ export default function LandingPage() {
 
         sessionStorage.setItem("statusData", JSON.stringify(response.data));
         sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
-        router.push("/search");
+        router.push("/search-doctor");
       } catch (error) {
         console.error("Error submitting form:", error);
       }

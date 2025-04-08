@@ -218,7 +218,7 @@ export const Task: React.FC<TaskProps> = ({
                 </Tooltip>
               </div>
 
-              <div className="bg-[#F2F6F9] py-4 md:px-2  px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0 hover:bg-gray-200">
+              <div className="bg-[#F2F6F9] py-4 md:px-2  px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0 ">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <img
@@ -299,42 +299,40 @@ export const Task: React.FC<TaskProps> = ({
                         <TooltipTrigger asChild>
                           <label>
                             <TooltipTrigger asChild>
-
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                  <div className="relative w-6 h-6">
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={(e) => {
-                                        e.stopPropagation();
-                                        setIsChecked(e.target.checked);
-                                      }}
-                                      onPointerDown={(e) => e.stopPropagation()}
-                                      className="appearance-none w-full h-full bg-white border border-gray-300 rounded-md 
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <div className="relative w-6 h-6">
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      setIsChecked(e.target.checked);
+                                    }}
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    className="appearance-none w-full h-full bg-white border border-gray-300 rounded-md 
                  checked:bg-[#00BA85] checked:border-transparent"
-                                    />
+                                  />
 
-                                    {/* White checkmark */}
-                                    {isChecked && (
-                                      <svg
-                                        className="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="3"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          d="M5 13l4 4L19 7"
-                                        />
-                                      </svg>
-                                    )}
-                                  </div>
-                                </label>
+                                  {/* White checkmark */}
+                                  {isChecked && (
+                                    <svg
+                                      className="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="3"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M5 13l4 4L19 7"
+                                      />
+                                    </svg>
+                                  )}
+                                </div>
+                              </label>
 
-                                {/* White checkmark overlay */}
-                               
+                              {/* White checkmark overlay */}
                             </TooltipTrigger>
                           </label>
                         </TooltipTrigger>
