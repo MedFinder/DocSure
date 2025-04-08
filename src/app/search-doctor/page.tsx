@@ -747,9 +747,11 @@ export default function SearchDoctorPage() {
                   Docsure AI will call the selected doctors in this sequence,
                   seek an appointment for you, and enquire about insurance
                 </p>
-                <Button className="bg-[#E5573F] text-white rounded-md">
-                  Continue
-                </Button>
+                <Link>
+                  <Button className="bg-[#E5573F] text-white rounded-md">
+                    Continue
+                  </Button>
+                </Link>
               </div>
               <div className="flex md:hidden px-2 py-2 text-sm items-center border">
                 <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
