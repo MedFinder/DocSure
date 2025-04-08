@@ -380,7 +380,7 @@ export default function SearchDoctorPage() {
     setIsDistanceOpen(false);
   };
 
-  console.log(doctors);
+  // console.log(doctors);
 
   return (
     // <section>
