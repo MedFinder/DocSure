@@ -747,7 +747,7 @@ export default function SearchDoctorPage() {
                   Docsure AI will call the selected doctors in this sequence,
                   seek an appointment for you, and enquire about insurance
                 </p>
-                <Link>
+                <Link href="/contact">
                   <Button className="bg-[#E5573F] text-white rounded-md">
                     Continue
                   </Button>
