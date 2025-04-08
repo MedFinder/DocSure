@@ -10,7 +10,7 @@ import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import Column from "../search/features/column";
+import Column from "../../components/older-pages/search/features/column";
 import { toast } from "sonner";
 import axios from "axios";
 import { DoctorCard } from "./DoctorCard";

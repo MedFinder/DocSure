@@ -17,9 +17,12 @@ import { Button } from "@/components/ui/button";
 import { track } from "@vercel/analytics";
 import useTypewriterEffect from "@/hooks/useTypewriterEffect";
 
-const LoadingSumamry = dynamic(() => import("../../../components/Loading/LoadingSummary"), {
-  ssr: false, // Disable SSR for this component
-});
+const LoadingSumamry = dynamic(
+  () => import("../../../Loading/LoadingSummary"),
+  {
+    ssr: false, // Disable SSR for this component
+  }
+);
 
 // Create a context to manage expanded rows
 const ExpandContext = createContext({
@@ -66,22 +69,28 @@ const getAlternateColor = (index: number) => {
   const colors = ["#F7D07D", "#A0F1C2"]; // Gold & Light Green
   return colors[index % 2]; // Alternate based on index
 };
-const getDrSummary = async (name: string, formatted_address: string, place_id: string) => {
+const getDrSummary = async (
+  name: string,
+  formatted_address: string,
+  place_id: string
+) => {
   const data = {
     name,
     formatted_address,
-    place_id
+    place_id,
   };
-  
+
   try {
     const resp = await axios.post(
       `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_summary`,
       data
     );
     // console.log(resp?.data)
-    return resp.data?.result?.summary || "No summary available for this provider.";
+    return (
+      resp.data?.result?.summary || "No summary available for this provider."
+    );
   } catch (error) {
-    console.error('Error fetching doctor summary:', error);
+    console.error("Error fetching doctor summary:", error);
     return "Unable to fetch summary information.";
   }
 };
@@ -103,37 +112,41 @@ export const Task: React.FC<TaskProps> = ({
   callStatus,
   doctorType,
   onDelete,
-  description = ''
+  description = "",
   //description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
   const [isSelected, setIsSelected] = useState(true);
   const [open, setOpen] = useState(false);
-  
+
   // Use the expand context instead of local state
   const { expandedId, setExpandedId } = useExpand();
   const isExpanded = expandedId === id;
-  
+
   const [doctorSummary, setDoctorSummary] = useState(description);
   const [isLoading, setIsLoading] = useState(false);
   const [summaryFetched, setSummaryFetched] = useState(false);
-  
+
   // Function to handle expanding and fetching summary
   const handleExpand = async (e) => {
     e.stopPropagation();
-    
+
     // Toggle expanded state - close if already open, otherwise open this one and close others
     if (isExpanded) {
       setExpandedId(null);
     } else {
       setExpandedId(id);
-      
+
       // If expanding and haven't fetched summary yet, get it
       if (!summaryFetched) {
         setIsLoading(true);
         try {
-          const summary = await getDrSummary(title, formatted_address || address || vicinity, place_id || id);
+          const summary = await getDrSummary(
+            title,
+            formatted_address || address || vicinity,
+            place_id || id
+          );
           setDoctorSummary(summary);
           setSummaryFetched(true);
         } catch (error) {
@@ -260,10 +273,12 @@ export const Task: React.FC<TaskProps> = ({
             <div className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded-md">
               {isLoading ? (
                 <div className="flex items-center justify-center py-4">
-                  <LoadingSumamry/>
+                  <LoadingSumamry />
                 </div>
               ) : (
-                <span className="text-xs tracking-tight leading-5s text-zinc-800">{doctorSummary}</span>
+                <span className="text-xs tracking-tight leading-5s text-zinc-800">
+                  {doctorSummary}
+                </span>
               )}
             </div>
           )}
@@ -378,10 +393,12 @@ export const Task: React.FC<TaskProps> = ({
             <div className="text-sm text-gray-600 animate-fadeIn">
               {isLoading ? (
                 <div className="flex items-center justify-center py-4">
-                 <LoadingSumamry/>
+                  <LoadingSumamry />
                 </div>
               ) : (
-                <span className="text-xs tracking-tight leading-5  text-zinc-800">{doctorSummary}</span>
+                <span className="text-xs tracking-tight leading-5  text-zinc-800">
+                  {doctorSummary}
+                </span>
               )}
             </div>
           </td>

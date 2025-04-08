@@ -2,7 +2,7 @@ import React from "react";
 import { Doctor } from "./types";
 import { LocationInfo } from "./LocationInfo";
 import { StatusBadge } from "./StatusBadge";
-import { CallStatusType } from "../search/features/column";
+import { CallStatusType } from "../../components/older-pages/search/features/column";
 
 interface DoctorCardProps {
   doctor: Doctor;
