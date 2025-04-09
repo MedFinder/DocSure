@@ -89,6 +89,9 @@ export default function SearchDoctorPage() {
   const [hoveredDoctor, setHoveredDoctor] = useState(null);
   const [isMapView, setIsMapView] = useState(false);
   const [totalDoctorsCount, setTotalDoctorsCount] = useState('');
+  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadMoreRef = useRef(null);
   const distanceOptions = [
     "< 2 miles",
     "< 5 miles",
@@ -177,7 +180,7 @@ export default function SearchDoctorPage() {
     }
   };
   const logDrLists = async (data) => {
-    console.log("Logging dr lists:", data);
+   // console.log("Logging dr lists:", data);
     try {
       const resp = await axios.post(
         `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
@@ -189,6 +192,88 @@ export default function SearchDoctorPage() {
       return null;
     }
   };
+
+  const loadMoreDoctors = async () => {
+    console.log('loading more doctors...')
+    if (!nextPageToken || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty"); 
+      const searchData = await JSON.parse(sessionStorage.getItem("searchData"));
+      // console.log(searchData)
+      const lat = searchData?.lat || 0;
+      const lng = searchData?.lng || 0;
+      const response = await axios.post(
+        'https://callai-backend-243277014955.us-central1.run.app/api/new_search_places',
+        {
+          location: `${lat},${lng}`,
+          radius: 20000,  
+          keyword: savedSpecialty,
+          next_page_token: nextPageToken,
+          prev_page_data: doctors, // Pass the current doctors list as prev_page_data
+        }
+      );
+
+      if (response.data?.results) {
+        const newDoctors = response.data.results.map((item) => ({
+          ...item,
+          id: item.place_id || item.id,
+          location: {
+            lat: item.location?.lat || item.lat,
+            lng: item.location?.lng || item.lng,
+          },
+        }));
+
+        setDoctors(prevDoctors => [...prevDoctors, ...newDoctors]);
+        setNextPageToken(response.data.next_page_token || null);
+        
+        // Store the updated data in session storage
+        const lastSearchSource = sessionStorage.getItem("lastSearchSource");
+        const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+        
+        // Get current data from storage
+        const currentData = JSON.parse(sessionStorage.getItem(storageKey) || "{}");
+        
+        // Merge new results with existing ones
+        const updatedData = {
+          ...currentData,
+          results: [...(currentData.results || []), ...newDoctors],
+          next_page_token: response.data.next_page_token || null
+        };
+        
+        sessionStorage.setItem(storageKey, JSON.stringify(updatedData));
+      }
+    } catch (error) {
+      console.error("Error loading more doctors:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && nextPageToken && !isLoadingMore) {
+          loadMoreDoctors();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nextPageToken, isLoadingMore]);
+
   useEffect(() => {
     async function fetchAndLogData() {
       const drsData = sessionStorage.getItem("statusData");
@@ -233,12 +318,13 @@ export default function SearchDoctorPage() {
             ...item,
             id: item.place_id || item.id,
             location: {
-              lat: item.geometry?.location?.lat || item.lat,
-              lng: item.geometry?.location?.lng || item.lng,
+              lat: item.location?.lat || item.lat,
+              lng: item.location?.lng || item.lng,
             },
           }));
 
           setDoctors(sortedData);
+          setNextPageToken(parsedData.next_page_token || null);
         } else {
           console.warn("No valid results found in sessionStorage.");
           setDoctors([]);

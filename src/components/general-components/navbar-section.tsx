@@ -105,8 +105,14 @@ export default function NavbarSection() {
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
         console.log();
-        const response = await axios.get(
-          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
+        const data = {
+          location: `${lat},${lng}`,
+          radius: 20000,  
+          keyword: formik.values.specialty,
+        }
+        const response = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+          data,
         );
 
         sessionStorage.setItem("formDataNav", JSON.stringify(updatedValues));

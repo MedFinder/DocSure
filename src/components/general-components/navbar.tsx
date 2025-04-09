@@ -103,8 +103,14 @@ export default function Navbar() {
         );
         console.log();
         const speciality_value = formik.values.specialty === 'Prescription / Refill' ? 'Primary Care Physician' : formik.values.specialty;
-        const response = await axios.get(
-          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${speciality_value}`
+        const data = {
+          location: `${lat},${lng}`,
+          radius: 20000,  
+          keyword: speciality_value,
+        }
+        const response = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+          data
         );
 
         sessionStorage.setItem("formDataNav", JSON.stringify(updatedValues));

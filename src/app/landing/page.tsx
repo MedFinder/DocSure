@@ -241,8 +241,14 @@ export default function LandingPage() {
   }, []);
   const getPopularDrs = async (lat, lng) => {
     try {
-      const response = await axios.get(
-        `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=Primary Care Physician`
+      const data = {
+        location: `${lat},${lng}`,
+        radius: 20000,  
+        keyword: 'Primary Care Physician',
+      }
+      const response = await axios.post(
+        "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+        data
       );
       return response.data;
     } catch (error) {
@@ -379,9 +385,14 @@ export default function LandingPage() {
           formik.values.specialty === "Prescription / Refill"
             ? "Primary Care Physician"
             : formik.values.specialty;
-
-        const response = await axios.get(
-          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${speciality_value}`
+        const data = {
+          location: `${lat},${lng}`,
+          radius: 20000,  
+          keyword: speciality_value,
+        }
+        const response = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+          data
         );
 
         // Handle request_id when the promise resolves
