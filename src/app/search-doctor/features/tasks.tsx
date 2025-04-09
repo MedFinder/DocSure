@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 //@ts-nocheck
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext, useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MapPin, Trash2, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
@@ -67,6 +67,11 @@ interface TaskProps {
   openingStatus?: string;
   openingTimeInfo?: string;
   isAppointmentBooked: boolean;
+  transcriptSummary?: {place_id:string, summary: string};
+  transcriptLoading?: boolean;
+  setTranscriptSummary: ({place_id:string, summary: string}) => void;
+  setTranscriptLoading: (loading: boolean) => void;
+  wsRef:React.RefObject<WebSocket | null>;
   callStatus: {
     isInitiated: boolean;
   };
@@ -83,10 +88,12 @@ const getDrSummary = async (
   formatted_address: string,
   place_id: string
 ) => {
+  const formData = await JSON.parse(sessionStorage.getItem("formData"));
   const data = {
     name,
     formatted_address,
     place_id,
+    request_id: formData?.request_id,
   };
 
   try {
@@ -122,6 +129,11 @@ export const Task: React.FC<TaskProps> = ({
   doctorType,
   openingStatus,
   openingTimeInfo,
+  transcriptSummary,
+  transcriptLoading,
+  setTranscriptSummary,
+  setTranscriptLoading,
+  wsRef,
   onDelete,
   description = "",
   //description = "No additional information available for this provider.", // Default description
@@ -136,9 +148,6 @@ export const Task: React.FC<TaskProps> = ({
   const isExpanded = expandedId === id;
 
   const [doctorSummary, setDoctorSummary] = useState(description);
-  const [isLoading, setIsLoading] = useState(false);
-  const [summaryFetched, setSummaryFetched] = useState(false);
-
   // Function to handle expanding and fetching summary
   const handleExpand = async (e) => {
     e.stopPropagation();
@@ -146,34 +155,54 @@ export const Task: React.FC<TaskProps> = ({
     // Toggle expanded state - close if already open, otherwise open this one and close others
     if (isExpanded) {
       setExpandedId(null);
+      setTranscriptLoading(false);
     } else {
+      setTranscriptLoading(true);
+      setTranscriptSummary({place_id: id, summary: ''});
       setExpandedId(id);
 
-      // If expanding and haven't fetched summary yet, get it
-      if (!summaryFetched) {
-        setIsLoading(true);
-        try {
-          const summary = await getDrSummary(
-            title,
-            formatted_address || address || vicinity,
-            place_id || id
-          );
-          setDoctorSummary(summary);
-          setSummaryFetched(true);
-        } catch (error) {
-          console.error("Error fetching doctor summary:", error);
-        } finally {
-          setIsLoading(false);
-        }
+      // Get request_id from session storage
+      const formData = await JSON.parse(sessionStorage.getItem("formData"));
+      const request_id = formData?.request_id;
+      try {
+        // Initial fetch to trigger the summary generation
+        const resp = await getDrSummary(
+          title,
+          formatted_address || address || vicinity,
+          place_id || id,
+          request_id
+          
+        );
+        //console.log(resp);
+        setTimeout(() => {
+          console.log('defaulting to dr summary..after socket time out')
+          setTranscriptLoading(false);
+          setTranscriptSummary({place_id: id, summary: resp})
+        }, 10000);
+        // if(wsRef.current?.readyState === 1) {
+        //   setTranscriptLoading(false);
+        //   setTranscriptSummary({place_id: id, summary: resp})
+        // }
+        console.log('Websocket state is',wsRef.current?.readyState)
+      } catch (error) {
+        console.error("Error fetching doctor summary:", error);
+        setDoctorSummary("Unable to fetch summary information.");
       }
     }
   };
+  // Clean up WebSocket on unmount only, not when unexpanding
+  // useEffect(() => {
+  //   return () => {
+  //     if (socket) {
+  //       socket.close();
+  //     }
+  //   };
+  // }, [socket]);
 
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
   };
-  //const renderedSummary = useTypewriterEffect(doctorSummary, 20);
 
   return (
     <>
@@ -342,7 +371,9 @@ export const Task: React.FC<TaskProps> = ({
                             Tooltip example:
                           </span> */}
                           <span>
-                            {isChecked ? "Deselect doctors you don’t want us to call." : "Select doctors to call for an appointment."}
+                            {isChecked
+                              ? "Deselect doctors you don’t want us to call."
+                              : "Select doctors to call for an appointment."}
                           </span>
                         </TooltipContent>
                       </Tooltip>
@@ -398,7 +429,7 @@ export const Task: React.FC<TaskProps> = ({
                       className=" hover:text-gray-700 transition-colors cursor-pointer  block"
                       onPointerDown={(e) => e.stopPropagation()}
                     >
-                      {isLoading ? (
+                      {transcriptLoading && transcriptSummary?.place_id === id ? (
                         <Loader2 className="mx-auto animate-spin" size={18} />
                       ) : isExpanded ? (
                         <span className="mx-auto text-sm underline hidden">
@@ -418,13 +449,13 @@ export const Task: React.FC<TaskProps> = ({
                         className=" p-4 transition-all bg-[#F2F6F9]"
                       >
                         <div className="text-sm text-gray-600 animate-fadeIn bg-[#F2F6F9]">
-                          {isLoading ? (
+                          {transcriptLoading && transcriptSummary?.place_id === id ? (
                             <div className="flex items-center justify-center py-4 bg-[#F2F6F9] ">
                               <LoadingSumamry />
                             </div>
                           ) : (
-                            <span className="text-xs tracking-tight leading-5  text-zinc-800 bg-[#F2F6F9]  ">
-                              {doctorSummary}
+                            <span className="text-xs tracking-tight leading-5 text-zinc-800 bg-[#F2F6F9]">
+                              {transcriptSummary?.summary ?? doctorSummary}
                             </span>
                           )}
                         </div>
@@ -455,7 +486,7 @@ export const Task: React.FC<TaskProps> = ({
             className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer hidden md:block"
             onPointerDown={(e) => e.stopPropagation()}
           >
-            {isLoading ? (
+            {transcriptLoading ? (
               <Loader2 className="mx-auto animate-spin" size={18} />
             ) : isExpanded ? (
               <ChevronUp className="mx-auto" size={18} />

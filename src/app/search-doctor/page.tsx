@@ -69,6 +69,8 @@ export default function SearchDoctorPage() {
   const [isAppointmentBooked, setIsAppointmentBooked] = useState(false);
   const [transcriptArray, setTranscriptArray] = useState([]);
   const [selectedInsurance, setSelectedInsurance] = useState(true);
+  const [transcriptSummary, setTranscriptSummary] = useState({place_id:'', summary: ''});
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [customAvailability, setCustomAvailability] = useState("");
   const [timeOfAppointment, settimeOfAppointment] = useState("few days");
   const [insuranceType, setinsuranceType] = useState("");
@@ -117,8 +119,7 @@ export default function SearchDoctorPage() {
     const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
     const savedAddress = sessionStorage.getItem("selectedAddress");
     const addressParts = savedAddress?.split(',') || [];
-    const cityName = addressParts.slice(-2).join(',').trim();
-    //console.log(cityName)
+    const cityName = addressParts.slice(-2).join(',').trim().replace(/[0-9]/g, '');
     try {
       const response = await axios.get(
         `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_count?medical_speciality=${savedSpecialty}&area=${cityName}`
@@ -203,9 +204,11 @@ export default function SearchDoctorPage() {
         //  console.log(payload)
         await logDrLists(payload);
       }
+      connectWebSocket(formData?.request_id);
     }
 
     fetchAndLogData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     const updateDoctorsList = () => {
@@ -405,7 +408,38 @@ export default function SearchDoctorPage() {
     setSelectedDistance(distance);
     setIsDistanceOpen(false);
   };
+  const connectWebSocket = async (id?: string) => {
+    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
+      id
+    }`;
+    console.log(url);
+    wsRef.current = new WebSocket(url);
 
+    wsRef.current.onopen = () => {
+      console.log("WebSocket connected successfully and opened.");
+    };
+    wsRef.current.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
+      console.log("WebSocket Message:", data);
+      const message = JSON.parse(event.data);
+      // console.log(message)
+      if (message.event === 'summary_stream' && message.data?.summary) {
+        setTranscriptLoading(false);
+        setTranscriptSummary(message.data);
+      }
+
+    };
+
+    wsRef.current.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    wsRef.current.onerror = (error) => {
+      //console.error("WebSocket Error:", error);
+      console.log("Retrying WebSocket connection in 5 seconds...");
+      setTimeout(connectWebSocket, 5000);
+    };
+  };
   // console.log(doctors);
 
   return (

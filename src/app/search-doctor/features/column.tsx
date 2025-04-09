@@ -22,6 +22,11 @@ interface ColumnProps {
   tasks: TaskType[];
   activeCallIndex: number;
   isAppointmentBooked: boolean;
+  transcriptSummary: {place_id:'', summary: ''};
+  transcriptLoading: boolean;
+  wsRef:React.RefObject<WebSocket | null>;
+  setTranscriptSummary: ({place_id:string, summary: string}) => void;
+  setTranscriptLoading: (loading: boolean) => void;
   callStatus: CallStatusType;
   onDelete: (id: string) => void;
 }
@@ -30,6 +35,11 @@ const Column: React.FC<ColumnProps> = ({
   activeCallIndex,
   callStatus,
   isAppointmentBooked,
+  transcriptSummary,
+  transcriptLoading,
+  wsRef,
+  setTranscriptSummary,
+  setTranscriptLoading,
   onDelete,
 }) => {
   // Function to delete a task by ID
@@ -109,6 +119,11 @@ const Column: React.FC<ColumnProps> = ({
                     address={task.formatted_address}
                     doctorType={doctorType}
                     onDelete={onDelete}
+                    transcriptSummary={transcriptSummary}
+                    setTranscriptSummary={setTranscriptSummary}
+                    transcriptLoading={transcriptLoading}
+                    setTranscriptLoading={setTranscriptLoading}
+                    wsRef={wsRef}
                   />
                 );
               })}
