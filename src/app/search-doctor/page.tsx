@@ -8,6 +8,7 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useMemo,
 } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
@@ -127,7 +128,7 @@ export default function SearchDoctorPage() {
       const response = await axios.get(
         `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_count?medical_speciality=${savedSpecialty}&area=${cityName}`
       );
-      console.log("Response:", response);
+      // console.log("Response:", response);
       setIsCountLoading(false);
       if (response.data && response.data.total_doctors) {
         setTotalDoctorsCount(response.data.total_doctors);
@@ -525,7 +526,23 @@ export default function SearchDoctorPage() {
       setTimeout(connectWebSocket, 5000);
     };
   };
-  // console.log(doctors);
+
+  // Calculate DrCount based on the conditions
+  const DrCount = useMemo(() => {
+    const drVal = parseInt(totalDoctorsCount)
+    if(drVal > 50) {
+      return drVal+"+";
+    }
+    else if ((drVal < 50 || isNaN(drVal))&& !nextPageToken) {
+      return doctors.length+"+";
+    } 
+    // If there is a nextPageToken or totalDoctorsCount >= 50
+    else {
+      return "50+";
+    }
+    // If totalDoctorsCount is less than 50 and there is no nextPageToken
+    
+  }, [doctors.length, totalDoctorsCount, nextPageToken]);
 
   return (
     // <section>
