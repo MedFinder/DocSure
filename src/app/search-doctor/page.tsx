@@ -353,6 +353,25 @@ export default function SearchDoctorPage() {
       router.events?.off("routeChangeComplete", handleRouteChange);
     };
   }, [router]);
+
+  useEffect(() => {
+    try {
+      const searchDataString = sessionStorage.getItem("searchData");
+      if (searchDataString) {
+        const searchData = JSON.parse(searchDataString);
+        if (searchData && searchData.lat && searchData.lng) {
+          setSelectedLocation({
+            lat: searchData.lat,
+            lng: searchData.lng
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error loading location from sessionStorage:", error);
+    }
+  }, []);
+  console.log("Selected location:", selectedLocation);
+
   const handleDelete = (id: string) => {
     setDoctors((prevDoctors) =>
       prevDoctors.filter((doctor) => doctor.id.toString() !== id)
