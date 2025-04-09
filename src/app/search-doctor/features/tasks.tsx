@@ -144,7 +144,10 @@ export const Task: React.FC<TaskProps> = ({
     useSortable({ id });
   const [isSelected, setIsSelected] = useState(true);
   const [open, setOpen] = useState(false);
-  const [isChecked, setIsChecked] = useState(() => openingStatus === "Open");
+  const [isChecked, setIsChecked] = useState(() => {
+    // Only check items that are both open and within the first 10
+    return index < 10 && openingStatus === "Open";
+  });
   // Use the expand context instead of local state
   const { expandedId, setExpandedId } = useExpand();
   const isExpanded = expandedId === id;
