@@ -204,7 +204,7 @@ export default function SearchDoctorPage() {
         //  console.log(payload)
         await logDrLists(payload);
       }
-      connectWebSocket(formData?.request_id);
+      connectWebSocket();
     }
 
     fetchAndLogData();
@@ -408,10 +408,9 @@ export default function SearchDoctorPage() {
     setSelectedDistance(distance);
     setIsDistanceOpen(false);
   };
-  const connectWebSocket = async (id?: string) => {
-    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
-      id
-    }`;
+  const connectWebSocket = async () => {
+    const formData = await JSON.parse(sessionStorage.getItem("formData"));
+    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${formData?.request_id}`;
     console.log(url);
     wsRef.current = new WebSocket(url);
 

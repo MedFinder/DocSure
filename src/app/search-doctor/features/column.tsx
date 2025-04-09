@@ -25,6 +25,7 @@ interface ColumnProps {
   transcriptSummary: {place_id:'', summary: ''};
   transcriptLoading: boolean;
   wsRef:React.RefObject<WebSocket | null>;
+  reconnectWebSocket: Promise<void>;
   setTranscriptSummary: ({place_id:string, summary: string}) => void;
   setTranscriptLoading: (loading: boolean) => void;
   callStatus: CallStatusType;
@@ -38,6 +39,7 @@ const Column: React.FC<ColumnProps> = ({
   transcriptSummary,
   transcriptLoading,
   wsRef,
+  reconnectWebSocket,
   setTranscriptSummary,
   setTranscriptLoading,
   onDelete,
@@ -124,6 +126,7 @@ const Column: React.FC<ColumnProps> = ({
                     transcriptLoading={transcriptLoading}
                     setTranscriptLoading={setTranscriptLoading}
                     wsRef={wsRef}
+                    reconnectWebSocket={reconnectWebSocket}
                   />
                 );
               })}

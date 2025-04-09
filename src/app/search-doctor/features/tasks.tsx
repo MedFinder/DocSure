@@ -72,6 +72,7 @@ interface TaskProps {
   setTranscriptSummary: ({place_id:string, summary: string}) => void;
   setTranscriptLoading: (loading: boolean) => void;
   wsRef:React.RefObject<WebSocket | null>;
+  reconnectWebSocket: Promise<void>;
   callStatus: {
     isInitiated: boolean;
   };
@@ -134,6 +135,7 @@ export const Task: React.FC<TaskProps> = ({
   setTranscriptSummary,
   setTranscriptLoading,
   wsRef,
+  reconnectWebSocket,
   onDelete,
   description = "",
   //description = "No additional information available for this provider.", // Default description
@@ -178,11 +180,14 @@ export const Task: React.FC<TaskProps> = ({
           console.log('defaulting to dr summary..after socket time out')
           setTranscriptLoading(false);
           setTranscriptSummary({place_id: id, summary: resp})
-        }, 10000);
-        // if(wsRef.current?.readyState === 1) {
-        //   setTranscriptLoading(false);
-        //   setTranscriptSummary({place_id: id, summary: resp})
-        // }
+        }, 5000);
+        if(wsRef.current?.readyState === 1) {
+          // setTranscriptLoading(false);
+          // setTranscriptSummary({place_id: id, summary: resp})
+        }else {
+          console.log('reconnecitng web socket...')
+          reconnectWebSocket()
+        }
         console.log('Websocket state is',wsRef.current?.readyState)
       } catch (error) {
         console.error("Error fetching doctor summary:", error);
@@ -190,14 +195,6 @@ export const Task: React.FC<TaskProps> = ({
       }
     }
   };
-  // Clean up WebSocket on unmount only, not when unexpanding
-  // useEffect(() => {
-  //   return () => {
-  //     if (socket) {
-  //       socket.close();
-  //     }
-  //   };
-  // }, [socket]);
 
   const style = {
     transition,
