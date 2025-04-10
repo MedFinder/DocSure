@@ -434,7 +434,7 @@ export default function Transcript() {
       if (dob) context += `; Date of birth:${dob}`;
       if (address) context += `; Address of the patient:${address}`;
       if (maxWait)
-        context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;
+        context += `; Maximum wait time for the appointment:${maxWait} days. If an appointment is not available within ${maxWait} days , then do not take an appointment `;
       if (availability)
         context += `; Availability of the patient:${availability}`;
       if (isnewPatient) context += `; Is New Patient:${isnewPatient}`;
@@ -767,7 +767,7 @@ export default function Transcript() {
       const savedAddress = sessionStorage.getItem("selectedAddress");
       const specialty = formData?.specialty;
 
-      router.push("/contact");
+      router.push("/appointment");
     }
   };
 

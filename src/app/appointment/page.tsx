@@ -100,10 +100,11 @@ export default function AppointmentPage() {
           insuranceType: parsedFormData?.insuranceType || "ppo",
           availability: parsedFormData?.availability || "anytime",
           subscriberId: parsedFormData?.subscriberId || "",
+          maxWait: parsedFormData?.maxWait || 3
         });
         setPills(parsedFormData?.objective ? parsedFormData.objective.split(", ") : []);
         setSelectedInsurance(parsedFormData?.selectedOption === "no");
-        setAvailabilityOption(parsedFormData?.availability || "anytime");
+        setAvailabilityOption(parsedFormData?.availabilityOption || "anytime");
         setCustomAvailability(parsedFormData?.availability || "anytime");
         // Check if timeOfAppointment is a valid date
         if (parsedFormData?.timeOfAppointment) {
@@ -132,14 +133,25 @@ export default function AppointmentPage() {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
-  const logPatientData = async (formData) => {
+  const logPatientData = async (updatedValues) => {
     const data = {
-      request_id: formData.request_id,
-      patient_name: formData.patientName,
-      patient_dob: formData.dob,
-      patient_email: formData.email,
-      patient_number: formData.phoneNumber,
-      patient_zipcode: "",
+      // request_id: formData.request_id,
+      // patient_name: formData.patientName,
+      // patient_dob: formData.dob,
+      // patient_email: formData.email,
+      // patient_number: formData.phoneNumber,
+      // patient_zipcode: "",
+
+      request_id: updatedValues.request_id,
+      new_patient: updatedValues.isNewPatient,
+      time_of_appointment: updatedValues.timeOfAppointment,
+      patient_availability: updatedValues.maxWait+' days',
+      medical_concerns: updatedValues.objective,
+      member_id: updatedValues?.subscriberId ?? "",
+      insurer: updatedValues.insurer ?? "none",
+      insurance_type: updatedValues?.insuranceType ?? "",
+      group_number: updatedValues.groupId ?? "",
+      has_insurance: !!updatedValues.insurer,
     };
     // console.log(data)
     try {
@@ -192,14 +204,21 @@ export default function AppointmentPage() {
         availability: customAvailability
           ? customAvailability
           : availabilityOption,
+        availabilityOption,
         specialty: savedSpecialty,
         timeOfAppointment,
         insuranceType: values.insuranceType,
-        maxWait: values.maxWait +'days',
+        maxWait: values.maxWait,
         isNewPatient: isNewPatient ? "yes" : "no",
         request_id: formData?.request_id,
       };
       console.log(updatedValues)
+      setIsLoading(true);
+      logPatientData(updatedValues);
+      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+      setTimeout(() => {
+        router.push("/contact");
+      }, 1500);
     },
     validateOnChange: true,
     validateOnBlur: true,
@@ -352,6 +371,7 @@ export default function AppointmentPage() {
                     onChange={(date) => {
                       setTimeOfAppointment(date);
                       setCustomAvailability(formatDateToYYYYMMDD(date));
+                      setAvailabilityOption('input-availability');
                     }}
                     dateFormat="yyyy-MM-dd"
                     showYearDropdown
