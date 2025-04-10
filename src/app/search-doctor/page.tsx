@@ -56,7 +56,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "../lib/utils";
 // import { GOOGLE_MAP_API_KEY } from "@/constants/global";
 const validationSchema = Yup.object().shape({
-  objective: Yup.string().required("Required"),
+ // objective: Yup.string().required("Required"),
 });
 const availabilityOptions = [{ value: "yes", label: "Available anytime" }];
 const distanceOptions = ["< 2 miles", "< 5 miles", "< 10 miles", "< 20 miles"];
@@ -424,70 +424,69 @@ export default function SearchDoctorPage() {
     },
     validationSchema,
     onSubmit: async (values) => {
+      setIsLoading(true)
       track("Searchpage_Continue_Btn_Clicked");
       // console.log("here");
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      // const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      // const formData = JSON.parse(sessionStorage.getItem("formData"));
       // console.log("Objective value:", values.objective);
 
-      if (!values.objective || !values.objective.trim()) {
-        toast.error("Please fill up all the required information");
-        return;
-      }
+      // if (!values.objective || !values.objective.trim()) {
+      //   toast.error("Please fill up all the required information");
+      //   return;
+      // }
 
       //console.log("Form values:", values);
 
-      const updatedValues = {
-        groupId: values.groupId,
-        subscriberId: values.subscriberId,
-        objective: values.objective,
-        insurer: values.insurer, // formData?.insurance_carrier
-        selectedOption: selectedInsurance === true ? "no" : "yes",
-        availability: customAvailability
-          ? customAvailability
-          : availabilityOptions[0].label,
-        specialty: savedSpecialty,
-        timeOfAppointment,
-        insuranceType,
-        maxWait: timeOfAppointment,
-        isNewPatient: isNewPatient ? "yes" : "no",
-        request_id: formData?.request_id,
-      };
-      // console.log(updatedValues)
-      logPatientData(updatedValues);
+      // const updatedValues = {
+      //   groupId: values.groupId,
+      //   subscriberId: values.subscriberId,
+      //   objective: values.objective,
+      //   insurer: values.insurer, // formData?.insurance_carrier
+      //   selectedOption: selectedInsurance === true ? "no" : "yes",
+      //   availability: customAvailability
+      //     ? customAvailability
+      //     : availabilityOptions[0].label,
+      //   specialty: savedSpecialty,
+      //   timeOfAppointment,
+      //   insuranceType,
+      //   maxWait: timeOfAppointment,
+      //   isNewPatient: isNewPatient ? "yes" : "no",
+      //   request_id: formData?.request_id,
+      // };
+      // // console.log(updatedValues)
+      // logPatientData(updatedValues);
 
-      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+      //sessionStorage.setItem("formData", JSON.stringify(updatedValues));
 
-      // console.log("Stored formData in sessionStorage:", updatedValues);
-
-      // Redirect to search page
       setTimeout(() => {
-        router.push("/contact");
-      }, 500);
+        router.push("/appointment");
+      }, 1500);
     },
   });
 
   // Add this function to handle manual submission with toast error
   const handleFormSubmit = () => {
     // Touch all fields to trigger validation
-    formik.validateForm().then((errors) => {
-      // If there are validation errors
-      if (Object.keys(errors).length > 0) {
-        // Set all fields as touched to show validation errors
-        const touchedFields = {};
-        Object.keys(formik.values).forEach((key) => {
-          touchedFields[key] = true;
-        });
-        formik.setTouched(touchedFields);
+    // formik.validateForm().then((errors) => {
+    //   // If there are validation errors
+    //   if (Object.keys(errors).length > 0) {
+    //     // Set all fields as touched to show validation errors
+    //     const touchedFields = {};
+    //     Object.keys(formik.values).forEach((key) => {
+    //       touchedFields[key] = true;
+    //     });
+    //     formik.setTouched(touchedFields);
 
-        // Show toast error
-        toast.error("Please fill up all the required information");
-        return;
-      }
+    //     // Show toast error
+    //     toast.error("Please fill up all the required information");
+    //     return;
+    //   }
 
-      // If no errors, submit the form
-      formik.handleSubmit();
-    });
+    //   // If no errors, submit the form
+    //   formik.handleSubmit();
+    // });
+    formik.handleSubmit();
   };
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A", // Replace with your API key
@@ -581,7 +580,7 @@ export default function SearchDoctorPage() {
           </Link>
         </div>
       ) : (
-        <form className="">
+        <form className="" onSubmit={formik.handleSubmit}>
           <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3 border border-t-0 border-b-1 text-sm">
             <div className="flex gap-2 items-center">
               <Image
@@ -621,11 +620,14 @@ export default function SearchDoctorPage() {
                   Docsure AI will call the selected doctors in this sequence,
                   seek an appointment for you, and enquire about insurance
                 </p>
-                <Link href="/contact">
-                  <Button className="bg-[#E5573F] text-white rounded-md">
-                    Continue
-                  </Button>
-                </Link>
+                <Button 
+                  className="bg-[#E5573F] text-white rounded-md"
+                  type="button"
+                  onClick={handleFormSubmit}
+                  disabled={isLoading}
+                  >
+                  {isLoading ? "Submitting..." : "Continue"}
+                </Button>
               </div>
               <div className="flex md:hidden px-2 py-2 text-sm items-center border">
                 <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
