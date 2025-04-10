@@ -157,15 +157,6 @@ export default function SearchDoctorPage() {
     const data = {
       request_id: updatedValues.request_id,
       preferred_location: savedAddress,
-      new_patient: updatedValues.isNewPatient,
-      time_of_appointment: updatedValues.timeOfAppointment,
-      patient_availability: updatedValues.maxWait,
-      medical_concerns: updatedValues.objective,
-      member_id: updatedValues?.subscriberId ?? "",
-      // insurer: updatedValues.insurer ?? "none",
-      insurance_type: updatedValues?.insuranceType ?? "",
-      group_number: updatedValues.groupId ?? "",
-      has_insurance: !!updatedValues.insurer,
     };
     console.log(data);
     try {
@@ -426,10 +417,8 @@ export default function SearchDoctorPage() {
     onSubmit: async (values) => {
       setIsLoading(true)
       track("Searchpage_Continue_Btn_Clicked");
-      // console.log("here");
-      // const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      // const formData = JSON.parse(sessionStorage.getItem("formData"));
-      // console.log("Objective value:", values.objective);
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      const formData = JSON.parse(sessionStorage.getItem("formData"));
 
       // if (!values.objective || !values.objective.trim()) {
       //   toast.error("Please fill up all the required information");
@@ -438,26 +427,14 @@ export default function SearchDoctorPage() {
 
       //console.log("Form values:", values);
 
-      // const updatedValues = {
-      //   groupId: values.groupId,
-      //   subscriberId: values.subscriberId,
-      //   objective: values.objective,
-      //   insurer: values.insurer, // formData?.insurance_carrier
-      //   selectedOption: selectedInsurance === true ? "no" : "yes",
-      //   availability: customAvailability
-      //     ? customAvailability
-      //     : availabilityOptions[0].label,
-      //   specialty: savedSpecialty,
-      //   timeOfAppointment,
-      //   insuranceType,
-      //   maxWait: timeOfAppointment,
-      //   isNewPatient: isNewPatient ? "yes" : "no",
-      //   request_id: formData?.request_id,
-      // };
+      const updatedValues = {
+        specialty: savedSpecialty,
+        request_id: formData?.request_id,
+      };
       // // console.log(updatedValues)
-      // logPatientData(updatedValues);
+      logPatientData(updatedValues);
 
-      //sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
 
       setTimeout(() => {
         router.push("/appointment");
