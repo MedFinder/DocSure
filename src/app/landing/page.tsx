@@ -40,24 +40,34 @@ import { log } from "console";
 import "./components/style.css";
 import AboutContentRight from "./components/AboutContentRight";
 import AboutContentLeft from "./components/AboutContentLeft";
+import { Footer } from "react-day-picker";
+import FooterSection from "./components/FooterSection";
 
 const doctorTypes = [
-  { value: "Dermatologist", label: "Dermatologist" },
+  { value: "Primary care doctor", label: "Primary care doctor" },
   {
-    value: "Cardiologist / Heart Doctor",
-    label: "Cardiologist / Heart Doctor",
+    value: "Dermatologist",
+    label: "Dermatologist",
   },
   {
-    value: "Neurologist / Headache Specialist",
-    label: "Neurologist / Headache Specialist",
+    value: "OB-GYN (Obstetrician-Gynecologist)",
+    label: "OB-GYN (Obstetrician-Gynecologist)",
   },
-  { value: "Pediatrician", label: "Pediatrician" },
   { value: "Dentist", label: "Dentist" },
   { value: "Psychiatrist", label: "Psychiatrist" },
-  { value: "Ophthalmologist", label: "Ophthalmologist" },
+  { value: "Psychologist", label: "Psychologist" },
+  { value: "Optometrist", label: "Optometrist" },
+  {
+    value: "Podiatrist / Foot and Ankle Specialist",
+    label: "Podiatrist / Foot and Ankle Specialist",
+  },
   {
     value: "Orthopedic Surgeon / Orthopedist",
     label: "Orthopedic Surgeon / Orthopedist",
+  },
+  {
+    value: "Chiropractor",
+    label: "Chiropractor",
   },
 ];
 const moreDoctorTypes = [
@@ -231,8 +241,14 @@ export default function LandingPage() {
   }, []);
   const getPopularDrs = async (lat, lng) => {
     try {
-      const response = await axios.get(
-        `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=Primary Care Physician`
+      const data = {
+        location: `${lat},${lng}`,
+        radius: 20000,  
+        keyword: 'Primary Care Physician',
+      }
+      const response = await axios.post(
+        "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+        data
       );
       return response.data;
     } catch (error) {
@@ -369,9 +385,14 @@ export default function LandingPage() {
           formik.values.specialty === "Prescription / Refill"
             ? "Primary Care Physician"
             : formik.values.specialty;
-
-        const response = await axios.get(
-          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${speciality_value}`
+        const data = {
+          location: `${lat},${lng}`,
+          radius: 20000,  
+          keyword: speciality_value,
+        }
+        const response = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+          data
         );
 
         // Handle request_id when the promise resolves
@@ -384,7 +405,7 @@ export default function LandingPage() {
 
         sessionStorage.setItem("statusData", JSON.stringify(response.data));
         sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
-        router.push("/search");
+        router.push("/search-doctor");
       } catch (error) {
         console.error("Error submitting form:", error);
       }
@@ -427,7 +448,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FCF8F1]  ">
+    <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">
       {/* Navbar */}
       <nav className="fixed top-0 w-full bg-[#FCF8F1] shadow-sm p-4 flex justify-between items-center z-50  text-sm nav-header">
         <div className="flex justify-between items-center gap-6 ">
@@ -629,7 +650,7 @@ export default function LandingPage() {
                     <div className="flex items-center justify-center px-3">
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1 border-b border-gray-400 md:border-none">
+                    <div className="flex-1  border-gray-400 md:border-none">
                       <Autocomplete
                         id="specialty"
                         name="specialty"
@@ -651,7 +672,7 @@ export default function LandingPage() {
                     <div className="flex items-center justify-center px-3">
                       <BookText className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1 border-b border-gray-400 md:border-none">
+                    <div className="flex-1  border-gray-400 md:border-none">
                       <Autocomplete
                         id="insurer"
                         name="insurer"
@@ -770,7 +791,7 @@ export default function LandingPage() {
           />
         </section>
 
-        <section id="about" className=" bg-white">
+        <section id="about" className=" bg-white my-section">
           <div className="about_wrapper mx-auto py-[7%] px-[10px]">
             <AboutContentLeft
               scrollToSection={scrollToSection}
@@ -795,7 +816,7 @@ export default function LandingPage() {
         {/* md:px-44 */}
         <section
           id="how_it_works"
-          className="flex bg-[#0074BA] border-b md:py-16 py-8 px-0 text-white"
+          className="flex bg-[#0074BA] border-b md:py-16 py-8 px-0 text-white my-section"
         >
           <div className="inner flex flex-col items-center justify-center gap-10 w-[85%] mx-auto">
             <h2 className="text-3xl ">How it works</h2>
@@ -867,7 +888,7 @@ export default function LandingPage() {
           className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2] border-b md:pt-16 md:pb-16 py-8 pb-16 px-0"
         >
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
-            Top-rated doctors in your area
+            Top-rated doctors near me
           </h2>
 
           <DoctorCardCarousel
@@ -1006,30 +1027,7 @@ export default function LandingPage() {
         </section>
 
         {/* Footer Section */}
-        <section className="bg-white py-8 flex flex-col  justify-center items-center">
-          <Image
-            src="/Vector (9).svg"
-            alt="New Logo"
-            width={40}
-            height={40}
-            className=""
-          />
-          <p>© 2025 Docure AI Inc.</p>
-          <div className="flex gap-2">
-            <Link href="/terms" className="hover:underline">
-              Terms
-            </Link>
-            <Link href="/privacy-policy" className="hover:underline">
-              Privacy
-            </Link>
-            <Link href="/" className="hover:underline">
-              Home
-            </Link>
-            <Link href="/contact-us" className="hover:underline">
-              Contact Us
-            </Link>
-          </div>
-        </section>
+        <FooterSection />
       </main>
     </div>
   );

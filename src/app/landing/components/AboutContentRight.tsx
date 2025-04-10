@@ -124,7 +124,7 @@ const AboutContentLeft: React.FC<ContentRightProps> = ({
           </div>
         </div>
 
-        <div className="about_content_right-42 ml-8">
+        <div className="about_content_right-42 md:ml-8">
           <div className="about_content_wrap">
             <p className="text-3xl mb-4">{title}</p>
 

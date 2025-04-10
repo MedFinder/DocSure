@@ -1,0 +1,79 @@
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* .task-table th,
+.task-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+} */
+
+.task-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  text-align: start;
+}
+
+.task-table td {
+  text-align: start;
+  padding: 10px 20px;
+  /* background-color: #f2f6f9; */
+}
+
+.task-table td:first-child {
+  font-weight: bold;
+  /* width: 50px; */
+}
+
+/* .task-table tbody tr:hover {
+  background-color: #00ba85;
+} */
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .task-table {
+    display: block;
+    border: none;
+  }
+
+  .task-table thead {
+    display: none; /* Hide table headers */
+  }
+
+  .task-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .task-table tr {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    /* border-radius: 8px; */
+    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .task-table td {
+    display: flex;
+    /* justify-content: space-between; */
+    padding: 2px 2px;
+    border-bottom: none;
+  }
+
+  .task-table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    flex: 1;
+  }
+
+  .task-table td:first-child {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+}

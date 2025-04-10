@@ -10,7 +10,7 @@ import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import Column from "../search/features/column";
+import Column from "../../components/older-pages/search/features/column";
 import { toast } from "sonner";
 import axios from "axios";
 import { DoctorCard } from "./DoctorCard";
@@ -315,20 +315,20 @@ export default function Transcript() {
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
 
   const handleConfirmSequence = useCallback(async () => {
-      // initiate call
-      try {
-        setIsConfirmed(true); // Disable button and dragging
-        const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
-        await initiateCall(
-          firstDoctorPhoneNumber,
-          doctors[activeCallIndex]?.name,
-          requestIdRef?.current,
-        );
-        return;
-      } catch (error) {
-        console.error("Error initiating call:", error);
-        setIsConfirmed(false); // Re-enable button and dragging if there's an error
-      }
+    // initiate call
+    try {
+      setIsConfirmed(true); // Disable button and dragging
+      const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
+      await initiateCall(
+        firstDoctorPhoneNumber,
+        doctors[activeCallIndex]?.name,
+        requestIdRef?.current
+      );
+      return;
+    } catch (error) {
+      console.error("Error initiating call:", error);
+      setIsConfirmed(false); // Re-enable button and dragging if there's an error
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCallIndex, doctors, phoneNumbers]);
   //console.log(phoneNumbers.length);
@@ -387,7 +387,12 @@ export default function Transcript() {
       nameOfOrg: string,
       request_id?: string
     ) => {
-      console.log("new call initiated for", doctorPhoneNumber, nameOfOrg, request_id);
+      console.log(
+        "new call initiated for",
+        doctorPhoneNumber,
+        nameOfOrg,
+        request_id
+      );
       if (!formData) {
         console.error("No formData found in sessionStorage.");
         return;
@@ -429,7 +434,7 @@ export default function Transcript() {
       if (dob) context += `; Date of birth:${dob}`;
       if (address) context += `; Address of the patient:${address}`;
       if (maxWait)
-        context += `; Maximum wait time for the appointment:${maxWait}. If an appointment is not available within ${maxWait} , then do not take an appointment `;
+        context += `; Maximum wait time for the appointment:${maxWait} days. If an appointment is not available within ${maxWait} days , then do not take an appointment `;
       if (availability)
         context += `; Availability of the patient:${availability}`;
       if (isnewPatient) context += `; Is New Patient:${isnewPatient}`;
@@ -762,9 +767,7 @@ export default function Transcript() {
       const savedAddress = sessionStorage.getItem("selectedAddress");
       const specialty = formData?.specialty;
 
-      router.push(
-        "/contact"
-      );
+      router.push("/appointment");
     }
   };
 
