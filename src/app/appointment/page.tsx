@@ -40,6 +40,15 @@ const validationSchema = Yup.object().shape({
     then: () => Yup.string().required("Insurance carrier is required"),
     otherwise: () => Yup.string().notRequired(),
   }),
+  timeOfAppointment: Yup.date().when('availabilityOption', {
+    is: 'input-availability',
+    then: () => 
+      Yup.date()
+        .required("Please select an appointment date")
+        .min(new Date(), "Appointment date cannot be in the past"),
+    otherwise: () => Yup.date().notRequired(),
+  }),
+  availabilityOption: Yup.string().required("Please select an availability option"),
 });
 
 export default function AppointmentPage() {
@@ -100,7 +109,9 @@ export default function AppointmentPage() {
           insuranceType: parsedFormData?.insuranceType || "ppo",
           availability: parsedFormData?.availability || "anytime",
           subscriberId: parsedFormData?.subscriberId || "",
-          maxWait: parsedFormData?.maxWait || 3
+          maxWait: parsedFormData?.maxWait || 3,
+          availabilityOption: parsedFormData?.availabilityOption || "anytime",
+          timeOfAppointment: parsedFormData?.timeOfAppointment ? new Date(parsedFormData.timeOfAppointment) : new Date(),
         });
         setPills(parsedFormData?.objective ? parsedFormData.objective.split(", ") : []);
         setSelectedInsurance(parsedFormData?.selectedOption === "no");
@@ -177,17 +188,13 @@ export default function AppointmentPage() {
       insuranceType: "ppo",
       selectedOption: "yes",
       isNewPatient: "yes",
+      availabilityOption: "anytime",
+      timeOfAppointment: new Date(),
     },
     validationSchema,
     onSubmit: async (values) => {
       // console.log(values)
-      // insuranceType:"ppo"
-      // subscriberId" '111222'
-      // insurer:"1st Agency"
-      // objective: "jjj"
-      // selectedOption:"yes"
-      // availability:"anytime"
-      // track("ContactPage_Btn_Clicked");
+      track("AppointmentDetail_Btn_Clicked");
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
       const formData = JSON.parse(sessionStorage.getItem("formData"));
 
@@ -227,9 +234,21 @@ export default function AppointmentPage() {
   // Handle availability option change
   const handleAvailabilityChange = (value) => {
     setCustomAvailability('');
-    setTimeOfAppointment('');
+    setTimeOfAppointment(new Date());
     setAvailabilityOption(value);
+    formik.setFieldValue('availabilityOption', value);
     formik.setFieldValue('availability', value);
+    
+    // When changing away from input-availability, clear any validation errors
+    if (value !== 'input-availability') {
+      const newErrors = {...formik.errors};
+      delete newErrors.timeOfAppointment;
+      formik.setErrors(newErrors);
+    } else {
+      // When changing to input-availability, validate the current date
+      formik.setFieldTouched('timeOfAppointment', true);
+      formik.validateField('timeOfAppointment');
+    }
   };
 
   // Handle insurance checkbox change
@@ -371,7 +390,8 @@ export default function AppointmentPage() {
                     onChange={(date) => {
                       setTimeOfAppointment(date);
                       setCustomAvailability(formatDateToYYYYMMDD(date));
-                      setAvailabilityOption('input-availability');
+                      formik.setFieldValue('timeOfAppointment', date);
+                      formik.setFieldTouched('timeOfAppointment', true);
                     }}
                     dateFormat="yyyy-MM-dd"
                     showYearDropdown
@@ -383,9 +403,15 @@ export default function AppointmentPage() {
                     autoComplete="off"
                     aria-autocomplete="none"
                     name="appointmentDate"
-                    className="w-full p-2 border rounded-none"
+                    className={cn(
+                      "w-full p-2 border rounded-none",
+                      formik.touched.timeOfAppointment && formik.errors.timeOfAppointment ? "border-red-500" : ""
+                    )}
                     wrapperClassName="w-full"
                   />
+                  {formik.touched.timeOfAppointment && formik.errors.timeOfAppointment && (
+                    <div className="text-red-500 text-sm">{formik.errors.timeOfAppointment}</div>
+                  )}
                 </div>
               )}
 
