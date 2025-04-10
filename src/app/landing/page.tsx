@@ -888,7 +888,7 @@ export default function LandingPage() {
           className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2] border-b md:pt-16 md:pb-16 py-8 pb-16 px-0"
         >
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
-            Top-rated doctors in your area
+            Top-rated doctors near me
           </h2>
 
           <DoctorCardCarousel

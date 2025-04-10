@@ -4,11 +4,11 @@ import Navbar from "@/components/general-components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
+import { useJsApiLoader } from "@react-google-maps/api";
 import axios from "axios";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import DatePicker from "react-datepicker";
@@ -24,14 +24,7 @@ import { Autocomplete } from "../../../components/ui/autocomplete";
 import { insuranceCarrierOptions } from "@/constants/store-constants";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
-import Link from "next/link";
 import FooterSection from "../landing/components/FooterSection";
-// Custom styles for DatePicker
-const customDatePickerStyles = `
-  .date-picker-error .react-datepicker__input-container input {
-    border-color: #ef4444 !important; /* red-500 */
-  }
-`;
 
 const validationSchema = Yup.object().shape({
   objective: Yup.string().required("Please add at least one topic to discuss"),
@@ -57,42 +50,19 @@ export default function AppointmentPage() {
   const [formData, setFormData] = useState({});
   const [searchData, setSearchData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [gender, setgender] = useState("");
-  const [genderTouched, setGenderTouched] = useState(false);
   const router = useRouter();
-  const addressRefs = useRef([]);
 
-  const wsRef = useRef<WebSocket | null>(null);
-  const [doctors, setDoctors] = useState([]);
-  const [phoneNumbers, setPhoneNumbers] = useState<(string | null)[]>([]);
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [showTranscript, setShowTranscript] = useState(false);
-  const [isAppointmentBooked, setIsAppointmentBooked] = useState(false);
-  const [transcriptArray, setTranscriptArray] = useState([]);
-  const [callStatus, setCallStatus] = useState({
-    isInitiated: false,
-    ssid: "",
-    email: "",
-  });
-  const [isCallEnded, setIsCallEnded] = useState(false);
-  const [extractedData, setExtractedData] = useState<TaskType[]>([]);
-  const [activeCallIndex, setActiveCallIndex] = useState(0);
-  const activeCallIndexRef = useRef(activeCallIndex);
-  const [context, setcontext] = useState("");
   const [customAvailability, setCustomAvailability] = useState("");
   const [availabilityOption, setAvailabilityOption] = useState("anytime");
   const [timeOfAppointment, setTimeOfAppointment] = useState(new Date());
   const [selectedInsurance, setSelectedInsurance] = useState(false);
   const [isNewPatient, setIsNewPatient] = useState(false);
 
-  useEffect(() => {
-    activeCallIndexRef.current = activeCallIndex;
-  }, [activeCallIndex]);
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
   });
+  
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedFormData = sessionStorage.getItem("formData");
@@ -136,6 +106,7 @@ export default function AppointmentPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
   // Utility function to format date without timezone issues
   const formatDateToYYYYMMDD = (date) => {
     const year = date.getFullYear();
@@ -144,15 +115,9 @@ export default function AppointmentPage() {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
+  
   const logPatientData = async (updatedValues) => {
     const data = {
-      // request_id: formData.request_id,
-      // patient_name: formData.patientName,
-      // patient_dob: formData.dob,
-      // patient_email: formData.email,
-      // patient_number: formData.phoneNumber,
-      // patient_zipcode: "",
-
       request_id: updatedValues.request_id,
       new_patient: updatedValues.isNewPatient,
       time_of_appointment: updatedValues.timeOfAppointment,
@@ -164,16 +129,13 @@ export default function AppointmentPage() {
       group_number: updatedValues.groupId ?? "",
       has_insurance: !!updatedValues.insurer,
     };
-    // console.log(data)
     try {
       const resp = await axios.put(
         `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata/${formData.request_id}`,
         data
       );
-      // console.log(resp)
       return;
     } catch (error) {
-      // console.error('Error logging call details:', error);
       return null;
     }
   };
@@ -193,7 +155,6 @@ export default function AppointmentPage() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      // console.log(values)
       track("AppointmentDetail_Btn_Clicked");
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
       const formData = JSON.parse(sessionStorage.getItem("formData"));
@@ -290,6 +251,18 @@ export default function AppointmentPage() {
       setInputValue("");
     }
   };
+
+  // Add a blur handler to capture input when user leaves the field
+  const handleInputBlur = () => {
+    if (inputValue.trim() !== "") {
+      if (!pills.includes(inputValue.trim())) {
+        setPills([...pills, inputValue.trim()]);
+        formik.setFieldValue('objective', [...pills, inputValue.trim()].join(", "));
+      }
+      setInputValue("");
+    }
+  };
+  
   const removePill = (value: string) => {
     const newPills = pills.filter((pill) => pill !== value);
     setPills(newPills);
@@ -301,16 +274,12 @@ export default function AppointmentPage() {
 
     // Touch all fields to show errors
     Object.keys(formik.values).forEach((field) => {
-      // console.log('touhced filed', field)
       formik.setFieldTouched(field, true);
     });
 
-    // Set gender as touched
-    setGenderTouched(true);
-
     // Validate all fields
     formik.validateForm().then((errors) => {
-      if (Object.keys(errors).length === 0 ) {
+      if (Object.keys(errors).length === 0) {
         formik.handleSubmit(e);
       } else {
         console.log(errors);
@@ -339,6 +308,7 @@ export default function AppointmentPage() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
+              onBlur={handleInputBlur}
               className={cn("rounded-none", formik.touched.objective && formik.errors.objective ? "border-red-500" : "")}
             />
             {formik.touched.objective && formik.errors.objective && (
