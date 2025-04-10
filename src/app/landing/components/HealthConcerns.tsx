@@ -30,12 +30,6 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
                   className="hover:underline hover:cursor-pointer"
                   onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
                 >
-                  Nexplanon removal
-                </li>
-                <li
-                  className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("OB-GYN (Obstetrician-Gynecologist)")}
-                >
                   OB-GYN emergency
                 </li>
                 <li
@@ -67,12 +61,6 @@ export default function HealthConcerns({ onClickAction }: HealthConcernsProps) {
                   onClick={() => onClickAction("Dermatologist")}
                 >
                   Hair loss
-                </li>
-                <li
-                  className="hover:underline hover:cursor-pointer"
-                  onClick={() => onClickAction("Endocrinologist / Diabetes Specialist")}
-                >
-                  Ozempic / Wegovy Consultation
                 </li>
               </ul>
             </div>

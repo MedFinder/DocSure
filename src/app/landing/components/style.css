@@ -54,7 +54,7 @@ body {
   border-bottom-width: 0px;
 }
 .about_wrapper {
-  width: 820px;
+  width: 100%; /* Default for all screen sizes */
 }
 
 @media only screen and (min-width: 768px) {
@@ -79,6 +79,9 @@ body {
 @media only screen and (min-width: 992px) {
   .nav-header .mobile {
     display: none;
+  }
+  .about_wrapper {
+    width: 820px;
   }
 }
 
