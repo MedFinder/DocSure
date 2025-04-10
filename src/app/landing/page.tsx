@@ -804,7 +804,7 @@ export default function LandingPage() {
               care of your scheduling needs.
             </p>
 
-            <div className="flex flex-col gap-12 md:pt-4 pt-0 md:grid grid-cols-3 gap-8 lg:gap-12 md:w-[100%]">
+            <div className="flex flex-col gap-12 md:pt-4 pt-0 md:grid grid-cols-3 gap-8 lg:gap-12 max-md:max-w-[100%]">
               <div className="flex flex-col justify-between bg-[#0C679F] h-[245px] items-center rounded-xl px-8 pb-6  md:w-358 md:px-6 md:h-[auto] it_works_card">
                 <div className="w-233">
                   <Image

@@ -132,7 +132,7 @@ const TestimonialCarousel = () => {
     <div className="w-full overflow-hidden py-6">
       <div
         ref={scrollContainerRef}
-        className="flex gap-4 overflow-x-scroll scrollbar-hide scroll-smooth"
+        className="flex gap-4 overflow-x-scroll scrollbar-hide scroll-smooth max-w[100%] mx-auto justify-center"
       >
         {testimony.map((testimonial, index) => (
           <div key={index} className="relative flex-shrink-0 w-[320px] h-[450px]">
