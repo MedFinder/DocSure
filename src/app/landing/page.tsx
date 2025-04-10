@@ -241,8 +241,14 @@ export default function LandingPage() {
   }, []);
   const getPopularDrs = async (lat, lng) => {
     try {
-      const response = await axios.get(
-        `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=Primary Care Physician`
+      const data = {
+        location: `${lat},${lng}`,
+        radius: 20000,  
+        keyword: 'Primary Care Physician',
+      }
+      const response = await axios.post(
+        "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+        data
       );
       return response.data;
     } catch (error) {
@@ -379,9 +385,14 @@ export default function LandingPage() {
           formik.values.specialty === "Prescription / Refill"
             ? "Primary Care Physician"
             : formik.values.specialty;
-
-        const response = await axios.get(
-          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${speciality_value}`
+        const data = {
+          location: `${lat},${lng}`,
+          radius: 20000,  
+          keyword: speciality_value,
+        }
+        const response = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+          data
         );
 
         // Handle request_id when the promise resolves
@@ -394,7 +405,7 @@ export default function LandingPage() {
 
         sessionStorage.setItem("statusData", JSON.stringify(response.data));
         sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
-        router.push("/search");
+        router.push("/search-doctor");
       } catch (error) {
         console.error("Error submitting form:", error);
       }
@@ -877,7 +888,7 @@ export default function LandingPage() {
           className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2] border-b md:pt-16 md:pb-16 py-8 pb-16 px-0"
         >
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
-            Top-rated doctors in your area
+            Top-rated doctors near me
           </h2>
 
           <DoctorCardCarousel

@@ -1,6 +1,6 @@
 //@ts-nocheck
 "use client";
-import { Menu, X, Search, MapPin } from "lucide-react";
+import { Menu, X, Search, MapPin, BookText } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image"; // Import Image component
 import { usePathname } from "next/navigation"; // Detect the current page
@@ -21,14 +21,17 @@ import {
 import { toast } from "sonner";
 import axios from "axios";
 import { ComboboxNav } from "../ui/combo-box-nav";
-import { medicalSpecialtiesOptions } from "@/constants/store-constants";
+import {
+  insuranceCarrierOptions,
+  medicalSpecialtiesOptions,
+} from "@/constants/store-constants";
 import { Autocomplete } from "../../../components/ui/autocomplete";
 import { track } from "@vercel/analytics";
 
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
-export default function Navbar() {
+export default function NavbarSection() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname(); // Get the current route
 
@@ -102,15 +105,14 @@ export default function Navbar() {
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
         console.log();
-        const speciality_value = formik.values.specialty === 'Prescription / Refill' ? 'Primary Care Physician' : formik.values.specialty;
         const data = {
           location: `${lat},${lng}`,
           radius: 20000,  
-          keyword: speciality_value,
+          keyword: formik.values.specialty,
         }
         const response = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
-          data
+          data,
         );
 
         sessionStorage.setItem("formDataNav", JSON.stringify(updatedValues));
@@ -162,7 +164,6 @@ export default function Navbar() {
           "selectedLocation",
           JSON.stringify({ lat, lng })
         );
-        // sessionStorage.setItem("selectedAddress", formattedAddress); // Store in session
       }
     }
   };
@@ -173,57 +174,39 @@ export default function Navbar() {
 
   return (
     <div className="fixed top-0 left-0 w-full  border-gray-200 bg-white z-50">
-      <div className="flex justify-between py-5 md:px-8 px-5 relative md:border-none   border border-b-2 items-center">
-        {/* {pathname === "/" && ( */}
-        {pathname == "/" && (
-          <div
-            onClick={() => router.push("/")}
-            className="md:hidden flex items-center gap-2 cursor-pointer"
-          >
-            <Image
-              src="/Logo.png"
-              alt="Docsure Logo"
-              width={30}
-              height={30}
-              className="w-auto h-auto"
-            />
-
-            <span className="text-[#FF6723] font-semibold text-xl whitespace-nowrap">
-              Docsure
-            </span>
-          </div>
+      <div className="flex justify-between py-3 md:py-5 md:px-8 px-4 relative  border border-b-1  items-center gap-2 ">
+        {pathname !== "/" && (
+          <button onClick={toggleSidebar} className="md:hidden mb-6">
+            <Menu className="w-8 h-6 text-gray-700" />
+          </button>
         )}
-        <div className=" flex gap-4 w-full">
+        <div className="flex gap-4 md:w-[71%] w-full">
           <div
             onClick={() => router.push("/")}
             className="hidden md:flex items-center gap-2 cursor-pointer"
           >
             <Image
-              src="/Logo.png"
-              alt="Docsure Logo"
-              width={30}
-              height={30}
-              className="w-auto h-auto"
+              src="/web-new-logo.svg"
+              alt="New Logo"
+              width={0}
+              height={0}
+              className="w-28 h-auto hidden md:flex"
             />
-
-            <span className="text-[#FF6723] font-semibold text-xl whitespace-nowrap">
-              Docsure
-            </span>
           </div>
           {pathname !== "/" && (
             <form
               onSubmit={formik.handleSubmit}
-              className="flex flex-col md:flex-row w-full max-w-[50rem] border border-gray-600 rounded-none shadow-sm"
+              className="flex flex-col md:flex-row w-full max-w-[52rem]"
             >
-              <div className="flex flex-col md:flex-row w-full relative">
+              <div className="flex flex-col md:flex-row w-full relative rounded-md border border-[#333333] ">
                 {/* Input Fields - Stack on mobile */}
                 <div className="flex flex-col md:flex-row flex-grow w-full">
                   {/* Specialty Section */}
-                  <div className="flex items-center flex-1 border-b md:border-b-0 border-gray-300">
-                    <div className="flex items-center justify-center px-3">
+                  <div className="flex items-center w-full sm:w-auto sm:flex-1">
+                    <div className="flex items-center justify-center px-3 md:hidden">
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1 min-w-[180px]">
+                    <div className="flex-1 border-b border-gray-400 md:border-none">
                       <Autocomplete
                         id="specialty"
                         name="specialty"
@@ -240,10 +223,30 @@ export default function Navbar() {
                       />
                     </div>
                   </div>
-
-                  {/* Location Section */}
-                  <div className="flex items-center flex-1">
+                  {/* Insurer section */}
+                  <div className="flex items-center w-full sm:w-auto sm:flex-1">
                     <div className="flex items-center justify-center px-3">
+                      <BookText className="w-5 h-5 text-gray-500" />
+                    </div>
+                    <div className="flex-1 border-b border-gray-400 md:border-none">
+                      <Autocomplete
+                        id="insurer"
+                        name="insurer"
+                        className="w-full"
+                        options={insuranceCarrierOptions}
+                        placeholder="Insurance carrier (optional)"
+                        value={formik.values.insurance_carrier}
+                        selected={formik.values.insurance_carrier}
+                        onChange={(value) => {
+                          formik.setFieldValue("insurance_carrier", value);
+                        }}
+                        clearable={false}
+                      />
+                    </div>
+                  </div>
+                  {/* Location Section */}
+                  <div className="flex items-center w-full sm:flex-1">
+                    <div className="flex items-center justify-center px-3 h-full">
                       <MapPin className="w-5 h-5 text-gray-500" />
                     </div>
                     <div className="flex-1">
@@ -268,31 +271,26 @@ export default function Navbar() {
                 </div>
 
                 {/* Search Button - Stays on the right, filling height on mobile */}
-                <Button className="bg-[#FF6723] text-white rounded-none px-6 md:h-12 h-full md:w-auto absolute md:static right-0 top-0 bottom-0">
-                  <Search className="text-white w-5 h-5" />
-                </Button>
+                <button
+                  className="text-white rounded-none px-2 md:px-5  md:h-12 h-full md:w-auto absolute md:static right-0 top-0 bottom-0 border-l-0 
+  bg-[#0074BA] md:bg-transparent hover:bg-[#0074BA] hover:text-white md:hover:bg-[#0074BA] md:hover:text-white"
+                >
+                  <Search className="w-5 h-5 font-semibold text-white md:text-gray-500 md:hover:text-white" />
+                </button>
               </div>
             </form>
           )}
         </div>
-        {pathname !== "/" && (
-          <button onClick={toggleSidebar} className="md:hidden ml-4">
-            <Menu className="w-8 h-8 text-gray-700" />
-          </button>
-        )}
-        {/* )} */}
 
-        {/* Left Section: Logo & Search (only on Search Page) */}
-
-        {/* Desktop Menu */}
-        <div className="hidden md:flex gap-8 items-center text-md font-normal">
-          <Link
-            onClick={() => track("Help_Btn_Clicked")}
-            href="/contact-us"
-            className="hover:text-gray-500"
-          >
+        <div className="hidden md:flex gap-6 items-center text-md font-normal text-sm">
+          <Link href="#">Browse</Link>
+          <Link href="/contact-us" onClick={() => track("Help_Btn_Clicked")}>
             Help
           </Link>
+          <Link href="#">Log In</Link>
+          <Button href="#" className="bg-[#0074BA] text-white rounded-md">
+            Sign Up
+          </Button>
         </div>
         {/* Mobile Hamburger */}
         {pathname == "/" && (
@@ -302,70 +300,57 @@ export default function Navbar() {
             </Link>
           </div>
         )}
-
-        {/* add it back here?? */}
-
-        {/* {pathname !== "/" && (
-
-          <button onClick={toggleSidebar} className="md:hidden">
-
-            <Menu className="w-8 h-8 text-gray-700" />
-
-          </button>
-
-        )} */}
       </div>
-
-      {/* Mobile Sidebar */}
 
       {/* Mobile Sidebar */}
       {isOpen && (
         <div className="fixed inset-0 md:hidden flex">
-          {/* Sidebar */}
           <div
             className={cn(
               "fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out",
               isOpen ? "translate-x-0" : "-translate-x-full"
             )}
-            onClick={(e) => e.stopPropagation()} // Prevent sidebar clicks from closing it
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center px-6 py-4 border-b">
               <Link href="/" className="flex items-center gap-2">
                 <Image
-                  src="/Logo.png"
+                  src="/web-new-logo.svg"
                   alt="Docsure Logo"
-                  width={24}
-                  height={24}
-                  className="w-auto h-auto"
+                  width={0}
+                  height={0}
+                  className="w-28 h-auto"
                 />
-                <span className="text-xl font-semibold text-[#FF6723]">
-                  DocSure
-                </span>
               </Link>
+
               <button onClick={closeSidebar}>
                 <X className="w-6 h-6 text-gray-700" />
               </button>
             </div>
 
             <nav className="flex flex-col gap-6 p-6 text-lg">
-              {/* Ensure links don't close the sidebar unless explicitly intended */}
               <Link
                 href="/contact-us"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent sidebar from closing
-                  router.push("/contact-us"); // Navigate to page
+                  e.stopPropagation();
+                  router.push("/contact-us");
                 }}
                 className="hover:text-gray-500"
               >
                 Help
               </Link>
+              <Link href="#">Browse</Link>
+
+              <Link href="#">Log In</Link>
+              <Button href="#" className="bg-[#0074BA] text-white rounded-md">
+                Sign Up
+              </Button>
             </nav>
           </div>
 
-          {/* Overlay (clicking outside will close sidebar) */}
           <div
             className="flex-1 bg-black bg-opacity-30"
-            onClick={closeSidebar} // Clicks outside sidebar close it
+            onClick={closeSidebar}
           />
         </div>
       )}
