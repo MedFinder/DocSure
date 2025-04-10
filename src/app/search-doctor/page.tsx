@@ -3,8 +3,6 @@
 import Navbar from "@/components/general-components/navbar";
 import Link from "next/link";
 import React, {
-  Suspense,
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -13,14 +11,10 @@ import React, {
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
   arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useRouter } from "next/navigation";
-import { Textarea } from "@/components/ui/textarea";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { toast } from "sonner";
 import { track } from "@vercel/analytics";
 import axios from "axios";
 
@@ -32,13 +26,8 @@ import Column from "./features/column";
 import {
   DistanceMatrixService,
   GoogleMap,
-  LoadScript,
   Marker,
-  OverlayView,
-  OverlayViewF,
-  Polyline,
   useJsApiLoader,
-  InfoWindow,
 } from "@react-google-maps/api";
 import { ChevronDown, LoaderCircle, Star } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -49,45 +38,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SelectContent } from "@radix-ui/react-select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "../lib/utils";
-// import { GOOGLE_MAP_API_KEY } from "@/constants/global";
+
 const validationSchema = Yup.object().shape({
- // objective: Yup.string().required("Required"),
+  // objective: Yup.string().required("Required"),
 });
-const availabilityOptions = [{ value: "yes", label: "Available anytime" }];
-const distanceOptions = ["< 2 miles", "< 5 miles", "< 10 miles", "< 20 miles"];
+
 export default function SearchDoctorPage() {
   const wsRef = useRef<WebSocket | null>(null);
   const router = useRouter();
   const [doctors, setDoctors] = useState([]);
   const [phoneNumbers, setPhoneNumbers] = useState<(string | null)[]>([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [showTranscript, setShowTranscript] = useState(false);
   const [isAppointmentBooked, setIsAppointmentBooked] = useState(false);
-  const [transcriptArray, setTranscriptArray] = useState([]);
-  const [selectedInsurance, setSelectedInsurance] = useState(true);
   const [transcriptSummary, setTranscriptSummary] = useState({place_id:'', summary: ''});
   const [transcriptLoading, setTranscriptLoading] = useState(false);
-  const [customAvailability, setCustomAvailability] = useState("");
-  const [timeOfAppointment, settimeOfAppointment] = useState("few days");
+  const [selectedInsurance, setSelectedInsurance] = useState(true);
   const [insuranceType, setinsuranceType] = useState("");
-  const [searchData, setSearchData] = useState(null);
   const [isNewPatient, setIsNewPatient] = useState(true);
-  const [selectedOption, setSelectedOption] = useState("yes");
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCountLoading, setIsCountLoading] = useState(false);
-  const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [selectedDistance, setSelectedDistance] = useState<string | null>(null);
   const [isDistanceOpen, setIsDistanceOpen] = useState(false);
   const [isRatingOpen, setIsRatingOpen] = useState(false);
-  const [hoveredDoctor, setHoveredDoctor] = useState(null);
   const [isMapView, setIsMapView] = useState(false);
   const [totalDoctorsCount, setTotalDoctorsCount] = useState('');
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
@@ -104,20 +79,18 @@ export default function SearchDoctorPage() {
     ssid: "",
     email: "",
   });
-  const [isCallEnded, setIsCallEnded] = useState(false);
-  const [extractedData, setExtractedData] = useState<TaskType[]>([]);
   const [activeCallIndex, setActiveCallIndex] = useState(0);
   const activeCallIndexRef = useRef(activeCallIndex);
-  const [context, setcontext] = useState("");
+  
   useEffect(() => {
     activeCallIndexRef.current = activeCallIndex;
   }, [activeCallIndex]);
 
   const getPhoneNumbers = () => {
     const numbers = doctors.map((doctor) => doctor.phone_number || null);
-    // console.log(numbers)
     setPhoneNumbers(numbers);
   };
+  
   const getTotalDoctorsList = async () => {
     setIsCountLoading(true);
     const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
@@ -128,16 +101,9 @@ export default function SearchDoctorPage() {
       const response = await axios.get(
         `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_count?medical_speciality=${savedSpecialty}&area=${cityName}`
       );
-      // console.log("Response:", response);
       setIsCountLoading(false);
       if (response.data && response.data.total_doctors) {
         setTotalDoctorsCount(response.data.total_doctors);
-        // if(response.data.total_doctors > 0) {
-        //   console.log("Total doctors count:", response.data.total_doctors);
-        // } else {
-        //   setIsConfirmed(false);
-        //   toast.info(response.data.total_doctors);
-        // }
         return response.data.total_doctors;
       } else {
         console.log("Invalid response format:", response.data);
@@ -164,15 +130,13 @@ export default function SearchDoctorPage() {
         `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata/${updatedValues.request_id}`,
         data
       );
-      // console.log(resp)
       return;
     } catch (error) {
-      // console.error('Error logging call details:', error);
       return null;
     }
   };
+  
   const logDrLists = async (data) => {
-   // console.log("Logging dr lists:", data);
     try {
       const resp = await axios.post(
         `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
@@ -193,7 +157,6 @@ export default function SearchDoctorPage() {
     try {
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty"); 
       const searchData = await JSON.parse(sessionStorage.getItem("searchData"));
-      // console.log(searchData)
       const lat = searchData?.lat || 0;
       const lng = searchData?.lng || 0;
       const response = await axios.post(
@@ -203,7 +166,7 @@ export default function SearchDoctorPage() {
           radius: 20000,  
           keyword: savedSpecialty,
           next_page_token: nextPageToken,
-          prev_page_data: doctors, // Pass the current doctors list as prev_page_data
+          prev_page_data: doctors,
         }
       );
 
@@ -220,14 +183,11 @@ export default function SearchDoctorPage() {
         setDoctors(prevDoctors => [...prevDoctors, ...newDoctors]);
         setNextPageToken(response.data.next_page_token || null);
         
-        // Store the updated data in session storage
         const lastSearchSource = sessionStorage.getItem("lastSearchSource");
         const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
         
-        // Get current data from storage
         const currentData = JSON.parse(sessionStorage.getItem(storageKey) || "{}");
         
-        // Merge new results with existing ones
         const updatedData = {
           ...currentData,
           results: [...(currentData.results || []), ...newDoctors],
@@ -273,12 +233,10 @@ export default function SearchDoctorPage() {
       console.log(formData);
       if (drsData) {
         const parsedDrsData = JSON.parse(drsData);
-        // console.log(parsedDrsData)
         const payload = {
           request_id: formData?.request_id,
           ...parsedDrsData,
         };
-        //  console.log(payload)
         await logDrLists(payload);
       }
       connectWebSocket();
@@ -361,7 +319,6 @@ export default function SearchDoctorPage() {
       console.error("Error loading location from sessionStorage:", error);
     }
   }, []);
-  // console.log("Selected location:", selectedLocation);
 
   const handleDelete = (id: string) => {
     setDoctors((prevDoctors) =>
@@ -379,7 +336,7 @@ export default function SearchDoctorPage() {
     const newSortedDoctors = arrayMove(doctors, oldIndex, newIndex).map(
       (doctor, index) => ({
         ...doctor,
-        name: `${doctor.name.replace(/^\d+\.\s*/, "")}`, // Renumber dynamically
+        name: `${doctor.name.replace(/^\d+\.\s*/, "")}`,
       })
     );
 
@@ -388,7 +345,6 @@ export default function SearchDoctorPage() {
 
   useEffect(() => {
     if (doctors.length) {
-      // console.log(doctors)
       getPhoneNumbers();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -431,7 +387,6 @@ export default function SearchDoctorPage() {
         specialty: savedSpecialty,
         request_id: formData?.request_id,
       };
-      // // console.log(updatedValues)
       logPatientData(updatedValues);
 
       sessionStorage.setItem("formData", JSON.stringify(updatedValues));
@@ -442,7 +397,6 @@ export default function SearchDoctorPage() {
     },
   });
 
-  // Add this function to handle manual submission with toast error
   const handleFormSubmit = () => {
     // Touch all fields to trigger validation
     // formik.validateForm().then((errors) => {
@@ -466,14 +420,9 @@ export default function SearchDoctorPage() {
     formik.handleSubmit();
   };
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A", // Replace with your API key
-    libraries: ["places"], // Add any required libraries
+    googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
+    libraries: ["places"],
   });
-
-  const containerStyle = {
-    width: "100%",
-    height: "400px",
-  };
 
   const center = {
     lat: 6.453056,
@@ -500,15 +449,11 @@ export default function SearchDoctorPage() {
       console.log("WebSocket connected successfully and opened.");
     };
     wsRef.current.onmessage = async (event) => {
-      const data = JSON.parse(event.data);
-      // console.log("WebSocket Message:", data);
       const message = JSON.parse(event.data);
-      // console.log(message)
       if (message.event === 'summary_stream' && message.data?.summary) {
         setTranscriptLoading(false);
         setTranscriptSummary(message.data);
       }
-
     };
 
     wsRef.current.onclose = () => {
@@ -516,13 +461,11 @@ export default function SearchDoctorPage() {
     };
 
     wsRef.current.onerror = (error) => {
-      //console.error("WebSocket Error:", error);
       console.log("Retrying WebSocket connection in 5 seconds...");
       setTimeout(connectWebSocket, 5000);
     };
   };
 
-  // Calculate DrCount based on the conditions
   const DrCount = useMemo(() => {
     const drVal = parseInt(totalDoctorsCount)
     if(drVal > 50) {
@@ -531,12 +474,9 @@ export default function SearchDoctorPage() {
     else if ((drVal < 50 || isNaN(drVal))&& !nextPageToken) {
       return doctors.length+"+";
     } 
-    // If there is a nextPageToken or totalDoctorsCount >= 50
     else {
       return "50+";
     }
-    // If totalDoctorsCount is less than 50 and there is no nextPageToken
-    
   }, [doctors.length, totalDoctorsCount, nextPageToken]);
 
   return (
