@@ -18,6 +18,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2 } from "lucide-react";
 import { trackConversion } from "@/lib/gtag";
 import { request } from "http";
+import NavbarSection from "@/components/general-components/navbar-section";
+import FooterSection from "../landing/components/FooterSection";
 
 // Custom styles for DatePicker
 const customDatePickerStyles = `
@@ -103,7 +105,7 @@ export default function Contact() {
         setSearchData(JSON.parse(storedSearchData));
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // Utility function to format date without timezone issues
   const formatDateToYYYYMMDD = (date) => {
@@ -129,7 +131,7 @@ export default function Contact() {
         data
       );
       // console.log(resp)
-      return
+      return;
     } catch (error) {
       // console.error('Error logging call details:', error);
       return null;
@@ -167,7 +169,7 @@ export default function Contact() {
         gender: values.gender,
         address: values.address || formData.address,
       };
-      logPatientData(updatedFormData)
+      logPatientData(updatedFormData);
       try {
         // Simulate a 1-second delay
         await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -197,7 +199,7 @@ export default function Contact() {
     Object.keys(formik.values).forEach((field) => {
       formik.setFieldTouched(field, true);
     });
-    
+
     // Set gender as touched
     setGenderTouched(true);
 
@@ -208,7 +210,7 @@ export default function Contact() {
       } else {
         // Force re-render to show all validation errors
         if (!gender) {
-          formik.setFieldError('gender', 'Please select a gender');
+          formik.setFieldError("gender", "Please select a gender");
         }
         formik.setErrors(errors);
       }
@@ -218,7 +220,7 @@ export default function Contact() {
   // Update gender handler to set formik value too
   const handleGenderChange = (value) => {
     setgender(value);
-    formik.setFieldValue('gender', value);
+    formik.setFieldValue("gender", value);
     if (!genderTouched) {
       setGenderTouched(true);
     }
@@ -245,12 +247,14 @@ export default function Contact() {
 
   return (
     <>
-      <Navbar />
+      <NavbarSection />
       {/* Add style tag for custom DatePicker styling */}
-      <style jsx global>{customDatePickerStyles}</style>
+      <style jsx global>
+        {customDatePickerStyles}
+      </style>
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col justify-center items-center px-6 sm:px-10 mt-32 md:mt-16"
+        className="flex flex-col justify-center items-center md:px-6 sm:px-10 mt-40 md:mt-16"
       >
         <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg ">
           <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
@@ -258,12 +262,14 @@ export default function Contact() {
           </p>
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label>Patient name</Label>
+              <Label className="text-[#333333BF] text-sm ">
+                Patient name
+              </Label>
               <Input
                 className={
                   formik.errors.patientName && formik.touched.patientName
                     ? "border-red-500 rounded-none"
-                    : "rounded-none"
+                    : "border border-[#333333] rounded-md"
                 }
                 name="patientName"
                 onChange={formik.handleChange}
@@ -277,8 +283,16 @@ export default function Contact() {
               )}
             </div>
             <div className="space-y-2">
-              <Label>Date of Birth </Label>
-              <div className={`w-full ${formik.errors.dob && formik.touched.dob ? "date-picker-error" : ""}`}>
+              <Label className="text-[#333333BF] text-sm space-y-2">
+                Date of Birth{" "}
+              </Label>
+              <div
+                className={`w-full ${
+                  formik.errors.dob && formik.touched.dob
+                    ? "date-picker-error"
+                    : ""
+                }`}
+              >
                 <DatePicker
                   selected={formik.values.dob}
                   onChange={handleDateChange}
@@ -293,7 +307,7 @@ export default function Contact() {
                   autoComplete="off"
                   aria-autocomplete="none"
                   name="dob"
-                  className="w-full p-2 border rounded-none"
+                  className="w-full p-2 border border-[#333333] rounded-md"
                   wrapperClassName="w-full"
                 />
               </div>
@@ -302,7 +316,9 @@ export default function Contact() {
               )}
             </div>
             <div className="space-y-2">
-              <Label>Gender</Label>
+              <Label className="text-[#333333BF] text-sm">
+                Gender
+              </Label>
               <RadioGroup
                 name="gender"
                 value={gender}
@@ -316,7 +332,7 @@ export default function Contact() {
                   </div>
                 ))}
               </RadioGroup>
-              {(genderTouched && !gender) && (
+              {genderTouched && !gender && (
                 <div className="text-red-500 text-sm">
                   Please select a gender
                 </div>
@@ -324,7 +340,10 @@ export default function Contact() {
             </div>
             <div className="space-y-2">
               <div className="flex flex-col space-y-4">
-                <Label htmlFor="address" className="w-auto ">
+                <Label
+                  htmlFor="address"
+                  className="text-[#333333BF] text-sm"
+                >
                   Address
                 </Label>
                 {isLoaded && (
@@ -336,7 +355,7 @@ export default function Contact() {
                       className={
                         formik.errors.address && formik.touched.address
                           ? "border-red-500 rounded-none"
-                          : "rounded-none"
+                          : "border border-[#333333] rounded-md"
                       }
                       placeholder="Search address.."
                       value={formik.values.address}
@@ -357,7 +376,7 @@ export default function Contact() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Email address</Label>
+              <Label  className="text-[#333333BF] text-sm" >Email address</Label>
               <Input
                 name="email"
                 onChange={formik.handleChange}
@@ -366,7 +385,7 @@ export default function Contact() {
                 className={
                   formik.errors.email && formik.touched.email
                     ? "border-red-500 rounded-none"
-                    : "rounded-none"
+                    : "border border-[#333333] rounded-md"
                 }
               />
               {formik.errors.email && formik.touched.email && (
@@ -376,7 +395,7 @@ export default function Contact() {
               )}
             </div>
             <div className="space-y-2">
-              <Label>Phone number</Label>
+              <Label  className="text-[#333333BF] text-sm" >Phone number</Label>
               <Input
                 name="phoneNumber"
                 onChange={formik.handleChange}
@@ -385,7 +404,7 @@ export default function Contact() {
                 className={
                   formik.errors.phoneNumber && formik.touched.phoneNumber
                     ? "border-red-500 rounded-none"
-                    : "rounded-none"
+                    : "border border-[#333333] rounded-md"
                 }
               />
               {formik.errors.phoneNumber && formik.touched.phoneNumber && (
@@ -396,21 +415,16 @@ export default function Contact() {
             </div>
           </div>
 
-          <span className="text-sm text-gray-600 block pt-2">
-            Appointment details will be sent to this phone number.
+          <span className="text-sm text-[#333333BF] block pt-2">
+            Appointment confirmation will be sent to this phone number.
           </span>
-          <span className="text-xs block pt-8 text-[#FF6723]">
-            By continuing, you authorize us to book an appointment on your
-            behalf.
-          </span>
-
-          <div className="flex justify-center md:mt-12 mt-6">
+          <div className="flex md:mt-12 my-6 w-full">
             <Button
               type="submit"
-              className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto flex items-center justify-center"
-              disabled={isLoading}
+              className="bg-[#E5573F] text-white px-6 py-5 w-full flex rounded-md"
+              disabled={isLoading || formik.isSubmitting}
             >
-              {isLoading ? (
+              {isLoading || formik.isSubmitting ? (
                 <span className="px-6">
                   <Loader2 className="animate-spin w-5 h-5" />
                 </span>
@@ -419,8 +433,14 @@ export default function Contact() {
               )}
             </Button>
           </div>
+          <span  className="text-[#333333BF] text-sm">
+            By continuing, you authorize us to book an appointment on your
+            behalf.
+          </span>
         </div>
       </form>
+      <FooterSection />
+
     </>
   );
 }
