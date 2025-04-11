@@ -429,7 +429,7 @@ export default function Contact() {
                   <Loader2 className="animate-spin w-5 h-5" />
                 </span>
               ) : (
-                "Continue"
+                "Book appointment"
               )}
             </Button>
           </div>

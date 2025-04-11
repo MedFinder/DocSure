@@ -28,11 +28,11 @@ import FooterSection from "../landing/components/FooterSection";
 
 const validationSchema = Yup.object().shape({
   objective: Yup.string().required("Please add at least one topic to discuss"),
-  insurer: Yup.string().when("selectedOption", {
-    is: "yes",
-    then: () => Yup.string().required("Insurance carrier is required"),
-    otherwise: () => Yup.string().notRequired(),
-  }),
+  // insurer: Yup.string().when("selectedOption", {
+  //   is: "yes",
+  //   then: () => Yup.string().required("Insurance carrier is required"),
+  //   otherwise: () => Yup.string().notRequired(),
+  // }),
   timeOfAppointment: Yup.date().when("availabilityOption", {
     is: "input-availability",
     then: () =>
@@ -81,15 +81,16 @@ export default function AppointmentPage() {
           insuranceType: parsedFormData?.insuranceType || "ppo",
           availability: parsedFormData?.availability || "anytime",
           subscriberId: parsedFormData?.subscriberId || "",
-          maxWait: parsedFormData?.maxWait || 3,
+          maxWait: parsedFormData?.maxWait ? parsedFormData?.maxWait: parsedFormData?.specialty === 'Primary Care Physician'? 3: 10 ,
           availabilityOption: parsedFormData?.availabilityOption || "anytime",
           timeOfAppointment: parsedFormData?.timeOfAppointment
             ? new Date(parsedFormData.timeOfAppointment)
             : new Date(),
         });
-        setPills(
-          parsedFormData?.objective ? parsedFormData.objective.split(", ") : []
-        );
+        // setPills(
+        //   parsedFormData?.objective ? parsedFormData.objective.split(", ") : []
+        // );
+        setInputValue( parsedFormData?.objective )
         setSelectedInsurance(parsedFormData?.selectedOption === "no");
         setAvailabilityOption(parsedFormData?.availabilityOption || "anytime");
         setCustomAvailability(parsedFormData?.availability || "anytime");
@@ -112,6 +113,34 @@ export default function AppointmentPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const logDrLists = async (data) => {
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
+        data
+      );
+      return;
+    } catch (error) {
+      console.error("Error dr details:", error);
+      return null;
+    }
+  };
+    useEffect(() => {
+      async function fetchAndLogData() {
+        const drsData = sessionStorage.getItem("statusData");
+        const formData = JSON.parse(sessionStorage.getItem("formData"));
+        console.log(formData);
+        if (drsData) {
+          const parsedDrsData = JSON.parse(drsData);
+          const payload = {
+            request_id: formData?.request_id,
+            ...parsedDrsData,
+          };
+          await logDrLists(payload);
+        }
+      }
+      fetchAndLogData();
+    }, []);
 
   // Utility function to format date without timezone issues
   const formatDateToYYYYMMDD = (date) => {
@@ -169,12 +198,15 @@ export default function AppointmentPage() {
         toast.error("Please fill up all the required information");
         return;
       }
+      if(selectedInsurance === false && values.insurer === "") {
+        setSelectedInsurance(true);
+      }
       const updatedValues = {
         groupId: values.groupId ?? "",
         subscriberId: values.subscriberId,
         objective: pills.length > 0 ? pills.join(", ") : values.objective,
         insurer: values.insurer ?? "",
-        selectedOption: selectedInsurance === true ? "no" : "yes",
+        selectedOption: selectedInsurance === true || selectedInsurance === false && values.insurer === "" ? "no" : "yes",
         availability: customAvailability
           ? customAvailability
           : availabilityOption,
@@ -246,7 +278,13 @@ export default function AppointmentPage() {
   const handleInsuranceTypeChange = (value) => {
     formik.setFieldValue("insuranceType", value);
   };
-
+  useEffect(()=> {
+    formik.setFieldValue(
+      "objective",
+      inputValue
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[inputValue])
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && inputValue.trim() !== "") {
       e.preventDefault();
@@ -288,6 +326,7 @@ export default function AppointmentPage() {
     Object.keys(formik.values).forEach((field) => {
       formik.setFieldTouched(field, true);
     });
+    formik.setFieldTouched('objective', true);
 
     // Validate all fields
     formik.validateForm().then((errors) => {
@@ -319,8 +358,8 @@ export default function AppointmentPage() {
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onBlur={handleInputBlur}
+              // onKeyDown={handleKeyDown}
+              // onBlur={handleInputBlur}
               className={cn(
                 " h-[40px] border border-[#333333] rounded-md",
                 formik.touched.objective && formik.errors.objective
@@ -410,10 +449,10 @@ export default function AppointmentPage() {
                 </div>
               )}
 
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <RadioGroupItem value="link-calender" id="r3" />
-                <Label className="underline">Link your calender</Label>
-              </div>
+                <Label className="underline">Link your calendar</Label>
+              </div> */}
             </RadioGroup>
             {formik.touched.availability && formik.errors.availability && (
               <div className="text-red-500 text-sm">
@@ -422,7 +461,7 @@ export default function AppointmentPage() {
             )}
           </div>
           <div className="space-y-6 pt-4">
-            <Label className="text-[#333333BF] text-sm">Max Wait</Label>
+            {/* <Label className="text-[#333333BF] text-sm">Max Wait</Label> */}
             <Slider
               //showTooltip={true}
               value={[formik.values.maxWait]}
@@ -443,9 +482,9 @@ export default function AppointmentPage() {
               </div>
             )}
           </div>
-          <span className="text-xs block pt-8 text-[#E5573F]">
+          {/* <span className="text-xs block pt-8 text-[#E5573F]">
             Longer wait time = better doctors
-          </span>
+          </span> */}
           <div className="flex flex-col space-y-3 pt-4">
             <div className="flex justify-between">
               <Label className="text-[#333333BF] text-base">Insurance</Label>
@@ -504,7 +543,7 @@ export default function AppointmentPage() {
             <div className="space-y-6">
               <div className="space-y-4 pt-4">
                 <Label className="text-[#333333BF] text-sm space-y-2">
-                  Member ID (Optional)
+                  Member ID
                 </Label>
                 <Input
                   className={cn(
