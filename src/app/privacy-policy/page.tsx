@@ -3,7 +3,7 @@ import FooterSection from "../landing/components/FooterSection";
 export default function PrivacyPolicy() {
   return (
     <>
-      <div className="flex flex-col justify-center px-6 md:px-96 py-16 overflow-auto bg-[#FCF8F1] ">
+      <div className="flex flex-col justify-center px-6 md:px-96 py-16 overflow-auto  ">
         <div className="flex flex-col justify-center">
           <div className="border-b border-b-slate-200 pb-4">
             <h1 className="text-2xl font-semibold mb-6 text-center break-words">

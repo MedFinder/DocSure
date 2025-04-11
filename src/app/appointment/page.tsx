@@ -28,20 +28,22 @@ import FooterSection from "../landing/components/FooterSection";
 
 const validationSchema = Yup.object().shape({
   objective: Yup.string().required("Please add at least one topic to discuss"),
-  insurer: Yup.string().when('selectedOption', {
-    is: 'yes',
+  insurer: Yup.string().when("selectedOption", {
+    is: "yes",
     then: () => Yup.string().required("Insurance carrier is required"),
     otherwise: () => Yup.string().notRequired(),
   }),
-  timeOfAppointment: Yup.date().when('availabilityOption', {
-    is: 'input-availability',
-    then: () => 
+  timeOfAppointment: Yup.date().when("availabilityOption", {
+    is: "input-availability",
+    then: () =>
       Yup.date()
         .required("Please select an appointment date")
         .min(new Date(), "Appointment date cannot be in the past"),
     otherwise: () => Yup.date().notRequired(),
   }),
-  availabilityOption: Yup.string().required("Please select an availability option"),
+  availabilityOption: Yup.string().required(
+    "Please select an availability option"
+  ),
 });
 
 export default function AppointmentPage() {
@@ -62,13 +64,13 @@ export default function AppointmentPage() {
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
   });
-  
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedFormData = sessionStorage.getItem("formData");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
-        console.log(parsedFormData)
+        console.log(parsedFormData);
         setFormData(parsedFormData);
 
         // Prefill formik values
@@ -81,9 +83,13 @@ export default function AppointmentPage() {
           subscriberId: parsedFormData?.subscriberId || "",
           maxWait: parsedFormData?.maxWait || 3,
           availabilityOption: parsedFormData?.availabilityOption || "anytime",
-          timeOfAppointment: parsedFormData?.timeOfAppointment ? new Date(parsedFormData.timeOfAppointment) : new Date(),
+          timeOfAppointment: parsedFormData?.timeOfAppointment
+            ? new Date(parsedFormData.timeOfAppointment)
+            : new Date(),
         });
-        setPills(parsedFormData?.objective ? parsedFormData.objective.split(", ") : []);
+        setPills(
+          parsedFormData?.objective ? parsedFormData.objective.split(", ") : []
+        );
         setSelectedInsurance(parsedFormData?.selectedOption === "no");
         setAvailabilityOption(parsedFormData?.availabilityOption || "anytime");
         setCustomAvailability(parsedFormData?.availability || "anytime");
@@ -106,7 +112,7 @@ export default function AppointmentPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   // Utility function to format date without timezone issues
   const formatDateToYYYYMMDD = (date) => {
     const year = date.getFullYear();
@@ -115,13 +121,13 @@ export default function AppointmentPage() {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
-  
+
   const logPatientData = async (updatedValues) => {
     const data = {
       request_id: updatedValues.request_id,
       new_patient: updatedValues.isNewPatient,
       time_of_appointment: updatedValues.timeOfAppointment,
-      patient_availability: updatedValues.maxWait+' days',
+      patient_availability: updatedValues.maxWait + " days",
       medical_concerns: updatedValues.objective,
       member_id: updatedValues?.subscriberId ?? "",
       insurer: updatedValues.insurer ?? "none",
@@ -164,10 +170,10 @@ export default function AppointmentPage() {
         return;
       }
       const updatedValues = {
-        groupId: values.groupId ?? '',
+        groupId: values.groupId ?? "",
         subscriberId: values.subscriberId,
         objective: pills.length > 0 ? pills.join(", ") : values.objective,
-        insurer: values.insurer ?? '',
+        insurer: values.insurer ?? "",
         selectedOption: selectedInsurance === true ? "no" : "yes",
         availability: customAvailability
           ? customAvailability
@@ -180,7 +186,7 @@ export default function AppointmentPage() {
         isNewPatient: isNewPatient ? "yes" : "no",
         request_id: formData?.request_id,
       };
-      console.log(updatedValues)
+      console.log(updatedValues);
       setIsLoading(true);
       logPatientData(updatedValues);
       sessionStorage.setItem("formData", JSON.stringify(updatedValues));
@@ -194,28 +200,28 @@ export default function AppointmentPage() {
 
   // Handle availability option change
   const handleAvailabilityChange = (value) => {
-    setCustomAvailability('');
+    setCustomAvailability("");
     setTimeOfAppointment(new Date());
     setAvailabilityOption(value);
-    formik.setFieldValue('availabilityOption', value);
-    formik.setFieldValue('availability', value);
-    
+    formik.setFieldValue("availabilityOption", value);
+    formik.setFieldValue("availability", value);
+
     // When changing away from input-availability, clear any validation errors
-    if (value !== 'input-availability') {
-      const newErrors = {...formik.errors};
+    if (value !== "input-availability") {
+      const newErrors = { ...formik.errors };
       delete newErrors.timeOfAppointment;
       formik.setErrors(newErrors);
     } else {
       // When changing to input-availability, validate the current date
-      formik.setFieldTouched('timeOfAppointment', true);
-      formik.validateField('timeOfAppointment');
+      formik.setFieldTouched("timeOfAppointment", true);
+      formik.validateField("timeOfAppointment");
     }
   };
 
   // Handle insurance checkbox change
   const handleInsuranceCheckboxChange = (checked) => {
     setSelectedInsurance(checked);
-    formik.setFieldValue('selectedOption', checked ? "no" : "yes");
+    formik.setFieldValue("selectedOption", checked ? "no" : "yes");
   };
 
   // Add useEffect to reset insurance fields when selectedOption changes to 'no'
@@ -225,20 +231,20 @@ export default function AppointmentPage() {
       formik.setFieldValue("insurer", "");
       formik.setFieldValue("subscriberId", "");
       formik.setFieldValue("insuranceType", "ppo");
-      
+
       // Also clear any validation errors for these fields
-      const newErrors = {...formik.errors};
+      const newErrors = { ...formik.errors };
       delete newErrors.insurer;
       delete newErrors.subscriberId;
       delete newErrors.insuranceType;
       formik.setErrors(newErrors);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.selectedOption]);
 
   // Handle insurance type change
   const handleInsuranceTypeChange = (value) => {
-    formik.setFieldValue('insuranceType', value);
+    formik.setFieldValue("insuranceType", value);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -246,7 +252,10 @@ export default function AppointmentPage() {
       e.preventDefault();
       if (!pills.includes(inputValue.trim())) {
         setPills([...pills, inputValue.trim()]);
-        formik.setFieldValue('objective', [...pills, inputValue.trim()].join(", "));
+        formik.setFieldValue(
+          "objective",
+          [...pills, inputValue.trim()].join(", ")
+        );
       }
       setInputValue("");
     }
@@ -257,16 +266,19 @@ export default function AppointmentPage() {
     if (inputValue.trim() !== "") {
       if (!pills.includes(inputValue.trim())) {
         setPills([...pills, inputValue.trim()]);
-        formik.setFieldValue('objective', [...pills, inputValue.trim()].join(", "));
+        formik.setFieldValue(
+          "objective",
+          [...pills, inputValue.trim()].join(", ")
+        );
       }
       setInputValue("");
     }
   };
-  
+
   const removePill = (value: string) => {
     const newPills = pills.filter((pill) => pill !== value);
     setPills(newPills);
-    formik.setFieldValue('objective', newPills.join(", "));
+    formik.setFieldValue("objective", newPills.join(", "));
   };
 
   const handleSubmit = (e) => {
@@ -309,10 +321,17 @@ export default function AppointmentPage() {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               onBlur={handleInputBlur}
-              className={cn("rounded-none", formik.touched.objective && formik.errors.objective ? "border-red-500" : "")}
+              className={cn(
+                " h-[40px] border border-[#333333] rounded-md",
+                formik.touched.objective && formik.errors.objective
+                  ? "border-red-500"
+                  : ""
+              )}
             />
             {formik.touched.objective && formik.errors.objective && (
-              <div className="text-red-500 text-sm">{formik.errors.objective}</div>
+              <div className="text-red-500 text-sm">
+                {formik.errors.objective}
+              </div>
             )}
 
             {pills.length > 0 && (
@@ -360,8 +379,8 @@ export default function AppointmentPage() {
                     onChange={(date) => {
                       setTimeOfAppointment(date);
                       setCustomAvailability(formatDateToYYYYMMDD(date));
-                      formik.setFieldValue('timeOfAppointment', date);
-                      formik.setFieldTouched('timeOfAppointment', true);
+                      formik.setFieldValue("timeOfAppointment", date);
+                      formik.setFieldTouched("timeOfAppointment", true);
                     }}
                     dateFormat="yyyy-MM-dd"
                     showYearDropdown
@@ -375,13 +394,19 @@ export default function AppointmentPage() {
                     name="appointmentDate"
                     className={cn(
                       "w-full p-2 border rounded-none",
-                      formik.touched.timeOfAppointment && formik.errors.timeOfAppointment ? "border-red-500" : ""
+                      formik.touched.timeOfAppointment &&
+                        formik.errors.timeOfAppointment
+                        ? "border-red-500"
+                        : ""
                     )}
                     wrapperClassName="w-full"
                   />
-                  {formik.touched.timeOfAppointment && formik.errors.timeOfAppointment && (
-                    <div className="text-red-500 text-sm">{formik.errors.timeOfAppointment}</div>
-                  )}
+                  {formik.touched.timeOfAppointment &&
+                    formik.errors.timeOfAppointment && (
+                      <div className="text-red-500 text-sm">
+                        {formik.errors.timeOfAppointment}
+                      </div>
+                    )}
                 </div>
               )}
 
@@ -391,26 +416,31 @@ export default function AppointmentPage() {
               </div>
             </RadioGroup>
             {formik.touched.availability && formik.errors.availability && (
-              <div className="text-red-500 text-sm">{formik.errors.availability}</div>
+              <div className="text-red-500 text-sm">
+                {formik.errors.availability}
+              </div>
             )}
           </div>
           <div className="space-y-6 pt-4">
             <Label className="text-[#333333BF] text-sm">Max Wait</Label>
-            <Slider 
-              //showTooltip={true} 
+            <Slider
+              //showTooltip={true}
               value={[formik.values.maxWait]}
-              //defaultValue={[3]} 
+              //defaultValue={[3]}
               onValueChange={(value) => {
-                formik.setFieldValue('maxWait', value[0]);
+                formik.setFieldValue("maxWait", value[0]);
                 // Force a re-render to update the tooltip
-                formik.setFieldTouched('maxWait', true);
+                formik.setFieldTouched("maxWait", true);
               }}
             />
             <div className="text-sm text-gray-500 mt-1">
-              Max wait: {formik.values.maxWait} {formik.values.maxWait === 1 ? 'day' : 'days'}
+              Max wait: {formik.values.maxWait}{" "}
+              {formik.values.maxWait === 1 ? "day" : "days"}
             </div>
             {formik.touched.maxWait && formik.errors.maxWait && (
-              <div className="text-red-500 text-sm">{formik.errors.maxWait}</div>
+              <div className="text-red-500 text-sm">
+                {formik.errors.maxWait}
+              </div>
             )}
           </div>
           <span className="text-xs block pt-8 text-[#E5573F]">
@@ -421,8 +451,8 @@ export default function AppointmentPage() {
               <Label className="text-[#333333BF] text-base">Insurance</Label>
               <span className="text-sm text-gray-600 block pt-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="no-insurance" 
+                  <Checkbox
+                    id="no-insurance"
                     checked={selectedInsurance}
                     onCheckedChange={handleInsuranceCheckboxChange}
                   />
@@ -445,7 +475,12 @@ export default function AppointmentPage() {
                   <Autocomplete
                     id="insurer"
                     name="insurer"
-                    className={cn("w-full border", formik.touched.insurer && formik.errors.insurer ? "border-red-500" : "")}
+                    className={cn(
+                      "w-full  border border-[#333333] rounded-md ",
+                      formik.touched.insurer && formik.errors.insurer
+                        ? "border-red-500"
+                        : ""
+                    )}
                     options={insuranceCarrierOptions}
                     value={formik.values.insurer}
                     selected={formik.values.insurer}
@@ -456,7 +491,9 @@ export default function AppointmentPage() {
                     clearable={false}
                   />
                   {formik.touched.insurer && formik.errors.insurer && (
-                    <div className="text-red-500 text-sm">{formik.errors.insurer}</div>
+                    <div className="text-red-500 text-sm">
+                      {formik.errors.insurer}
+                    </div>
                   )}
                 </div>
               </>
@@ -469,18 +506,27 @@ export default function AppointmentPage() {
                 <Label className="text-[#333333BF] text-sm space-y-2">
                   Member ID (Optional)
                 </Label>
-                <Input 
-                  className={cn("rounded-none border", formik.touched.subscriberId && formik.errors.subscriberId ? "border-red-500" : "")}
+                <Input
+                  className={cn(
+                    " h-[40px] border border-[#333333] rounded-md",
+                    formik.touched.subscriberId && formik.errors.subscriberId
+                      ? "border-red-500"
+                      : ""
+                  )}
                   value={formik.values.subscriberId}
-                  onChange={(e) => formik.setFieldValue("subscriberId", e.target.value)}
+                  onChange={(e) =>
+                    formik.setFieldValue("subscriberId", e.target.value)
+                  }
                   onBlur={formik.handleBlur}
                   name="subscriberId"
                 />
                 {formik.touched.subscriberId && formik.errors.subscriberId && (
-                  <div className="text-red-500 text-sm">{formik.errors.subscriberId}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.subscriberId}
+                  </div>
                 )}
               </div>
-              <RadioGroup 
+              <RadioGroup
                 value={formik.values.insuranceType}
                 onValueChange={handleInsuranceTypeChange}
                 className="flex gap-12"
@@ -495,7 +541,9 @@ export default function AppointmentPage() {
                 </div>
               </RadioGroup>
               {formik.touched.insuranceType && formik.errors.insuranceType && (
-                <div className="text-red-500 text-sm">{formik.errors.insuranceType}</div>
+                <div className="text-red-500 text-sm">
+                  {formik.errors.insuranceType}
+                </div>
               )}
             </div>
           )}
@@ -503,7 +551,7 @@ export default function AppointmentPage() {
           <div className="flex md:mt-12 mt-6 w-full">
             <Button
               type="submit"
-              className="bg-[#E5573F] text-white px-6 py-5 w-full sm:w-auto flex rounded-md"
+              className="bg-[#E5573F] text-white px-6 py-5 w-full flex rounded-md"
               disabled={isLoading || formik.isSubmitting}
             >
               {isLoading || formik.isSubmitting ? (

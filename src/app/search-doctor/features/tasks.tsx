@@ -67,11 +67,11 @@ interface TaskProps {
   openingStatus?: string;
   openingTimeInfo?: string;
   isAppointmentBooked: boolean;
-  transcriptSummary?: {place_id:string, summary: string};
+  transcriptSummary?: { place_id: string; summary: string };
   transcriptLoading?: boolean;
-  setTranscriptSummary: ({place_id:string, summary: string}) => void;
+  setTranscriptSummary: ({ place_id: string, summary: string }) => void;
   setTranscriptLoading: (loading: boolean) => void;
-  wsRef:React.RefObject<WebSocket | null>;
+  wsRef: React.RefObject<WebSocket | null>;
   reconnectWebSocket: Promise<void>;
   callStatus: {
     isInitiated: boolean;
@@ -148,7 +148,7 @@ export const Task: React.FC<TaskProps> = ({
     // Only check items that are both open and within the first 10
     return index < 10 && openingStatus === "Open";
   });
-  // Use the expand context instead of local state
+
   const { expandedId, setExpandedId } = useExpand();
   const isExpanded = expandedId === id;
 
@@ -163,7 +163,7 @@ export const Task: React.FC<TaskProps> = ({
       setTranscriptLoading(false);
     } else {
       setTranscriptLoading(true);
-      setTranscriptSummary({place_id: id, summary: ''});
+      setTranscriptSummary({ place_id: id, summary: "" });
       setExpandedId(id);
 
       // Get request_id from session storage
@@ -176,22 +176,21 @@ export const Task: React.FC<TaskProps> = ({
           formatted_address || address || vicinity,
           place_id || id,
           request_id
-          
         );
         //console.log(resp);
         setTimeout(() => {
-          console.log('defaulting to dr summary..after socket time out')
+          console.log("defaulting to dr summary..after socket time out");
           setTranscriptLoading(false);
-          setTranscriptSummary({place_id: id, summary: resp})
+          setTranscriptSummary({ place_id: id, summary: resp });
         }, 5000);
-        if(wsRef.current?.readyState === 1) {
+        if (wsRef.current?.readyState === 1) {
           // setTranscriptLoading(false);
           // setTranscriptSummary({place_id: id, summary: resp})
-        }else {
-          console.log('reconnecitng web socket...')
-          reconnectWebSocket()
+        } else {
+          console.log("reconnecitng web socket...");
+          reconnectWebSocket();
         }
-        console.log('Websocket state is',wsRef.current?.readyState)
+        console.log("Websocket state is", wsRef.current?.readyState);
       } catch (error) {
         console.error("Error fetching doctor summary:", error);
         setDoctorSummary("Unable to fetch summary information.");
@@ -239,9 +238,7 @@ export const Task: React.FC<TaskProps> = ({
                     className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
                   >
                     {/* <span className="font-semibold">Tooltip example:</span> */}
-                    <span>
-                      Select doctors to call for an appointment.
-                    </span>
+                    <span>Select doctors to call for an appointment.</span>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -260,9 +257,7 @@ export const Task: React.FC<TaskProps> = ({
                     className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
                   >
                     {/* <span className="font-semibold">Tooltip example:</span> */}
-                    <span>
-                      Drag items to reorder the priority.
-                    </span>
+                    <span>Drag items to reorder the priority.</span>
                   </TooltipContent>
                 </Tooltip>
                 <div className="flex flex-col gap-2 font-normal w-full">
@@ -429,7 +424,8 @@ export const Task: React.FC<TaskProps> = ({
                       className=" hover:text-gray-700 transition-colors cursor-pointer  block"
                       onPointerDown={(e) => e.stopPropagation()}
                     >
-                      {transcriptLoading && transcriptSummary?.place_id === id ? (
+                      {transcriptLoading &&
+                      transcriptSummary?.place_id === id ? (
                         <Loader2 className="mx-auto animate-spin" size={18} />
                       ) : isExpanded ? (
                         <span className="mx-auto text-sm underline hidden">
@@ -449,7 +445,8 @@ export const Task: React.FC<TaskProps> = ({
                         className=" p-4 transition-all bg-[#F2F6F9]"
                       >
                         <div className="text-sm text-gray-600 animate-fadeIn bg-[#F2F6F9]">
-                          {transcriptLoading && transcriptSummary?.place_id === id ? (
+                          {transcriptLoading &&
+                          transcriptSummary?.place_id === id ? (
                             <div className="flex items-center justify-center py-4 bg-[#F2F6F9] ">
                               <LoadingSumamry />
                             </div>

@@ -2,16 +2,9 @@
 "use client";
 import Navbar from "@/components/general-components/navbar";
 import Link from "next/link";
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
-import {
-  arrayMove,
-} from "@dnd-kit/sortable";
+import { arrayMove } from "@dnd-kit/sortable";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -26,10 +19,11 @@ import Column from "./features/column";
 import {
   DistanceMatrixService,
   GoogleMap,
+  InfoWindow,
   Marker,
   useJsApiLoader,
 } from "@react-google-maps/api";
-import { ChevronDown, LoaderCircle, Star } from "lucide-react";
+import { ChevronDown, LoaderCircle, MapPin, Star } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
@@ -51,7 +45,10 @@ export default function SearchDoctorPage() {
   const [phoneNumbers, setPhoneNumbers] = useState<(string | null)[]>([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isAppointmentBooked, setIsAppointmentBooked] = useState(false);
-  const [transcriptSummary, setTranscriptSummary] = useState({place_id:'', summary: ''});
+  const [transcriptSummary, setTranscriptSummary] = useState({
+    place_id: "",
+    summary: "",
+  });
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [selectedInsurance, setSelectedInsurance] = useState(true);
   const [insuranceType, setinsuranceType] = useState("");
@@ -64,10 +61,15 @@ export default function SearchDoctorPage() {
   const [isDistanceOpen, setIsDistanceOpen] = useState(false);
   const [isRatingOpen, setIsRatingOpen] = useState(false);
   const [isMapView, setIsMapView] = useState(false);
-  const [totalDoctorsCount, setTotalDoctorsCount] = useState('');
+  const [totalDoctorsCount, setTotalDoctorsCount] = useState("");
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadMoreRef = useRef(null);
+  const mapRef = useRef(null);
+  const [activeDoctor, setActiveDoctor] = useState(null);
+  const [isChecked, setIsChecked] = useState(false);
+  const [checkedDoctors, setCheckedDoctors] = useState({});
+
   const distanceOptions = [
     "< 2 miles",
     "< 5 miles",
@@ -81,7 +83,7 @@ export default function SearchDoctorPage() {
   });
   const [activeCallIndex, setActiveCallIndex] = useState(0);
   const activeCallIndexRef = useRef(activeCallIndex);
-  
+
   useEffect(() => {
     activeCallIndexRef.current = activeCallIndex;
   }, [activeCallIndex]);
@@ -90,13 +92,17 @@ export default function SearchDoctorPage() {
     const numbers = doctors.map((doctor) => doctor.phone_number || null);
     setPhoneNumbers(numbers);
   };
-  
+
   const getTotalDoctorsList = async () => {
     setIsCountLoading(true);
     const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
     const savedAddress = sessionStorage.getItem("selectedAddress");
-    const addressParts = savedAddress?.split(',') || [];
-    const cityName = addressParts.slice(-2).join(',').trim().replace(/[0-9]/g, '');
+    const addressParts = savedAddress?.split(",") || [];
+    const cityName = addressParts
+      .slice(-2)
+      .join(",")
+      .trim()
+      .replace(/[0-9]/g, "");
     try {
       const response = await axios.get(
         `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_count?medical_speciality=${savedSpecialty}&area=${cityName}`
@@ -107,7 +113,7 @@ export default function SearchDoctorPage() {
         return response.data.total_doctors;
       } else {
         console.log("Invalid response format:", response.data);
-        return 'Could not fetch doctors count';
+        return "Could not fetch doctors count";
       }
     } catch (error) {
       setIsCountLoading(false);
@@ -135,7 +141,7 @@ export default function SearchDoctorPage() {
       return null;
     }
   };
-  
+
   const logDrLists = async (data) => {
     try {
       const resp = await axios.post(
@@ -150,20 +156,20 @@ export default function SearchDoctorPage() {
   };
 
   const loadMoreDoctors = async () => {
-    console.log('loading more doctors...')
+    console.log("loading more doctors...");
     if (!nextPageToken || isLoadingMore) return;
 
     setIsLoadingMore(true);
     try {
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty"); 
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
       const searchData = await JSON.parse(sessionStorage.getItem("searchData"));
       const lat = searchData?.lat || 0;
       const lng = searchData?.lng || 0;
       const response = await axios.post(
-        'https://callai-backend-243277014955.us-central1.run.app/api/new_search_places',
+        "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
         {
           location: `${lat},${lng}`,
-          radius: 20000,  
+          radius: 20000,
           keyword: savedSpecialty,
           next_page_token: nextPageToken,
           prev_page_data: doctors,
@@ -180,20 +186,23 @@ export default function SearchDoctorPage() {
           },
         }));
 
-        setDoctors(prevDoctors => [...prevDoctors, ...newDoctors]);
+        setDoctors((prevDoctors) => [...prevDoctors, ...newDoctors]);
         setNextPageToken(response.data.next_page_token || null);
-        
+
         const lastSearchSource = sessionStorage.getItem("lastSearchSource");
-        const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
-        
-        const currentData = JSON.parse(sessionStorage.getItem(storageKey) || "{}");
-        
+        const storageKey =
+          lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+
+        const currentData = JSON.parse(
+          sessionStorage.getItem(storageKey) || "{}"
+        );
+
         const updatedData = {
           ...currentData,
           results: [...(currentData.results || []), ...newDoctors],
-          next_page_token: response.data.next_page_token || null
+          next_page_token: response.data.next_page_token || null,
         };
-        
+
         sessionStorage.setItem(storageKey, JSON.stringify(updatedData));
       }
     } catch (error) {
@@ -223,7 +232,7 @@ export default function SearchDoctorPage() {
         observer.unobserve(currentRef);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextPageToken, isLoadingMore]);
 
   useEffect(() => {
@@ -243,7 +252,7 @@ export default function SearchDoctorPage() {
     }
 
     fetchAndLogData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     const updateDoctorsList = () => {
@@ -283,7 +292,7 @@ export default function SearchDoctorPage() {
         console.error("Error parsing sessionStorage data:", error);
         setDoctors([]);
       }
-      getTotalDoctorsList()
+      getTotalDoctorsList();
     };
 
     // Initial load
@@ -311,7 +320,7 @@ export default function SearchDoctorPage() {
         if (searchData && searchData.lat && searchData.lng) {
           setSelectedLocation({
             lat: searchData.lat,
-            lng: searchData.lng
+            lng: searchData.lng,
           });
         }
       }
@@ -371,7 +380,7 @@ export default function SearchDoctorPage() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      setIsLoading(true)
+      setIsLoading(true);
       track("Searchpage_Continue_Btn_Clicked");
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
       const formData = JSON.parse(sessionStorage.getItem("formData"));
@@ -450,7 +459,7 @@ export default function SearchDoctorPage() {
     };
     wsRef.current.onmessage = async (event) => {
       const message = JSON.parse(event.data);
-      if (message.event === 'summary_stream' && message.data?.summary) {
+      if (message.event === "summary_stream" && message.data?.summary) {
         setTranscriptLoading(false);
         setTranscriptSummary(message.data);
       }
@@ -467,17 +476,27 @@ export default function SearchDoctorPage() {
   };
 
   const DrCount = useMemo(() => {
-    const drVal = parseInt(totalDoctorsCount)
-    if(drVal > 50) {
-      return drVal+"+";
-    }
-    else if ((drVal < 50 || isNaN(drVal))&& !nextPageToken) {
-      return doctors.length+"+";
-    } 
-    else {
+    const drVal = parseInt(totalDoctorsCount);
+    if (drVal > 50) {
+      return drVal + "+";
+    } else if ((drVal < 50 || isNaN(drVal)) && !nextPageToken) {
+      return doctors.length + "+";
+    } else {
       return "50+";
     }
   }, [doctors.length, totalDoctorsCount, nextPageToken]);
+
+  useEffect(() => {
+    const newChecked = {};
+
+    doctors.slice(0, 10).forEach((doc) => {
+      if (doc.opening_hours?.open_now) {
+        newChecked[doc.id] = true;
+      }
+    });
+
+    setCheckedDoctors(newChecked);
+  }, [doctors]);
 
   return (
     <section>
@@ -537,12 +556,12 @@ export default function SearchDoctorPage() {
                   Docsure AI will call the selected doctors in this sequence,
                   seek an appointment for you, and enquire about insurance
                 </p>
-                <Button 
+                <Button
                   className="bg-[#E5573F] text-white rounded-md"
                   type="button"
                   onClick={handleFormSubmit}
                   disabled={isLoading}
-                  >
+                >
                   {isLoading ? "Submitting..." : "Continue"}
                 </Button>
               </div>
@@ -668,99 +687,209 @@ export default function SearchDoctorPage() {
                 </div>
               </div>
               <DndContext
-              onDragEnd={handleDragEnd}
-              collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+                collisionDetection={closestCenter}
               >
-              <ScrollArea className="h-full w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0">
-                <div className="flex flex-col md:flex-row w-full">
-                  <Column
-                    activeCallIndex={activeCallIndex}
-                    tasks={doctors}
-                    onDelete={handleDelete}
-                    isDraggable={!isConfirmed}
-                    callStatus={callStatus}
-                    transcriptSummary={transcriptSummary}
-                    setTranscriptSummary={setTranscriptSummary}
-                    transcriptLoading={transcriptLoading}
-                    setTranscriptLoading={setTranscriptLoading}
-                    isAppointmentBooked={isAppointmentBooked}
-                    wsRef={wsRef}
-                    reconnectWebSocket={connectWebSocket}
-                  />
-                </div>
-                {/* Loading indicator for infinite scrolling */}
-                <div ref={loadMoreRef} className="w-full py-4 flex justify-center">
-                  {isLoadingMore && 
-                    <LoaderCircle className="w-6 h-6 text-gray-500 animate-spin" />
-                  }
-                  {/* {!nextPageToken && doctors.length > 0 && 
+                <ScrollArea className="h-full w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0">
+                  <div className="flex flex-col md:flex-row w-full">
+                    <Column
+                      activeCallIndex={activeCallIndex}
+                      tasks={doctors}
+                      onDelete={handleDelete}
+                      isDraggable={!isConfirmed}
+                      callStatus={callStatus}
+                      transcriptSummary={transcriptSummary}
+                      setTranscriptSummary={setTranscriptSummary}
+                      transcriptLoading={transcriptLoading}
+                      setTranscriptLoading={setTranscriptLoading}
+                      isAppointmentBooked={isAppointmentBooked}
+                      wsRef={wsRef}
+                      reconnectWebSocket={connectWebSocket}
+                    />
+                  </div>
+                  {/* Loading indicator for infinite scrolling */}
+                  <div
+                    ref={loadMoreRef}
+                    className="w-full py-4 flex justify-center"
+                  >
+                    {isLoadingMore && (
+                      <LoaderCircle className="w-6 h-6 text-gray-500 animate-spin" />
+                    )}
+                    {/* {!nextPageToken && doctors.length > 0 && 
                     <p className="text-sm text-gray-500">No more doctors to load</p>
                   } */}
-                </div>
-              </ScrollArea>
-            </DndContext>
+                  </div>
+                </ScrollArea>
+              </DndContext>
             </div>
 
-          {/* Map view */}
-          <div
-            className={`md:w-[35%] w-full h-screen relative px-4 md:px-0 ${
-              isMapView ? "block" : "hidden"
-            } md:block`}
-          >
-            {/* Google Map (visible only on mobile when map view is true) */}
-            {!isLoaded ? (
-              <div className="flex items-center justify-center h-full">
-                <LoaderCircle className="w-8 h-8 text-gray-500 animate-spin" />
-              </div>
-            ) : (
-              <GoogleMap
-                mapContainerStyle={{ width: "100%", height: "100%" }} // Full height for the map
-                center={selectedLocation || center}
-                zoom={9} // 11
-                options={{ disableDefaultUI: true, zoomControl: true }}
-              >
-                {selectedLocation && (
-                  <Marker
-                    position={selectedLocation}
-                    title="Your Selected Location"
-                    icon={{
-                      url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", // Custom icon for the inputted location
-                    }}
-                  />
-                )}
+            {/* Map view */}
+            <div
+              className={`md:w-[35%] w-full h-screen relative px-4 md:px-0 ${
+                isMapView ? "block" : "hidden"
+              } md:block`}
+            >
+              {/* Google Map (visible only on mobile when map view is true) */}
+              {!isLoaded ? (
+                <div className="flex items-center justify-center h-full">
+                  <LoaderCircle className="w-8 h-8 text-gray-500 animate-spin" />
+                </div>
+              ) : (
+                <GoogleMap
+                  mapContainerStyle={{ width: "100%", height: "100%" }}
+                  center={selectedLocation || center}
+                  zoom={9}
+                  onLoad={(map) => {
+                    mapRef.current = map;
 
-                {doctors.slice(0, 10).map((doctor, index) => (
-                  <Marker
-                    key={doctor.id || index}
-                    position={{
+                    const bounds = new window.google.maps.LatLngBounds();
+
+                    if (selectedLocation) {
+                      bounds.extend(selectedLocation);
+                    }
+
+                    doctors.slice(0, 10).forEach((doctor) => {
+                      if (doctor.location?.lat && doctor.location?.lng) {
+                        bounds.extend({
+                          lat: doctor.location.lat,
+                          lng: doctor.location.lng,
+                        });
+                      }
+                    });
+
+                    if (!bounds.isEmpty()) {
+                      map.fitBounds(bounds);
+                    }
+                  }}
+                  options={{ disableDefaultUI: true, zoomControl: true }}
+                >
+                  {/* Blue "You" Marker */}
+                  {selectedLocation && (
+                    <Marker
+                      position={selectedLocation}
+                      title="Your Location"
+                      icon={{
+                        url: "/YouPin.svg", // Path relative to public/
+                        scaledSize: new window.google.maps.Size(40, 40),
+                      }}
+                    />
+                  )}
+
+                  {/* Doctor Markers with clickable popups */}
+                  {doctors.slice(0, 10).map((doctor, index) => {
+                    const position = {
                       lat: doctor.location?.lat || 0,
                       lng: doctor.location?.lng || 0,
+                    };
+
+                    return (
+                      <Marker
+                        key={doctor.id || index}
+                        position={position}
+                        icon={{
+                          url: "/LocationPin.svg", // Path relative to public/
+                          scaledSize: new window.google.maps.Size(40, 40),
+                        }}
+                        onClick={
+                          () => setActiveDoctor({ ...doctor, position, index }) // 👈 add index here
+                        }
+                      />
+                    );
+                  })}
+
+                  {/* InfoWindow for selected doctor */}
+                  {activeDoctor && (
+                    <InfoWindow
+                      position={activeDoctor.position}
+                      onCloseClick={() => setActiveDoctor(null)}
+                    >
+                      <div className="text-sm  flex flex-col items-start space-y-1 min-w-48 max-w-48 w-auto ">
+                        <p className="font-semibold">{activeDoctor.name}</p>
+                        <div className="flex  items-center gap-2 ">
+                          <img
+                            src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
+                            className="object-contain w-3 rounded-sm"
+                            alt="Rating star"
+                          />
+                          <span className="whitespace-nowrap">
+                            {activeDoctor.rating !== undefined
+                              ? activeDoctor.rating
+                              : "-"}
+                          </span>
+                          <span>•</span>
+                          <span className="whitespace-nowrap underline">
+                            {activeDoctor.user_ratings_total || 0} reviews
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin size={13} />
+                          <span className="whitespace-nowrap text-[#333333] text-sm pb-2">
+                            {activeDoctor.distance || "-"}
+                          </span>
+                        </div>
+                        <div className="flex gap-1 items-center border-t pt-3 w-full">
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <div className="relative w-6 h-6">
+                              {/* <input type="checkbox" checked={true} /> */}
+
+                              <input
+                                type="checkbox"
+                                checked={
+                                  checkedDoctors[activeDoctor.id] || false
+                                }
+                                onChange={(e) => {
+                                  const newChecked = e.target.checked;
+                                  setCheckedDoctors((prev) => ({
+                                    ...prev,
+                                    [activeDoctor.id]: newChecked,
+                                  }));
+                                }}
+                                onPointerDown={(e) => e.stopPropagation()}
+                                className="appearance-none w-full h-full bg-white border border-gray-300 rounded-md 
+    checked:bg-[#00BA85] checked:border-transparent"
+                              />
+
+                              {/* White checkmark */}
+                              {checkedDoctors[activeDoctor.id] && (
+                                <svg
+                                  className="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="3"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                              )}
+                            </div>
+                          </label>
+                          <span className=" ">Keep in Queue</span>
+                        </div>
+                      </div>
+                    </InfoWindow>
+                  )}
+
+                  <DistanceMatrixService
+                    options={{
+                      origins: [
+                        selectedLocation || { lat: 6.453056, lng: 3.395833 },
+                      ],
+                      destinations: doctors.slice(0, 10).map((doctor) => ({
+                        lat: doctor.location?.lat || 0,
+                        lng: doctor.location?.lng || 0,
+                      })),
+                      travelMode: "DRIVING",
                     }}
-                    title={doctor.name || "Doctor Location"}
-                    icon={{
-                      url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png", // Custom icon for doctors
+                    callback={(response) => {
+                      // You can use this data for showing distance etc.
                     }}
                   />
-                ))}
-
-                <DistanceMatrixService
-                  options={{
-                    origins: [
-                      selectedLocation || { lat: 6.453056, lng: 3.395833 },
-                    ],
-                    destinations: doctors.slice(0, 10).map((doctor) => ({
-                      lat: doctor.location?.lat || 0,
-                      lng: doctor.location?.lng || 0,
-                    })),
-                    travelMode: "DRIVING",
-                  }}
-                  callback={(response) => {
-                    // console.log("Distance Matrix Response:", response);
-                  }}
-                />
-              </GoogleMap>
-            )}
-
+                </GoogleMap>
+              )}
             </div>
           </div>
         </form>
