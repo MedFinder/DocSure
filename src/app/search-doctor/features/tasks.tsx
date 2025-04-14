@@ -281,6 +281,9 @@ export const Task: React.FC<TaskProps> = ({
                         //   e.stopPropagation();
                         //   track("Dr_Website_Clicked");
                         // }}
+                        type="button"
+                        onClick={handleExpand}
+                        onPointerDown={(e) => e.stopPropagation()}
                       >
                         {title}
                       </p>
@@ -295,6 +298,9 @@ export const Task: React.FC<TaskProps> = ({
                       //   e.stopPropagation();
                       //   track("Dr_Website_Clicked");
                       // }}
+                      type="button"
+                      onClick={handleExpand}
+                      onPointerDown={(e) => e.stopPropagation()}
                     >
                       {title}
                     </p>

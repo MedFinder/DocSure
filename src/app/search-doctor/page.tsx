@@ -516,7 +516,10 @@ export default function SearchDoctorPage() {
           </Link>
         </div>
       ) : (
-        <form className="flex flex-col flex-grow overflow-hidden" onSubmit={formik.handleSubmit}>
+        <form
+          className="flex flex-col flex-grow overflow-hidden"
+          onSubmit={formik.handleSubmit}
+        >
           <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3 border border-t-0 border-b-1 text-sm h-[60px] shrink-0">
             <div className="flex gap-2 items-center">
               <Image
@@ -552,18 +555,18 @@ export default function SearchDoctorPage() {
               }`}
             >
               <div className="md:flex hidden justify-between px-4 py-2 text-sm items-center">
-                <p className="">
-                  Docsure AI will call top-rated doctors in this sequence,
-                  seek an appointment for you, and enquire about insurance.
-                </p>
-                <Button
-                  className="bg-[#E5573F] text-white rounded-md"
-                  type="button"
-                  onClick={handleFormSubmit}
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Booking..." : "Book appointment"}
-                </Button>
+                <div className="flex gap-2">
+                  Docsure AI will call top-rated doctors in this sequence, seek
+                  an appointment for you, and enquire about insurance.
+                  <Button
+                    className="bg-[#E5573F] text-white rounded-md"
+                    type="button"
+                    onClick={handleFormSubmit}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Booking..." : "Book appointment"}
+                  </Button>
+                </div>
               </div>
               <div className="flex md:hidden px-2 py-2 text-sm items-center border">
                 <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
