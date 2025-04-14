@@ -50,6 +50,7 @@ export default function NavbarSection() {
 
   const [doctors, setDoctors] = useState([]);
   const [specialty, setSpecialty] = useState("");
+  const [insurer, setInsurer] = useState("");
   const [location, setLocation] = useState(null);
 
   const { isLoaded } = useJsApiLoader({
@@ -60,9 +61,14 @@ export default function NavbarSection() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      const savedInsurer = sessionStorage.getItem("selectedInsurer");
       if (savedSpecialty) {
         setSpecialty(savedSpecialty);
         formik.setFieldValue("specialty", savedSpecialty);
+      }
+      if (savedInsurer) {
+        setInsurer(savedInsurer);
+        formik.setFieldValue("insurance_carrier", savedInsurer); // ✅ correct field
       }
 
       const savedAddress = sessionStorage.getItem("selectedAddress");
@@ -107,12 +113,12 @@ export default function NavbarSection() {
         console.log();
         const data = {
           location: `${lat},${lng}`,
-          radius: 20000,  
+          radius: 20000,
           keyword: formik.values.specialty,
-        }
+        };
         const response = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
-          data,
+          data
         );
 
         sessionStorage.setItem("formDataNav", JSON.stringify(updatedValues));
@@ -235,9 +241,10 @@ export default function NavbarSection() {
                         className="w-full"
                         options={insuranceCarrierOptions}
                         placeholder="Insurance carrier (optional)"
-                        value={formik.values.insurance_carrier}
+                        // value={savedInsurer || ""}
                         selected={formik.values.insurance_carrier}
                         onChange={(value) => {
+                          setInsurer(value);
                           formik.setFieldValue("insurance_carrier", value);
                         }}
                         clearable={false}
@@ -273,9 +280,10 @@ export default function NavbarSection() {
                 {/* Search Button - Stays on the right, filling height on mobile */}
                 <button
                   className="text-white rounded-none px-2 md:px-5  md:h-12 h-full md:w-auto absolute md:static right-0 top-0 bottom-0 border-l-0 
-  bg-[#0074BA] md:bg-transparent hover:bg-[#0074BA] hover:text-white md:hover:bg-[#0074BA] md:hover:text-white"
+  bg-[#0074BA] md:bg-[#E5573F] hover:bg-[#0074BA] hover:text-white md:hover:bg-[#0074BA] md:hover:text-white rounded-tr-sm rounded-br-sm
+ "
                 >
-                  <Search className="w-5 h-5 font-semibold text-white md:text-gray-500 md:hover:text-white" />
+                  <Search className="w-5 h-5 font-semibold text-white md:text-white md:hover:text-white" />
                 </button>
               </div>
             </form>

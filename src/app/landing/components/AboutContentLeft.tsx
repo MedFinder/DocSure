@@ -155,6 +155,10 @@ const AboutContentLeft: React.FC<ContentRightProps> = ({
                 </p>
                 <p className="text-white w-[100%]">
                   Largest selection of providers across
+                  <br />
+                  <span className="text-white w-[100%] font-semibold">
+                    60+ specialties
+                  </span>
                 </p>
               </div>
 

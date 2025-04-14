@@ -117,6 +117,7 @@ export default function LandingPage() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
+  const [selectedInsurer, setSelectedInsurer] = useState("");
   const [isLoading, setisLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [prefilledAddress, setPrefilledAddress] = useState(""); // State for prefilled address
@@ -243,9 +244,9 @@ export default function LandingPage() {
     try {
       const data = {
         location: `${lat},${lng}`,
-        radius: 20000,  
-        keyword: 'Primary Care Physician',
-      }
+        radius: 20000,
+        keyword: "Primary Care Physician",
+      };
       const response = await axios.post(
         "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
         data
@@ -374,6 +375,7 @@ export default function LandingPage() {
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
         sessionStorage.setItem("selectedSpecialty", values.specialty);
+        sessionStorage.setItem("selectedInsurer", values.insurance_carrier);
         sessionStorage.setItem(
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
@@ -387,9 +389,9 @@ export default function LandingPage() {
             : formik.values.specialty;
         const data = {
           location: `${lat},${lng}`,
-          radius: 20000,  
+          radius: 20000,
           keyword: speciality_value,
-        }
+        };
         const response = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
           data
@@ -679,10 +681,11 @@ export default function LandingPage() {
                         className="w-full"
                         options={insuranceCarrierOptions}
                         placeholder="Insurance carrier (optional)"
-                        value={formik.values.insurance_carrier}
+                        value={selectedInsurer}
                         selected={formik.values.insurance_carrier}
                         onChange={(value) => {
                           formik.setFieldValue("insurance_carrier", value);
+                          setSelectedInsurer(value);
                         }}
                         clearable={false}
                       />

@@ -31,7 +31,7 @@ const customDatePickerStyles = `
 // Updated validation schema to include gender
 const validationSchema = Yup.object().shape({
   patientName: Yup.string().required("Patient name is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
+  // email: Yup.string().email("Invalid email").required("Email is required"),
   phoneNumber: Yup.string().required("Phone number is required"),
   dob: Yup.date()
     .required("Date of birth is required")
@@ -245,6 +245,13 @@ export default function Contact() {
     formik.setFieldTouched("dob", true); // Mark as touched when changed
   };
 
+  useEffect(() => {
+    const savedAddress = sessionStorage.getItem("selectedAddress");
+    if (savedAddress) {
+      formik.setFieldValue("address", savedAddress);
+    }
+  }, []);
+
   return (
     <>
       <NavbarSection />
@@ -262,9 +269,7 @@ export default function Contact() {
           </p>
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-[#333333BF] text-sm ">
-                Patient name
-              </Label>
+              <Label className="text-[#333333BF] text-sm ">Patient name</Label>
               <Input
                 className={
                   formik.errors.patientName && formik.touched.patientName
@@ -316,9 +321,7 @@ export default function Contact() {
               )}
             </div>
             <div className="space-y-2">
-              <Label className="text-[#333333BF] text-sm">
-                Gender
-              </Label>
+              <Label className="text-[#333333BF] text-sm">Gender</Label>
               <RadioGroup
                 name="gender"
                 value={gender}
@@ -340,10 +343,7 @@ export default function Contact() {
             </div>
             <div className="space-y-2">
               <div className="flex flex-col space-y-4">
-                <Label
-                  htmlFor="address"
-                  className="text-[#333333BF] text-sm"
-                >
+                <Label htmlFor="address" className="text-[#333333BF] text-sm">
                   Address
                 </Label>
                 {isLoaded && (
@@ -376,7 +376,7 @@ export default function Contact() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label  className="text-[#333333BF] text-sm" >Email address</Label>
+              <Label className="text-[#333333BF] text-sm">Email address</Label>
               <Input
                 name="email"
                 onChange={formik.handleChange}
@@ -395,7 +395,7 @@ export default function Contact() {
               )}
             </div>
             <div className="space-y-2">
-              <Label  className="text-[#333333BF] text-sm" >Phone number</Label>
+              <Label className="text-[#333333BF] text-sm">Phone number</Label>
               <Input
                 name="phoneNumber"
                 onChange={formik.handleChange}
@@ -433,14 +433,13 @@ export default function Contact() {
               )}
             </Button>
           </div>
-          <span  className="text-[#333333BF] text-sm">
+          <span className="text-[#333333BF] text-sm">
             By continuing, you authorize us to book an appointment on your
             behalf.
           </span>
         </div>
       </form>
       <FooterSection />
-
     </>
   );
 }

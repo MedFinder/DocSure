@@ -499,7 +499,7 @@ export default function SearchDoctorPage() {
   }, [doctors]);
 
   return (
-    <section>
+    <section className="h-screen flex flex-col overflow-hidden">
       <NavbarSection />
       {doctors.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-screen text-center ">
@@ -516,8 +516,11 @@ export default function SearchDoctorPage() {
           </Link>
         </div>
       ) : (
-        <form className="" onSubmit={formik.handleSubmit}>
-          <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3 border border-t-0 border-b-1 text-sm">
+        <form
+          className="flex flex-col flex-grow overflow-hidden"
+          onSubmit={formik.handleSubmit}
+        >
+          <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3 border border-t-0 border-b-1 text-sm h-[60px] shrink-0">
             <div className="flex gap-2 items-center">
               <Image
                 src="/Group 198.svg"
@@ -544,7 +547,7 @@ export default function SearchDoctorPage() {
           </p> */}
           </div>
 
-          <div className="flex">
+          <div className="flex flex-grow overflow-hidden">
             {/* Table view */}
             <div
               className={`md:w-[65%] w-full ${
@@ -552,18 +555,18 @@ export default function SearchDoctorPage() {
               }`}
             >
               <div className="md:flex hidden justify-between px-4 py-2 text-sm items-center">
-                <p className="">
-                  Docsure AI will call the selected doctors in this sequence,
-                  seek an appointment for you, and enquire about insurance
-                </p>
-                <Button
-                  className="bg-[#E5573F] text-white rounded-md"
-                  type="button"
-                  onClick={handleFormSubmit}
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Submitting..." : "Continue"}
-                </Button>
+                <div className="flex gap-2">
+                  Docsure AI will call top-rated doctors in this sequence, seek
+                  an appointment for you, and enquire about insurance.
+                  <Button
+                    className="bg-[#E5573F] text-white rounded-md"
+                    type="button"
+                    onClick={handleFormSubmit}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Booking..." : "Book appointment"}
+                  </Button>
+                </div>
               </div>
               <div className="flex md:hidden px-2 py-2 text-sm items-center border">
                 <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
@@ -690,7 +693,7 @@ export default function SearchDoctorPage() {
                 onDragEnd={handleDragEnd}
                 collisionDetection={closestCenter}
               >
-                <ScrollArea className="h-full w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0">
+                <ScrollArea className="h-full w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0 overflow-y-auto">
                   <div className="flex flex-col md:flex-row w-full">
                     <Column
                       activeCallIndex={activeCallIndex}
