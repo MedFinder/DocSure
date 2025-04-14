@@ -23,6 +23,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { track } from "@vercel/analytics";
+import NavbarSection from "@/components/general-components/navbar-section";
+import FooterSection from "../landing/components/FooterSection";
 
 const _doctors: Doctor[] = [
   {
@@ -801,16 +803,16 @@ export default function Transcript() {
 
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
-      <Navbar />
+      <NavbarSection />
 
-      <div className="mt-5 w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4" />
+      <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
       <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
         <div className=" flex  w-full  text-[#333333] md:text-lg mt-20 ">
           <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
           <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
           <button
             onClick={toggleTranscript}
-            className="w-1/3 mt-6 md:mt-0 text-sm text whitespace-nowrap md:hidden text-[#FF6723] underline"
+            className="w-1/3 mt-6 md:mt-0 text-sm text whitespace-nowrap md:hidden text-[#E5573F] underline"
           >
             {showTranscript ? "Back to List" : "View Transcript"}
           </button>
@@ -906,7 +908,7 @@ export default function Transcript() {
               }`}
             >
               {/* Note text updated with orange color */}
-              {/* <div className="mb-3 text-sm tracking-tight text-[#FF6723]">
+              {/* <div className="mb-3 text-sm tracking-tight text-[#E5573F]">
                 <p>
                   Tip: Feel free to close this browser. Your booking
                   confirmation will be sent to you over email and text.
@@ -1012,6 +1014,7 @@ export default function Transcript() {
           </div>
         </DialogContent>
       </Dialog>
+      {/* <FooterSection /> */}
     </main>
   );
 }

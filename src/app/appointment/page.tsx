@@ -81,7 +81,11 @@ export default function AppointmentPage() {
           insuranceType: parsedFormData?.insuranceType || "ppo",
           availability: parsedFormData?.availability || "anytime",
           subscriberId: parsedFormData?.subscriberId || "",
-          maxWait: parsedFormData?.maxWait ? parsedFormData?.maxWait: parsedFormData?.specialty === 'Primary Care Physician'? 3: 10 ,
+          maxWait: parsedFormData?.maxWait
+            ? parsedFormData?.maxWait
+            : parsedFormData?.specialty === "Primary Care Physician"
+            ? 3
+            : 10,
           availabilityOption: parsedFormData?.availabilityOption || "anytime",
           timeOfAppointment: parsedFormData?.timeOfAppointment
             ? new Date(parsedFormData.timeOfAppointment)
@@ -90,7 +94,7 @@ export default function AppointmentPage() {
         // setPills(
         //   parsedFormData?.objective ? parsedFormData.objective.split(", ") : []
         // );
-        setInputValue( parsedFormData?.objective )
+        setInputValue(parsedFormData?.objective);
         setSelectedInsurance(parsedFormData?.selectedOption === "no");
         setAvailabilityOption(parsedFormData?.availabilityOption || "anytime");
         setCustomAvailability(parsedFormData?.availability || "anytime");
@@ -125,22 +129,22 @@ export default function AppointmentPage() {
       return null;
     }
   };
-    useEffect(() => {
-      async function fetchAndLogData() {
-        const drsData = sessionStorage.getItem("statusData");
-        const formData = JSON.parse(sessionStorage.getItem("formData"));
-        console.log(formData);
-        if (drsData) {
-          const parsedDrsData = JSON.parse(drsData);
-          const payload = {
-            request_id: formData?.request_id,
-            ...parsedDrsData,
-          };
-          await logDrLists(payload);
-        }
+  useEffect(() => {
+    async function fetchAndLogData() {
+      const drsData = sessionStorage.getItem("statusData");
+      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      console.log(formData);
+      if (drsData) {
+        const parsedDrsData = JSON.parse(drsData);
+        const payload = {
+          request_id: formData?.request_id,
+          ...parsedDrsData,
+        };
+        await logDrLists(payload);
       }
-      fetchAndLogData();
-    }, []);
+    }
+    fetchAndLogData();
+  }, []);
 
   // Utility function to format date without timezone issues
   const formatDateToYYYYMMDD = (date) => {
@@ -198,7 +202,7 @@ export default function AppointmentPage() {
         toast.error("Please fill up all the required information");
         return;
       }
-      if(selectedInsurance === false && values.insurer === "") {
+      if (selectedInsurance === false && values.insurer === "") {
         setSelectedInsurance(true);
       }
       const updatedValues = {
@@ -206,7 +210,11 @@ export default function AppointmentPage() {
         subscriberId: values.subscriberId,
         objective: pills.length > 0 ? pills.join(", ") : values.objective,
         insurer: values.insurer ?? "",
-        selectedOption: selectedInsurance === true || selectedInsurance === false && values.insurer === "" ? "no" : "yes",
+        selectedOption:
+          selectedInsurance === true ||
+          (selectedInsurance === false && values.insurer === "")
+            ? "no"
+            : "yes",
         availability: customAvailability
           ? customAvailability
           : availabilityOption,
@@ -278,13 +286,10 @@ export default function AppointmentPage() {
   const handleInsuranceTypeChange = (value) => {
     formik.setFieldValue("insuranceType", value);
   };
-  useEffect(()=> {
-    formik.setFieldValue(
-      "objective",
-      inputValue
-    );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[inputValue])
+  useEffect(() => {
+    formik.setFieldValue("objective", inputValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputValue]);
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && inputValue.trim() !== "") {
       e.preventDefault();
@@ -326,7 +331,7 @@ export default function AppointmentPage() {
     Object.keys(formik.values).forEach((field) => {
       formik.setFieldTouched(field, true);
     });
-    formik.setFieldTouched('objective', true);
+    formik.setFieldTouched("objective", true);
 
     // Validate all fields
     formik.validateForm().then((errors) => {
@@ -339,6 +344,12 @@ export default function AppointmentPage() {
       }
     });
   };
+  useEffect(() => {
+    const savedInsurer = sessionStorage.getItem("selectedInsurer");
+    if (savedInsurer) {
+      formik.setFieldValue("insurer", savedInsurer);
+    }
+  }, []);
 
   return (
     <div>
@@ -357,6 +368,7 @@ export default function AppointmentPage() {
             </Label>
             <Input
               value={inputValue}
+              placeholder="Knee pain, fever, skin rash..."
               onChange={(e) => setInputValue(e.target.value)}
               // onKeyDown={handleKeyDown}
               // onBlur={handleInputBlur}
@@ -425,6 +437,7 @@ export default function AppointmentPage() {
                     showYearDropdown
                     showMonthDropdown
                     dropdownMode="select"
+                    placeholderText="Free after 3pm on weekdays"
                     yearDropdownItemNumber={100}
                     scrollableYearDropdown
                     minDate={new Date()}

@@ -211,6 +211,9 @@ export const Task: React.FC<TaskProps> = ({
         {...attributes}
         {...listeners}
         className="transition-all duration-300 w-full py-4 "
+        // type="button"
+        // onClick={handleExpand}
+        // onPointerDown={(e) => e.stopPropagation()}
       >
         <td className="flex  md:table-cell    ">
           <TooltipProvider>
@@ -269,32 +272,32 @@ export const Task: React.FC<TaskProps> = ({
                         </span>
                       ) : null}
 
-                      <a
-                        href={website}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <p
+                        // href={website}
+                        // target="_blank"
+                        // rel="noopener noreferrer"
                         className="block w-full  sm:max-w-full whitespace-normal overflow-hidden text-ellipsis cursor-pointer font-medium text-base leading-snug break-words"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          track("Dr_Website_Clicked");
-                        }}
+                        // onClick={(e) => {
+                        //   e.stopPropagation();
+                        //   track("Dr_Website_Clicked");
+                        // }}
                       >
                         {title}
-                      </a>
+                      </p>
                     </div>
 
-                    <a
-                      href={website}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <p
+                      // href={website}
+                      // target="_blank"
+                      // rel="noopener noreferrer"
                       className="cursor-pointer font-medium text-base sm:text-base hidden md:block "
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        track("Dr_Website_Clicked");
-                      }}
+                      // onClick={(e) => {
+                      //   e.stopPropagation();
+                      //   track("Dr_Website_Clicked");
+                      // }}
                     >
                       {title}
-                    </a>
+                    </p>
                     <div className="flex gap-16 pr-2">
                       <div className="md:flex  gap-1 font-normal text-[#333333] text-sm items-center hidden">
                         <img
@@ -306,7 +309,7 @@ export const Task: React.FC<TaskProps> = ({
                           {rating !== undefined ? rating : "-"}
                         </span>
                         <span>•</span>
-                        <span className="whitespace-nowrap underline">
+                        <span className="whitespace-nowrap ">
                           {review || 0} reviews
                         </span>
                       </div>
@@ -385,7 +388,7 @@ export const Task: React.FC<TaskProps> = ({
                       {rating !== undefined ? rating : "-"}
                     </span>
                     <span>•</span>
-                    <span className="whitespace-nowrap underline">
+                    <span className="whitespace-nowrap ">
                       {review || 0} reviews
                     </span>
                     <span className="px-1">|</span>
@@ -421,6 +424,19 @@ export const Task: React.FC<TaskProps> = ({
                     <button
                       type="button"
                       onClick={handleExpand}
+                      className="hover:text-gray-700 transition-colors cursor-pointer block"
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
+                      {!isExpanded && (
+                        <span className="mx-auto text-sm underline">
+                          view more
+                        </span>
+                      )}
+                    </button>
+                    {/* 
+                    <button
+                      type="button"
+                      onClick={handleExpand}
                       className=" hover:text-gray-700 transition-colors cursor-pointer  block"
                       onPointerDown={(e) => e.stopPropagation()}
                     >
@@ -436,7 +452,7 @@ export const Task: React.FC<TaskProps> = ({
                           view more
                         </span>
                       )}
-                    </button>
+                    </button> */}
                   </div>
                   {isExpanded && (
                     <div className="md:!table-row w-full bg-[#F2F6F9]  ">

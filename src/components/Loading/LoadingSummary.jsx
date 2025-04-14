@@ -3,7 +3,7 @@
 import Lottie from "lottie-react";
 import animationData from "../../../loading-summary.json"; // Adjust path as needed
 
-const LoadingSummary = ({ customstyle = { width: 100, height: 30 } }) => {
+const LoadingSummary = ({ customstyle = { width: 100, height: 30,  } }) => {
   return (
     <Lottie
       animationData={animationData}
