@@ -90,7 +90,7 @@ const Column: React.FC<ColumnProps> = ({
   //     </table>
   //   </div>
   // );
-  // console.log(tasks);
+  console.log(tasks);
   return (
     <div className="w-full">
       <table className="task-table w-full border-collapse md:table">

@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-//@ts-nocheck
 import { useState, useEffect, createContext, useContext, useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";

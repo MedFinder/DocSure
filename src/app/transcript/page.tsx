@@ -13,7 +13,6 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Column from "../../components/older-pages/search/features/column";
 import { toast } from "sonner";
 import axios from "axios";
-import { DoctorCard } from "./DoctorCard";
 import { ChatSection } from "./ChatSection";
 import {
   Dialog,
@@ -25,6 +24,7 @@ import {
 import { track } from "@vercel/analytics";
 import NavbarSection from "@/components/general-components/navbar-section";
 import FooterSection from "../landing/components/FooterSection";
+import { DoctorCard, ExpandProvider } from "./DoctorCard";
 
 const _doctors: Doctor[] = [
   {
@@ -193,6 +193,11 @@ export default function Transcript() {
   const requestIdRef = useRef(formData?.request_id);
   const callStatusRef = useRef(callStatus);
   const [context, setcontext] = useState("");
+  const [transcriptSummary, setTranscriptSummary] = useState({
+    place_id: "",
+    summary: "",
+  });
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [openModifyDialog, setOpenModifyDialog] = useState(false); // Dialog for Modify Request
@@ -228,6 +233,7 @@ export default function Transcript() {
     const storedData = sessionStorage.getItem("statusData");
     if (storedData) {
       const parsedData = JSON.parse(storedData);
+
       const sortedData = parsedData.results.map((item, index) => {
         // Transform each Google Places API result into a Doctor type
         return {
@@ -251,10 +257,14 @@ export default function Transcript() {
           vicinity: item.formatted_address || "",
           website: item.website || "",
           isSponsored: false, // Default not sponsored
+          opening_hours: {
+            status: item.opening_hours?.status || "",
+            time_info: item.opening_hours?.time_info || "",
+          },
         };
       });
-      // console.log({ parsedData });
-      // console.log({ sortedData });
+      console.log({ parsedData }, "parsedData");
+      console.log({ sortedData }, "sortedData");
       setDoctors(sortedData);
     } else {
       router.push("/");
@@ -531,94 +541,94 @@ export default function Transcript() {
       });
     }
   };
-  const connectWebSocket = (id?: string) => {
-    // if (wsRef?.current) {
-    //   //check if exisiting connection exists and disconnect
-    //   console.log("disconnect exisiting connection if it exists...");
-    //   wsRef?.current?.close();
-    // }
-    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
-      id ?? callStatusRef.current.ssid
-    }`;
-    console.log(url);
-    wsRef.current = new WebSocket(url);
+  // const connectWebSocket = (id?: string) => {
+  //   // if (wsRef?.current) {
+  //   //   //check if exisiting connection exists and disconnect
+  //   //   console.log("disconnect exisiting connection if it exists...");
+  //   //   wsRef?.current?.close();
+  //   // }
+  //   const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
+  //     id ?? callStatusRef.current.ssid
+  //   }`;
+  //   console.log(url);
+  //   wsRef.current = new WebSocket(url);
 
-    wsRef.current.onopen = () => {
-      console.log("WebSocket connected successfully and opened.");
-    };
-    wsRef.current.onmessage = async (event) => {
-      const data = JSON.parse(event.data);
-      // console.log("WebSocket Message:", data);
-      if (data.event === "call_ended") {
-        // console.log("Call Ended Data:", data);
-        setTimeout(async () => {
-          const call_ended_result = await handleEndCall(data?.call_sid);
-          console.log({ call_ended_result });
-          if (call_ended_result?.status == "yes") {
-            // Save relevant information for success page
-            const successMessage =
-              call_ended_result?.confirmation_message ??
-              "Appointment Booked Successfully";
-            sendSMS(successMessage);
-            const doctorPhone =
-              doctors[activeCallIndexRef.current]?.phone_number;
-            // make the sms call to the patient
-            setIsAppointmentBooked(true);
-            wsRef?.current?.close();
+  //   wsRef.current.onopen = () => {
+  //     console.log("WebSocket connected successfully and opened.");
+  //   };
+  //   wsRef.current.onmessage = async (event) => {
+  //     const data = JSON.parse(event.data);
+  //     // console.log("WebSocket Message:", data);
+  //     if (data.event === "call_ended") {
+  //       // console.log("Call Ended Data:", data);
+  //       setTimeout(async () => {
+  //         const call_ended_result = await handleEndCall(data?.call_sid);
+  //         console.log({ call_ended_result });
+  //         if (call_ended_result?.status == "yes") {
+  //           // Save relevant information for success page
+  //           const successMessage =
+  //             call_ended_result?.confirmation_message ??
+  //             "Appointment Booked Successfully";
+  //           sendSMS(successMessage);
+  //           const doctorPhone =
+  //             doctors[activeCallIndexRef.current]?.phone_number;
+  //           // make the sms call to the patient
+  //           setIsAppointmentBooked(true);
+  //           wsRef?.current?.close();
 
-            // Pass parameters to success page using router.push with query params
-            router.push(
-              `/success?success_message=${encodeURIComponent(
-                successMessage
-              )}&phone_number=${encodeURIComponent(doctorPhone || "")}`
-            );
-            return;
-          } else {
-            // console.log("call ended but not booked..this is where skip happens");
-            if (callStatusRef.current.ssid === data?.call_sid) {
-              toast.warning(
-                "Appointment could not be booked. Trying next doctor..."
-              );
-              moveToNextDoctor(
-                null,
-                activeCallIndexRef.current,
-                formData.request_id
-              );
-            }
-          }
-        }, 5000);
-      }
+  //           // Pass parameters to success page using router.push with query params
+  //           router.push(
+  //             `/success?success_message=${encodeURIComponent(
+  //               successMessage
+  //             )}&phone_number=${encodeURIComponent(doctorPhone || "")}`
+  //           );
+  //           return;
+  //         } else {
+  //           // console.log("call ended but not booked..this is where skip happens");
+  //           if (callStatusRef.current.ssid === data?.call_sid) {
+  //             toast.warning(
+  //               "Appointment could not be booked. Trying next doctor..."
+  //             );
+  //             moveToNextDoctor(
+  //               null,
+  //               activeCallIndexRef.current,
+  //               formData.request_id
+  //             );
+  //           }
+  //         }
+  //       }, 5000);
+  //     }
 
-      if (data.event === "call_in_process") {
-        const timestamp = new Date().toLocaleTimeString();
-        if (callStatusRef.current.ssid === data?.call_sid) {
-          setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
-        }
-      }
+  //     if (data.event === "call_in_process") {
+  //       const timestamp = new Date().toLocaleTimeString();
+  //       if (callStatusRef.current.ssid === data?.call_sid) {
+  //         setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
+  //       }
+  //     }
 
-      if (data.event === "call_not_picked") {
-        // doctor did not pick call...move to next
-        if (callStatusRef.current.ssid === data?.call_sid) {
-          toast.info("Doctor did not pick call. Trying next doctor...");
-          moveToNextDoctor(
-            null,
-            activeCallIndexRef.current,
-            formData.request_id
-          );
-        }
-      }
-    };
+  //     if (data.event === "call_not_picked") {
+  //       // doctor did not pick call...move to next
+  //       if (callStatusRef.current.ssid === data?.call_sid) {
+  //         toast.info("Doctor did not pick call. Trying next doctor...");
+  //         moveToNextDoctor(
+  //           null,
+  //           activeCallIndexRef.current,
+  //           formData.request_id
+  //         );
+  //       }
+  //     }
+  //   };
 
-    wsRef.current.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
+  //   wsRef.current.onclose = () => {
+  //     console.log("WebSocket disconnected");
+  //   };
 
-    wsRef.current.onerror = (error) => {
-      //console.error("WebSocket Error:", error);
-      console.log("Retrying WebSocket connection in 5 seconds...");
-      setTimeout(connectWebSocket, 5000);
-    };
-  };
+  //   wsRef.current.onerror = (error) => {
+  //     //console.error("WebSocket Error:", error);
+  //     console.log("Retrying WebSocket connection in 5 seconds...");
+  //     setTimeout(connectWebSocket, 5000);
+  //   };
+  // };
 
   // const logDrLists = async () => {
   //   // Create arrays to collect the values
@@ -667,6 +677,98 @@ export default function Transcript() {
   //     return null;
   //   }
   // };
+  const connectWebSocket = (id?: string) => {
+    // Check if a WebSocket connection already exists
+    if (wsRef?.current) {
+      console.log("Reusing existing WebSocket connection...");
+      return; // Exit if the WebSocket is already connected
+    }
+
+    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
+      id ?? callStatusRef.current.ssid
+    }`;
+    console.log(url);
+    wsRef.current = new WebSocket(url);
+
+    wsRef.current.onopen = () => {
+      console.log("WebSocket connected successfully and opened.");
+    };
+
+    wsRef.current.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
+
+      // Handle call-ended event
+      if (data.event === "call_ended") {
+        setTimeout(async () => {
+          const call_ended_result = await handleEndCall(data?.call_sid);
+          console.log({ call_ended_result });
+          if (call_ended_result?.status === "yes") {
+            const successMessage =
+              call_ended_result?.confirmation_message ??
+              "Appointment Booked Successfully";
+            sendSMS(successMessage);
+            const doctorPhone =
+              doctors[activeCallIndexRef.current]?.phone_number;
+            setIsAppointmentBooked(true);
+            wsRef?.current?.close();
+
+            router.push(
+              `/success?success_message=${encodeURIComponent(
+                successMessage
+              )}&phone_number=${encodeURIComponent(doctorPhone || "")}`
+            );
+          } else {
+            if (callStatusRef.current.ssid === data?.call_sid) {
+              toast.warning(
+                "Appointment could not be booked. Trying next doctor..."
+              );
+              moveToNextDoctor(
+                null,
+                activeCallIndexRef.current,
+                formData.request_id
+              );
+            }
+          }
+        }, 5000);
+      }
+
+      // Handle call-in-process event
+      if (data.event === "call_in_process") {
+        if (callStatusRef.current.ssid === data?.call_sid) {
+          setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
+        }
+      }
+
+      // Handle call-not-picked event
+      if (data.event === "call_not_picked") {
+        if (callStatusRef.current.ssid === data?.call_sid) {
+          toast.info("Doctor did not pick call. Trying next doctor...");
+          moveToNextDoctor(
+            null,
+            activeCallIndexRef.current,
+            formData.request_id
+          );
+        }
+      }
+
+      // Handle summary_stream event
+      if (data.event === "summary_stream" && data.data?.summary) {
+        setTranscriptLoading(false); // Stop loading when summary is received
+        setTranscriptSummary(data.data); // Update the transcript summary
+      }
+    };
+
+    wsRef.current.onclose = () => {
+      console.log("WebSocket disconnected");
+      wsRef.current = null; // Reset the WebSocket reference
+    };
+
+    wsRef.current.onerror = (error) => {
+      console.log("Retrying WebSocket connection in 5 seconds...");
+      setTimeout(() => connectWebSocket(id), 5000); // Retry connection after 5 seconds
+    };
+  };
+
   const getDisplayTranscript = () => {
     if (transcriptArray.length > 0) {
       // console.log(transcriptArray)
@@ -800,6 +902,8 @@ export default function Transcript() {
   // const handleCall = () => {
   //   window.location.href = `tel:${+2348167238042}`;
   // };
+  console.log(transcriptSummary);
+  // console.log(place_id);
 
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
@@ -828,26 +932,35 @@ export default function Transcript() {
               {/* Scrollable doctor cards container */}
 
               <div className="pr-2 h-[calc(100%-60px)]">
-                <ScrollArea className="h-full w-full md:w-auto">
-                  {doctors.map((doctor, index) => (
-                    <DoctorCard
-                      key={index}
-                      index={index}
-                      activeCallIndex={activeCallIndex}
-                      doctor={doctor}
-                      callStatus={callStatus}
-                      isAppointmentBooked={isAppointmentBooked}
-                      onSkip={() => {
-                        track("Skip_Call_Btn_Clicked");
-                        moveToNextDoctor(
-                          callStatus?.ssid,
-                          activeCallIndexRef.current,
-                          formData.request_id
-                        );
-                      }} // Move to next doctor
-                    />
-                  ))}
-                </ScrollArea>
+                <ExpandProvider>
+                  <ScrollArea className="h-full w-full md:w-auto">
+                    {doctors.map((doctor, index) => (
+                      <DoctorCard
+                        key={index}
+                        index={index}
+                        wsRef={wsRef}
+                        id={index.toString()}
+                        activeCallIndex={activeCallIndex}
+                        doctor={doctor}
+                        callStatus={callStatus}
+                        transcriptSummary={transcriptSummary}
+                        setTranscriptSummary={setTranscriptSummary}
+                        transcriptLoading={transcriptLoading}
+                        setTranscriptLoading={setTranscriptLoading}
+                        isAppointmentBooked={isAppointmentBooked}
+                        reconnectWebSocket={connectWebSocket}
+                        onSkip={() => {
+                          track("Skip_Call_Btn_Clicked");
+                          moveToNextDoctor(
+                            callStatus?.ssid,
+                            activeCallIndexRef.current,
+                            formData.request_id
+                          );
+                        }} // Move to next doctor
+                      />
+                    ))}
+                  </ScrollArea>
+                </ExpandProvider>
               </div>
 
               {/* Terminate Request Button - fixed at bottom */}

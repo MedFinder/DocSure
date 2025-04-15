@@ -1,5 +1,9 @@
 import { CallStatusType } from "../../components/older-pages/search/features/column";
 
+type OpeningHours = {
+  status: string;
+  time_info: string;
+};
 export interface Doctor {
   id: string;
   name: string;
@@ -13,6 +17,7 @@ export interface Doctor {
   status: "available" | "calling" | "queue" | "unavailable";
   waitTime: string;
   appointments: string;
+  opening_hours: OpeningHours;
 }
 
 export interface LocationInfoProps {
