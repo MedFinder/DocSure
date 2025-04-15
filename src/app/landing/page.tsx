@@ -10,6 +10,8 @@ import {
   MapPin,
   Menu,
   Search,
+  User,
+  CalendarIcon,
   X,
 } from "lucide-react";
 import Image from "next/image";
@@ -22,6 +24,8 @@ import {
   medicalSpecialtiesOptions,
 } from "@/constants/store-constants";
 import Link from "next/link";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import DoctorCard from "./DoctorCard";
 import DoctorCardCarousel from "./components/DoctorCardCarousel";
 import TestSwiper from "./components/test";
@@ -42,6 +46,7 @@ import AboutContentRight from "./components/AboutContentRight";
 import AboutContentLeft from "./components/AboutContentLeft";
 import { Footer } from "react-day-picker";
 import FooterSection from "./components/FooterSection";
+import QuickDetailsModal from "./components/QuickDetailsModal";
 
 const doctorTypes = [
   { value: "Primary care doctor", label: "Primary care doctor" },
@@ -102,8 +107,16 @@ const moreDoctorTypes = [
     label: "Nephrologist / Kidney Specialist",
   },
 ];
+// Custom styles for DatePicker
+const customDatePickerStyles = `
+  .react-datepicker__input-container input {
+    border: none
+  }
+`;
 const validationSchema = Yup.object().shape({
-  specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
+  specialty: Yup.string().required("Specialty is required"),
+  userName: Yup.string().required("Your name is required"),
+  dob: Yup.date().required("Date of birth is required").max(new Date(), "Date of birth cannot be in the future"),
 });
 const scrollToSection = (id: string, offset: number) => {
   const element = document.getElementById(id);
@@ -116,6 +129,7 @@ const scrollToSection = (id: string, offset: number) => {
 export default function LandingPage() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [selectedInsurer, setSelectedInsurer] = useState("");
   const [isLoading, setisLoading] = useState(false);
@@ -260,10 +274,23 @@ export default function LandingPage() {
 
   const fetchUserLocationAndPopularDrs = async () => {
     const storedDoctors = sessionStorage.getItem("popularDoctors");
-    const storedAddress = sessionStorage.getItem("selectedAddress");
+    const storedSpeciality = sessionStorage.getItem("selectedSpecialty");
     const storedLocation = sessionStorage.getItem("selectedLocation");
-    if (storedAddress) {
-      setAddressLocation(storedAddress);
+    const formData = sessionStorage.getItem("formData");
+    if(formData){
+      const parsedFormData = JSON.parse(formData);
+      //console.log(parsedFormData)
+      if (parsedFormData?.patientName) {
+        formik.setFieldValue("userName", parsedFormData.patientName);  
+      }
+      if(parsedFormData.dob){
+        formik.setFieldValue("dob", new Date(parsedFormData.dob));
+      }
+
+    }
+    if(storedSpeciality){
+      setPrefilledSpecialty(storedSpeciality);
+      formik.setFieldValue("specialty", storedSpeciality);  
     }
     if (storedLocation) {
       const { lat, lng } = JSON.parse(storedLocation);
@@ -358,7 +385,8 @@ export default function LandingPage() {
   const formik = useFormik({
     initialValues: {
       specialty: prefilledSpecialty || "",
-      insurance_carrier: "",
+      userName: "",
+      dob: null,
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -400,14 +428,32 @@ export default function LandingPage() {
         // Handle request_id when the promise resolves
         requestIdPromise.then((request_id) => {
           if (request_id) {
-            const updatedValues = { ...values, request_id };
-            sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+            const updatedValues = { 
+              ...values, 
+              request_id,
+              patientName: values.userName // Add userName as patientName for compatibility
+            };
+            // Get existing form data if it exists
+            const existingFormData = sessionStorage.getItem("formData");
+            let mergedValues = updatedValues;
+            
+            if (existingFormData) {
+              try {
+              const parsedExistingData = JSON.parse(existingFormData);
+              // Merge existing data with new values (new values take precedence)
+              mergedValues = { ...parsedExistingData, ...updatedValues };
+              } catch (error) {
+              console.error("Error parsing existing form data:", error);
+              }
+            }
+            
+            sessionStorage.setItem("formData", JSON.stringify(mergedValues));
           }
         });
 
-        sessionStorage.setItem("statusData", JSON.stringify(response.data));
+        await sessionStorage.setItem("statusData", JSON.stringify(response.data));
         sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
-        router.push("/appointment");
+        router.push("/transcript?confirmed=true");
       } catch (error) {
         console.error("Error submitting form:", error);
       }
@@ -452,6 +498,10 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">
       {/* Navbar */}
+      {/* Add style tag for custom DatePicker styling */}
+      <style jsx global>
+        {customDatePickerStyles}
+      </style>
       <nav className="fixed top-0 w-full bg-[#FCF8F1] shadow-sm p-4 flex justify-between items-center z-50  text-sm nav-header">
         <div className="flex justify-between items-center gap-6 ">
           <Image
@@ -669,62 +719,82 @@ export default function LandingPage() {
                       />
                     </div>
                   </div>
-                  {/* Insurer section */}
+                  {/* Name section (replacing insurer section) */}
                   <div className="flex items-center w-full sm:w-auto sm:flex-1">
                     <div className="flex items-center justify-center px-3">
-                      <BookText className="w-5 h-5 text-gray-500" />
+                      <User className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1  border-gray-400 md:border-none">
-                      <Autocomplete
-                        id="insurer"
-                        name="insurer"
-                        className="w-full"
-                        options={insuranceCarrierOptions}
-                        placeholder="Insurance carrier (optional)"
-                        value={selectedInsurer}
-                        selected={formik.values.insurance_carrier}
-                        onChange={(value) => {
-                          formik.setFieldValue("insurance_carrier", value);
-                          setSelectedInsurer(value);
+                    <div className="flex-1 border-gray-400 md:border-none">
+                      <Input
+                        id="userName"
+                        name="userName"
+                        className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+                        placeholder="Your name"
+                        value={formik.values.userName || ""}
+                        onChange={(e) => {
+                          formik.setFieldValue("userName", e.target.value);
                         }}
-                        clearable={false}
+                      />
+                    </div>
+                    {formik.errors.userName && formik.touched.userName && (
+                      <div className="text-red-500 text-xs px-2">
+                        {formik.errors.userName}
+                      </div>
+                    )}
+                  </div>
+                  {/* DOB section (replacing Location section) */}
+                  <div className="flex items-center w-full sm:flex-1">
+                    <div className="flex items-center justify-center px-3 h-full">
+                      <CalendarIcon className="w-5 h-5 text-gray-500" />
+                    </div>
+                    <div className="flex-1">
+                      <DatePicker
+                        selected={formik.values.dob}
+                        onChange={(date) => {
+                          formik.setFieldValue("dob", date);
+                          formik.setFieldTouched("dob", true);
+                        }}
+                        onBlur={() => formik.setFieldTouched("dob", true)}
+                        dateFormat="yyyy-MM-dd"
+                        showYearDropdown
+                        showMonthDropdown
+                        dropdownMode="select"
+                        yearDropdownItemNumber={100}
+                        scrollableYearDropdown
+                        maxDate={new Date()}
+                        autoComplete="off"
+                        aria-autocomplete="none"
+                        placeholderText="Your date of birth"
+                        className="w-full border-none!important focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+                        wrapperClassName="w-full"
                       />
                     </div>
                   </div>
-                  {/* Location section */}
-                  <div className="flex items-center w-full sm:flex-1">
-                    <div className="flex items-center justify-center px-3 h-full">
-                      <MapPin className="w-5 h-5 text-gray-500" />
-                    </div>
-                    <div className="flex-1">
-                      {isLoaded && (
-                        <StandaloneSearchBox
-                          onLoad={(ref) => (inputRefs.current[0] = ref)}
-                          onPlacesChanged={() => handleOnPlacesChanged(0)}
-                        >
-                          <Input
-                            type="text"
-                            placeholder="Address, city, zip code"
-                            className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none text-ellipsis"
-                            value={addressLocation || ""}
-                            onChange={(e) => setAddressLocation(e.target.value)}
-                            autoComplete="off"
-                            aria-autocomplete="none"
-                          />
-                        </StandaloneSearchBox>
-                      )}
-                    </div>
-                  </div>
                   <div className="mx-3">
-                    <Button className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 my-4 h-12 items-center justify-center w-full md:w-auto md:hidden">
-                      <Search className="w-5 h-5 text-white" /> Search
+                    <Button 
+                      className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 my-4 h-12 items-center justify-center w-full md:w-auto md:hidden"
+                      disabled={
+                        isLoading || 
+                        !formik.values.specialty || 
+                        !selectedLocation || 
+                        !formik.values.userName || 
+                        !formik.values.dob
+                      }
+                      onClick={formik.handleSubmit}
+                      type="submit"
+                    >
+                      <Search className="w-5 h-5 text-white" /> Book
                     </Button>
                   </div>
                 </div>
               </div>
               <Button
                 disabled={
-                  isLoading || !formik.values.specialty || !selectedLocation
+                  isLoading || 
+                  !formik.values.specialty || 
+                  !selectedLocation || 
+                  !formik.values.userName || 
+                  !formik.values.dob
                 }
                 onClick={formik.handleSubmit} // Explicitly trigger form submission
                 type="submit"
@@ -734,16 +804,28 @@ export default function LandingPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 text-white animate-spin" />{" "}
-                    Searching
+                    Booking
                   </>
                 ) : (
                   <>
-                    <Search className="w-5 h-5 text-white" /> Search
+                    <Search className="w-5 h-5 text-white" /> Book
                   </>
                 )}
               </Button>
             </form>
-
+            <div
+              className="text-[#E5573F] md:flex space-x-2 items-center hidden cursor-pointer hover:underline"
+              onClick={() => {
+                // Save selected specialty before opening modal
+                if (selectedSpecialty) {
+                  sessionStorage.setItem("selectedSpecialty", selectedSpecialty);
+                }
+                setIsModalOpen(true);
+              }}
+            >
+              <p>Provide additional details to get appointments faster</p>
+              <ArrowRight />
+            </div>
             {/* Specialty Selection */}
             <ScrollArea className="w-full whitespace-nowrap md:flex gap-4 md:pt-4 pt-0 hidden">
               <div className="flex gap-4 px-1 pb-2 md:max-w-full max-w-[50%] justify-center">
@@ -768,13 +850,13 @@ export default function LandingPage() {
             </ScrollArea>
             {/* <div></div> */}
 
-            <Link
+            {/* <Link
               href="/coming-soon"
               className="text-[#E5573F] md:flex space-x-2 mt-2 items-center hidden"
             >
               <p>Search for a doctor, hospital or medical group</p>
               <ArrowRight />
-            </Link>
+            </Link> */}
           </div>
 
           {/* Images positioned at the bottom edges */}
@@ -1032,6 +1114,13 @@ export default function LandingPage() {
         {/* Footer Section */}
         <FooterSection />
       </main>
+      
+      {/* Quick Details Modal */}
+      <QuickDetailsModal 
+        open={isModalOpen} 
+        onOpenChange={setIsModalOpen}
+        initialSpecialty={selectedSpecialty}
+      />
     </div>
   );
 }

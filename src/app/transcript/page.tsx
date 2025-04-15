@@ -430,6 +430,7 @@ export default function Transcript() {
         insurer,
         maxWait,
       } = formData;
+      // console.log(formData)
 
       let context =
         "Clinical concerns:" +
@@ -456,10 +457,10 @@ export default function Transcript() {
         request_id,
         objective: "Schedule an appointment",
         context: context,
-        patient_number: phoneNumber,
+        patient_number: phoneNumber ?? '510-902-8776',
         patient_name: patientName,
         hospital_name: nameOfOrg,
-        patient_email: email,
+        patient_email: email ?? 'care@meomind.com',
         doctor_number: doctorPhoneNumber,
       };
       sessionStorage.setItem("context", context);
