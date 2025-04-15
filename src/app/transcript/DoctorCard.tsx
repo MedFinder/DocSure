@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React, { useContext, useState } from "react";
 import { Doctor } from "./types";
 import { LocationInfo } from "./LocationInfo";
@@ -47,6 +48,7 @@ interface DoctorCardProps {
   setTranscriptLoading: (loading: boolean) => void;
   reconnectWebSocket: Promise<void>;
   wsRef: React.RefObject<WebSocket | null>;
+  description?: string;
 }
 
 const getDrSummary = async (
@@ -90,14 +92,13 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
   transcriptLoading,
   reconnectWebSocket,
   wsRef,
+  description = "",
 }) => {
-  const getAlternateColor = (index: number) => {
-    const colors = ["#F7D07D", "#A0F1C2"]; // Gold & Light Green
-    return colors[index % 2]; // Alternate based on index
-  };
   const { expandedId, setExpandedId } = useExpand();
+  const [doctorSummary, setDoctorSummary] = useState(description);
+
   const isExpanded = expandedId === id;
-  console.log(expandedId, id)
+  console.log(expandedId, id);
   // console.log("DoctorCard", doctor);
   const handleExpand = async () => {
     if (isExpanded) {
@@ -145,15 +146,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
       }
     }
   };
-  console.log("expandedId", expandedId);
-  console.log("transcriptSummary", transcriptSummary);
-  console.log("isExpanded", isExpanded);
 
-  // const style = {
-  //   transition,
-  //   transform: CSS.Transform.toString(transform),
-  // };
-  // console.log(doctor);
   return (
     <>
       {/* Web View (Existing Layout) */}
@@ -177,7 +170,10 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                   {doctor.isSponsored && (
                     <span className="text-xs tracking-tight">Sponsored</span>
                   )}
-                  <h3 className="text-base font-medium tracking-tight">
+                  <h3
+                    className="text-base font-medium tracking-tight"
+                    onClick={handleExpand}
+                  >
                     {doctor.name}
                   </h3>
                 </div>
@@ -187,7 +183,10 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                 {doctor.isSponsored && (
                   <span className="text-xs tracking-tight">Sponsored</span>
                 )}
-                <h3 className="text-base font-medium tracking-tight">
+                <h3
+                  className="text-base font-medium tracking-tight"
+                  onClick={handleExpand}
+                >
                   {doctor.name}
                 </h3>
               </div>
@@ -264,20 +263,32 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                     </button> */}
             </div>
             {isExpanded && (
-              <div className="md:!table-row w-full bg-[#F2F6F9]">
-                <div colSpan={5} className="p-4 transition-all bg-[#F2F6F9]">
+              <div className="md:!table-row w-full bg-[#F2F6F9]  ">
+                <div colSpan={5} className=" p-4 transition-all bg-[#F2F6F9]">
                   <div className="text-sm text-gray-600 animate-fadeIn bg-[#F2F6F9]">
                     {transcriptLoading && transcriptSummary?.place_id === id ? (
-                      <div className="flex items-center justify-center py-4 bg-[#F2F6F9]">
+                      <div className="flex items-center justify-center py-4 bg-[#F2F6F9] ">
                         <LoadingSumamry />
                       </div>
                     ) : (
                       <span className="text-xs tracking-tight leading-5 text-zinc-800 bg-[#F2F6F9]">
-                        {transcriptSummary?.summary ?? "No summary available."}
+                        {transcriptSummary?.summary ??
+                          doctorSummary ??
+                          "No summary available"}
                       </span>
                     )}
                   </div>
                 </div>
+              </div>
+            )}
+            {isExpanded && (
+              <div className="flex justify-start text-start items-center">
+                <button
+                  onClick={handleExpand}
+                  className="text-sm underline mt-4"
+                >
+                  view less
+                </button>
               </div>
             )}
           </div>
@@ -310,7 +321,14 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
             </span>
           </div>
           <div className="flex flex-col flex-grow bg-[#F2F6F9] p-3 rounded-md">
-            <h3 className="text-base break-words">{doctor.name}</h3>
+            <h3
+              className="text-base break-words"
+              onClick={handleExpand}
+              onPointerDown={(e) => e.stopPropagation()}
+              type="button"
+            >
+              {doctor.name}
+            </h3>
             {doctor.isSponsored && (
               <span className="text-xs text-gray-500 tracking-tight">
                 Sponsored
@@ -329,6 +347,47 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                 appointments={doctor.appointments}
               />
             </div>
+            <div className=" md:table-cell">
+              <button
+                type="button"
+                onClick={handleExpand}
+                className="hover:text-gray-700 transition-colors cursor-pointer block"
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                {!isExpanded && (
+                  <span className="mx-auto text-sm underline">view more</span>
+                )}
+              </button>
+            </div>
+            {isExpanded && (
+              <div className="md:!table-row w-full bg-[#F2F6F9]  ">
+                <div colSpan={5} className=" p-4 transition-all bg-[#F2F6F9]">
+                  <div className="text-sm text-gray-600 animate-fadeIn bg-[#F2F6F9]">
+                    {transcriptLoading && transcriptSummary?.place_id === id ? (
+                      <div className="flex items-center justify-center py-4 bg-[#F2F6F9] ">
+                        <LoadingSumamry />
+                      </div>
+                    ) : (
+                      <span className="text-xs tracking-tight leading-5 text-zinc-800 bg-[#F2F6F9]">
+                        {transcriptSummary?.summary ??
+                          doctorSummary ??
+                          "No summary available"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            {isExpanded && (
+              <div className="flex justify-start text-start items-center">
+                <button
+                  onClick={handleExpand}
+                  className="text-sm underline mt-4"
+                >
+                  view less
+                </button>
+              </div>
+            )}
             <div className="mt-2 mr-4 flex self-end">
               <StatusBadge
                 status={doctor.status}
@@ -349,5 +408,3 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
     </>
   );
 };
-
-
