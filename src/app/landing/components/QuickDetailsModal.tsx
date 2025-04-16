@@ -35,13 +35,13 @@ import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 const validationSchema = Yup.object().shape({
   //objective: Yup.string().required("Please add at least one topic to discuss"),
   patientName: Yup.string().required("Patient name is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  phoneNumber: Yup.string().required("Phone number is required"),
+  email: Yup.string().email("Invalid email").notRequired(),
+  phoneNumber: Yup.string().notRequired(),
   dob: Yup.date()
     .required("Date of birth is required")
     .max(new Date(), "Date of birth cannot be in the future"),
-  gender: Yup.string().required("Please select a gender"),
-  availabilityOption: Yup.string().required("Please select an availability option"),
+  gender: Yup.string().notRequired(),
+  availabilityOption: Yup.string().notRequired(),
   timeOfAppointment: Yup.string().when("availabilityOption", {
     is: "input-availability",
     then: () => Yup.string().required("Please describe your availability"),
@@ -168,6 +168,7 @@ export default function QuickDetailsModal({ open, onOpenChange, updatePreference
     },
     validationSchema,
     onSubmit: async (values) => {
+      const temp_sepciality = sessionStorage.getItem("selectedSpecialty")
       track("QuickDetails_Btn_Clicked");
 
       if (!formik.isValid) {
@@ -180,7 +181,7 @@ export default function QuickDetailsModal({ open, onOpenChange, updatePreference
       const updatedValues = {
         ...values,
         dob: formatDateToYYYYMMDD(values.dob),
-        objective: values.objective,
+        objective: values.objective || `${temp_sepciality} consultation`,
         subscriberId: values.subscriberId,
         selectedOption: selectedInsurance ? "no" : "yes",
         availability: customAvailability ? customAvailability : availabilityOption,
@@ -205,10 +206,10 @@ export default function QuickDetailsModal({ open, onOpenChange, updatePreference
        // Store form data in session storage
         window.sessionStorage.setItem("formData", JSON.stringify(mergedValues));
         
-        // Store specialty in session storage if not already there
-        if (initialSpecialty && !sessionStorage.getItem("selectedSpecialty")) {
-          sessionStorage.setItem("selectedSpecialty", initialSpecialty);
-        }
+        // // Store specialty in session storage if not already there
+        // if (initialSpecialty && !sessionStorage.getItem("selectedSpecialty")) {
+        //   sessionStorage.setItem("selectedSpecialty", initialSpecialty);
+        // }
 
         await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing
 
@@ -710,11 +711,13 @@ export default function QuickDetailsModal({ open, onOpenChange, updatePreference
                     disabled={isLoading || formik.isSubmitting}
                 >
                     {isLoading || formik.isSubmitting ? (
-                    <span className="px-6">
-                        <Loader2 className="animate-spin w-5 h-5" />
-                    </span>
+                        <span className="px-6">
+                            <Loader2 className="animate-spin w-5 h-5" />
+                        </span>
+                    ) : updatePreferences ? (
+                        "Modify My Request"
                     ) : (
-                    "Book appointment"
+                        "Book appointment"
                     )}
                 </Button>
             </div>

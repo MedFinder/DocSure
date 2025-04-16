@@ -409,6 +409,7 @@ export default function Transcript() {
       );
       // Use customformdata if available, otherwise use the state formData
       const currentFormData = customformdata || formData;
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
       
       if (!currentFormData) {
         console.error("No formData found in sessionStorage or provided as parameter.");
@@ -420,7 +421,7 @@ export default function Transcript() {
         email,
         phoneNumber,
         patientName,
-        objective = `${currentFormData?.speciality} consultation`,
+        objective = `${savedSpecialty} consultation`,
         subscriberId,
         groupId,
         selectedOption = 'no',

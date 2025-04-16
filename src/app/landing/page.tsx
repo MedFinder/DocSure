@@ -307,18 +307,12 @@ export default function LandingPage() {
     const defaultLat = 37.7749; // Default latitude (e.g., San Francisco)
     const defaultLng = -122.4194; // Default longitude (e.g., San Francisco)
 
+    // If geolocation is not supported by the browser
     if (!navigator.geolocation) {
-      toast.error(
-        "Geolocation is not supported by your browser. Using default location."
-      );
-      const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
-      if (popularDoctors?.results?.length > 0) {
-        const doctorlists = popularDoctors?.results?.slice(0, 20);
-        setpopulardoctors(doctorlists);
-        sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
-      }
+      await getLocationFromIP();
       return;
     }
+    // If geolocation is supported, try to get user's position
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const lat = position.coords.latitude;
@@ -331,8 +325,7 @@ export default function LandingPage() {
           );
 
           const address =
-            geocodeResponse.data.results[0]?.formatted_address || "";
-          // console.log(address)
+            geocodeResponse.data.results[0]?.formatted_address || ""; 
           setSelectedLocation({ lat, lng });
           setAddressLocation(address); // Set the fetched address
           sessionStorage.setItem("selectedAddress", address);
@@ -352,19 +345,68 @@ export default function LandingPage() {
           }
         } catch (error) {
           console.error("Error fetching address or popular doctors:", error);
+          await getLocationFromIP();
         }
       },
       async (error) => {
         console.error("Error getting location:", error);
-        // toast.error("Unable to retrieve your location. Using default location.");
-        const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
+        await getLocationFromIP();
+      }
+    );
+  };
+
+  // Function to get location from IP address
+  const getLocationFromIP = async () => {
+    console.log('fetching location from ip....')
+    try {
+      // Use IP-based geolocation as fallback
+      const ipGeolocationResponse = await axios.get('https://ipapi.co/json/');
+      if (ipGeolocationResponse.data && ipGeolocationResponse.data.latitude && ipGeolocationResponse.data.longitude) {
+        const lat = ipGeolocationResponse.data.latitude;
+        const lng = ipGeolocationResponse.data.longitude;
+        const city = ipGeolocationResponse.data.city;
+        const region = ipGeolocationResponse.data.region;
+        const country = ipGeolocationResponse.data.country_name;
+        const formattedAddress = `${city}, ${region}, ${country}`;
+        
+        setSelectedLocation({ lat, lng });
+        setAddressLocation(formattedAddress);
+        sessionStorage.setItem("selectedAddress", formattedAddress);
+        sessionStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
+        
+        const popularDoctors = await getPopularDrs(lat, lng);
         if (popularDoctors?.results?.length > 0) {
           const doctorlists = popularDoctors?.results?.slice(0, 20);
           setpopulardoctors(doctorlists);
           sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
         }
+      } else {
+        // IP geolocation failed, use default location
+        toast.error("Could not determine your location. Using default location.");
+        getDefaultLocation();
       }
-    );
+    } catch (error) {
+      console.error("Error with IP geolocation:", error);
+      toast.error("Could not determine your location. Using default location.");
+      getDefaultLocation();
+    }
+  };
+
+  // Function to use default location when all else fails
+  const getDefaultLocation = async () => {
+    const defaultLat = 37.7749; // San Francisco
+    const defaultLng = -122.4194;
+    setSelectedLocation({ lat: defaultLat, lng: defaultLng });
+    setAddressLocation("San Francisco, CA, USA");
+    sessionStorage.setItem("selectedAddress", "San Francisco, CA, USA");
+    sessionStorage.setItem("selectedLocation", JSON.stringify({ lat: defaultLat, lng: defaultLng }));
+    
+    const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
+    if (popularDoctors?.results?.length > 0) {
+      const doctorlists = popularDoctors?.results?.slice(0, 20);
+      setpopulardoctors(doctorlists);
+      sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+    }
   };
   const logRequestInfo = async () => {
     const savedAddress = sessionStorage.getItem("selectedAddress");
