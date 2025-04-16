@@ -69,16 +69,19 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      const savedInsurer = sessionStorage.getItem("selectedInsurer");
+      const formData = sessionStorage.getItem("formData");
+      if(formData){
+        const parsedFormData = JSON.parse(formData);
+        //console.log(parsedFormData)
+        if (parsedFormData?.insurer) {
+          setInsurer(parsedFormData?.insurer);
+          formik.setFieldValue("insurance_carrier", parsedFormData?.insurer); // ✅ correct field 
+        }
+      }
       if (savedSpecialty) {
         setSpecialty(savedSpecialty);
         formik.setFieldValue("specialty", savedSpecialty);
       }
-      if (savedInsurer) {
-        setInsurer(savedInsurer);
-        formik.setFieldValue("insurance_carrier", savedInsurer); // ✅ correct field
-      }
-
       const savedAddress = sessionStorage.getItem("selectedAddress");
       const savedAddressLocation = sessionStorage.getItem("selectedLocation");
       const AddressLocation = JSON.parse(savedAddressLocation);
@@ -93,7 +96,7 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [openModal, isModalOpen]); // Added openModal and isModalOpen to dependency array
 
   const formik = useFormik({
     initialValues: {
@@ -148,6 +151,12 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
       }
     },
   });
+  const handleFieldClick = () => {
+    if (updatePreferences) {
+      formik.submitForm();
+      return
+    }
+  };
 
   // useEffect(() => {
   //   if (selectedOption === "no") {
@@ -226,7 +235,7 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
                     <div className="flex items-center justify-center px-3 md:hidden">
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1 border-b border-gray-400 md:border-none">
+                    <div onClick={handleFieldClick} className="flex-1 border-b border-gray-400 md:border-none">
                       <Autocomplete
                         id="specialty"
                         name="specialty"
@@ -240,6 +249,7 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
                         }}
                         clearable={false}
                         navbar
+                        enabled={updatePreferences?false: true}
                       />
                     </div>
                   </div>
@@ -248,7 +258,7 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
                     <div className="flex items-center justify-center px-3">
                       <BookText className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1 border-b border-gray-400 md:border-none">
+                    <div onClick={handleFieldClick} className="flex-1 border-b border-gray-400 md:border-none">
                       <Autocomplete
                         id="insurer"
                         name="insurer"
@@ -262,15 +272,17 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
                           formik.setFieldValue("insurance_carrier", value);
                         }}
                         clearable={false}
+                        enabled={updatePreferences?false: true}
                       />
                     </div>
                   </div>
                   {/* Location Section */}
+                  {!updatePreferences &&
                   <div className="flex items-center w-full sm:flex-1">
                     <div className="flex items-center justify-center px-3 h-full">
                       <MapPin className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1">
+                    <div onClick={handleFieldClick} className="flex-1">
                       {isLoaded && (
                         <StandaloneSearchBox
                           onLoad={(ref) => (inputRefs.current[0] = ref)}
@@ -289,6 +301,7 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
                       )}
                     </div>
                   </div>
+                  }
                 </div>
 
                 {/* Search Button - Stays on the right, filling height on mobile */}

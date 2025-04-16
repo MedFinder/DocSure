@@ -937,8 +937,7 @@ export default function Transcript() {
       {/* Info section with border bottom */}
         <div className="w-full mt-20">
           <p className="text-sm md:text-sm text-gray-700">
-            Docsure AI will call top-rated doctors in this sequence, seek
-            an appointment for you, and enquire about insurance.
+            Docsure AI is calling the top-rated doctors in your area to seek an appointment for you.
           </p>
         </div>
         <div className=" flex  w-full  text-[#333333] md:text-lg mt-5 ">
@@ -1019,7 +1018,7 @@ export default function Transcript() {
                 >
                   Terminate Request
                 </button>
-                <button
+                {/* <button
                   onClick={() => setOpenModifyDialog(true)}
                   disabled={!callStatus?.isInitiated}
                   className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
@@ -1029,7 +1028,7 @@ export default function Transcript() {
                   }`}
                 >
                   Modify My Request
-                </button>
+                </button> */}
                 <button
                   onClick={() => setOpenTerminateAndCallDialog(true)}
                   disabled={!callStatus?.isInitiated}
