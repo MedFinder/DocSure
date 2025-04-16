@@ -19,7 +19,7 @@ import { Autocomplete } from "../../../../components/ui/autocomplete";
 import { Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import { insuranceCarrierOptions } from "@/constants/store-constants";
+import { insuranceCarrierOptions, medicalSpecialtiesOptions } from "@/constants/store-constants";
 import { track } from "@vercel/analytics";
 import { toast } from "sonner";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
@@ -135,6 +135,7 @@ export default function QuickDetailsModal({
           email: parsedFormData.email || "",
           dob: parsedFormData.dob ? new Date(parsedFormData.dob) : null,
           gender: parsedFormData.gender || "",
+          specialty: parsedFormData.specialty || "",
           insurer: parsedFormData?.insurer || "",
           selectedOption: parsedFormData?.selectedOption || "yes",
           insuranceType: parsedFormData?.insuranceType || "ppo",
@@ -200,6 +201,10 @@ export default function QuickDetailsModal({
     validationSchema,
     onSubmit: async (values) => {
       const temp_sepciality = sessionStorage.getItem("selectedSpecialty");
+      const speciality_value =
+      formik.values.specialty === "Prescription / Refill"
+        ? "Primary Care Physician"
+        : formik.values.specialty;
       track("QuickDetails_Btn_Clicked");
 
       if (!formik.isValid) {
@@ -212,7 +217,7 @@ export default function QuickDetailsModal({
       const updatedValues = {
         ...values,
         dob: formatDateToYYYYMMDD(values.dob),
-        objective: values.objective || `${temp_sepciality} consultation`,
+        objective: values.objective || `${formik.values.specialty} consultation`,
         subscriberId: values.subscriberId,
         selectedOption: selectedInsurance ? "no" : "yes",
         availability: customAvailability
@@ -225,7 +230,9 @@ export default function QuickDetailsModal({
         // Get existing form data if it exists
         const existingFormData = sessionStorage.getItem("formData");
         let mergedValues = updatedValues;
-
+        if (formik.values.specialty) {
+            sessionStorage.setItem("selectedSpecialty", formik.values.specialty);
+          }
         if (existingFormData) {
           try {
             const parsedExistingData = JSON.parse(existingFormData);
@@ -370,6 +377,12 @@ export default function QuickDetailsModal({
     formik.setFieldTouched("dob", true); // Mark as touched when changed
   };
 
+  // Handle medical specialty change
+  const handleSpecialtyChange = (value) => {
+    formik.setFieldValue("specialty", value);
+    formik.setFieldTouched("specialty", true);
+  };
+
   // Update gender
   const handleGenderChange = (value) => {
     setGender(value);
@@ -391,12 +404,12 @@ export default function QuickDetailsModal({
 
     // Validate all fields
     formik.validateForm().then((errors) => {
-      if (Object.keys(errors).length === 0 && gender) {
+      if (Object.keys(errors).length === 0) {
         formik.handleSubmit(e);
       } else {
-        if (!gender) {
-          formik.setFieldError("gender", "Please select a gender");
-        }
+        // if (!gender) {
+        //   formik.setFieldError("gender", "Please select a gender");
+        // }
         formik.setErrors(errors);
       }
     });
@@ -615,6 +628,33 @@ export default function QuickDetailsModal({
                 <>
                   <div className="space-y-2">
                     <Label className="text-[#333333BF] text-sm">
+                      Medical Specialty
+                    </Label>
+                    <Autocomplete
+                      id="specialty"
+                      name="specialty"
+                      className={cn(
+                        "w-full border border-[#333333] rounded-md",
+                        formik.touched.specialty && formik.errors.specialty
+                          ? "border-red-500"
+                          : ""
+                      )}
+                      options={medicalSpecialtiesOptions}
+                      value={formik.values.specialty}
+                      selected={formik.values.specialty}
+                      onChange={handleSpecialtyChange}
+                      clearable={false}
+                      placeholder="Select a medical specialty"
+                    />
+                    {formik.touched.specialty && formik.errors.specialty && (
+                      <div className="text-red-500 text-sm">
+                        {formik.errors.specialty}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-[#333333BF] text-sm">
                       Patient name
                     </Label>
                     <Input
@@ -698,11 +738,11 @@ export default function QuickDetailsModal({
                     </div>
                   ))}
                 </RadioGroup>
-                {genderTouched && !gender && (
+                {/* {genderTouched && !gender && (
                   <div className="text-red-500 text-sm">
                     Please select a gender
                   </div>
-                )}
+                )} */}
               </div>
               <div className="space-y-2">
                 <div className="flex flex-col space-y-4">

@@ -349,7 +349,7 @@ export default function LandingPage() {
         }
       },
       async (error) => {
-        console.error("Error getting location:", error);
+        console.log("Error getting location:", error);
         await getLocationFromIP();
       }
     );
@@ -495,7 +495,9 @@ export default function LandingPage() {
 
         await sessionStorage.setItem("statusData", JSON.stringify(response.data));
         sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
-        router.push("/transcript?confirmed=true");
+        setTimeout(() => {
+          router.push("/transcript?confirmed=true");
+        }, 500);
       } catch (error) {
         console.error("Error submitting form:", error);
       }
