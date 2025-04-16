@@ -98,7 +98,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
   const [doctorSummary, setDoctorSummary] = useState(description);
 
   const isExpanded = expandedId === id;
-  console.log(expandedId, id);
+  //console.log(expandedId, id);
   // console.log("DoctorCard", doctor);
   const handleExpand = async () => {
     if (isExpanded) {

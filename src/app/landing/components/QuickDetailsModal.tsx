@@ -60,7 +60,7 @@ const genderOptions = [
   { value: "Non-binary", label: "Non-binary" },
 ];
 
-export default function QuickDetailsModal({ open, onOpenChange, initialSpecialty = "" }) {
+export default function QuickDetailsModal({ open, onOpenChange, updatePreferences = false, confirmUpdatePreferences,  initialSpecialty = "" }) {
   const [inputValue, setInputValue] = useState("");
   const [pills, setPills] = useState<string[]>([]);
     const [selectedLocation, setSelectedLocation] = useState(null);
@@ -211,9 +211,14 @@ export default function QuickDetailsModal({ open, onOpenChange, initialSpecialty
         }
 
         await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing
-        
+
+        if(updatePreferences){
+            onOpenChange(false); 
+            confirmUpdatePreferences()
+        } else {           
         // Redirect to next page
         router.push("/transcript?confirmed=true");
+        }
       } catch (error) {
         console.error("Error submitting form:", error);
         toast.error("An error occurred. Please try again.");
@@ -398,8 +403,8 @@ export default function QuickDetailsModal({ open, onOpenChange, initialSpecialty
                   value={formik.values.phoneNumber}
                   placeholder="Your phone number"
                 />
-                <span className="text-sm text-gray-600 block pt-2">
-                    Appointment confirmation will be sent to this phone number.
+                <span className="text-[#333333BF] text-xs text-center">
+                    Appointment confirmation will be sent to this number.
                 </span>
                 {formik.errors.phoneNumber && formik.touched.phoneNumber && (
                   <div className="text-red-500 text-sm">
@@ -494,8 +499,11 @@ export default function QuickDetailsModal({ open, onOpenChange, initialSpecialty
                   </div>
                 )}
               </div>
-
-              <div className="space-y-3">
+            </div>
+            
+            {/* Right column - Patient details */}
+            <div className="space-y-5">
+                <div className="space-y-3">
                 <Label className="text-[#333333BF]">Patient availability</Label>
 
                 <RadioGroup
@@ -543,11 +551,7 @@ export default function QuickDetailsModal({ open, onOpenChange, initialSpecialty
                   )}
                 </RadioGroup>
               </div>
-            </div>
-            
-            {/* Right column - Patient details */}
-            <div className="space-y-5">
-              <div className="space-y-2 pt-2">
+              <div className="space-y-2">
                 <div className="flex">
                   <Label className="text-[#333333BF] text-sm">Max wait time:</Label>
                   <span className="text-sm text-gray-500 pl-2">
@@ -562,60 +566,63 @@ export default function QuickDetailsModal({ open, onOpenChange, initialSpecialty
                   }}
                 />
               </div>
-              
-              <div className="space-y-2">
-                <Label className="text-[#333333BF] text-sm">Patient name</Label>
-                <Input
-                  className={
-                    formik.errors.patientName && formik.touched.patientName
-                      ? "border-red-500 rounded-md"
-                      : "border border-[#333333] rounded-md"
-                  }
-                  name="patientName"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.patientName}
-                  placeholder="Full name"
-                />
-                {formik.errors.patientName && formik.touched.patientName && (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.patientName}
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-[#333333BF] text-sm">Date of Birth</Label>
-                <div
-                  className={`w-full ${
-                    formik.errors.dob && formik.touched.dob
-                      ? "date-picker-error"
-                      : ""
-                  }`}
-                >
-                  <DatePicker
-                    selected={formik.values.dob}
-                    onChange={handleDateChange}
+              {updatePreferences && 
+                <>
+                 <div className="space-y-2">
+                    <Label className="text-[#333333BF] text-sm">Patient name</Label>
+                    <Input
+                    className={
+                        formik.errors.patientName && formik.touched.patientName
+                        ? "border-red-500 rounded-md"
+                        : "border border-[#333333] rounded-md"
+                    }
+                    name="patientName"
+                    onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    dateFormat="yyyy-MM-dd"
-                    showYearDropdown
-                    showMonthDropdown
-                    dropdownMode="select"
-                    yearDropdownItemNumber={100}
-                    scrollableYearDropdown
-                    maxDate={new Date()}
-                    autoComplete="off"
-                    aria-autocomplete="none"
-                    name="dob"
-                    className="w-full p-2 border border-[#333333] rounded-md"
-                    wrapperClassName="w-full"
-                    placeholderText="Select date of birth"
-                  />
+                    value={formik.values.patientName}
+                    placeholder="Full name"
+                    />
+                    {formik.errors.patientName && formik.touched.patientName && (
+                    <div className="text-red-500 text-sm">
+                        {formik.errors.patientName}
+                    </div>
+                    )}
                 </div>
-                {formik.errors.dob && formik.touched.dob && (
-                  <div className="text-red-500 text-sm">{formik.errors.dob}</div>
-                )}
-              </div>
+                
+                <div className="space-y-2">
+                    <Label className="text-[#333333BF] text-sm">Date of Birth</Label>
+                    <div
+                    className={`w-full ${
+                        formik.errors.dob && formik.touched.dob
+                        ? "date-picker-error"
+                        : ""
+                    }`}
+                    >
+                    <DatePicker
+                        selected={formik.values.dob}
+                        onChange={handleDateChange}
+                        onBlur={formik.handleBlur}
+                        dateFormat="yyyy-MM-dd"
+                        showYearDropdown
+                        showMonthDropdown
+                        dropdownMode="select"
+                        yearDropdownItemNumber={100}
+                        scrollableYearDropdown
+                        maxDate={new Date()}
+                        autoComplete="off"
+                        aria-autocomplete="none"
+                        name="dob"
+                        className="w-full p-2 border border-[#333333] rounded-md"
+                        wrapperClassName="w-full"
+                        placeholderText="Select date of birth"
+                    />
+                    </div>
+                    {formik.errors.dob && formik.touched.dob && (
+                    <div className="text-red-500 text-sm">{formik.errors.dob}</div>
+                    )}
+                </div>
+                </>
+              }
               
               <div className="space-y-2">
                 <Label className="text-[#333333BF] text-sm">Gender</Label>
@@ -696,28 +703,28 @@ export default function QuickDetailsModal({ open, onOpenChange, initialSpecialty
           </div>
           
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-[#E5573F] text-white px-6"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="flex items-center">
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Submitting...
-                </span>
-              ) : (
-                "Continue to Booking"
-              )}
-            </Button>
+            <div className="flex md:mt-12 my-2 w-[80%] mx-auto">
+                <Button
+                    type="submit"
+                    className="bg-[#E5573F] text-white px-6 py-5 w-full flex rounded-md"
+                    disabled={isLoading || formik.isSubmitting}
+                >
+                    {isLoading || formik.isSubmitting ? (
+                    <span className="px-6">
+                        <Loader2 className="animate-spin w-5 h-5" />
+                    </span>
+                    ) : (
+                    "Book appointment"
+                    )}
+                </Button>
+            </div>
           </DialogFooter>
+        <div className="w-full flex justify-center">
+            <span className="text-[#333333BF] text-xs text-center">
+                By continuing, you authorize us to book an appointment on your
+                behalf.
+            </span>
+        </div>
         </form>
       </DialogContent>
     </Dialog>

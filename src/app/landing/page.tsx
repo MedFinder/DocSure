@@ -730,6 +730,8 @@ export default function LandingPage() {
                         name="userName"
                         className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
                         placeholder="Your name"
+                        autoComplete="off"
+                        aria-autocomplete="none"
                         value={formik.values.userName || ""}
                         onChange={(e) => {
                           formik.setFieldValue("userName", e.target.value);

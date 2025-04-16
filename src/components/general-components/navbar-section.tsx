@@ -27,12 +27,20 @@ import {
 } from "@/constants/store-constants";
 import { Autocomplete } from "../../../components/ui/autocomplete";
 import { track } from "@vercel/analytics";
+import QuickDetailsModal from "@/app/landing/components/QuickDetailsModal";
 
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
-export default function NavbarSection() {
+
+interface NavbarSectionProps {
+  updatePreferences?: boolean; // Flag to show "Update Preferences" text
+  openModal?: boolean; // Flag to open QuickDetailsModal
+}
+
+export default function NavbarSection({ updatePreferences = false, confirmUpdatePreferences,  openModal = false }: NavbarSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(openModal);
   const pathname = usePathname(); // Get the current route
 
   const toggleSidebar = () => setIsOpen(!isOpen);
@@ -97,6 +105,12 @@ export default function NavbarSection() {
       console.log(values);
       track("Navbar_Search_Btn_Clicked");
       const updatedValues = { ...values };
+
+      // If updatePreferences is true, open the modal instead of searching
+      if (updatePreferences) {
+        setIsModalOpen(true);
+        return;
+      }
 
       setisLoading(true);
       if (!selectedLocation) {
@@ -279,11 +293,15 @@ export default function NavbarSection() {
 
                 {/* Search Button - Stays on the right, filling height on mobile */}
                 <button
-                  className="text-white rounded-none px-2 md:px-5  md:h-12 h-full md:w-auto absolute md:static right-0 top-0 bottom-0 border-l-0 
+                  className={`text-white rounded-none px-2 md:px-5 md:h-12 h-full md:w-auto absolute md:static right-0 top-0 bottom-0 border-l-0 
   bg-[#0074BA] md:bg-[#E5573F] hover:bg-[#0074BA] hover:text-white md:hover:bg-[#0074BA] md:hover:text-white rounded-tr-sm rounded-br-sm
- "
+  ${updatePreferences ? "md:min-w-[200px]" : ""}`}
                 >
-                  <Search className="w-5 h-5 font-semibold text-white md:text-white md:hover:text-white" />
+                  {updatePreferences ? (
+                    <span className="hidden md:inline-block text-white">Update Preferences</span>
+                  ) : (
+                    <Search className="w-5 h-5 font-semibold text-white md:text-white md:hover:text-white" />
+                  )}
                 </button>
               </div>
             </form>
@@ -362,6 +380,15 @@ export default function NavbarSection() {
           />
         </div>
       )}
+
+      {/* Quick Details Modal */}
+      <QuickDetailsModal 
+        open={isModalOpen} 
+        onOpenChange={setIsModalOpen}
+        initialSpecialty={specialty}
+        updatePreferences={updatePreferences}
+        confirmUpdatePreferences={confirmUpdatePreferences}
+      />
     </div>
   );
 }

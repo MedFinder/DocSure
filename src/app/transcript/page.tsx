@@ -326,7 +326,7 @@ export default function Transcript() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
 
-  const handleConfirmSequence = useCallback(async () => {
+  const handleConfirmSequence = useCallback(async (formdata) => {
     // initiate call
     try {
       setIsConfirmed(true); // Disable button and dragging
@@ -334,7 +334,8 @@ export default function Transcript() {
       await initiateCall(
         firstDoctorPhoneNumber,
         doctors[activeCallIndex]?.name,
-        requestIdRef?.current
+        requestIdRef?.current,
+        formdata
       );
       return;
     } catch (error) {
@@ -397,7 +398,8 @@ export default function Transcript() {
     async (
       doctorPhoneNumber: string,
       nameOfOrg: string,
-      request_id?: string
+      request_id?: string,
+      customformdata?: any
     ) => {
       console.log(
         "new call initiated for",
@@ -405,8 +407,11 @@ export default function Transcript() {
         nameOfOrg,
         request_id
       );
-      if (!formData) {
-        console.error("No formData found in sessionStorage.");
+      // Use customformdata if available, otherwise use the state formData
+      const currentFormData = customformdata || formData;
+      
+      if (!currentFormData) {
+        console.error("No formData found in sessionStorage or provided as parameter.");
         return;
       }
 
@@ -415,11 +420,11 @@ export default function Transcript() {
         email,
         phoneNumber,
         patientName,
-        objective,
+        objective = `${currentFormData?.speciality} consultation`,
         subscriberId,
         groupId,
-        selectedOption,
-        dob,
+        selectedOption = 'no',
+        dob ='',
         address,
         selectedAvailability,
         timeOfAppointment,
@@ -429,8 +434,7 @@ export default function Transcript() {
         // zipcode,
         insurer,
         maxWait,
-      } = formData;
-      // console.log(formData)
+      } = currentFormData;
 
       let context =
         "Clinical concerns:" +
@@ -464,7 +468,7 @@ export default function Transcript() {
         doctor_number: doctorPhoneNumber,
       };
       sessionStorage.setItem("context", context);
-      // console.log(data);
+      console.log(data);
       try {
         const callResponse = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
@@ -875,6 +879,23 @@ export default function Transcript() {
       router.push("/appointment");
     }
   };
+  const confirmUpdatePreferences = async () => {
+    if (callStatus?.isInitiated) {
+      try {
+        await terminateRequest();        
+        console.log("Current Call has been terminated successfully.");
+          // Modify handleConfirmSequence to use the latest form data from session storage
+          const currentStoredFormData = JSON.parse(sessionStorage.getItem("formData") || "{}");
+          requestIdRef.current = currentStoredFormData?.request_id;
+          setFormData(currentStoredFormData);
+          handleConfirmSequence(currentStoredFormData);
+      } catch (error) {
+        console.error("Failed to log call termination:", error);
+        toast.error("Failed to terminate the call. Please try again.");
+        return;
+      }
+    }
+  };
 
   const confirmTerminateAndCallMyself = async () => {
     setOpenTerminateAndCallDialog(false); // Close the dialog
@@ -903,16 +924,23 @@ export default function Transcript() {
   // const handleCall = () => {
   //   window.location.href = `tel:${+2348167238042}`;
   // };
-  console.log(transcriptSummary);
+  // console.log(transcriptSummary);
   // console.log(place_id);
 
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
-      <NavbarSection />
+      <NavbarSection updatePreferences confirmUpdatePreferences={confirmUpdatePreferences} />
 
       <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
       <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
-        <div className=" flex  w-full  text-[#333333] md:text-lg mt-20 ">
+      {/* Info section with border bottom */}
+        <div className="w-full mt-20">
+          <p className="text-sm md:text-sm text-gray-700">
+            Docsure AI will call top-rated doctors in this sequence, seek
+            an appointment for you, and enquire about insurance.
+          </p>
+        </div>
+        <div className=" flex  w-full  text-[#333333] md:text-lg mt-5 ">
           <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
           <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
           <button
