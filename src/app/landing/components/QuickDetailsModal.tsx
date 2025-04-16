@@ -443,188 +443,7 @@ export default function QuickDetailsModal({
           <div className="grid md:grid-cols-2 gap-6">
             {/* Left column - Appointment details */}
             <div className="space-y-5">
-              <div className="space-y-2">
-                <Label className="text-[#333333BF] text-sm">Phone number</Label>
-                <Input
-                  className={
-                    formik.errors.phoneNumber && formik.touched.phoneNumber
-                      ? "border-red-500 rounded-md"
-                      : "border border-[#333333] rounded-md"
-                  }
-                  name="phoneNumber"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.phoneNumber}
-                  placeholder="Your phone number"
-                />
-                <span className="text-[#333333BF] text-xs text-center">
-                  Appointment confirmation will be sent to this number.
-                </span>
-                {formik.errors.phoneNumber && formik.touched.phoneNumber && (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.phoneNumber}
-                  </div>
-                )}
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between pb-5">
-                  <Label className="text-[#333333BF] text-base">Insurance</Label>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="no-insurance"
-                      checked={selectedInsurance}
-                      onCheckedChange={handleInsuranceCheckboxChange}
-                    />
-                    <Label
-                      htmlFor="no-insurance"
-                      className="text-sm font-medium leading-none"
-                    >
-                      Don't have insurance
-                    </Label>
-                  </div>
-                </div>
-
-                {!selectedInsurance && (
-                  <>
-                    <Label className="text-[#333333BF] text-sm">Insurer</Label>
-                    <div className="flex-1">
-                      <Autocomplete
-                        id="insurer"
-                        name="insurer"
-                        className={cn(
-                          "w-full border border-[#333333] rounded-md",
-                          formik.touched.insurer && formik.errors.insurer
-                            ? "border-red-500"
-                            : ""
-                        )}
-                        options={insuranceCarrierOptions}
-                        value={formik.values.insurer}
-                        selected={formik.values.insurer}
-                        onChange={(value) => {
-                          formik.setFieldValue("insurer", value);
-                          formik.setFieldTouched("insurer", true);
-                        }}
-                        clearable={false}
-                      />
-                      {formik.touched.insurer && formik.errors.insurer && (
-                        <div className="text-red-500 text-sm">
-                          {formik.errors.insurer}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-2 mt-3">
-                      <Label className="text-[#333333BF] text-sm">
-                        Member ID
-                      </Label>
-                      <Input
-                        className={"border border-[#333333] rounded-md"}
-                        name="subscriberId"
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.subscriberId || ""}
-                        placeholder="Insurance Member ID"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm text-[#333333BF]">
-                  What would you like to discuss?
-                </Label>
-                <Input
-                  value={inputValue}
-                  placeholder="Knee pain, fever, skin rash..."
-                  onChange={(e) => setInputValue(e.target.value)}
-                  className={cn(
-                    "h-[40px] border border-[#333333] rounded-md",
-                    formik.touched.objective && formik.errors.objective
-                      ? "border-red-500"
-                      : ""
-                  )}
-                />
-                {formik.touched.objective && formik.errors.objective && (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.objective}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right column - Patient details */}
-            <div className="space-y-5">
-              <div className="space-y-3">
-                <Label className="text-[#333333BF]">Patient availability</Label>
-
-                <RadioGroup
-                  value={availabilityOption}
-                  onValueChange={handleAvailabilityChange}
-                  name="availability"
-                  className="flex flex-col py-2 space-y-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="anytime" id="r1" />
-                    <Label htmlFor="r1">Available Anytime</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="input-availability" id="r2" />
-                    <Label htmlFor="r2">Input your availability</Label>
-                  </div>
-                  {availabilityOption === "input-availability" && (
-                    <div className="w-full pl-6">
-                      <Input
-                        name="customAvailability"
-                        value={customAvailability}
-                        onChange={(e) => {
-                          setCustomAvailability(e.target.value);
-                          setAvailabilityOption("input-availability");
-                          formik.setFieldValue(
-                            "timeOfAppointment",
-                            e.target.value
-                          );
-                          formik.setFieldTouched("timeOfAppointment", true);
-                        }}
-                        onBlur={formik.handleBlur}
-                        placeholder="Weekdays after 5pm, Weekends 9am-3pm"
-                        className={cn(
-                          "w-full border rounded-md",
-                          formik.touched.timeOfAppointment &&
-                            formik.errors.timeOfAppointment
-                            ? "border-red-500"
-                            : ""
-                        )}
-                      />
-                      {formik.touched.timeOfAppointment &&
-                        formik.errors.timeOfAppointment && (
-                          <div className="text-red-500 text-sm">
-                            {formik.errors.timeOfAppointment}
-                          </div>
-                        )}
-                    </div>
-                  )}
-                </RadioGroup>
-              </div>
-              <div className="space-y-2">
-                <div className="flex">
-                  <Label className="text-[#333333BF] text-sm">
-                    Max wait time:
-                  </Label>
-                  <span className="text-sm text-gray-500 pl-2">
-                    {formik.values.maxWait}{" "}
-                    {formik.values.maxWait === 1 ? "day" : "days"}
-                  </span>
-                </div>
-                <Slider
-                  value={[formik.values.maxWait]}
-                  onValueChange={(value) => {
-                    formik.setFieldValue("maxWait", value[0]);
-                    formik.setFieldTouched("maxWait", true);
-                  }}
-                />
-              </div>
-              {updatePreferences && (
+            {updatePreferences && (
                 <>
                   <div className="space-y-2">
                     <Label className="text-[#333333BF] text-sm">
@@ -716,7 +535,212 @@ export default function QuickDetailsModal({
                   </div>
                 </>
               )}
+              <div className="space-y-2">
+                <Label className="text-[#333333BF] text-sm">Phone number</Label>
+                <Input
+                  className={
+                    formik.errors.phoneNumber && formik.touched.phoneNumber
+                      ? "border-red-500 rounded-md"
+                      : "border border-[#333333] rounded-md"
+                  }
+                  name="phoneNumber"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.phoneNumber}
+                  placeholder="Your phone number"
+                />
+                <span className="text-[#333333BF] text-xs text-center">
+                  Appointment confirmation will be sent to this number.
+                </span>
+                {formik.errors.phoneNumber && formik.touched.phoneNumber && (
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.phoneNumber}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between pb-5">
+                  <Label className="text-[#333333BF] text-base">Insurance</Label>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="no-insurance"
+                      checked={selectedInsurance}
+                      onCheckedChange={handleInsuranceCheckboxChange}
+                    />
+                    <Label
+                      htmlFor="no-insurance"
+                      className="text-sm font-medium leading-none"
+                    >
+                      Don't have insurance
+                    </Label>
+                  </div>
+                </div>
 
+                {!selectedInsurance && (
+                  <>
+                    <Label className="text-[#333333BF] text-sm">Insurer</Label>
+                    <div className="flex-1">
+                      <Autocomplete
+                        id="insurer"
+                        name="insurer"
+                        className={cn(
+                          "w-full border border-[#333333] rounded-md",
+                          formik.touched.insurer && formik.errors.insurer
+                            ? "border-red-500"
+                            : ""
+                        )}
+                        options={insuranceCarrierOptions}
+                        value={formik.values.insurer}
+                        selected={formik.values.insurer}
+                        onChange={(value) => {
+                          formik.setFieldValue("insurer", value);
+                          formik.setFieldTouched("insurer", true);
+                        }}
+                        clearable={false}
+                      />
+                      {formik.touched.insurer && formik.errors.insurer && (
+                        <div className="text-red-500 text-sm">
+                          {formik.errors.insurer}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2 mt-3">
+                      <Label className="text-[#333333BF] text-sm">
+                        Member ID
+                      </Label>
+                      <Input
+                        className={"border border-[#333333] rounded-md"}
+                        name="subscriberId"
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        value={formik.values.subscriberId || ""}
+                        placeholder="Insurance Member ID"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {!updatePreferences && (
+                <div className="space-y-2">
+                  <Label className="text-sm text-[#333333BF]">
+                    What would you like to discuss?
+                  </Label>
+                  <Input
+                    value={inputValue}
+                    placeholder="Knee pain, fever, skin rash..."
+                    onChange={(e) => setInputValue(e.target.value)}
+                    className={cn(
+                      "h-[40px] border border-[#333333] rounded-md",
+                      formik.touched.objective && formik.errors.objective
+                        ? "border-red-500"
+                        : ""
+                    )}
+                  />
+                  {formik.touched.objective && formik.errors.objective && (
+                    <div className="text-red-500 text-sm">
+                      {formik.errors.objective}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Right column - Patient details */}
+            <div className="space-y-5">
+              {updatePreferences && (
+                <div className="space-y-2">
+                  <Label className="text-sm text-[#333333BF]">
+                    What would you like to discuss?
+                  </Label>
+                  <Input
+                    value={inputValue}
+                    placeholder="Knee pain, fever, skin rash..."
+                    onChange={(e) => setInputValue(e.target.value)}
+                    className={cn(
+                      "h-[40px] border border-[#333333] rounded-md",
+                      formik.touched.objective && formik.errors.objective
+                        ? "border-red-500"
+                        : ""
+                    )}
+                  />
+                  {formik.touched.objective && formik.errors.objective && (
+                    <div className="text-red-500 text-sm">
+                      {formik.errors.objective}
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="space-y-3">
+                <Label className="text-[#333333BF]">Patient availability</Label>
+
+                <RadioGroup
+                  value={availabilityOption}
+                  onValueChange={handleAvailabilityChange}
+                  name="availability"
+                  className="flex flex-col py-2 space-y-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="anytime" id="r1" />
+                    <Label htmlFor="r1">Available Anytime</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="input-availability" id="r2" />
+                    <Label htmlFor="r2">Input your availability</Label>
+                  </div>
+                  {availabilityOption === "input-availability" && (
+                    <div className="w-full pl-6">
+                      <Input
+                        name="customAvailability"
+                        value={customAvailability}
+                        onChange={(e) => {
+                          setCustomAvailability(e.target.value);
+                          setAvailabilityOption("input-availability");
+                          formik.setFieldValue(
+                            "timeOfAppointment",
+                            e.target.value
+                          );
+                          formik.setFieldTouched("timeOfAppointment", true);
+                        }}
+                        onBlur={formik.handleBlur}
+                        placeholder="Weekdays after 5pm, Weekends 9am-3pm"
+                        className={cn(
+                          "w-full border rounded-md",
+                          formik.touched.timeOfAppointment &&
+                            formik.errors.timeOfAppointment
+                            ? "border-red-500"
+                            : ""
+                        )}
+                      />
+                      {formik.touched.timeOfAppointment &&
+                        formik.errors.timeOfAppointment && (
+                          <div className="text-red-500 text-sm">
+                            {formik.errors.timeOfAppointment}
+                          </div>
+                        )}
+                    </div>
+                  )}
+                </RadioGroup>
+              </div>
+              <div className="space-y-2">
+                <div className="flex">
+                  <Label className="text-[#333333BF] text-sm">
+                    Max wait time:
+                  </Label>
+                  <span className="text-sm text-gray-500 pl-2">
+                    {formik.values.maxWait}{" "}
+                    {formik.values.maxWait === 1 ? "day" : "days"}
+                  </span>
+                </div>
+                <Slider
+                  value={[formik.values.maxWait]}
+                  onValueChange={(value) => {
+                    formik.setFieldValue("maxWait", value[0]);
+                    formik.setFieldTouched("maxWait", true);
+                  }}
+                />
+              </div>
               <div className="space-y-2">
                 <Label className="text-[#333333BF] text-sm">Gender</Label>
                 <RadioGroup
