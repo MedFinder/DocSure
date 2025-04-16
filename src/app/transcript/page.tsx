@@ -180,6 +180,7 @@ export default function Transcript() {
   const [showTranscript, setShowTranscript] = useState(false);
   const [isAppointmentBooked, setIsAppointmentBooked] = useState(false);
   const [transcriptArray, setTranscriptArray] = useState([]);
+  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [callStatus, setCallStatus] = useState({
     isInitiated: false,
     ssid: "",
@@ -189,6 +190,7 @@ export default function Transcript() {
   const [formData, setFormData] = useState();
   const [extractedData, setExtractedData] = useState<TaskType[]>([]);
   const [activeCallIndex, setActiveCallIndex] = useState(0);
+  const [isPreferencesUpdated, setIsPreferencesUpdated] = useState(false);
   const activeCallIndexRef = useRef(activeCallIndex);
   const requestIdRef = useRef(formData?.request_id);
   const callStatusRef = useRef(callStatus);
@@ -229,47 +231,102 @@ export default function Transcript() {
     setPhoneNumbers(numbers);
   };
 
-  useEffect(() => {
-    const storedData = sessionStorage.getItem("statusData");
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-
-      const sortedData = parsedData.results.map((item, index) => {
-        // Transform each Google Places API result into a Doctor type
-        return {
-          id: item.place_id, // Preserve the original id from place_id
-          name: item.name || "Unknown Doctor",
-          title: item.types?.includes("health")
-            ? "Primary Care Doctor"
-            : "Specialist",
-          image: item.photos?.[0]?.photo_reference
-            ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${item.photos[0].photo_reference}&key=${apiKey}`
-            : "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
-          rating: item.rating || 0,
-          reviews: item.user_ratings_total || 0,
-          distance: item.distance || "Unknown distance",
-          address: item.formatted_address || "Address unavailable",
-          status: "queue", // Default status
-          waitTime: "Excellent wait time", // Default wait time
-          appointments: "New patient appointments", // Default appointment text
-          phone_number: item.phone_number || null,
-          place_id: item.place_id,
-          vicinity: item.formatted_address || "",
-          website: item.website || "",
-          isSponsored: false, // Default not sponsored
-          opening_hours: {
-            status: item.opening_hours?.status || "",
-            time_info: item.opening_hours?.time_info || "",
-          },
-        };
-      });
-      console.log({ parsedData }, "parsedData");
-      console.log({ sortedData }, "sortedData");
-      setDoctors(sortedData);
-    } else {
-      router.push("/");
-    }
-  }, [router, apiKey]);
+    useEffect(() => {
+      const updateDoctorsList = () => {
+        try {
+          const lastSearchSource = sessionStorage.getItem("lastSearchSource");
+          let rawData;
+  
+          if (lastSearchSource === "navbar") {
+            rawData = sessionStorage.getItem("statusDataNav");
+            // setIsPreferencesUpdated(false)
+            // setCallStatus({
+            //   isInitiated: false,
+            //   ssid: "",
+            //   email: "",
+            // });
+            // setActiveCallIndex(0)
+            // setTranscriptArray([])
+          } else {
+            rawData = sessionStorage.getItem("statusData");
+          }
+  
+          if (!rawData) {
+            router.push("/");
+            return;
+          }
+  
+          const parsedData = JSON.parse(rawData);
+          if (parsedData?.results?.length) {
+            // const sortedData = parsedData.results.map((item) => ({
+            //   ...item,
+            //   id: item.place_id || item.id,
+            //   location: {
+            //     lat: item.location?.lat || item.lat,
+            //     lng: item.location?.lng || item.lng,
+            //   },
+            // }));
+            const sortedData = parsedData.results.map((item, index) => {
+              // Transform each Google Places API result into a Doctor type
+              return {
+                id: item.place_id || item.id, // Preserve the original id from place_id
+                name: item.name || "Unknown Doctor",
+                title: item.types?.includes("health")
+                  ? "Primary Care Doctor"
+                  : "Specialist",
+                image: item.photos?.[0]?.photo_reference
+                  ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${item.photos[0].photo_reference}&key=${apiKey}`
+                  : "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+                rating: item.rating || 0,
+                reviews: item.user_ratings_total || 0,
+                distance: item.distance || "Unknown distance",
+                address: item.formatted_address || "Address unavailable",
+                status: "queue", // Default status
+                waitTime: "Excellent wait time", // Default wait time
+                appointments: "New patient appointments", // Default appointment text
+                phone_number: item.phone_number || null,
+                location: {
+                  lat: item.location?.lat || item.lat,
+                  lng: item.location?.lng || item.lng,
+               },
+                place_id: item.place_id,
+                vicinity: item.formatted_address || "",
+                website: item.website || "",
+                isSponsored: false, // Default not sponsored
+                opening_hours: {
+                  status: item.opening_hours?.status || "",
+                  time_info: item.opening_hours?.time_info || "",
+                },
+              };
+            });
+  
+            setDoctors(sortedData);
+            setNextPageToken(parsedData.next_page_token || null);
+          } else {
+            console.warn("No valid results found in sessionStorage.");
+            setDoctors([]);
+          }
+        } catch (error) {
+          console.error("Error parsing sessionStorage data:", error);
+          setDoctors([]);
+        }
+      };
+      // Initial load
+      updateDoctorsList();
+  
+      // Listen for storage changes (detect when a new search is performed)
+      const handleStorageChange = () => updateDoctorsList();
+      window.addEventListener("storage", handleStorageChange);
+  
+      // Also detect route changes (e.g., navigating from home to search)
+      const handleRouteChange = () => updateDoctorsList();
+      router.events?.on("routeChangeComplete", handleRouteChange);
+  
+      return () => {
+        window.removeEventListener("storage", handleStorageChange);
+        router.events?.off("routeChangeComplete", handleRouteChange);
+      };
+    }, [router,apiKey]);
 
   const handleDragEnd = (event) => {
     if (isConfirmed) return; // Prevent reordering if call sequence has started
@@ -350,7 +407,9 @@ export default function Transcript() {
       setShowTranscript(true);
       setTranscriptArray((prev) => [
         ...prev,
-        `Calling ${doctors[activeCallIndex]?.name} to seek an appointment\n`,
+        `${isPreferencesUpdated ? "Re-calling" : "Calling"} ${
+          doctors[activeCallIndex]?.name
+        } to seek an appointment\n`,
       ]);
       console.log("ws listener added for id:", callStatus?.ssid);
       if (wsRef.current.readyState !== WebSocket.OPEN) {
@@ -462,10 +521,10 @@ export default function Transcript() {
         request_id,
         objective: "Schedule an appointment",
         context: context,
-        patient_number: phoneNumber ?? '510-902-8776',
+        patient_number: phoneNumber || '510-902-8776',
         patient_name: patientName,
         hospital_name: nameOfOrg,
-        patient_email: email ?? 'care@meomind.com',
+        patient_email: email || 'care@meomind.com',
         doctor_number: doctorPhoneNumber,
       };
       sessionStorage.setItem("context", context);
@@ -511,6 +570,7 @@ export default function Transcript() {
     request_id: string
   ) => {
     // console.log(id,currentindex,request_id)
+    setIsPreferencesUpdated(false)
     let newIndex = currentindex + 1;
     if (id) {
       // wsRef?.current?.close(); // temp solution; disconnect websocket and connect to a new one
@@ -781,6 +841,10 @@ export default function Transcript() {
           const currentStoredFormData = JSON.parse(sessionStorage.getItem("formData") || "{}");
           requestIdRef.current = currentStoredFormData?.request_id;
           setFormData(currentStoredFormData);
+          
+          // Set isPreferencesUpdated flag to true
+          setIsPreferencesUpdated(true);
+          
           handleConfirmSequence(currentStoredFormData);
       } catch (error) {
         console.error("Failed to log call termination:", error);

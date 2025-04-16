@@ -8,6 +8,7 @@ import * as Yup from "yup";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ReactModal from "react-modal";
+import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,11 +33,11 @@ if (typeof window !== "undefined") {
 
 // Validation schema combining elements from both pages
 const validationSchema = Yup.object().shape({
-  patientName: Yup.string().required("Patient name is required"),
+  patientName: Yup.string().notRequired("Patient name is required"),
   email: Yup.string().email("Invalid email").notRequired(),
   phoneNumber: Yup.string().notRequired(),
   dob: Yup.date()
-    .required("Date of birth is required")
+    .notRequired("Date of birth is required")
     .max(new Date(), "Date of birth cannot be in the future"),
   gender: Yup.string().notRequired(),
   availabilityOption: Yup.string().notRequired(),
@@ -108,10 +109,15 @@ export default function QuickDetailsModal({
 
   // Utility function to format date without timezone issues
   const formatDateToYYYYMMDD = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+    if(date){
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+    else {
+        return ''
+    }
   };
 
   const { isLoaded } = useJsApiLoader({
@@ -123,6 +129,8 @@ export default function QuickDetailsModal({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedFormData = sessionStorage.getItem("formData");
+      const savedAddress = sessionStorage.getItem("selectedAddress");
+      const storedLocation = sessionStorage.getItem("selectedLocation");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
         setFormData(parsedFormData);
@@ -150,7 +158,6 @@ export default function QuickDetailsModal({
           timeOfAppointment: parsedFormData?.timeOfAppointment
             ? new Date(parsedFormData.timeOfAppointment)
             : new Date(),
-          address: parsedFormData.address || "",
         });
 
         setInputValue(parsedFormData?.objective || "");
@@ -169,11 +176,13 @@ export default function QuickDetailsModal({
 
         // Revalidate the form
         formik.validateForm();
-      } else if (initialSpecialty) {
-        // If no stored data but specialty is provided from parent
-        formik.setFieldValue("specialty", initialSpecialty);
-        // Save to session storage
-        sessionStorage.setItem("selectedSpecialty", initialSpecialty);
+      }
+      if (savedAddress) {
+        formik.setFieldValue("address", savedAddress)
+      }
+      if (storedLocation) {
+        const { lat, lng } = JSON.parse(storedLocation);
+        setSelectedLocation({ lat, lng });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -217,7 +226,7 @@ export default function QuickDetailsModal({
       const updatedValues = {
         ...values,
         dob: formatDateToYYYYMMDD(values.dob),
-        objective: values.objective || `${formik.values.specialty} consultation`,
+        objective: values.objective || `${formik.values.specialty ?formik.values.specialty +' consultation':''}`,
         subscriberId: values.subscriberId,
         selectedOption: selectedInsurance ? "no" : "yes",
         availability: customAvailability
@@ -230,14 +239,26 @@ export default function QuickDetailsModal({
         // Get existing form data if it exists
         const existingFormData = sessionStorage.getItem("formData");
         let mergedValues = updatedValues;
-        if (formik.values.specialty) {
-            sessionStorage.setItem("selectedSpecialty", formik.values.specialty);
-          }
+        // if (formik.values.specialty) {
+        //   sessionStorage.setItem("selectedSpecialty", formik.values.specialty);
+        // }
+        
         if (existingFormData) {
           try {
             const parsedExistingData = JSON.parse(existingFormData);
+            
+            // Check if address or specialty changed
+            const addressChanged = parsedExistingData.address !== updatedValues.address;
+            const specialtyChanged = parsedExistingData.specialty !== updatedValues.specialty;
+            
             // Merge existing data with new values (new values take precedence)
             mergedValues = { ...parsedExistingData, ...updatedValues };
+            
+            // If address or specialty changed, refetch doctor lists
+            if (addressChanged || specialtyChanged) {
+                console.log('address or speciality changed')
+                refetchDrLists();
+            }
           } catch (error) {
             console.error("Error parsing existing form data:", error);
           }
@@ -251,8 +272,8 @@ export default function QuickDetailsModal({
           onOpenChange(false);
           confirmUpdatePreferences();
         } else {
-          // Redirect to next page
-          router.push("/transcript?confirmed=true");
+         onOpenChange(false);
+         // router.push("/transcript?confirmed=true");
         }
       } catch (error) {
         console.error("Error submitting form:", error);
@@ -266,6 +287,34 @@ export default function QuickDetailsModal({
     validateOnBlur: true,
   });
 
+  const refetchDrLists = async () => {
+    try {
+        const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
+        sessionStorage.setItem(
+          "searchData",
+          JSON.stringify({ lat, lng, specialty: formik.values.specialty })
+        );
+        const data = {
+          location: `${lat},${lng}`,
+          radius: 20000,
+          keyword: formik.values.specialty,
+        };
+        const response = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+          data
+        );
+
+        sessionStorage.setItem("statusDataNav", JSON.stringify(response.data));
+        sessionStorage.setItem("lastSearchSource", "navbar"); // Track last search source
+
+        window.dispatchEvent(new Event("storage"));
+
+        // console.log("Form Data:", values);
+        console.log("API Response Data:", response.data);
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      }
+  }
   // Handle availability option change
   const handleAvailabilityChange = (value) => {
     setCustomAvailability("");
@@ -325,6 +374,11 @@ export default function QuickDetailsModal({
           lat: address.geometry.location.lat(),
           lng: address.geometry.location.lng(),
         });
+        sessionStorage.setItem("selectedAddress", address?.formatted_address);
+        sessionStorage.setItem(
+          "selectedLocation",
+          JSON.stringify({ lat:address.geometry.location.lat(), lng:address.geometry.location.lng() })
+        );
       }
     }
   };
@@ -381,6 +435,7 @@ export default function QuickDetailsModal({
   const handleSpecialtyChange = (value) => {
     formik.setFieldValue("specialty", value);
     formik.setFieldTouched("specialty", true);
+    sessionStorage.setItem("selectedSpecialty", value);
   };
 
   // Update gender
@@ -407,6 +462,7 @@ export default function QuickDetailsModal({
       if (Object.keys(errors).length === 0) {
         formik.handleSubmit(e);
       } else {
+        console.log("Validation errors:", errors);
         // if (!gender) {
         //   formik.setFieldError("gender", "Please select a gender");
         // }
@@ -837,19 +893,20 @@ export default function QuickDetailsModal({
                     <Loader2 className="animate-spin w-5 h-5" />
                   </span>
                 ) : updatePreferences ? (
-                  "Modify My Request"
+                  "Update"
                 ) : (
-                  "Book appointment"
+                  "Update"
                 )}
               </Button>
             </div>
           </div>
-          <div className="w-full flex justify-center">
+          {updatePreferences &&  <div className="w-full flex justify-center">
             <span className="text-[#333333BF] text-xs text-center">
               By continuing, you authorize us to book an appointment on your
               behalf.
             </span>
-          </div>
+          </div> }
+
         </form>
       </div>
     </ReactModal>
