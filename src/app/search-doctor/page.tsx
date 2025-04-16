@@ -474,7 +474,6 @@ export default function SearchDoctorPage() {
       setTimeout(connectWebSocket, 5000);
     };
   };
-
   const DrCount = useMemo(() => {
     const drVal = parseInt(totalDoctorsCount);
     if (drVal > 50) {

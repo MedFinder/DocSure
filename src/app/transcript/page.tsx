@@ -13,7 +13,6 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Column from "../../components/older-pages/search/features/column";
 import { toast } from "sonner";
 import axios from "axios";
-import { DoctorCard } from "./DoctorCard";
 import { ChatSection } from "./ChatSection";
 import {
   Dialog,
@@ -25,6 +24,7 @@ import {
 import { track } from "@vercel/analytics";
 import NavbarSection from "@/components/general-components/navbar-section";
 import FooterSection from "../landing/components/FooterSection";
+import { DoctorCard, ExpandProvider } from "./DoctorCard";
 
 const _doctors: Doctor[] = [
   {
@@ -193,6 +193,11 @@ export default function Transcript() {
   const requestIdRef = useRef(formData?.request_id);
   const callStatusRef = useRef(callStatus);
   const [context, setcontext] = useState("");
+  const [transcriptSummary, setTranscriptSummary] = useState({
+    place_id: "",
+    summary: "",
+  });
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [openModifyDialog, setOpenModifyDialog] = useState(false); // Dialog for Modify Request
@@ -228,6 +233,7 @@ export default function Transcript() {
     const storedData = sessionStorage.getItem("statusData");
     if (storedData) {
       const parsedData = JSON.parse(storedData);
+
       const sortedData = parsedData.results.map((item, index) => {
         // Transform each Google Places API result into a Doctor type
         return {
@@ -251,10 +257,14 @@ export default function Transcript() {
           vicinity: item.formatted_address || "",
           website: item.website || "",
           isSponsored: false, // Default not sponsored
+          opening_hours: {
+            status: item.opening_hours?.status || "",
+            time_info: item.opening_hours?.time_info || "",
+          },
         };
       });
-      // console.log({ parsedData });
-      // console.log({ sortedData });
+      console.log({ parsedData }, "parsedData");
+      console.log({ sortedData }, "sortedData");
       setDoctors(sortedData);
     } else {
       router.push("/");
@@ -316,7 +326,7 @@ export default function Transcript() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
 
-  const handleConfirmSequence = useCallback(async () => {
+  const handleConfirmSequence = useCallback(async (formdata) => {
     // initiate call
     try {
       setIsConfirmed(true); // Disable button and dragging
@@ -324,7 +334,8 @@ export default function Transcript() {
       await initiateCall(
         firstDoctorPhoneNumber,
         doctors[activeCallIndex]?.name,
-        requestIdRef?.current
+        requestIdRef?.current,
+        formdata
       );
       return;
     } catch (error) {
@@ -387,7 +398,8 @@ export default function Transcript() {
     async (
       doctorPhoneNumber: string,
       nameOfOrg: string,
-      request_id?: string
+      request_id?: string,
+      customformdata?: any
     ) => {
       console.log(
         "new call initiated for",
@@ -395,8 +407,12 @@ export default function Transcript() {
         nameOfOrg,
         request_id
       );
-      if (!formData) {
-        console.error("No formData found in sessionStorage.");
+      // Use customformdata if available, otherwise use the state formData
+      const currentFormData = customformdata || formData;
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      
+      if (!currentFormData) {
+        console.error("No formData found in sessionStorage or provided as parameter.");
         return;
       }
 
@@ -405,11 +421,11 @@ export default function Transcript() {
         email,
         phoneNumber,
         patientName,
-        objective,
+        objective = `${savedSpecialty} consultation`,
         subscriberId,
         groupId,
-        selectedOption,
-        dob,
+        selectedOption = 'no',
+        dob ='',
         address,
         selectedAvailability,
         timeOfAppointment,
@@ -419,7 +435,7 @@ export default function Transcript() {
         // zipcode,
         insurer,
         maxWait,
-      } = formData;
+      } = currentFormData;
 
       let context =
         "Clinical concerns:" +
@@ -446,14 +462,14 @@ export default function Transcript() {
         request_id,
         objective: "Schedule an appointment",
         context: context,
-        patient_number: phoneNumber,
+        patient_number: phoneNumber ?? '510-902-8776',
         patient_name: patientName,
         hospital_name: nameOfOrg,
-        patient_email: email,
+        patient_email: email ?? 'care@meomind.com',
         doctor_number: doctorPhoneNumber,
       };
       sessionStorage.setItem("context", context);
-      // console.log(data);
+      console.log(data);
       try {
         const callResponse = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
@@ -531,94 +547,94 @@ export default function Transcript() {
       });
     }
   };
-  const connectWebSocket = (id?: string) => {
-    // if (wsRef?.current) {
-    //   //check if exisiting connection exists and disconnect
-    //   console.log("disconnect exisiting connection if it exists...");
-    //   wsRef?.current?.close();
-    // }
-    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
-      id ?? callStatusRef.current.ssid
-    }`;
-    console.log(url);
-    wsRef.current = new WebSocket(url);
+  // const connectWebSocket = (id?: string) => {
+  //   // if (wsRef?.current) {
+  //   //   //check if exisiting connection exists and disconnect
+  //   //   console.log("disconnect exisiting connection if it exists...");
+  //   //   wsRef?.current?.close();
+  //   // }
+  //   const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
+  //     id ?? callStatusRef.current.ssid
+  //   }`;
+  //   console.log(url);
+  //   wsRef.current = new WebSocket(url);
 
-    wsRef.current.onopen = () => {
-      console.log("WebSocket connected successfully and opened.");
-    };
-    wsRef.current.onmessage = async (event) => {
-      const data = JSON.parse(event.data);
-      // console.log("WebSocket Message:", data);
-      if (data.event === "call_ended") {
-        // console.log("Call Ended Data:", data);
-        setTimeout(async () => {
-          const call_ended_result = await handleEndCall(data?.call_sid);
-          console.log({ call_ended_result });
-          if (call_ended_result?.status == "yes") {
-            // Save relevant information for success page
-            const successMessage =
-              call_ended_result?.confirmation_message ??
-              "Appointment Booked Successfully";
-            sendSMS(successMessage);
-            const doctorPhone =
-              doctors[activeCallIndexRef.current]?.phone_number;
-            // make the sms call to the patient
-            setIsAppointmentBooked(true);
-            wsRef?.current?.close();
+  //   wsRef.current.onopen = () => {
+  //     console.log("WebSocket connected successfully and opened.");
+  //   };
+  //   wsRef.current.onmessage = async (event) => {
+  //     const data = JSON.parse(event.data);
+  //     // console.log("WebSocket Message:", data);
+  //     if (data.event === "call_ended") {
+  //       // console.log("Call Ended Data:", data);
+  //       setTimeout(async () => {
+  //         const call_ended_result = await handleEndCall(data?.call_sid);
+  //         console.log({ call_ended_result });
+  //         if (call_ended_result?.status == "yes") {
+  //           // Save relevant information for success page
+  //           const successMessage =
+  //             call_ended_result?.confirmation_message ??
+  //             "Appointment Booked Successfully";
+  //           sendSMS(successMessage);
+  //           const doctorPhone =
+  //             doctors[activeCallIndexRef.current]?.phone_number;
+  //           // make the sms call to the patient
+  //           setIsAppointmentBooked(true);
+  //           wsRef?.current?.close();
 
-            // Pass parameters to success page using router.push with query params
-            router.push(
-              `/success?success_message=${encodeURIComponent(
-                successMessage
-              )}&phone_number=${encodeURIComponent(doctorPhone || "")}`
-            );
-            return;
-          } else {
-            // console.log("call ended but not booked..this is where skip happens");
-            if (callStatusRef.current.ssid === data?.call_sid) {
-              toast.warning(
-                "Appointment could not be booked. Trying next doctor..."
-              );
-              moveToNextDoctor(
-                null,
-                activeCallIndexRef.current,
-                formData.request_id
-              );
-            }
-          }
-        }, 5000);
-      }
+  //           // Pass parameters to success page using router.push with query params
+  //           router.push(
+  //             `/success?success_message=${encodeURIComponent(
+  //               successMessage
+  //             )}&phone_number=${encodeURIComponent(doctorPhone || "")}`
+  //           );
+  //           return;
+  //         } else {
+  //           // console.log("call ended but not booked..this is where skip happens");
+  //           if (callStatusRef.current.ssid === data?.call_sid) {
+  //             toast.warning(
+  //               "Appointment could not be booked. Trying next doctor..."
+  //             );
+  //             moveToNextDoctor(
+  //               null,
+  //               activeCallIndexRef.current,
+  //               formData.request_id
+  //             );
+  //           }
+  //         }
+  //       }, 5000);
+  //     }
 
-      if (data.event === "call_in_process") {
-        const timestamp = new Date().toLocaleTimeString();
-        if (callStatusRef.current.ssid === data?.call_sid) {
-          setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
-        }
-      }
+  //     if (data.event === "call_in_process") {
+  //       const timestamp = new Date().toLocaleTimeString();
+  //       if (callStatusRef.current.ssid === data?.call_sid) {
+  //         setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
+  //       }
+  //     }
 
-      if (data.event === "call_not_picked") {
-        // doctor did not pick call...move to next
-        if (callStatusRef.current.ssid === data?.call_sid) {
-          toast.info("Doctor did not pick call. Trying next doctor...");
-          moveToNextDoctor(
-            null,
-            activeCallIndexRef.current,
-            formData.request_id
-          );
-        }
-      }
-    };
+  //     if (data.event === "call_not_picked") {
+  //       // doctor did not pick call...move to next
+  //       if (callStatusRef.current.ssid === data?.call_sid) {
+  //         toast.info("Doctor did not pick call. Trying next doctor...");
+  //         moveToNextDoctor(
+  //           null,
+  //           activeCallIndexRef.current,
+  //           formData.request_id
+  //         );
+  //       }
+  //     }
+  //   };
 
-    wsRef.current.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
+  //   wsRef.current.onclose = () => {
+  //     console.log("WebSocket disconnected");
+  //   };
 
-    wsRef.current.onerror = (error) => {
-      //console.error("WebSocket Error:", error);
-      console.log("Retrying WebSocket connection in 5 seconds...");
-      setTimeout(connectWebSocket, 5000);
-    };
-  };
+  //   wsRef.current.onerror = (error) => {
+  //     //console.error("WebSocket Error:", error);
+  //     console.log("Retrying WebSocket connection in 5 seconds...");
+  //     setTimeout(connectWebSocket, 5000);
+  //   };
+  // };
 
   // const logDrLists = async () => {
   //   // Create arrays to collect the values
@@ -667,6 +683,98 @@ export default function Transcript() {
   //     return null;
   //   }
   // };
+  const connectWebSocket = (id?: string) => {
+    // Check if a WebSocket connection already exists
+    if (wsRef?.current) {
+      console.log("Reusing existing WebSocket connection...");
+      return; // Exit if the WebSocket is already connected
+    }
+
+    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
+      id ?? callStatusRef.current.ssid
+    }`;
+    console.log(url);
+    wsRef.current = new WebSocket(url);
+
+    wsRef.current.onopen = () => {
+      console.log("WebSocket connected successfully and opened.");
+    };
+
+    wsRef.current.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
+
+      // Handle call-ended event
+      if (data.event === "call_ended") {
+        setTimeout(async () => {
+          const call_ended_result = await handleEndCall(data?.call_sid);
+          console.log({ call_ended_result });
+          if (call_ended_result?.status === "yes") {
+            const successMessage =
+              call_ended_result?.confirmation_message ??
+              "Appointment Booked Successfully";
+            sendSMS(successMessage);
+            const doctorPhone =
+              doctors[activeCallIndexRef.current]?.phone_number;
+            setIsAppointmentBooked(true);
+            wsRef?.current?.close();
+
+            router.push(
+              `/success?success_message=${encodeURIComponent(
+                successMessage
+              )}&phone_number=${encodeURIComponent(doctorPhone || "")}`
+            );
+          } else {
+            if (callStatusRef.current.ssid === data?.call_sid) {
+              toast.warning(
+                "Appointment could not be booked. Trying next doctor..."
+              );
+              moveToNextDoctor(
+                null,
+                activeCallIndexRef.current,
+                formData.request_id
+              );
+            }
+          }
+        }, 5000);
+      }
+
+      // Handle call-in-process event
+      if (data.event === "call_in_process") {
+        if (callStatusRef.current.ssid === data?.call_sid) {
+          setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
+        }
+      }
+
+      // Handle call-not-picked event
+      if (data.event === "call_not_picked") {
+        if (callStatusRef.current.ssid === data?.call_sid) {
+          toast.info("Doctor did not pick call. Trying next doctor...");
+          moveToNextDoctor(
+            null,
+            activeCallIndexRef.current,
+            formData.request_id
+          );
+        }
+      }
+
+      // Handle summary_stream event
+      if (data.event === "summary_stream" && data.data?.summary) {
+        setTranscriptLoading(false); // Stop loading when summary is received
+        setTranscriptSummary(data.data); // Update the transcript summary
+      }
+    };
+
+    wsRef.current.onclose = () => {
+      console.log("WebSocket disconnected");
+      wsRef.current = null; // Reset the WebSocket reference
+    };
+
+    wsRef.current.onerror = (error) => {
+      console.log("Retrying WebSocket connection in 5 seconds...");
+      setTimeout(() => connectWebSocket(id), 5000); // Retry connection after 5 seconds
+    };
+  };
+
   const getDisplayTranscript = () => {
     if (transcriptArray.length > 0) {
       // console.log(transcriptArray)
@@ -772,6 +880,23 @@ export default function Transcript() {
       router.push("/appointment");
     }
   };
+  const confirmUpdatePreferences = async () => {
+    if (callStatus?.isInitiated) {
+      try {
+        await terminateRequest();        
+        console.log("Current Call has been terminated successfully.");
+          // Modify handleConfirmSequence to use the latest form data from session storage
+          const currentStoredFormData = JSON.parse(sessionStorage.getItem("formData") || "{}");
+          requestIdRef.current = currentStoredFormData?.request_id;
+          setFormData(currentStoredFormData);
+          handleConfirmSequence(currentStoredFormData);
+      } catch (error) {
+        console.error("Failed to log call termination:", error);
+        toast.error("Failed to terminate the call. Please try again.");
+        return;
+      }
+    }
+  };
 
   const confirmTerminateAndCallMyself = async () => {
     setOpenTerminateAndCallDialog(false); // Close the dialog
@@ -800,14 +925,22 @@ export default function Transcript() {
   // const handleCall = () => {
   //   window.location.href = `tel:${+2348167238042}`;
   // };
+  // console.log(transcriptSummary);
+  // console.log(place_id);
 
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
-      <NavbarSection />
+      <NavbarSection updatePreferences confirmUpdatePreferences={confirmUpdatePreferences} />
 
       <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
       <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
-        <div className=" flex  w-full  text-[#333333] md:text-lg mt-20 ">
+      {/* Info section with border bottom */}
+        <div className="w-full mt-20">
+          <p className="text-sm md:text-sm text-gray-700">
+            Docsure AI is calling the top-rated doctors in your area to seek an appointment for you.
+          </p>
+        </div>
+        <div className=" flex  w-full  text-[#333333] md:text-lg mt-5 ">
           <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
           <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
           <button
@@ -828,26 +961,35 @@ export default function Transcript() {
               {/* Scrollable doctor cards container */}
 
               <div className="pr-2 h-[calc(100%-60px)]">
-                <ScrollArea className="h-full w-full md:w-auto">
-                  {doctors.map((doctor, index) => (
-                    <DoctorCard
-                      key={index}
-                      index={index}
-                      activeCallIndex={activeCallIndex}
-                      doctor={doctor}
-                      callStatus={callStatus}
-                      isAppointmentBooked={isAppointmentBooked}
-                      onSkip={() => {
-                        track("Skip_Call_Btn_Clicked");
-                        moveToNextDoctor(
-                          callStatus?.ssid,
-                          activeCallIndexRef.current,
-                          formData.request_id
-                        );
-                      }} // Move to next doctor
-                    />
-                  ))}
-                </ScrollArea>
+                <ExpandProvider>
+                  <ScrollArea className="h-full w-full md:w-auto">
+                    {doctors.map((doctor, index) => (
+                      <DoctorCard
+                        key={index}
+                        index={index}
+                        wsRef={wsRef}
+                        id={index.toString()}
+                        activeCallIndex={activeCallIndex}
+                        doctor={doctor}
+                        callStatus={callStatus}
+                        transcriptSummary={transcriptSummary}
+                        setTranscriptSummary={setTranscriptSummary}
+                        transcriptLoading={transcriptLoading}
+                        setTranscriptLoading={setTranscriptLoading}
+                        isAppointmentBooked={isAppointmentBooked}
+                        reconnectWebSocket={connectWebSocket}
+                        onSkip={() => {
+                          track("Skip_Call_Btn_Clicked");
+                          moveToNextDoctor(
+                            callStatus?.ssid,
+                            activeCallIndexRef.current,
+                            formData.request_id
+                          );
+                        }} // Move to next doctor
+                      />
+                    ))}
+                  </ScrollArea>
+                </ExpandProvider>
               </div>
 
               {/* Terminate Request Button - fixed at bottom */}
@@ -876,7 +1018,7 @@ export default function Transcript() {
                 >
                   Terminate Request
                 </button>
-                <button
+                {/* <button
                   onClick={() => setOpenModifyDialog(true)}
                   disabled={!callStatus?.isInitiated}
                   className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
@@ -886,7 +1028,7 @@ export default function Transcript() {
                   }`}
                 >
                   Modify My Request
-                </button>
+                </button> */}
                 <button
                   onClick={() => setOpenTerminateAndCallDialog(true)}
                   disabled={!callStatus?.isInitiated}

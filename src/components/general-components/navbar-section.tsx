@@ -27,12 +27,20 @@ import {
 } from "@/constants/store-constants";
 import { Autocomplete } from "../../../components/ui/autocomplete";
 import { track } from "@vercel/analytics";
+import QuickDetailsModal from "@/app/landing/components/QuickDetailsModal";
 
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
-export default function NavbarSection() {
+
+interface NavbarSectionProps {
+  updatePreferences?: boolean; // Flag to show "Update Preferences" text
+  openModal?: boolean; // Flag to open QuickDetailsModal
+}
+
+export default function NavbarSection({ updatePreferences = false, confirmUpdatePreferences,  openModal = false }: NavbarSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(openModal);
   const pathname = usePathname(); // Get the current route
 
   const toggleSidebar = () => setIsOpen(!isOpen);
@@ -61,16 +69,19 @@ export default function NavbarSection() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      const savedInsurer = sessionStorage.getItem("selectedInsurer");
+      const formData = sessionStorage.getItem("formData");
+      if(formData){
+        const parsedFormData = JSON.parse(formData);
+        //console.log(parsedFormData)
+        if (parsedFormData?.insurer) {
+          setInsurer(parsedFormData?.insurer);
+          formik.setFieldValue("insurance_carrier", parsedFormData?.insurer); // ✅ correct field 
+        }
+      }
       if (savedSpecialty) {
         setSpecialty(savedSpecialty);
         formik.setFieldValue("specialty", savedSpecialty);
       }
-      if (savedInsurer) {
-        setInsurer(savedInsurer);
-        formik.setFieldValue("insurance_carrier", savedInsurer); // ✅ correct field
-      }
-
       const savedAddress = sessionStorage.getItem("selectedAddress");
       const savedAddressLocation = sessionStorage.getItem("selectedLocation");
       const AddressLocation = JSON.parse(savedAddressLocation);
@@ -85,7 +96,7 @@ export default function NavbarSection() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [openModal, isModalOpen]); // Added openModal and isModalOpen to dependency array
 
   const formik = useFormik({
     initialValues: {
@@ -97,6 +108,12 @@ export default function NavbarSection() {
       console.log(values);
       track("Navbar_Search_Btn_Clicked");
       const updatedValues = { ...values };
+
+      // If updatePreferences is true, open the modal instead of searching
+      if (updatePreferences) {
+        setIsModalOpen(true);
+        return;
+      }
 
       setisLoading(true);
       if (!selectedLocation) {
@@ -134,6 +151,12 @@ export default function NavbarSection() {
       }
     },
   });
+  const handleFieldClick = () => {
+    if (updatePreferences) {
+      formik.submitForm();
+      return
+    }
+  };
 
   // useEffect(() => {
   //   if (selectedOption === "no") {
@@ -212,7 +235,7 @@ export default function NavbarSection() {
                     <div className="flex items-center justify-center px-3 md:hidden">
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1 border-b border-gray-400 md:border-none">
+                    <div onClick={handleFieldClick} className="flex-1 border-b border-gray-400 md:border-none">
                       <Autocomplete
                         id="specialty"
                         name="specialty"
@@ -226,6 +249,7 @@ export default function NavbarSection() {
                         }}
                         clearable={false}
                         navbar
+                        enabled={updatePreferences?false: true}
                       />
                     </div>
                   </div>
@@ -234,7 +258,7 @@ export default function NavbarSection() {
                     <div className="flex items-center justify-center px-3">
                       <BookText className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1 border-b border-gray-400 md:border-none">
+                    <div onClick={handleFieldClick} className="flex-1 border-b border-gray-400 md:border-none">
                       <Autocomplete
                         id="insurer"
                         name="insurer"
@@ -248,15 +272,17 @@ export default function NavbarSection() {
                           formik.setFieldValue("insurance_carrier", value);
                         }}
                         clearable={false}
+                        enabled={updatePreferences?false: true}
                       />
                     </div>
                   </div>
                   {/* Location Section */}
+                  {!updatePreferences &&
                   <div className="flex items-center w-full sm:flex-1">
                     <div className="flex items-center justify-center px-3 h-full">
                       <MapPin className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1">
+                    <div onClick={handleFieldClick} className="flex-1">
                       {isLoaded && (
                         <StandaloneSearchBox
                           onLoad={(ref) => (inputRefs.current[0] = ref)}
@@ -275,15 +301,20 @@ export default function NavbarSection() {
                       )}
                     </div>
                   </div>
+                  }
                 </div>
 
                 {/* Search Button - Stays on the right, filling height on mobile */}
                 <button
-                  className="text-white rounded-none px-2 md:px-5  md:h-12 h-full md:w-auto absolute md:static right-0 top-0 bottom-0 border-l-0 
+                  className={`text-white rounded-none px-2 md:px-5 md:h-12 h-full md:w-auto absolute md:static right-0 top-0 bottom-0 border-l-0 
   bg-[#0074BA] md:bg-[#E5573F] hover:bg-[#0074BA] hover:text-white md:hover:bg-[#0074BA] md:hover:text-white rounded-tr-sm rounded-br-sm
- "
+  ${updatePreferences ? "md:min-w-[200px]" : ""}`}
                 >
-                  <Search className="w-5 h-5 font-semibold text-white md:text-white md:hover:text-white" />
+                  {updatePreferences ? (
+                    <span className="hidden md:inline-block text-white">Update Preferences</span>
+                  ) : (
+                    <Search className="w-5 h-5 font-semibold text-white md:text-white md:hover:text-white" />
+                  )}
                 </button>
               </div>
             </form>
@@ -362,6 +393,15 @@ export default function NavbarSection() {
           />
         </div>
       )}
+
+      {/* Quick Details Modal */}
+      <QuickDetailsModal 
+        open={isModalOpen} 
+        onOpenChange={setIsModalOpen}
+        initialSpecialty={specialty}
+        updatePreferences={updatePreferences}
+        confirmUpdatePreferences={confirmUpdatePreferences}
+      />
     </div>
   );
 }

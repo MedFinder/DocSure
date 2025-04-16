@@ -22,11 +22,11 @@ interface ColumnProps {
   tasks: TaskType[];
   activeCallIndex: number;
   isAppointmentBooked: boolean;
-  transcriptSummary: {place_id:'', summary: ''};
+  transcriptSummary: { place_id: ""; summary: "" };
   transcriptLoading: boolean;
-  wsRef:React.RefObject<WebSocket | null>;
+  wsRef: React.RefObject<WebSocket | null>;
   reconnectWebSocket: Promise<void>;
-  setTranscriptSummary: ({place_id:string, summary: string}) => void;
+  setTranscriptSummary: ({ place_id: string, summary: string }) => void;
   setTranscriptLoading: (loading: boolean) => void;
   callStatus: CallStatusType;
   onDelete: (id: string) => void;
@@ -90,7 +90,6 @@ const Column: React.FC<ColumnProps> = ({
   //     </table>
   //   </div>
   // );
-  // console.log(tasks);
   return (
     <div className="w-full">
       <table className="task-table w-full border-collapse md:table">

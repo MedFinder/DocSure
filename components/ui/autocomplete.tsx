@@ -24,6 +24,7 @@ interface AutocompleteProps {
   clearable?: boolean;
   navbar?: boolean;
   maxItemsToShow?: number;
+  enabled?: boolean; // Added enabled prop
 }
 
 export function Autocomplete({
@@ -37,6 +38,7 @@ export function Autocomplete({
   clearable = true,
   navbar = false,
   maxItemsToShow = 7, // Default to show up to 7 items before scrolling
+  enabled = true, // Default to enabled
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
@@ -153,6 +155,9 @@ export function Autocomplete({
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Don't process changes if component is disabled
+    if (!enabled) return;
+    
     const newValue = e.target.value;
     setInputValue(newValue);
 
@@ -170,6 +175,9 @@ export function Autocomplete({
   };
 
   const handleSelectOption = (value: string) => {
+    // Don't process selection if component is disabled
+    if (!enabled) return;
+    
     const option = options.find((option) => option.value === value);
     if (option) {
       setInputValue(option.label);
@@ -179,6 +187,9 @@ export function Autocomplete({
   };
 
   const handleClear = () => {
+    // Don't process clear if component is disabled
+    if (!enabled) return;
+    
     setInputValue("");
     onChange("");
 
@@ -189,7 +200,8 @@ export function Autocomplete({
   };
 
   const renderDropdown = () => {
-    if (!open || !isMounted) return null;
+    // Don't show dropdown if component is disabled
+    if (!open || !isMounted || !enabled) return null;
 
     const dropdown = (
       <div
@@ -240,6 +252,7 @@ export function Autocomplete({
           value={inputValue}
           onChange={handleInputChange}
           onFocus={() => {
+            if (!enabled) return;
             setOpen(true);
             updatePosition();
           }}
