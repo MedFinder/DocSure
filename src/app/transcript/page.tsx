@@ -547,142 +547,34 @@ export default function Transcript() {
       });
     }
   };
-  // const connectWebSocket = (id?: string) => {
-  //   // if (wsRef?.current) {
-  //   //   //check if exisiting connection exists and disconnect
-  //   //   console.log("disconnect exisiting connection if it exists...");
-  //   //   wsRef?.current?.close();
-  //   // }
-  //   const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${
-  //     id ?? callStatusRef.current.ssid
-  //   }`;
-  //   console.log(url);
-  //   wsRef.current = new WebSocket(url);
-
-  //   wsRef.current.onopen = () => {
-  //     console.log("WebSocket connected successfully and opened.");
-  //   };
-  //   wsRef.current.onmessage = async (event) => {
-  //     const data = JSON.parse(event.data);
-  //     // console.log("WebSocket Message:", data);
-  //     if (data.event === "call_ended") {
-  //       // console.log("Call Ended Data:", data);
-  //       setTimeout(async () => {
-  //         const call_ended_result = await handleEndCall(data?.call_sid);
-  //         console.log({ call_ended_result });
-  //         if (call_ended_result?.status == "yes") {
-  //           // Save relevant information for success page
-  //           const successMessage =
-  //             call_ended_result?.confirmation_message ??
-  //             "Appointment Booked Successfully";
-  //           sendSMS(successMessage);
-  //           const doctorPhone =
-  //             doctors[activeCallIndexRef.current]?.phone_number;
-  //           // make the sms call to the patient
-  //           setIsAppointmentBooked(true);
-  //           wsRef?.current?.close();
-
-  //           // Pass parameters to success page using router.push with query params
-  //           router.push(
-  //             `/success?success_message=${encodeURIComponent(
-  //               successMessage
-  //             )}&phone_number=${encodeURIComponent(doctorPhone || "")}`
-  //           );
-  //           return;
-  //         } else {
-  //           // console.log("call ended but not booked..this is where skip happens");
-  //           if (callStatusRef.current.ssid === data?.call_sid) {
-  //             toast.warning(
-  //               "Appointment could not be booked. Trying next doctor..."
-  //             );
-  //             moveToNextDoctor(
-  //               null,
-  //               activeCallIndexRef.current,
-  //               formData.request_id
-  //             );
-  //           }
-  //         }
-  //       }, 5000);
-  //     }
-
-  //     if (data.event === "call_in_process") {
-  //       const timestamp = new Date().toLocaleTimeString();
-  //       if (callStatusRef.current.ssid === data?.call_sid) {
-  //         setTranscriptArray((prev) => [...prev, `${data.transcription}`]);
-  //       }
-  //     }
-
-  //     if (data.event === "call_not_picked") {
-  //       // doctor did not pick call...move to next
-  //       if (callStatusRef.current.ssid === data?.call_sid) {
-  //         toast.info("Doctor did not pick call. Trying next doctor...");
-  //         moveToNextDoctor(
-  //           null,
-  //           activeCallIndexRef.current,
-  //           formData.request_id
-  //         );
-  //       }
-  //     }
-  //   };
-
-  //   wsRef.current.onclose = () => {
-  //     console.log("WebSocket disconnected");
-  //   };
-
-  //   wsRef.current.onerror = (error) => {
-  //     //console.error("WebSocket Error:", error);
-  //     console.log("Retrying WebSocket connection in 5 seconds...");
-  //     setTimeout(connectWebSocket, 5000);
-  //   };
-  // };
-
-  // const logDrLists = async () => {
-  //   // Create arrays to collect the values
-  //   const doctor_numbers = [];
-  //   const hospital_names = [];
-  //   const addresses = [];
-  //   const distances = [];
-  //   const ratings = [];
-  //   const websites = [];
-
-  //   // Map through the doctors and phoneNumbers arrays
-  //   for (let i = 0; i < doctors.length; i++) {
-  //     // Add values to respective arrays, ensuring we handle potentially missing values
-  //     doctor_numbers.push(phoneNumbers[i] || 'N/A');
-  //     hospital_names.push(doctors[i]?.name || 'N/A');
-  //     addresses.push(doctors[i]?.vicinity || 'N/A');
-  //     distances.push(doctors[i]?.distance || 'N/A');
-  //     ratings.push(doctors[i]?.rating || 0);
-  //     websites.push(doctors[i]?.website || 'N/A');
-  //   }
-  //   const formData = JSON.parse(sessionStorage.getItem("formData"));
-  //   // console.log(formData);
-  //   const { request_id } = formData;
-  //   // Create final object with comma-separated values
-  //   const result = {
-  //     request_id,
-  //     doctor_numbers: doctor_numbers.join(','),
-  //     hospital_names: hospital_names.join(','),
-  //     addresses: addresses.join(','),
-  //     distances: distances.join(','),
-  //     ratings: ratings.join(','),
-  //     websites: websites.join(',')
-  //   };
-
-  //   console.log(result, 'log dr lists');
-
-  //   try {
-  //     const resp = await axios.post(
-  //       `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
-  //       result
-  //     );
-  //     // console.log(resp?.data)
-  //     return;
-  //   } catch (error) {
-  //     console.log('Error logging dr details:', error);
-  //     return null;
-  //   }
-  // };
+  const logDrLists = async (data) => {
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
+        data
+      );
+      return;
+    } catch (error) {
+      console.error("Error dr details:", error);
+      return null;
+    }
+  };
+  useEffect(() => {
+    async function fetchAndLogData() {
+      const drsData = sessionStorage.getItem("statusData");
+      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      //console.log(formData);
+      if (drsData) {
+        const parsedDrsData = JSON.parse(drsData);
+        const payload = {
+          request_id: formData?.request_id,
+          ...parsedDrsData,
+        };
+        await logDrLists(payload);
+      }
+    }
+    fetchAndLogData();
+  }, []);
   const connectWebSocket = (id?: string) => {
     // Check if a WebSocket connection already exists
     if (wsRef?.current) {
