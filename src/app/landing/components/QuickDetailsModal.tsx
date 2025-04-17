@@ -575,7 +575,7 @@ export default function QuickDetailsModal({
                         selected={formik.values.dob}
                         onChange={handleDateChange}
                         onBlur={formik.handleBlur}
-                        dateFormat="yyyy-MM-dd"
+                        dateFormat="MM-dd-yyyy"
                         showYearDropdown
                         showMonthDropdown
                         dropdownMode="select"

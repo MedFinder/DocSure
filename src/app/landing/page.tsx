@@ -740,7 +740,7 @@ export default function LandingPage() {
                 Book top rated doctors near you
               </h2>
               <h2 className="text-xl font-normal">
-                Let our AI call clinics and secure your appointment for free.
+                Let our AI call clinics and secure your appointment for free
               </h2>
             </div>
 
