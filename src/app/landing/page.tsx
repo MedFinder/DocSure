@@ -442,8 +442,9 @@ export default function LandingPage() {
         toast.error("No location selected");
         return;
       }
+      const storedLocation = sessionStorage.getItem("selectedLocation");
       try {
-        const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
+        const { lat, lng } = JSON.parse(storedLocation);
         sessionStorage.setItem("selectedSpecialty", values.specialty);
         sessionStorage.setItem("selectedInsurer", values.insurance_carrier);
         sessionStorage.setItem(
@@ -451,8 +452,9 @@ export default function LandingPage() {
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
 
-        // Call logRequestInfo without awaiting
+        // Call logRequestInfo and get the promise
         const requestIdPromise = logRequestInfo();
+        
         const speciality_value =
           formik.values.specialty === "Prescription / Refill"
             ? "Primary Care Physician"
@@ -462,44 +464,52 @@ export default function LandingPage() {
           radius: 20000,
           keyword: speciality_value,
         };
+        
+        // Make API call to search places
         const response = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
           data
         );
-
-        // Handle request_id when the promise resolves
-        requestIdPromise.then((request_id) => {
-          if (request_id) {
-            const updatedValues = { 
-              ...values, 
-              request_id,
-              patientName: values.userName // Add userName as patientName for compatibility
-            };
-            // Get existing form data if it exists
-            const existingFormData = sessionStorage.getItem("formData");
-            let mergedValues = updatedValues;
-            
-            if (existingFormData) {
-              try {
+        
+        // Wait for the request ID promise to resolve
+        const request_id = await requestIdPromise;
+        
+        // Once request_id is available, update formData
+        if (request_id) {
+          const updatedValues = { 
+            ...values, 
+            request_id,
+            patientName: values.userName // Add userName as patientName for compatibility
+          };
+          
+          // Get existing form data if it exists
+          const existingFormData = sessionStorage.getItem("formData");
+          let mergedValues = updatedValues;
+          
+          if (existingFormData) {
+            try {
               const parsedExistingData = JSON.parse(existingFormData);
               // Merge existing data with new values (new values take precedence)
               mergedValues = { ...parsedExistingData, ...updatedValues };
-              } catch (error) {
+            } catch (error) {
               console.error("Error parsing existing form data:", error);
-              }
             }
-            
-            sessionStorage.setItem("formData", JSON.stringify(mergedValues));
           }
-        });
+          
+          // Save the updated form data to session storage
+          sessionStorage.setItem("formData", JSON.stringify(mergedValues));
+        }
 
-        await sessionStorage.setItem("statusData", JSON.stringify(response.data));
+        // Save search results to session storage
+        sessionStorage.setItem("statusData", JSON.stringify(response.data));
         sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
-        setTimeout(() => {
-          router.push("/transcript?confirmed=true");
-        }, 500);
+        
+        // Now that everything is saved to sessionStorage, navigate to transcript page
+        router.push("/transcript?confirmed=true");
       } catch (error) {
         console.error("Error submitting form:", error);
+        toast.error("An error occurred. Please try again.");
+        setisLoading(false);
       }
     },
   });

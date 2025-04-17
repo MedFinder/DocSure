@@ -191,6 +191,8 @@ export default function Transcript() {
   const [extractedData, setExtractedData] = useState<TaskType[]>([]);
   const [activeCallIndex, setActiveCallIndex] = useState(0);
   const [isPreferencesUpdated, setIsPreferencesUpdated] = useState(false);
+  const [isPreferencesReinitialized, setIsPreferencesReinitialized] = useState(false);
+
   const activeCallIndexRef = useRef(activeCallIndex);
   const requestIdRef = useRef(formData?.request_id);
   const callStatusRef = useRef(callStatus);
@@ -238,15 +240,14 @@ export default function Transcript() {
           let rawData;
   
           if (lastSearchSource === "navbar") {
+            setCallStatus({
+              isInitiated: false,
+              ssid: "",
+              email: "",
+            });
+            setActiveCallIndex(0)
+            setTranscriptArray([])
             rawData = sessionStorage.getItem("statusDataNav");
-            // setIsPreferencesUpdated(false)
-            // setCallStatus({
-            //   isInitiated: false,
-            //   ssid: "",
-            //   email: "",
-            // });
-            // setActiveCallIndex(0)
-            // setTranscriptArray([])
           } else {
             rawData = sessionStorage.getItem("statusData");
           }
@@ -386,6 +387,7 @@ export default function Transcript() {
   const handleConfirmSequence = useCallback(async (formdata) => {
     // initiate call
     try {
+      console.log('first trial........')
       setIsConfirmed(true); // Disable button and dragging
       const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
       await initiateCall(
@@ -407,7 +409,7 @@ export default function Transcript() {
       setShowTranscript(true);
       setTranscriptArray((prev) => [
         ...prev,
-        `${isPreferencesUpdated ? "Re-calling" : "Calling"} ${
+        `${isPreferencesUpdated && !isPreferencesReinitialized ? "Re-calling" : "Calling"} ${
           doctors[activeCallIndex]?.name
         } to seek an appointment\n`,
       ]);
@@ -570,6 +572,7 @@ export default function Transcript() {
     request_id: string
   ) => {
     // console.log(id,currentindex,request_id)
+    setIsPreferencesReinitialized(false)
     setIsPreferencesUpdated(false)
     let newIndex = currentindex + 1;
     if (id) {
@@ -841,11 +844,9 @@ export default function Transcript() {
           const currentStoredFormData = JSON.parse(sessionStorage.getItem("formData") || "{}");
           requestIdRef.current = currentStoredFormData?.request_id;
           setFormData(currentStoredFormData);
-          
-          // Set isPreferencesUpdated flag to true
-          setIsPreferencesUpdated(true);
-          
-          handleConfirmSequence(currentStoredFormData);
+          if(!isPreferencesReinitialized){
+            handleConfirmSequence(currentStoredFormData);
+          }
       } catch (error) {
         console.error("Failed to log call termination:", error);
         toast.error("Failed to terminate the call. Please try again.");
@@ -886,7 +887,7 @@ export default function Transcript() {
 
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
-      <NavbarSection updatePreferences confirmUpdatePreferences={confirmUpdatePreferences} />
+      <NavbarSection updatePreferences confirmUpdatePreferences={confirmUpdatePreferences} setIsPreferencesUpdated={setIsPreferencesUpdated} setIsPreferencesReinitialized={setIsPreferencesReinitialized}  />
 
       <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
       <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
