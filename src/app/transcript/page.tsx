@@ -10,7 +10,6 @@ import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import Column from "../../components/older-pages/search/features/column";
 import { toast } from "sonner";
 import axios from "axios";
 import { ChatSection } from "./ChatSection";
@@ -25,6 +24,7 @@ import { track } from "@vercel/analytics";
 import NavbarSection from "@/components/general-components/navbar-section";
 import FooterSection from "../landing/components/FooterSection";
 import { DoctorCard, ExpandProvider } from "./DoctorCard";
+import Column from "../search-doctor/features/column";
 
 const _doctors: Doctor[] = [
   {
@@ -173,6 +173,7 @@ export default function Transcript() {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY;
   // console.log(apiKey);
   const wsRef = useRef<WebSocket | null>(null);
+  const wsSummaryRef = useRef<WebSocket | null>(null);
   const router = useRouter();
   const [doctors, setDoctors] = useState([]);
   const [phoneNumbers, setPhoneNumbers] = useState<(string | null)[]>([]);
@@ -259,48 +260,48 @@ export default function Transcript() {
   
           const parsedData = JSON.parse(rawData);
           if (parsedData?.results?.length) {
-            // const sortedData = parsedData.results.map((item) => ({
-            //   ...item,
-            //   id: item.place_id || item.id,
-            //   location: {
-            //     lat: item.location?.lat || item.lat,
-            //     lng: item.location?.lng || item.lng,
-            //   },
-            // }));
-            const sortedData = parsedData.results.map((item, index) => {
-              // Transform each Google Places API result into a Doctor type
-              return {
-                id: item.place_id || item.id, // Preserve the original id from place_id
-                name: item.name || "Unknown Doctor",
-                title: item.types?.includes("health")
-                  ? "Primary Care Doctor"
-                  : "Specialist",
-                image: item.photos?.[0]?.photo_reference
-                  ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${item.photos[0].photo_reference}&key=${apiKey}`
-                  : "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
-                rating: item.rating || 0,
-                reviews: item.user_ratings_total || 0,
-                distance: item.distance || "Unknown distance",
-                address: item.formatted_address || "Address unavailable",
-                status: "queue", // Default status
-                waitTime: "Excellent wait time", // Default wait time
-                appointments: "New patient appointments", // Default appointment text
-                phone_number: item.phone_number || null,
-                location: {
-                  lat: item.location?.lat || item.lat,
-                  lng: item.location?.lng || item.lng,
-               },
-                place_id: item.place_id,
-                vicinity: item.formatted_address || "",
-                website: item.website || "",
-                isSponsored: false, // Default not sponsored
-                opening_hours: {
-                  status: item.opening_hours?.status || "",
-                  time_info: item.opening_hours?.time_info || "",
-                },
-              };
-            });
-  
+            const sortedData = parsedData.results.map((item) => ({
+              ...item,
+              id: item.place_id || item.id,
+              location: {
+                lat: item.location?.lat || item.lat,
+                lng: item.location?.lng || item.lng,
+              },
+            }));
+            // const sortedData = parsedData.results.map((item, index) => {
+            //   // Transform each Google Places API result into a Doctor type
+            //   return {
+            //     id: item.place_id || item.id, // Preserve the original id from place_id
+            //     name: item.name || "Unknown Doctor",
+            //     title: item.types?.includes("health")
+            //       ? "Primary Care Doctor"
+            //       : "Specialist",
+            //     image: item.photos?.[0]?.photo_reference
+            //       ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${item.photos[0].photo_reference}&key=${apiKey}`
+            //       : "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+            //     rating: item.rating || 0,
+            //     reviews: item.user_ratings_total || 0,
+            //     distance: item.distance || "Unknown distance",
+            //     address: item.formatted_address || "Address unavailable",
+            //     status: "queue", // Default status
+            //     waitTime: "Excellent wait time", // Default wait time
+            //     appointments: "New patient appointments", // Default appointment text
+            //     phone_number: item.phone_number || null,
+            //     location: {
+            //       lat: item.location?.lat || item.lat,
+            //       lng: item.location?.lng || item.lng,
+            //    },
+            //     place_id: item.place_id,
+            //     vicinity: item.formatted_address || "",
+            //     website: item.website || "",
+            //     isSponsored: false, // Default not sponsored
+            //     opening_hours: {
+            //       status: item.opening_hours?.status || "",
+            //       time_info: item.opening_hours?.time_info || "",
+            //     },
+            //   };
+            // });
+            console.log(sortedData)
             setDoctors(sortedData);
             setNextPageToken(parsedData.next_page_token || null);
           } else {
@@ -455,6 +456,32 @@ export default function Transcript() {
     setOpenDialog(false);
     toast.success("Your request has been terminated successfully.");
   };
+  const connectWebSocketSummary = async () => {
+    const formData = await JSON.parse(sessionStorage.getItem("formData"));
+    const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${formData?.request_id}`;
+    console.log(url,'summary socket url');
+    wsSummaryRef.current = new WebSocket(url);
+
+    wsSummaryRef.current.onopen = () => {
+      console.log("Summary WebSocket connected successfully and opened.");
+    };
+    wsSummaryRef.current.onmessage = async (event) => {
+      const message = JSON.parse(event.data);
+      if (message.event === "summary_stream" && message.data?.summary) {
+        setTranscriptLoading(false);
+        setTranscriptSummary(message.data);
+      }
+    };
+
+    wsSummaryRef.current.onclose = () => {
+      console.log("Sumamry WebSocket disconnected");
+    };
+
+    wsSummaryRef.current.onerror = (error) => {
+      console.log("Summary Retrying WebSocket connection in 5 seconds...");
+      setTimeout(connectWebSocket, 5000);
+    };
+  };
   const initiateCall = useCallback(
     async (
       doctorPhoneNumber: string,
@@ -472,7 +499,7 @@ export default function Transcript() {
       const currentFormData = customformdata || formData;
       const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
       
-      if (!currentFormData) {
+      if (!currentFormData || !doctorPhoneNumber) {
         console.error("No formData found in sessionStorage or provided as parameter.");
         return;
       }
@@ -637,6 +664,8 @@ export default function Transcript() {
       }
     }
     fetchAndLogData();
+    connectWebSocketSummary();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const connectWebSocket = (id?: string) => {
     // Check if a WebSocket connection already exists
@@ -887,54 +916,73 @@ export default function Transcript() {
 
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
-      <NavbarSection updatePreferences confirmUpdatePreferences={confirmUpdatePreferences} setIsPreferencesUpdated={setIsPreferencesUpdated} setIsPreferencesReinitialized={setIsPreferencesReinitialized}  />
-
-      <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
-      <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
-      {/* Info section with border bottom */}
-        <div className="w-full mt-20">
-          <p className="text-sm md:text-sm text-gray-700">
-            Docsure AI is calling the top-rated doctors in your area to seek an appointment for you.
+      <NavbarSection 
+        updatePreferences 
+        confirmUpdatePreferences={confirmUpdatePreferences} 
+        setIsPreferencesUpdated={setIsPreferencesUpdated} 
+        setIsPreferencesReinitialized={setIsPreferencesReinitialized} 
+      />
+      {doctors.length === 0 ? 
+        <div className="flex flex-col items-center justify-center h-screen text-center ">
+          <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
+            No results found!
           </p>
+          <p className="text-gray-500 mt-2">
+            We could not find any doctors that meet this criteria.
+          </p>
+          <Link href="/">
+            <Button className="bg-[#7DA1B7] text-white px-6 py-5 mt-8 w-full sm:w-auto">
+              Search Again
+            </Button>
+          </Link>
         </div>
-        <div className=" flex  w-full  text-[#333333] md:text-lg mt-5 ">
-          <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
-          <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
-          <button
-            onClick={toggleTranscript}
-            className="w-1/3 mt-6 md:mt-0 text-sm text whitespace-nowrap md:hidden text-[#E5573F] underline"
-          >
-            {showTranscript ? "Back to List" : "View Transcript"}
-          </button>
-        </div>
-
-        <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
-          <div className="flex gap-5 h-full max-md:flex-col">
-            <div
-              className={`w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full ${
-                showTranscript ? "hidden md:block" : "block"
-              }`}
+        :
+        <>
+        <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
+        <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
+        {/* Info section with border bottom */}
+          <div className="w-full mt-20">
+            <p className="text-sm md:text-sm text-gray-700">
+              Docsure AI is calling the top-rated doctors in your area to seek an appointment for you.
+            </p>
+          </div>
+          <div className=" flex  w-full  text-[#333333] md:text-lg mt-5 ">
+            <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
+            <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
+            <button
+              onClick={toggleTranscript}
+              className="w-1/3 mt-6 md:mt-0 text-sm text whitespace-nowrap md:hidden text-[#E5573F] underline"
             >
-              {/* Scrollable doctor cards container */}
+              {showTranscript ? "Back to List" : "View Transcript"}
+            </button>
+          </div>
 
-              <div className="pr-2 h-[calc(100%-60px)]">
-                <ExpandProvider>
-                  <ScrollArea className="h-full w-full md:w-auto">
-                    {doctors.map((doctor, index) => (
-                      <DoctorCard
-                        key={index}
-                        index={index}
-                        wsRef={wsRef}
-                        id={index.toString()}
+          <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
+            <div className="flex gap-5 h-full max-md:flex-col">
+              <div
+                className={`w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full ${
+                  showTranscript ? "hidden md:block" : "block"
+                }`}
+              >
+                {/* Scrollable doctor cards container */}
+
+                <div className="pr-2 h-[calc(100%-60px)]">
+                  <ExpandProvider>
+                    <ScrollArea className="h-full w-full md:w-auto">
+                      <Column
                         activeCallIndex={activeCallIndex}
-                        doctor={doctor}
+                        tasks={doctors}
+                        //onDelete={handleDelete}
+                        isDraggable={!isConfirmed}
                         callStatus={callStatus}
                         transcriptSummary={transcriptSummary}
                         setTranscriptSummary={setTranscriptSummary}
                         transcriptLoading={transcriptLoading}
                         setTranscriptLoading={setTranscriptLoading}
                         isAppointmentBooked={isAppointmentBooked}
-                        reconnectWebSocket={connectWebSocket}
+                        wsRef={wsSummaryRef}
+                        reconnectWebSocket={connectWebSocketSummary}
+                        fromTranscript={true}
                         onSkip={() => {
                           track("Skip_Call_Btn_Clicked");
                           moveToNextDoctor(
@@ -943,177 +991,204 @@ export default function Transcript() {
                             formData.request_id
                           );
                         }} // Move to next doctor
-                      />
-                    ))}
-                  </ScrollArea>
-                </ExpandProvider>
+                        />
+                      {/* {doctors.map((doctor, index) => (
+                        <DoctorCard
+                          key={index}
+                          index={index}
+                          wsRef={wsRef}
+                          id={doctor.id}
+                          activeCallIndex={activeCallIndex}
+                          doctor={doctor}
+                          callStatus={callStatus}
+                          transcriptSummary={transcriptSummary}
+                          setTranscriptSummary={setTranscriptSummary}
+                          transcriptLoading={transcriptLoading}
+                          setTranscriptLoading={setTranscriptLoading}
+                          isAppointmentBooked={isAppointmentBooked}
+                          reconnectWebSocket={connectWebSocket}
+                          onSkip={() => {
+                            track("Skip_Call_Btn_Clicked");
+                            moveToNextDoctor(
+                              callStatus?.ssid,
+                              activeCallIndexRef.current,
+                              formData.request_id
+                            );
+                          }} // Move to next doctor
+                        />
+                      ))} */}
+                    </ScrollArea>
+                  </ExpandProvider>
+                </div>
+
+                {/* Terminate Request Button - fixed at bottom */}
+                {/* <div className="flex justify-center mt-4 pb-2">
+                  <button
+                    onClick={terminateRequest}
+                    disabled={!callStatus?.isInitiated}
+                    className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                      callStatus?.isInitiated
+                        ? "bg-red-600 hover:bg-red-700 text-white"
+                        : "bg-red-300 cursor-not-allowed text-white opacity-70"
+                    }`}
+                  >
+                    Terminate Request
+                  </button>
+                </div> */}
+                <div className="flex flex-row md:flex-row gap-4 justify-start md:justify-center mt-4 pb-2 overflow-x-auto whitespace-nowrap ">
+                  <button
+                    onClick={handleTerminateRequest}
+                    disabled={!callStatus?.isInitiated}
+                    className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                      callStatus?.isInitiated
+                        ? "bg-red-600 hover:bg-red-700 text-white"
+                        : "bg-red-300 cursor-not-allowed text-white opacity-70"
+                    }`}
+                  >
+                    Terminate Request
+                  </button>
+                  {/* <button
+                    onClick={() => setOpenModifyDialog(true)}
+                    disabled={!callStatus?.isInitiated}
+                    className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
+                      callStatus?.isInitiated
+                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                        : "bg-blue-300 cursor-not-allowed text-white opacity-70"
+                    }`}
+                  >
+                    Modify My Request
+                  </button> */}
+                  <button
+                    onClick={() => setOpenTerminateAndCallDialog(true)}
+                    disabled={!callStatus?.isInitiated}
+                    className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
+                      callStatus?.isInitiated
+                        ? "bg-orange-600 hover:bg-orange-700 text-white"
+                        : "bg-orange-300 cursor-not-allowed text-white opacity-70"
+                    }`}
+                  >
+                    Terminate And Call Myself
+                  </button>
+                </div>
               </div>
 
-              {/* Terminate Request Button - fixed at bottom */}
-              {/* <div className="flex justify-center mt-4 pb-2">
-                <button
-                  onClick={terminateRequest}
-                  disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-8 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
-                    callStatus?.isInitiated
-                      ? "bg-red-600 hover:bg-red-700 text-white"
-                      : "bg-red-300 cursor-not-allowed text-white opacity-70"
-                  }`}
-                >
-                  Terminate Request
-                </button>
-              </div> */}
-              <div className="flex flex-row md:flex-row gap-4 justify-start md:justify-center mt-4 pb-2 overflow-x-auto whitespace-nowrap ">
-                <button
-                  onClick={handleTerminateRequest}
-                  disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
-                    callStatus?.isInitiated
-                      ? "bg-red-600 hover:bg-red-700 text-white"
-                      : "bg-red-300 cursor-not-allowed text-white opacity-70"
-                  }`}
-                >
-                  Terminate Request
-                </button>
-                {/* <button
-                  onClick={() => setOpenModifyDialog(true)}
-                  disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
-                    callStatus?.isInitiated
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "bg-blue-300 cursor-not-allowed text-white opacity-70"
-                  }`}
-                >
-                  Modify My Request
-                </button> */}
-                <button
-                  onClick={() => setOpenTerminateAndCallDialog(true)}
-                  disabled={!callStatus?.isInitiated}
-                  className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
-                    callStatus?.isInitiated
-                      ? "bg-orange-600 hover:bg-orange-700 text-white"
-                      : "bg-orange-300 cursor-not-allowed text-white opacity-70"
-                  }`}
-                >
-                  Terminate And Call Myself
-                </button>
+              {/* Always show in desktop, conditionally in mobile */}
+              <div
+                className={`w-[32%] flex flex-col max-md:ml-0 max-md:w-full ${
+                  showTranscript ? "block" : "hidden md:block"
+                }`}
+              >
+                {/* Note text updated with orange color */}
+                {/* <div className="mb-3 text-sm tracking-tight text-[#E5573F]">
+                  <p>
+                    Tip: Feel free to close this browser. Your booking
+                    confirmation will be sent to you over email and text.
+                  </p>
+                </div> */}
+                {/* <ScrollArea className="h-full w-full md:w-auto">
+                  <ChatSection
+                    doctorName={doctors[activeCallIndex]?.name}
+                    transcripts={getDisplayTranscript()}
+                  />
+                </ScrollArea> */}
+                <div className="h-[900px] overflow-y-auto ">
+                  <ChatSection
+                    doctorName={doctors[activeCallIndex]?.name}
+                    transcripts={getDisplayTranscript()}
+                  />
+                </div>
               </div>
             </div>
+          </div>
+        </section>
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          <DialogContent className="sm:max-w-lg h-52 px-4 ">
+            <DialogHeader>
+              <DialogTitle>Terminate Request</DialogTitle>
+            </DialogHeader>
+            <p className="text-gray-600">
+              This will terminate your appointment booking request and cannot be
+              undone. Continue?
+            </p>
+            <div className="md:flex  flex  justify-between gap-6">
+              <Button
+                variant="secondary"
+                className="w-1/2 rounded-md"
+                onClick={() => setOpenDialog(false)}
+              >
+                No
+              </Button>
+              <Button
+                variant="destructive"
+                className="w-1/2 rounded-md"
+                onClick={confirmTermination}
+              >
+                Yes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <Dialog open={openModifyDialog} onOpenChange={setOpenModifyDialog}>
+          <DialogContent className="sm:max-w-lg h-52">
+            <DialogHeader>
+              <DialogTitle>Modify Request</DialogTitle>
+            </DialogHeader>
+            <p className="text-gray-600">
+              This will terminate your current request and redirect you to modify
+              your request. Continue?
+            </p>
+            <div className="md:flex flex justify-between gap-6">
+              <Button
+                variant="secondary"
+                className="w-1/2 rounded-md"
+                onClick={() => setOpenModifyDialog(false)}
+              >
+                No
+              </Button>
+              <Button
+                variant="destructive"
+                className="w-1/2 rounded-md"
+                onClick={confirmModifyRequest}
+              >
+                Yes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <Dialog
+          open={openTerminateAndCallDialog}
+          onOpenChange={setOpenTerminateAndCallDialog}
+        >
+          <DialogContent className="sm:max-w-lg h-52">
+            <DialogHeader>
+              <DialogTitle>Terminate and Call Myself</DialogTitle>
+            </DialogHeader>
+            <p className="text-gray-600">
+              This will terminate your current request and allow you to call the
+              doctor directly. Continue?
+            </p>
+            <div className=" md:flex flex  justify-between gap-6">
+              <Button
+                variant="secondary"
+                className="w-1/2 rounded-md"
+                onClick={() => setOpenTerminateAndCallDialog(false)}
+              >
+                No
+              </Button>
+              <Button
+                variant="destructive"
+                className="w-1/2 rounded-md"
+                onClick={confirmTerminateAndCallMyself}
+              >
+                Yes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        {/* <FooterSection /> */}
+      </>  
+    }
 
-            {/* Always show in desktop, conditionally in mobile */}
-            <div
-              className={`ml-5 w-[32%] flex flex-col max-md:ml-0 max-md:w-full ${
-                showTranscript ? "block" : "hidden md:block"
-              }`}
-            >
-              {/* Note text updated with orange color */}
-              {/* <div className="mb-3 text-sm tracking-tight text-[#E5573F]">
-                <p>
-                  Tip: Feel free to close this browser. Your booking
-                  confirmation will be sent to you over email and text.
-                </p>
-              </div> */}
-              {/* <ScrollArea className="h-full w-full md:w-auto">
-                <ChatSection
-                  doctorName={doctors[activeCallIndex]?.name}
-                  transcripts={getDisplayTranscript()}
-                />
-              </ScrollArea> */}
-              <div className="h-[900px] overflow-y-auto ">
-                <ChatSection
-                  doctorName={doctors[activeCallIndex]?.name}
-                  transcripts={getDisplayTranscript()}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="sm:max-w-lg h-52 px-4 ">
-          <DialogHeader>
-            <DialogTitle>Terminate Request</DialogTitle>
-          </DialogHeader>
-          <p className="text-gray-600">
-            This will terminate your appointment booking request and cannot be
-            undone. Continue?
-          </p>
-          <div className="md:flex  flex  justify-between gap-6">
-            <Button
-              variant="secondary"
-              className="w-1/2 rounded-md"
-              onClick={() => setOpenDialog(false)}
-            >
-              No
-            </Button>
-            <Button
-              variant="destructive"
-              className="w-1/2 rounded-md"
-              onClick={confirmTermination}
-            >
-              Yes
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-      <Dialog open={openModifyDialog} onOpenChange={setOpenModifyDialog}>
-        <DialogContent className="sm:max-w-lg h-52">
-          <DialogHeader>
-            <DialogTitle>Modify Request</DialogTitle>
-          </DialogHeader>
-          <p className="text-gray-600">
-            This will terminate your current request and redirect you to modify
-            your request. Continue?
-          </p>
-          <div className="md:flex flex justify-between gap-6">
-            <Button
-              variant="secondary"
-              className="w-1/2 rounded-md"
-              onClick={() => setOpenModifyDialog(false)}
-            >
-              No
-            </Button>
-            <Button
-              variant="destructive"
-              className="w-1/2 rounded-md"
-              onClick={confirmModifyRequest}
-            >
-              Yes
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-      <Dialog
-        open={openTerminateAndCallDialog}
-        onOpenChange={setOpenTerminateAndCallDialog}
-      >
-        <DialogContent className="sm:max-w-lg h-52">
-          <DialogHeader>
-            <DialogTitle>Terminate and Call Myself</DialogTitle>
-          </DialogHeader>
-          <p className="text-gray-600">
-            This will terminate your current request and allow you to call the
-            doctor directly. Continue?
-          </p>
-          <div className=" md:flex flex  justify-between gap-6">
-            <Button
-              variant="secondary"
-              className="w-1/2 rounded-md"
-              onClick={() => setOpenTerminateAndCallDialog(false)}
-            >
-              No
-            </Button>
-            <Button
-              variant="destructive"
-              className="w-1/2 rounded-md"
-              onClick={confirmTerminateAndCallMyself}
-            >
-              Yes
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-      {/* <FooterSection /> */}
     </main>
   );
 }

@@ -23,6 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { StatusBadge } from "@/app/transcript-new/StatusBadge";
 
 const LoadingSumamry = dynamic(
   () => import("../../../components/Loading/LoadingSummary"),
@@ -72,12 +73,14 @@ interface TaskProps {
   setTranscriptSummary: ({ place_id: string, summary: string }) => void;
   setTranscriptLoading: (loading: boolean) => void;
   wsRef: React.RefObject<WebSocket | null>;
+  fromTranscript?: boolean;
   reconnectWebSocket: Promise<void>;
   callStatus: {
     isInitiated: boolean;
   };
   onDelete: (id: string) => void; // Function to delete item
   description?: string; // Optional description/summary field
+  onSkip?: () => void; // Function to skip the item
 }
 
 const getAlternateColor = (index: number) => {
@@ -135,9 +138,11 @@ export const Task: React.FC<TaskProps> = ({
   setTranscriptSummary,
   setTranscriptLoading,
   wsRef,
+  fromTranscript,
   reconnectWebSocket,
   onDelete,
   description = "",
+  onSkip,
   //description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -159,6 +164,7 @@ export const Task: React.FC<TaskProps> = ({
 
     // Toggle expanded state - close if already open, otherwise open this one and close others
     if (isExpanded) {
+      setTranscriptSummary({ place_id: id, summary: "" });
       setExpandedId(null);
       setTranscriptLoading(false);
     } else {
@@ -215,7 +221,7 @@ export const Task: React.FC<TaskProps> = ({
         // onClick={handleExpand}
         // onPointerDown={(e) => e.stopPropagation()}
       >
-        <td className="flex  md:table-cell    ">
+        <td className={`flex md:table-cell ${fromTranscript ? "!px-0" : ""}`}>
           <TooltipProvider>
             <div className="flex  md:gap-2 gap-2 ">
               <div className="flex md:gap-2 gap-0">
@@ -426,7 +432,7 @@ export const Task: React.FC<TaskProps> = ({
                     <span>•</span>
                     <span>{openingTimeInfo}</span>
                   </div>
-                  <div className=" md:table-cell">
+                  <div className="flex justify-between items-center w-full">
                     <button
                       type="button"
                       onClick={handleExpand}
@@ -439,6 +445,18 @@ export const Task: React.FC<TaskProps> = ({
                         </span>
                       )}
                     </button>
+                    {!isExpanded && fromTranscript && (
+                      <div className="flex justify-end items-center">
+                        <StatusBadge
+                          status={'queue'}
+                          index={index}
+                          onSkip={onSkip}
+                          activeCallIndex={activeCallIndex}
+                          callStatus={callStatus}
+                          isAppointmentBooked={isAppointmentBooked}
+                        />
+                      </div>
+                    )}
                     {/* 
                     <button
                       type="button"
@@ -481,8 +499,8 @@ export const Task: React.FC<TaskProps> = ({
                       </div>
                     </div>
                   )}
-                  {isExpanded && (
-                    <div className="flex justify-start text-start items-center">
+                  {isExpanded && fromTranscript && (
+                    <div className="flex justify-between text-start items-center">
                       <button
                         onClick={handleExpand}
                         className="text-sm underline mt-4"
@@ -490,6 +508,16 @@ export const Task: React.FC<TaskProps> = ({
                       >
                         view less
                       </button>
+                      <div className="flex justify-end items-center">
+                        <StatusBadge
+                          status={'queue'}
+                          index={index}
+                          onSkip={onSkip}
+                          activeCallIndex={activeCallIndex}
+                          callStatus={callStatus}
+                          isAppointmentBooked={isAppointmentBooked}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -498,22 +526,6 @@ export const Task: React.FC<TaskProps> = ({
           </TooltipProvider>
         </td>
 
-        {/* Expand/Collapse Button - New Column */}
-        {/* <td className="p-2 text-center hidden md:table-cell">
-          <button
-            onClick={handleExpand}
-            className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer hidden md:block"
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            {transcriptLoading ? (
-              <Loader2 className="mx-auto animate-spin" size={18} />
-            ) : isExpanded ? (
-              <ChevronUp className="mx-auto" size={18} />
-            ) : (
-              <ChevronDown className="mx-auto" size={18} />
-            )}
-          </button>
-        </td> */}
       </tr>
 
       {/* Expandable Description Panel - only visible on desktop */}
