@@ -36,9 +36,11 @@ const validationSchema = Yup.object().shape({
 interface NavbarSectionProps {
   updatePreferences?: boolean; // Flag to show "Update Preferences" text
   openModal?: boolean; // Flag to open QuickDetailsModal
+  setispreferencesUpdated?: (value: boolean) => void; // Callback to set preferences updated state
+  setIsPreferencesReinitialized?: (value: boolean) => void; // Callback to set preferences reinitialized state
 }
 
-export default function NavbarSection({ updatePreferences = false, confirmUpdatePreferences,  openModal = false }: NavbarSectionProps) {
+export default function NavbarSection({ updatePreferences = false, confirmUpdatePreferences,  openModal = false, setIsPreferencesUpdated, setIsPreferencesReinitialized }: NavbarSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(openModal);
   const pathname = usePathname(); // Get the current route
@@ -111,6 +113,8 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
 
       // If updatePreferences is true, open the modal instead of searching
       if (updatePreferences) {
+        setIsPreferencesUpdated(false)
+        setIsPreferencesReinitialized(false)
         setIsModalOpen(true);
         return;
       }
@@ -401,6 +405,8 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
         initialSpecialty={specialty}
         updatePreferences={updatePreferences}
         confirmUpdatePreferences={confirmUpdatePreferences}
+        setispreferencesUpdated={setIsPreferencesUpdated}
+        setIsPreferencesReinitialized={setIsPreferencesReinitialized}
       />
     </div>
   );

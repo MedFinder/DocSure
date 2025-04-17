@@ -65,6 +65,8 @@ export default function QuickDetailsModal({
   updatePreferences = false,
   confirmUpdatePreferences,
   initialSpecialty = "",
+  setispreferencesUpdated,
+  setIsPreferencesReinitialized
 }) {
   const [inputValue, setInputValue] = useState("");
   const [pills, setPills] = useState<string[]>([]);
@@ -130,6 +132,7 @@ export default function QuickDetailsModal({
     if (typeof window !== "undefined") {
       const storedFormData = sessionStorage.getItem("formData");
       const savedAddress = sessionStorage.getItem("selectedAddress");
+      const temp_sepciality = sessionStorage.getItem("selectedSpecialty");
       const storedLocation = sessionStorage.getItem("selectedLocation");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
@@ -180,6 +183,9 @@ export default function QuickDetailsModal({
       if (savedAddress) {
         formik.setFieldValue("address", savedAddress)
       }
+      if(temp_sepciality){
+        formik.setFieldValue("specialty", temp_sepciality)
+      }
       if (storedLocation) {
         const { lat, lng } = JSON.parse(storedLocation);
         setSelectedLocation({ lat, lng });
@@ -209,7 +215,6 @@ export default function QuickDetailsModal({
     },
     validationSchema,
     onSubmit: async (values) => {
-      const temp_sepciality = sessionStorage.getItem("selectedSpecialty");
       const speciality_value =
       formik.values.specialty === "Prescription / Refill"
         ? "Primary Care Physician"
@@ -257,6 +262,7 @@ export default function QuickDetailsModal({
             // If address or specialty changed, refetch doctor lists
             if (addressChanged || specialtyChanged) {
                 console.log('address or speciality changed')
+                updatePreferences && setIsPreferencesReinitialized(true)
                 refetchDrLists();
             }
           } catch (error) {
@@ -269,6 +275,7 @@ export default function QuickDetailsModal({
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate processing
 
         if (updatePreferences) {
+          setispreferencesUpdated(true);
           onOpenChange(false);
           confirmUpdatePreferences();
         } else {
@@ -568,7 +575,7 @@ export default function QuickDetailsModal({
                         selected={formik.values.dob}
                         onChange={handleDateChange}
                         onBlur={formik.handleBlur}
-                        dateFormat="yyyy-MM-dd"
+                        dateFormat="MM-dd-yyyy"
                         showYearDropdown
                         showMonthDropdown
                         dropdownMode="select"

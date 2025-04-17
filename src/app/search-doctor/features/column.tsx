@@ -24,12 +24,14 @@ interface ColumnProps {
   isAppointmentBooked: boolean;
   transcriptSummary: { place_id: ""; summary: "" };
   transcriptLoading: boolean;
+  fromTranscript?: boolean;
   wsRef: React.RefObject<WebSocket | null>;
   reconnectWebSocket: Promise<void>;
   setTranscriptSummary: ({ place_id: string, summary: string }) => void;
   setTranscriptLoading: (loading: boolean) => void;
   callStatus: CallStatusType;
   onDelete: (id: string) => void;
+  onSkip?: () => void;
 }
 const Column: React.FC<ColumnProps> = ({
   tasks,
@@ -43,6 +45,8 @@ const Column: React.FC<ColumnProps> = ({
   setTranscriptSummary,
   setTranscriptLoading,
   onDelete,
+  fromTranscript,
+  onSkip,
 }) => {
   // Function to delete a task by ID
 
@@ -126,6 +130,8 @@ const Column: React.FC<ColumnProps> = ({
                     setTranscriptLoading={setTranscriptLoading}
                     wsRef={wsRef}
                     reconnectWebSocket={reconnectWebSocket}
+                    fromTranscript={fromTranscript}
+                    onSkip={onSkip}
                   />
                 );
               })}
