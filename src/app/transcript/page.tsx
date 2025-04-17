@@ -182,6 +182,8 @@ export default function Transcript() {
   const [isAppointmentBooked, setIsAppointmentBooked] = useState(false);
   const [transcriptArray, setTranscriptArray] = useState([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadMoreRef = useRef(null);
   const [callStatus, setCallStatus] = useState({
     isInitiated: false,
     ssid: "",
@@ -907,6 +909,86 @@ export default function Transcript() {
       }
     }
   };
+
+  const loadMoreDoctors = async () => {
+    console.log("loading more doctors...");
+    if (!nextPageToken || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      const searchData = await JSON.parse(sessionStorage.getItem("searchData"));
+      const lat = searchData?.lat || 0;
+      const lng = searchData?.lng || 0;
+      const response = await axios.post(
+        "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+        {
+          location: `${lat},${lng}`,
+          radius: 20000,
+          keyword: savedSpecialty,
+          next_page_token: nextPageToken,
+          prev_page_data: doctors,
+        }
+      );
+
+      if (response.data?.results) {
+        const newDoctors = response.data.results.map((item) => ({
+          ...item,
+          id: item.place_id || item.id,
+          location: {
+            lat: item.location?.lat || item.lat,
+            lng: item.location?.lng || item.lng,
+          },
+        }));
+
+        setDoctors((prevDoctors) => [...prevDoctors, ...newDoctors]);
+        setNextPageToken(response.data.next_page_token || null);
+
+        const lastSearchSource = sessionStorage.getItem("lastSearchSource");
+        const storageKey =
+          lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+
+        const currentData = JSON.parse(
+          sessionStorage.getItem(storageKey) || "{}"
+        );
+
+        const updatedData = {
+          ...currentData,
+          results: [...(currentData.results || []), ...newDoctors],
+          next_page_token: response.data.next_page_token || null,
+        };
+
+        sessionStorage.setItem(storageKey, JSON.stringify(updatedData));
+      }
+    } catch (error) {
+      console.error("Error loading more doctors:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && nextPageToken && !isLoadingMore) {
+          loadMoreDoctors();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nextPageToken, isLoadingMore]);
 
   // const handleCall = () => {
   //   window.location.href = `tel:${+2348167238042}`;
