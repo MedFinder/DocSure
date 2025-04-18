@@ -56,7 +56,7 @@ const getDrSummary = async (
   formatted_address: string,
   place_id: string
 ) => {
-  const formData = await JSON.parse(sessionStorage.getItem("formData"));
+  const formData = await JSON.parse(localStorage.getItem("formData"));
   const data = {
     name,
     formatted_address,
@@ -109,7 +109,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
       setTranscriptSummary({ place_id: id, summary: "" });
       setExpandedId(id);
 
-      const formData = await JSON.parse(sessionStorage.getItem("formData"));
+      const formData = await JSON.parse(localStorage.getItem("formData"));
       const request_id = formData?.request_id;
 
       try {

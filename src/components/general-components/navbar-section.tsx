@@ -67,14 +67,13 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
   });
-  // console.log("::", savedAddress, savedSpecialty);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      const formData = sessionStorage.getItem("formData");
+      const savedSpecialty = localStorage.getItem("selectedSpecialty");
+      const formData = localStorage.getItem("formData");
       if(formData){
         const parsedFormData = JSON.parse(formData);
-        //console.log(parsedFormData)
         if (parsedFormData?.insurer) {
           setInsurer(parsedFormData?.insurer);
           formik.setFieldValue("insurance_carrier", parsedFormData?.insurer); // ✅ correct field 
@@ -84,8 +83,8 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
         setSpecialty(savedSpecialty);
         formik.setFieldValue("specialty", savedSpecialty);
       }
-      const savedAddress = sessionStorage.getItem("selectedAddress");
-      const savedAddressLocation = sessionStorage.getItem("selectedLocation");
+      const savedAddress = localStorage.getItem("selectedAddress");
+      const savedAddressLocation = localStorage.getItem("selectedLocation");
       const AddressLocation = JSON.parse(savedAddressLocation);
       if (savedAddress) {
         setAddressLocation(savedAddress);
@@ -102,7 +101,6 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
 
   const formik = useFormik({
     initialValues: {
-      // specialty: savedSpecialty || "",
       specialty: "",
     },
     validationSchema,
@@ -127,11 +125,10 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
 
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-        sessionStorage.setItem(
+        localStorage.setItem(
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
-        console.log();
         const data = {
           location: `${lat},${lng}`,
           radius: 20000,
@@ -142,9 +139,9 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
           data
         );
 
-        sessionStorage.setItem("formDataNav", JSON.stringify(updatedValues));
-        sessionStorage.setItem("statusDataNav", JSON.stringify(response.data));
-        sessionStorage.setItem("lastSearchSource", "navbar"); // Track last search source
+        localStorage.setItem("formDataNav", JSON.stringify(updatedValues));
+        localStorage.setItem("statusDataNav", JSON.stringify(response.data));
+        localStorage.setItem("lastSearchSource", "navbar"); // Track last search source
 
         window.dispatchEvent(new Event("storage"));
 
@@ -155,6 +152,7 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
       }
     },
   });
+
   const handleFieldClick = () => {
     if (updatePreferences) {
       formik.submitForm();
@@ -162,25 +160,6 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
     }
   };
 
-  // useEffect(() => {
-  //   if (selectedOption === "no") {
-  //     formik.setFieldValue("subscriberId", "");
-  //     formik.setFieldValue("groupId", "");
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [selectedOption]);
-
-  // const handleOnPlacesChanged = (index) => {
-  //   if (inputRefs.current[index]) {
-  //     const places = inputRefs.current[index].getPlaces();
-  //     if (places.length > 0) {
-  //       const place = places[0];
-  //       const lat = place.geometry.location.lat();
-  //       const lng = place.geometry.location.lng();
-  //       setSelectedLocation({ lat, lng });
-  //     }
-  //   }
-  // };
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
       const places = inputRefs.current[index].getPlaces();
@@ -192,8 +171,8 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
 
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
-        sessionStorage.setItem("selectedAddress", formattedAddress);
-        sessionStorage.setItem(
+        localStorage.setItem("selectedAddress", formattedAddress);
+        localStorage.setItem(
           "selectedLocation",
           JSON.stringify({ lat, lng })
         );
@@ -269,7 +248,6 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
                         className="w-full"
                         options={insuranceCarrierOptions}
                         placeholder="Insurance carrier (optional)"
-                        // value={savedInsurer || ""}
                         selected={formik.values.insurance_carrier}
                         onChange={(value) => {
                           setInsurer(value);

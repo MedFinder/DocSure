@@ -213,7 +213,7 @@ export default function Transcript() {
   const [isTerminated, setIsTerminated] = useState(false);
 
   useEffect(() => {
-    const storedFormData = sessionStorage.getItem("formData");
+    const storedFormData = localStorage.getItem("formData");
     if (storedFormData) {
       // console.log(JSON.parse(storedFormData));
       setFormData(JSON.parse(storedFormData));
@@ -239,7 +239,7 @@ export default function Transcript() {
     useEffect(() => {
       const updateDoctorsList = () => {
         try {
-          const lastSearchSource = sessionStorage.getItem("lastSearchSource");
+          const lastSearchSource = localStorage.getItem("lastSearchSource");
           let rawData;
   
           if (lastSearchSource === "navbar") {
@@ -250,9 +250,9 @@ export default function Transcript() {
             });
             setActiveCallIndex(0)
             setTranscriptArray([])
-            rawData = sessionStorage.getItem("statusDataNav");
+            rawData = localStorage.getItem("statusDataNav");
           } else {
-            rawData = sessionStorage.getItem("statusData");
+            rawData = localStorage.getItem("statusData");
           }
   
           if (!rawData) {
@@ -307,11 +307,11 @@ export default function Transcript() {
             setDoctors(sortedData);
             setNextPageToken(parsedData.next_page_token || null);
           } else {
-            console.warn("No valid results found in sessionStorage.");
+            console.warn("No valid results found in localStorage.");
             setDoctors([]);
           }
         } catch (error) {
-          console.error("Error parsing sessionStorage data:", error);
+          console.error("Error parsing localStorage data:", error);
           setDoctors([]);
         }
       };
@@ -390,8 +390,21 @@ export default function Transcript() {
   const handleConfirmSequence = useCallback(async (formdata) => {
     // initiate call
     try {
-      console.log('first trial........')
       setIsConfirmed(true); // Disable button and dragging
+      
+      // Check if the first doctor's office is open
+      if (doctors[activeCallIndex]?.opening_hours?.status !== "Open") {
+        console.log("First doctor's office is closed. Finding next open doctor...");
+        toast.info("First doctor's office is closed. Finding next open doctor...");
+        // Call moveToNextDoctor to find an open doctor
+        moveToNextDoctor(
+          null, 
+          activeCallIndex - 1, // Start from current index - 1 so moveToNextDoctor will check from current index
+          requestIdRef?.current
+        );
+        return;
+      }
+      
       const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
       await initiateCall(
         firstDoctorPhoneNumber,
@@ -459,7 +472,7 @@ export default function Transcript() {
     toast.success("Your request has been terminated successfully.");
   };
   const connectWebSocketSummary = async () => {
-    const formData = await JSON.parse(sessionStorage.getItem("formData"));
+    const formData = await JSON.parse(localStorage.getItem("formData"));
     const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${formData?.request_id}`;
     console.log(url,'summary socket url');
     wsSummaryRef.current = new WebSocket(url);
@@ -499,10 +512,10 @@ export default function Transcript() {
       );
       // Use customformdata if available, otherwise use the state formData
       const currentFormData = customformdata || formData;
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      const savedSpecialty = localStorage.getItem("selectedSpecialty");
       
       if (!currentFormData || !doctorPhoneNumber) {
-        console.error("No formData found in sessionStorage or provided as parameter.");
+        console.error("No formData found in localStorage or provided as parameter.");
         return;
       }
 
@@ -558,7 +571,7 @@ export default function Transcript() {
         patient_email: email || 'care@meomind.com',
         doctor_number: doctorPhoneNumber,
       };
-      sessionStorage.setItem("context", context);
+      localStorage.setItem("context", context);
       console.log(data);
       try {
         const callResponse = await axios.post(
@@ -582,7 +595,7 @@ export default function Transcript() {
           model: callResponse.data.model,
         };
         setFormData(updatedFormData);
-        sessionStorage.setItem("formData", JSON.stringify(updatedFormData));
+        localStorage.setItem("formData", JSON.stringify(updatedFormData));
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
@@ -608,35 +621,57 @@ export default function Transcript() {
       // wsRef?.current?.close(); // temp solution; disconnect websocket and connect to a new one
       terminateCurrentCall(id);
     }
-    // Move to the next doctor
-    setActiveCallIndex(newIndex);
-    // console.log(newIndex,'newIndex');
-    if (newIndex < doctors.length) {
-      const nextDoctor = doctors[newIndex];
-      // console.log("Calling next doctor:", nextDoctor);
-
-      const phoneNumber = phoneNumbers[newIndex] ?? nextDoctor?.phone_number; //+2348168968260
-      const nameOfOrg = nextDoctor?.name; //+2348168968260
-      if (phoneNumber) {
-        await initiateCall(
-          phoneNumber,
-          nameOfOrg,
-          request_id ?? requestIdRef?.current
-        );
-      } else {
-        console.log("No phone number available for the next doctor.");
-        toast.error("Next doctor has no phone number. Skipping...");
-        // setActiveCallIndex((prevIndex) => prevIndex + 1); // Move to the next doctor
+    
+    // Function to find the next available doctor with "Open" status
+    const findNextOpenDoctor = (startIndex: number): number => {
+      for (let i = startIndex; i < doctors.length; i++) {
+        if (doctors[i]?.opening_hours?.status === "Open") {
+          return i;
+        }
       }
-    } else {
+      return -1; // No open doctors found
+    };
+    
+    // Find next open doctor
+    const nextOpenIndex = findNextOpenDoctor(newIndex);
+    
+    // If no open doctors found, end the process
+    if (nextOpenIndex === -1) {
       wsRef?.current?.close();
-      toast.success("All doctors have been called successfully..");
+      toast.info("No more available doctors with open offices. Request terminated.");
       setIsConfirmed(false);
       setCallStatus({
         isInitiated: false,
         ssid: "",
         email: "",
       });
+      return;
+    }
+    
+    // Set the active call index to the next open doctor
+    setActiveCallIndex(nextOpenIndex);
+    
+    // If the next open doctor isn't the immediate next one, log which ones we're skipping
+    if (nextOpenIndex > newIndex) {
+      toast.info(`Skipping ${nextOpenIndex - newIndex} doctor(s) with closed offices`);
+    }
+    
+    // Proceed with the next open doctor
+    const nextDoctor = doctors[nextOpenIndex];
+    const phoneNumber = phoneNumbers[nextOpenIndex] ?? nextDoctor?.phone_number;
+    const nameOfOrg = nextDoctor?.name;
+    
+    if (phoneNumber) {
+      await initiateCall(
+        phoneNumber,
+        nameOfOrg,
+        request_id ?? requestIdRef?.current
+      );
+    } else {
+      console.log("No phone number available for the next doctor.");
+      toast.error("Next doctor has no phone number. Skipping...");
+      // Try the next doctor
+      moveToNextDoctor(null, nextOpenIndex, request_id ?? requestIdRef?.current);
     }
   };
   const logDrLists = async (data) => {
@@ -653,8 +688,8 @@ export default function Transcript() {
   };
   useEffect(() => {
     async function fetchAndLogData() {
-      const drsData = sessionStorage.getItem("statusData");
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      const drsData = localStorage.getItem("statusData");
+      const formData = JSON.parse(localStorage.getItem("formData"));
       //console.log(formData);
       if (drsData) {
         const parsedDrsData = JSON.parse(drsData);
@@ -772,8 +807,8 @@ export default function Transcript() {
     async (id: string, retries = 2): Promise<any> => {
       const index = activeCallIndexRef.current;
       // console.log('cuurentIndex',index)
-      // const formData = JSON.parse(sessionStorage.getItem("formData"));
-      const context = sessionStorage.getItem("context");
+      // const formData = JSON.parse(localStorage.getItem("formData"));
+      const context = localStorage.getItem("context");
       const {
         email,
         phoneNumber,
@@ -860,7 +895,7 @@ export default function Transcript() {
 
       terminateRequest();
 
-      const savedAddress = sessionStorage.getItem("selectedAddress");
+      const savedAddress = localStorage.getItem("selectedAddress");
       const specialty = formData?.specialty;
 
       router.push("/appointment");
@@ -871,8 +906,8 @@ export default function Transcript() {
       try {
         await terminateRequest();        
         console.log("Current Call has been terminated successfully.");
-          // Modify handleConfirmSequence to use the latest form data from session storage
-          const currentStoredFormData = JSON.parse(sessionStorage.getItem("formData") || "{}");
+          // Modify handleConfirmSequence to use the latest form data from local storage
+          const currentStoredFormData = JSON.parse(localStorage.getItem("formData") || "{}");
           requestIdRef.current = currentStoredFormData?.request_id;
           setFormData(currentStoredFormData);
           if(!isPreferencesReinitialized){
@@ -916,8 +951,8 @@ export default function Transcript() {
 
     setIsLoadingMore(true);
     try {
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      const searchData = await JSON.parse(sessionStorage.getItem("searchData"));
+      const savedSpecialty = localStorage.getItem("selectedSpecialty");
+      const searchData = await JSON.parse(localStorage.getItem("searchData"));
       const lat = searchData?.lat || 0;
       const lng = searchData?.lng || 0;
       const response = await axios.post(
@@ -944,12 +979,12 @@ export default function Transcript() {
         setDoctors((prevDoctors) => [...prevDoctors, ...newDoctors]);
         setNextPageToken(response.data.next_page_token || null);
 
-        const lastSearchSource = sessionStorage.getItem("lastSearchSource");
+        const lastSearchSource = localStorage.getItem("lastSearchSource");
         const storageKey =
           lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
 
         const currentData = JSON.parse(
-          sessionStorage.getItem(storageKey) || "{}"
+          localStorage.getItem(storageKey) || "{}"
         );
 
         const updatedData = {
@@ -958,7 +993,7 @@ export default function Transcript() {
           next_page_token: response.data.next_page_token || null,
         };
 
-        sessionStorage.setItem(storageKey, JSON.stringify(updatedData));
+        localStorage.setItem(storageKey, JSON.stringify(updatedData));
       }
     } catch (error) {
       console.error("Error loading more doctors:", error);

@@ -254,37 +254,16 @@ export default function LandingPage() {
     },
   ];
   useEffect(() => {
-    fetchUserLocationAndPopularDrs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const getPopularDrs = async (lat, lng) => {
-    try {
-      const data = {
-        location: `${lat},${lng}`,
-        radius: 20000,
-        keyword: "Primary Care Physician",
-      };
-      const response = await axios.post(
-        "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
-        data
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching popular doctors:", error);
-      return [];
-    }
-  };
+    // Load saved data from localStorage on mount
+    const storedDoctors = localStorage.getItem("popularDoctors");
+    const storedSpeciality = localStorage.getItem("selectedSpecialty");
+    const storedLocation = localStorage.getItem("selectedLocation");
+    const formData = localStorage.getItem("formData");
 
-  const fetchUserLocationAndPopularDrs = async () => {
-    const storedDoctors = sessionStorage.getItem("popularDoctors");
-    const storedSpeciality = sessionStorage.getItem("selectedSpecialty");
-    const storedLocation = sessionStorage.getItem("selectedLocation");
-    const formData = sessionStorage.getItem("formData");
-    if(formData){
+    if (formData) {
       const parsedFormData = JSON.parse(formData);
-      //console.log(parsedFormData)
-      if (parsedFormData?.patientName) {
-        formik.setFieldValue("userName", parsedFormData.patientName);  
+      if (parsedFormData.patientName) {
+        formik.setFieldValue("userName", parsedFormData.patientName);
       }
       if(parsedFormData.dob){
         formik.setFieldValue("dob", new Date(parsedFormData.dob));
@@ -312,7 +291,7 @@ export default function LandingPage() {
 
     // If geolocation is not supported by the browser
     if (!navigator.geolocation) {
-      await getLocationFromIP();
+      getLocationFromIP();
       return;
     }
     // If geolocation is supported, try to get user's position
@@ -331,8 +310,8 @@ export default function LandingPage() {
             geocodeResponse.data.results[0]?.formatted_address || ""; 
           setSelectedLocation({ lat, lng });
           setAddressLocation(address); // Set the fetched address
-          sessionStorage.setItem("selectedAddress", address);
-          sessionStorage.setItem(
+          localStorage.setItem("selectedAddress", address);
+          localStorage.setItem(
             "selectedLocation",
             JSON.stringify({ lat, lng })
           );
@@ -341,7 +320,7 @@ export default function LandingPage() {
           if (popularDoctors?.results?.length > 0) {
             const doctorlists = popularDoctors?.results?.slice(0, 20);
             setpopulardoctors(doctorlists);
-            sessionStorage.setItem(
+            localStorage.setItem(
               "popularDoctors",
               JSON.stringify(doctorlists)
             );
@@ -356,6 +335,23 @@ export default function LandingPage() {
         await getLocationFromIP();
       }
     );
+  }, []);
+  const getPopularDrs = async (lat, lng) => {
+    try {
+      const data = {
+        location: `${lat},${lng}`,
+        radius: 20000,
+        keyword: "Primary Care Physician",
+      };
+      const response = await axios.post(
+        "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+        data
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching popular doctors:", error);
+      return [];
+    }
   };
 
   // Function to get location from IP address
@@ -374,14 +370,14 @@ export default function LandingPage() {
         
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress);
-        sessionStorage.setItem("selectedAddress", formattedAddress);
-        sessionStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
+        localStorage.setItem("selectedAddress", formattedAddress);
+        localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
         
         const popularDoctors = await getPopularDrs(lat, lng);
         if (popularDoctors?.results?.length > 0) {
           const doctorlists = popularDoctors?.results?.slice(0, 20);
           setpopulardoctors(doctorlists);
-          sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+          localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
         }
       } else {
         // IP geolocation failed, use default location
@@ -401,18 +397,18 @@ export default function LandingPage() {
     const defaultLng = -122.4194;
     setSelectedLocation({ lat: defaultLat, lng: defaultLng });
     setAddressLocation("San Francisco, CA, USA");
-    sessionStorage.setItem("selectedAddress", "San Francisco, CA, USA");
-    sessionStorage.setItem("selectedLocation", JSON.stringify({ lat: defaultLat, lng: defaultLng }));
+    localStorage.setItem("selectedAddress", "San Francisco, CA, USA");
+    localStorage.setItem("selectedLocation", JSON.stringify({ lat: defaultLat, lng: defaultLng }));
     
     const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
     if (popularDoctors?.results?.length > 0) {
       const doctorlists = popularDoctors?.results?.slice(0, 20);
       setpopulardoctors(doctorlists);
-      sessionStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+      localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
     }
   };
   const logRequestInfo = async () => {
-    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const savedAddress = localStorage.getItem("selectedAddress");
     const data = {
       doctor_speciality: formik.values.specialty,
       preferred_location: savedAddress,
@@ -445,12 +441,12 @@ export default function LandingPage() {
         toast.error("No location selected");
         return;
       }
-      const storedLocation = sessionStorage.getItem("selectedLocation");
+      const storedLocation = localStorage.getItem("selectedLocation");
       try {
         const { lat, lng } = JSON.parse(storedLocation);
-        sessionStorage.setItem("selectedSpecialty", values.specialty);
-        sessionStorage.setItem("selectedInsurer", values.insurance_carrier);
-        sessionStorage.setItem(
+        localStorage.setItem("selectedSpecialty", values.specialty);
+        localStorage.setItem("selectedInsurer", values.insurance_carrier);
+        localStorage.setItem(
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
@@ -486,7 +482,7 @@ export default function LandingPage() {
           };
           
           // Get existing form data if it exists
-          const existingFormData = sessionStorage.getItem("formData");
+          const existingFormData = localStorage.getItem("formData");
           let mergedValues = updatedValues;
           
           if (existingFormData) {
@@ -499,15 +495,15 @@ export default function LandingPage() {
             }
           }
           
-          // Save the updated form data to session storage
-          sessionStorage.setItem("formData", JSON.stringify(mergedValues));
+          // Save the updated form data to localStorage
+          localStorage.setItem("formData", JSON.stringify(mergedValues));
         }
 
-        // Save search results to session storage
-        sessionStorage.setItem("statusData", JSON.stringify(response.data));
-        sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
+        // Save search results to localStorage
+        localStorage.setItem("statusData", JSON.stringify(response.data));
+        localStorage.setItem("lastSearchSource", "home"); // Track last search source
         
-        // Now that everything is saved to sessionStorage, navigate to transcript page
+        // Now that everything is saved to localStorage, navigate to transcript page
         router.push("/transcript?confirmed=true");
       } catch (error) {
         console.error("Error submitting form:", error);
@@ -537,9 +533,9 @@ export default function LandingPage() {
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
 
-        // Store in sessionStorage
-        sessionStorage.setItem("selectedAddress", formattedAddress);
-        sessionStorage.setItem(
+        // Store in localStorage
+        localStorage.setItem("selectedAddress", formattedAddress);
+        localStorage.setItem(
           "selectedLocation",
           JSON.stringify({ lat, lng })
         );
@@ -786,7 +782,7 @@ export default function LandingPage() {
                         id="userName"
                         name="userName"
                         className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
-                        placeholder="Your name"
+                        placeholder="Your full name"
                         autoComplete="off"
                         aria-autocomplete="none"
                         value={formik.values.userName || ""}
@@ -877,7 +873,7 @@ export default function LandingPage() {
               onClick={() => {
                 // Save selected specialty before opening modal
                 if (selectedSpecialty) {
-                  sessionStorage.setItem("selectedSpecialty", selectedSpecialty);
+                  localStorage.setItem("selectedSpecialty", selectedSpecialty);
                 }
                 setIsModalOpen(true);
               }}
