@@ -433,7 +433,7 @@ export default function AppointmentPage() {
                       formik.setFieldValue("timeOfAppointment", date);
                       formik.setFieldTouched("timeOfAppointment", true);
                     }}
-                    dateFormat="yyyy-MM-dd"
+                    dateFormat="MM-dd-yyyy"
                     showYearDropdown
                     showMonthDropdown
                     dropdownMode="select"

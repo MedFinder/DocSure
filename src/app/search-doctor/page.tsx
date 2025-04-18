@@ -528,7 +528,7 @@ export default function SearchDoctorPage() {
                 height={0}
                 className="w-5 h-auto"
               />
-              <p>425 verified doctors in your area</p>
+              <p>{DrCount} verified doctors in your area</p>
             </div>
 
             {/* "View Map" button on mobile */}
@@ -692,7 +692,7 @@ export default function SearchDoctorPage() {
                 onDragEnd={handleDragEnd}
                 collisionDetection={closestCenter}
               >
-                <ScrollArea className="h-full w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0 overflow-y-auto">
+                <ScrollArea className="h-[90%] w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0 overflow-y-auto">
                   <div className="flex flex-col md:flex-row w-full">
                     <Column
                       activeCallIndex={activeCallIndex}

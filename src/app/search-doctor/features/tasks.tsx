@@ -253,7 +253,8 @@ export const Task: React.FC<TaskProps> = ({
               </div>
 
               <div className="bg-[#F2F6F9] py-4 md:px-2  px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0 ">
-                <Tooltip>
+                {!fromTranscript && 
+                  <Tooltip>
                   <TooltipTrigger asChild>
                     <img
                       src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
@@ -269,6 +270,7 @@ export const Task: React.FC<TaskProps> = ({
                     <span>Drag items to reorder the priority.</span>
                   </TooltipContent>
                 </Tooltip>
+                }
                 <div className="flex flex-col gap-2 font-normal w-full">
                   <div className="flex justify-between ">
                     <div className="flex flex-grow items-start gap-2 md:hidden w-full  ">
@@ -331,8 +333,8 @@ export const Task: React.FC<TaskProps> = ({
                           {distance || "-"}
                         </span>
                       </div>
-
-                      <Tooltip>
+                      {!fromTranscript &&
+                        <Tooltip>
                         <TooltipTrigger asChild>
                           <label>
                             <TooltipTrigger asChild>
@@ -347,7 +349,7 @@ export const Task: React.FC<TaskProps> = ({
                                     }}
                                     onPointerDown={(e) => e.stopPropagation()}
                                     className="appearance-none w-full h-full bg-white border border-gray-300 rounded-md 
-                 checked:bg-[#00BA85] checked:border-transparent"
+                  checked:bg-[#00BA85] checked:border-transparent"
                                   />
 
                                   {/* White checkmark */}
@@ -387,6 +389,7 @@ export const Task: React.FC<TaskProps> = ({
                           </span>
                         </TooltipContent>
                       </Tooltip>
+                      }
                     </div>
                   </div>
                   <span className=" text-sm text-[#636465]">{vicinity}</span>

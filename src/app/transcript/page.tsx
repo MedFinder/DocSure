@@ -3,7 +3,7 @@
 import Navbar from "@/components/general-components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { LoaderCircle, Search } from "lucide-react";
 import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
@@ -1021,7 +1021,7 @@ export default function Transcript() {
         :
         <>
         <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
-        <section className="flex flex-col items-start px-7 mt-8 w-full h-[calc(100vh-100px)] max-md:px-5 max-md:max-w-full ">
+        <section className="flex flex-col items-start px-7 mt-8 w-full h-[95%] max-md:px-5 max-md:max-w-full ">
         {/* Info section with border bottom */}
           <div className="w-full mt-20">
             <p className="text-sm md:text-sm text-gray-700">
@@ -1050,7 +1050,7 @@ export default function Transcript() {
 
                 <div className="pr-2 h-[calc(100%-60px)]">
                   <ExpandProvider>
-                    <ScrollArea className="h-full w-full md:w-auto">
+                    <ScrollArea className="h-[90%] w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0 overflow-y-auto">
                       <Column
                         activeCallIndex={activeCallIndex}
                         tasks={doctors}
@@ -1099,6 +1099,15 @@ export default function Transcript() {
                           }} // Move to next doctor
                         />
                       ))} */}
+                  {/* Loading indicator for infinite scrolling */}
+                  <div
+                    ref={loadMoreRef}
+                    className="w-full py-4 flex justify-center"
+                  >
+                    {isLoadingMore && (
+                      <LoaderCircle className="w-6 h-6 text-gray-500 animate-spin" />
+                    )}
+                    </div>
                     </ScrollArea>
                   </ExpandProvider>
                 </div>

@@ -294,7 +294,7 @@ export default function ContactNew() {
                   selected={formik.values.dob}
                   onChange={handleDateChange}
                   onBlur={formik.handleBlur}
-                  dateFormat="yyyy-MM-dd"
+                  dateFormat="MM-dd-yyyy"
                   showYearDropdown
                   showMonthDropdown
                   dropdownMode="select"
