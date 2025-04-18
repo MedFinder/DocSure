@@ -810,7 +810,7 @@ export default function LandingPage() {
                           formik.setFieldTouched("dob", true);
                         }}
                         onBlur={() => formik.setFieldTouched("dob", true)}
-                        dateFormat="MM-dd-yyyy"
+                        dateFormat="MM/dd/yyyy"
                         showYearDropdown
                         showMonthDropdown
                         dropdownMode="select"
@@ -819,7 +819,7 @@ export default function LandingPage() {
                         maxDate={new Date()}
                         autoComplete="off"
                         aria-autocomplete="none"
-                        placeholderText="Your date of birth"
+                        placeholderText="Your date of birth(mm/dd/yyyy)"
                         className="w-full border-none!important focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
                         wrapperClassName="w-full"
                       />
