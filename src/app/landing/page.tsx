@@ -110,7 +110,10 @@ const moreDoctorTypes = [
 // Custom styles for DatePicker
 const customDatePickerStyles = `
   .react-datepicker__input-container input {
-    border: none
+    border: none;
+  }
+  .react-datepicker__input-container input::placeholder {
+    color: #737373;
   }
 `;
 const validationSchema = Yup.object().shape({
