@@ -314,7 +314,7 @@ export const Task: React.FC<TaskProps> = ({
                       onClick={handleExpand}
                       onPointerDown={(e) => e.stopPropagation()}
                     >
-                      {title}hhh
+                      {title}
                     </p>
                     <div className="flex gap-16 pr-2">
                       <div className="md:flex  gap-1 font-normal text-[#333333] text-sm items-center hidden">

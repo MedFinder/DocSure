@@ -185,7 +185,7 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
   }
 
   return (
-    <div className="fixed top-0 left-0 w-full  border-gray-200 bg-white z-50">
+    <div className="fixed top-0 left-0 w-full  border-gray-200 bg-[#FCF8F1] z-50">
       <div className="flex justify-between py-3 md:py-5 md:px-8 px-4 relative  border border-b-1  items-center gap-2 ">
         {pathname !== "/" && (
           <button onClick={toggleSidebar} className="md:hidden mb-6">
@@ -304,14 +304,16 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
         </div>
 
         <div className="hidden md:flex gap-6 items-center text-md font-normal text-sm">
-          <Link href="#">Browse</Link>
+          {/* <Link href="#">Browse</Link> */}
           <Link href="/contact-us" onClick={() => track("Help_Btn_Clicked")}>
             Help
           </Link>
-          <Link href="#">Log In</Link>
-          <Button href="#" className="bg-[#0074BA] text-white rounded-md">
-            Sign Up
-          </Button>
+          {/* <Link href="#">Log In</Link> */}
+          {/* <Link href={'/'}>
+            <Button className="bg-[#0074BA] text-white rounded-md">
+              Get Started
+            </Button>
+          </Link> */}
         </div>
         {/* Mobile Hamburger */}
         {pathname == "/" && (
@@ -360,12 +362,14 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
               >
                 Help
               </Link>
-              <Link href="#">Browse</Link>
+              {/* <Link href="#">Browse</Link> */}
 
-              <Link href="#">Log In</Link>
-              <Button href="#" className="bg-[#0074BA] text-white rounded-md">
-                Sign Up
-              </Button>
+              {/* <Link href="#">Log In</Link> */}
+              {/* <Link href="/">
+                <Button className="bg-[#0074BA] text-white rounded-md">
+                  Get Started
+                </Button>
+              </Link> */}
             </nav>
           </div>
 
