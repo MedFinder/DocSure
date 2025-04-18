@@ -390,8 +390,21 @@ export default function Transcript() {
   const handleConfirmSequence = useCallback(async (formdata) => {
     // initiate call
     try {
-      console.log('first trial........')
       setIsConfirmed(true); // Disable button and dragging
+      
+      // Check if the first doctor's office is open
+      if (doctors[activeCallIndex]?.opening_hours?.status !== "Open") {
+        console.log("First doctor's office is closed. Finding next open doctor...");
+        toast.info("First doctor's office is closed. Finding next open doctor...");
+        // Call moveToNextDoctor to find an open doctor
+        moveToNextDoctor(
+          null, 
+          activeCallIndex - 1, // Start from current index - 1 so moveToNextDoctor will check from current index
+          requestIdRef?.current
+        );
+        return;
+      }
+      
       const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
       await initiateCall(
         firstDoctorPhoneNumber,
@@ -608,35 +621,57 @@ export default function Transcript() {
       // wsRef?.current?.close(); // temp solution; disconnect websocket and connect to a new one
       terminateCurrentCall(id);
     }
-    // Move to the next doctor
-    setActiveCallIndex(newIndex);
-    // console.log(newIndex,'newIndex');
-    if (newIndex < doctors.length) {
-      const nextDoctor = doctors[newIndex];
-      // console.log("Calling next doctor:", nextDoctor);
-
-      const phoneNumber = phoneNumbers[newIndex] ?? nextDoctor?.phone_number; //+2348168968260
-      const nameOfOrg = nextDoctor?.name; //+2348168968260
-      if (phoneNumber) {
-        await initiateCall(
-          phoneNumber,
-          nameOfOrg,
-          request_id ?? requestIdRef?.current
-        );
-      } else {
-        console.log("No phone number available for the next doctor.");
-        toast.error("Next doctor has no phone number. Skipping...");
-        // setActiveCallIndex((prevIndex) => prevIndex + 1); // Move to the next doctor
+    
+    // Function to find the next available doctor with "Open" status
+    const findNextOpenDoctor = (startIndex: number): number => {
+      for (let i = startIndex; i < doctors.length; i++) {
+        if (doctors[i]?.opening_hours?.status === "Open") {
+          return i;
+        }
       }
-    } else {
+      return -1; // No open doctors found
+    };
+    
+    // Find next open doctor
+    const nextOpenIndex = findNextOpenDoctor(newIndex);
+    
+    // If no open doctors found, end the process
+    if (nextOpenIndex === -1) {
       wsRef?.current?.close();
-      toast.success("All doctors have been called successfully..");
+      toast.info("No more available doctors with open offices. Request terminated.");
       setIsConfirmed(false);
       setCallStatus({
         isInitiated: false,
         ssid: "",
         email: "",
       });
+      return;
+    }
+    
+    // Set the active call index to the next open doctor
+    setActiveCallIndex(nextOpenIndex);
+    
+    // If the next open doctor isn't the immediate next one, log which ones we're skipping
+    if (nextOpenIndex > newIndex) {
+      toast.info(`Skipping ${nextOpenIndex - newIndex} doctor(s) with closed offices`);
+    }
+    
+    // Proceed with the next open doctor
+    const nextDoctor = doctors[nextOpenIndex];
+    const phoneNumber = phoneNumbers[nextOpenIndex] ?? nextDoctor?.phone_number;
+    const nameOfOrg = nextDoctor?.name;
+    
+    if (phoneNumber) {
+      await initiateCall(
+        phoneNumber,
+        nameOfOrg,
+        request_id ?? requestIdRef?.current
+      );
+    } else {
+      console.log("No phone number available for the next doctor.");
+      toast.error("Next doctor has no phone number. Skipping...");
+      // Try the next doctor
+      moveToNextDoctor(null, nextOpenIndex, request_id ?? requestIdRef?.current);
     }
   };
   const logDrLists = async (data) => {
