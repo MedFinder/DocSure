@@ -1216,8 +1216,8 @@ export default function Transcript() {
                         disabled={!callStatus?.isInitiated}
                         className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
                           callStatus?.isInitiated
-                            ? "bg-red-600 hover:bg-red-700 text-white"
-                            : "bg-red-300 cursor-not-allowed text-white opacity-70"
+                            ? "bg-black hover:bg-black text-white"
+                            : "bg-black cursor-not-allowed text-white opacity-70"
                         }`}
                       >
                         Pause Calling
@@ -1227,8 +1227,8 @@ export default function Transcript() {
                         disabled={!callStatus?.isInitiated}
                         className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
                           callStatus?.isInitiated
-                            ? "bg-orange-600 hover:bg-orange-700 text-white"
-                            : "bg-orange-300 cursor-not-allowed text-white opacity-70"
+                            ? "bg-[#0074BA]0 hover:bg-blue-400 text-white"
+                            : "bg-[#0074BA] cursor-not-allowed text-white opacity-70"
                         }`}
                       >
                         Terminate And Call Myself
