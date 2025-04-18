@@ -95,8 +95,8 @@ export default function SearchDoctorPage() {
 
   const getTotalDoctorsList = async () => {
     setIsCountLoading(true);
-    const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const savedSpecialty = localStorage.getItem("selectedSpecialty");
+    const savedAddress = localStorage.getItem("selectedAddress");
     const addressParts = savedAddress?.split(",") || [];
     const cityName = addressParts
       .slice(-2)
@@ -125,7 +125,7 @@ export default function SearchDoctorPage() {
   };
 
   const logPatientData = async (updatedValues) => {
-    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const savedAddress = localStorage.getItem("selectedAddress");
     const data = {
       request_id: updatedValues.request_id,
       preferred_location: savedAddress,
@@ -161,8 +161,8 @@ export default function SearchDoctorPage() {
 
     setIsLoadingMore(true);
     try {
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      const searchData = await JSON.parse(sessionStorage.getItem("searchData"));
+      const savedSpecialty = localStorage.getItem("selectedSpecialty");
+      const searchData = await JSON.parse(localStorage.getItem("searchData"));
       const lat = searchData?.lat || 0;
       const lng = searchData?.lng || 0;
       const response = await axios.post(
@@ -189,12 +189,12 @@ export default function SearchDoctorPage() {
         setDoctors((prevDoctors) => [...prevDoctors, ...newDoctors]);
         setNextPageToken(response.data.next_page_token || null);
 
-        const lastSearchSource = sessionStorage.getItem("lastSearchSource");
+        const lastSearchSource = localStorage.getItem("lastSearchSource");
         const storageKey =
           lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
 
         const currentData = JSON.parse(
-          sessionStorage.getItem(storageKey) || "{}"
+          localStorage.getItem(storageKey) || "{}"
         );
 
         const updatedData = {
@@ -203,7 +203,7 @@ export default function SearchDoctorPage() {
           next_page_token: response.data.next_page_token || null,
         };
 
-        sessionStorage.setItem(storageKey, JSON.stringify(updatedData));
+        localStorage.setItem(storageKey, JSON.stringify(updatedData));
       }
     } catch (error) {
       console.error("Error loading more doctors:", error);
@@ -237,8 +237,8 @@ export default function SearchDoctorPage() {
 
   useEffect(() => {
     async function fetchAndLogData() {
-      const drsData = sessionStorage.getItem("statusData");
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      const drsData = localStorage.getItem("statusData");
+      const formData = JSON.parse(localStorage.getItem("formData"));
       console.log(formData);
       if (drsData) {
         const parsedDrsData = JSON.parse(drsData);
@@ -257,13 +257,13 @@ export default function SearchDoctorPage() {
   useEffect(() => {
     const updateDoctorsList = () => {
       try {
-        const lastSearchSource = sessionStorage.getItem("lastSearchSource");
+        const lastSearchSource = localStorage.getItem("lastSearchSource");
         let rawData;
 
         if (lastSearchSource === "navbar") {
-          rawData = sessionStorage.getItem("statusDataNav");
+          rawData = localStorage.getItem("statusDataNav");
         } else {
-          rawData = sessionStorage.getItem("statusData");
+          rawData = localStorage.getItem("statusData");
         }
 
         if (!rawData) {
@@ -285,11 +285,11 @@ export default function SearchDoctorPage() {
           setDoctors(sortedData);
           setNextPageToken(parsedData.next_page_token || null);
         } else {
-          console.warn("No valid results found in sessionStorage.");
+          console.warn("No valid results found in localStorage.");
           setDoctors([]);
         }
       } catch (error) {
-        console.error("Error parsing sessionStorage data:", error);
+        console.error("Error parsing localStorage data:", error);
         setDoctors([]);
       }
       getTotalDoctorsList();
@@ -314,7 +314,7 @@ export default function SearchDoctorPage() {
 
   useEffect(() => {
     try {
-      const searchDataString = sessionStorage.getItem("searchData");
+      const searchDataString = localStorage.getItem("searchData");
       if (searchDataString) {
         const searchData = JSON.parse(searchDataString);
         if (searchData && searchData.lat && searchData.lng) {
@@ -325,7 +325,7 @@ export default function SearchDoctorPage() {
         }
       }
     } catch (error) {
-      console.error("Error loading location from sessionStorage:", error);
+      console.error("Error loading location from localStorage:", error);
     }
   }, []);
 
@@ -382,8 +382,8 @@ export default function SearchDoctorPage() {
     onSubmit: async (values) => {
       setIsLoading(true);
       track("Searchpage_Continue_Btn_Clicked");
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      const savedSpecialty = localStorage.getItem("selectedSpecialty");
+      const formData = JSON.parse(localStorage.getItem("formData"));
 
       // if (!values.objective || !values.objective.trim()) {
       //   toast.error("Please fill up all the required information");
@@ -398,7 +398,7 @@ export default function SearchDoctorPage() {
       };
       logPatientData(updatedValues);
 
-      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+      localStorage.setItem("formData", JSON.stringify(updatedValues));
 
       setTimeout(() => {
         router.push("/appointment");
@@ -449,7 +449,7 @@ export default function SearchDoctorPage() {
     setIsDistanceOpen(false);
   };
   const connectWebSocket = async () => {
-    const formData = await JSON.parse(sessionStorage.getItem("formData"));
+    const formData = await JSON.parse(localStorage.getItem("formData"));
     const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${formData?.request_id}`;
     console.log(url);
     wsRef.current = new WebSocket(url);
@@ -457,6 +457,7 @@ export default function SearchDoctorPage() {
     wsRef.current.onopen = () => {
       console.log("WebSocket connected successfully and opened.");
     };
+
     wsRef.current.onmessage = async (event) => {
       const message = JSON.parse(event.data);
       if (message.event === "summary_stream" && message.data?.summary) {

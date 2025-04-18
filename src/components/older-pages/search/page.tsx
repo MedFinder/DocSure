@@ -368,7 +368,7 @@ export default function SearchPage() {
     setPhoneNumbers(numbers);
   };
   const logPatientData = async (updatedValues) => {
-    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const savedAddress = localStorage.getItem("selectedAddress");
     const data = {
       request_id: updatedValues.request_id,
       preferred_location: savedAddress,
@@ -409,43 +409,51 @@ export default function SearchPage() {
     }
   };
   useEffect(() => {
-    async function fetchAndLogData() {
-      const drsData = sessionStorage.getItem("statusData");
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
-      console.log(formData)
-      if (drsData) {
-        const parsedDrsData = JSON.parse(drsData);
-        // console.log(parsedDrsData)
-        const payload = {
-          request_id: formData?.request_id,
-          ...parsedDrsData,
-        };
-       //  console.log(payload)
-        await logDrLists(payload);
-      }
+    const savedAddress = localStorage.getItem("selectedAddress");
+    if (savedAddress) {
+      // ...existing code...
     }
     
     fetchAndLogData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function fetchAndLogData() {
+    const drsData = localStorage.getItem("statusData");
+    const formData = JSON.parse(localStorage.getItem("formData"));
+    console.log(formData)
+    if (drsData) {
+      const parsedDrsData = JSON.parse(drsData);
+      // console.log(parsedDrsData)
+      const payload = {
+        request_id: formData?.request_id,
+        ...parsedDrsData,
+      };
+     //  console.log(payload)
+      await logDrLists(payload);
+    }
+  }
+
   useEffect(() => {
     const updateDoctorsList = () => {
       try {
-        const lastSearchSource = sessionStorage.getItem("lastSearchSource");
+        const lastSearchSource = localStorage.getItem("lastSearchSource");
         let rawData;
 
         if (lastSearchSource === "navbar") {
-          rawData = sessionStorage.getItem("statusDataNav");
+          rawData = localStorage.getItem("statusDataNav");
         } else {
-          rawData = sessionStorage.getItem("statusData");
+          rawData = localStorage.getItem("statusData");
         }
 
         if (!rawData) {
-          router.push("/");
+          console.warn("No search data found in localStorage.");
+          setDoctors([]);
           return;
         }
 
         const parsedData = JSON.parse(rawData);
-        if (parsedData?.results?.length) {
+        if (parsedData?.results && parsedData.results.length > 0) {
           const sortedData = parsedData.results.map((item) => ({
             ...item,
             id: item.place_id || item.id,
@@ -453,11 +461,11 @@ export default function SearchPage() {
 
           setDoctors(sortedData);
         } else {
-          console.warn("No valid results found in sessionStorage.");
+          console.warn("No valid results found in localStorage.");
           setDoctors([]);
         }
       } catch (error) {
-        console.error("Error parsing sessionStorage data:", error);
+        console.error("Error parsing localStorage data:", error);
         setDoctors([]);
       }
     };
@@ -532,8 +540,8 @@ export default function SearchPage() {
     onSubmit: async (values) => {
       track("Searchpage_Continue_Btn_Clicked");
       // console.log("here");
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      const savedSpecialty = localStorage.getItem("selectedSpecialty");
+      const formData = JSON.parse(localStorage.getItem("formData"));
       // console.log("Objective value:", values.objective);
 
       if (!values.objective || !values.objective.trim()) {
@@ -562,9 +570,9 @@ export default function SearchPage() {
       // console.log(updatedValues)
       logPatientData(updatedValues)
 
-      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+      localStorage.setItem("formData", JSON.stringify(updatedValues));
 
-      // console.log("Stored formData in sessionStorage:", updatedValues);
+      // console.log("Stored formData in localStorage:", updatedValues);
 
       // Redirect to search page
       setTimeout(() => {

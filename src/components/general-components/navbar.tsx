@@ -53,17 +53,17 @@ export default function Navbar() {
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
   });
-  // console.log("::", savedAddress, savedSpecialty);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+      const savedSpecialty = localStorage.getItem("selectedSpecialty");
       if (savedSpecialty) {
         setSpecialty(savedSpecialty);
         formik.setFieldValue("specialty", savedSpecialty);
       }
 
-      const savedAddress = sessionStorage.getItem("selectedAddress");
-      const savedAddressLocation = sessionStorage.getItem("selectedLocation");
+      const savedAddress = localStorage.getItem("selectedAddress");
+      const savedAddressLocation = localStorage.getItem("selectedLocation");
       const AddressLocation = JSON.parse(savedAddressLocation);
       if (savedAddress) {
         setAddressLocation(savedAddress);
@@ -80,72 +80,62 @@ export default function Navbar() {
 
   const formik = useFormik({
     initialValues: {
-      // specialty: savedSpecialty || "",
       specialty: "",
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log(values);
       track("Navbar_Search_Btn_Clicked");
-      const updatedValues = { ...values };
-
-      setisLoading(true);
-      if (!selectedLocation) {
-        toast.error("No location selected");
+      if (!specialty) {
+        toast.error("Please select a specialty");
         return;
       }
 
+      if (!selectedLocation) {
+        toast.error("Please select a location");
+        return;
+      }
+
+      setisLoading(true);
+
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-        sessionStorage.setItem(
+        const speciality_value =
+          formik.values.specialty === "Prescription / Refill"
+            ? "Primary Care Physician"
+            : formik.values.specialty;
+        const data = {
+          location: `${lat},${lng}`,
+          radius: 20000,
+          keyword: speciality_value,
+        };
+
+        localStorage.setItem(
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
-        console.log();
-        const speciality_value = formik.values.specialty === 'Prescription / Refill' ? 'Primary Care Physician' : formik.values.specialty;
-        const data = {
-          location: `${lat},${lng}`,
-          radius: 20000,  
-          keyword: speciality_value,
-        }
+
         const response = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
           data
         );
 
-        sessionStorage.setItem("formDataNav", JSON.stringify(updatedValues));
-        sessionStorage.setItem("statusDataNav", JSON.stringify(response.data));
-        sessionStorage.setItem("lastSearchSource", "navbar"); // Track last search source
+        const updatedValues = { specialty: values.specialty };
+        localStorage.setItem("formDataNav", JSON.stringify(updatedValues));
+        localStorage.setItem("statusDataNav", JSON.stringify(response.data));
+        localStorage.setItem("lastSearchSource", "navbar"); // Track last search source
 
         window.dispatchEvent(new Event("storage"));
 
-        console.log("Form Data:", values);
-        console.log("API Response Data:", response.data);
+        router.push("/search-doctor");
       } catch (error) {
-        console.error("Error submitting form:", error);
+        console.error("Error searching:", error);
+        toast.error("An error occurred during search");
+      } finally {
+        setisLoading(false);
       }
     },
   });
 
-  // useEffect(() => {
-  //   if (selectedOption === "no") {
-  //     formik.setFieldValue("subscriberId", "");
-  //     formik.setFieldValue("groupId", "");
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [selectedOption]);
-
-  // const handleOnPlacesChanged = (index) => {
-  //   if (inputRefs.current[index]) {
-  //     const places = inputRefs.current[index].getPlaces();
-  //     if (places.length > 0) {
-  //       const place = places[0];
-  //       const lat = place.geometry.location.lat();
-  //       const lng = place.geometry.location.lng();
-  //       setSelectedLocation({ lat, lng });
-  //     }
-  //   }
-  // };
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
       const places = inputRefs.current[index].getPlaces();
@@ -157,12 +147,11 @@ export default function Navbar() {
 
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
-        sessionStorage.setItem("selectedAddress", formattedAddress);
-        sessionStorage.setItem(
+        localStorage.setItem("selectedAddress", formattedAddress);
+        localStorage.setItem(
           "selectedLocation",
           JSON.stringify({ lat, lng })
         );
-        // sessionStorage.setItem("selectedAddress", formattedAddress); // Store in session
       }
     }
   };
@@ -174,7 +163,6 @@ export default function Navbar() {
   return (
     <div className="fixed top-0 left-0 w-full  border-gray-200 bg-white z-50">
       <div className="flex justify-between py-5 md:px-8 px-5 relative md:border-none   border border-b-2 items-center">
-        {/* {pathname === "/" && ( */}
         {pathname == "/" && (
           <div
             onClick={() => router.push("/")}
@@ -216,9 +204,7 @@ export default function Navbar() {
               className="flex flex-col md:flex-row w-full max-w-[50rem] border border-gray-600 rounded-none shadow-sm"
             >
               <div className="flex flex-col md:flex-row w-full relative">
-                {/* Input Fields - Stack on mobile */}
                 <div className="flex flex-col md:flex-row flex-grow w-full">
-                  {/* Specialty Section */}
                   <div className="flex items-center flex-1 border-b md:border-b-0 border-gray-300">
                     <div className="flex items-center justify-center px-3">
                       <Search className="w-5 h-5 text-gray-500" />
@@ -241,7 +227,6 @@ export default function Navbar() {
                     </div>
                   </div>
 
-                  {/* Location Section */}
                   <div className="flex items-center flex-1">
                     <div className="flex items-center justify-center px-3">
                       <MapPin className="w-5 h-5 text-gray-500" />
@@ -267,7 +252,6 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                {/* Search Button - Stays on the right, filling height on mobile */}
                 <Button className="bg-[#FF6723] text-white rounded-none px-6 md:h-12 h-full md:w-auto absolute md:static right-0 top-0 bottom-0">
                   <Search className="text-white w-5 h-5" />
                 </Button>
@@ -280,11 +264,7 @@ export default function Navbar() {
             <Menu className="w-8 h-8 text-gray-700" />
           </button>
         )}
-        {/* )} */}
 
-        {/* Left Section: Logo & Search (only on Search Page) */}
-
-        {/* Desktop Menu */}
         <div className="hidden md:flex gap-8 items-center text-md font-normal">
           <Link
             onClick={() => track("Help_Btn_Clicked")}
@@ -294,7 +274,6 @@ export default function Navbar() {
             Help
           </Link>
         </div>
-        {/* Mobile Hamburger */}
         {pathname == "/" && (
           <div className="md:hidden flex gap-8 items-center text-md font-normal ">
             <Link href="/contact-us" className="hover:text-gray-500">
@@ -302,32 +281,16 @@ export default function Navbar() {
             </Link>
           </div>
         )}
-
-        {/* add it back here?? */}
-
-        {/* {pathname !== "/" && (
-
-          <button onClick={toggleSidebar} className="md:hidden">
-
-            <Menu className="w-8 h-8 text-gray-700" />
-
-          </button>
-
-        )} */}
       </div>
 
-      {/* Mobile Sidebar */}
-
-      {/* Mobile Sidebar */}
       {isOpen && (
         <div className="fixed inset-0 md:hidden flex">
-          {/* Sidebar */}
           <div
             className={cn(
               "fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out",
               isOpen ? "translate-x-0" : "-translate-x-full"
             )}
-            onClick={(e) => e.stopPropagation()} // Prevent sidebar clicks from closing it
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center px-6 py-4 border-b">
               <Link href="/" className="flex items-center gap-2">
@@ -348,12 +311,11 @@ export default function Navbar() {
             </div>
 
             <nav className="flex flex-col gap-6 p-6 text-lg">
-              {/* Ensure links don't close the sidebar unless explicitly intended */}
               <Link
                 href="/contact-us"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent sidebar from closing
-                  router.push("/contact-us"); // Navigate to page
+                  e.stopPropagation();
+                  router.push("/contact-us");
                 }}
                 className="hover:text-gray-500"
               >
@@ -362,10 +324,9 @@ export default function Navbar() {
             </nav>
           </div>
 
-          {/* Overlay (clicking outside will close sidebar) */}
           <div
             className="flex-1 bg-black bg-opacity-30"
-            onClick={closeSidebar} // Clicks outside sidebar close it
+            onClick={closeSidebar}
           />
         </div>
       )}

@@ -127,13 +127,13 @@ export default function QuickDetailsModal({
     libraries: ["places"],
   });
 
-  // Load existing form data from session storage if available
+  // Load existing form data from localStorage if available
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedFormData = sessionStorage.getItem("formData");
-      const savedAddress = sessionStorage.getItem("selectedAddress");
-      const temp_sepciality = sessionStorage.getItem("selectedSpecialty");
-      const storedLocation = sessionStorage.getItem("selectedLocation");
+      const storedFormData = localStorage.getItem("formData");
+      const savedAddress = localStorage.getItem("selectedAddress");
+      const temp_sepciality = localStorage.getItem("selectedSpecialty");
+      const storedLocation = localStorage.getItem("selectedLocation");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
         setFormData(parsedFormData);
@@ -242,10 +242,10 @@ export default function QuickDetailsModal({
 
       try {
         // Get existing form data if it exists
-        const existingFormData = sessionStorage.getItem("formData");
+        const existingFormData = localStorage.getItem("formData");
         let mergedValues = updatedValues;
         // if (formik.values.specialty) {
-        //   sessionStorage.setItem("selectedSpecialty", formik.values.specialty);
+        //   localStorage.setItem("selectedSpecialty", formik.values.specialty);
         // }
         
         if (existingFormData) {
@@ -269,8 +269,8 @@ export default function QuickDetailsModal({
             console.error("Error parsing existing form data:", error);
           }
         }
-        // Store form data in session storage
-        window.sessionStorage.setItem("formData", JSON.stringify(mergedValues));
+        // Store form data in localStorage
+        window.localStorage.setItem("formData", JSON.stringify(mergedValues));
 
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate processing
 
@@ -297,7 +297,7 @@ export default function QuickDetailsModal({
   const refetchDrLists = async () => {
     try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-        sessionStorage.setItem(
+        localStorage.setItem(
           "searchData",
           JSON.stringify({ lat, lng, specialty: formik.values.specialty })
         );
@@ -311,8 +311,8 @@ export default function QuickDetailsModal({
           data
         );
 
-        sessionStorage.setItem("statusDataNav", JSON.stringify(response.data));
-        sessionStorage.setItem("lastSearchSource", "navbar"); // Track last search source
+        localStorage.setItem("statusDataNav", JSON.stringify(response.data));
+        localStorage.setItem("lastSearchSource", "navbar"); // Track last search source
 
         window.dispatchEvent(new Event("storage"));
 
@@ -381,8 +381,8 @@ export default function QuickDetailsModal({
           lat: address.geometry.location.lat(),
           lng: address.geometry.location.lng(),
         });
-        sessionStorage.setItem("selectedAddress", address?.formatted_address);
-        sessionStorage.setItem(
+        localStorage.setItem("selectedAddress", address?.formatted_address);
+        localStorage.setItem(
           "selectedLocation",
           JSON.stringify({ lat:address.geometry.location.lat(), lng:address.geometry.location.lng() })
         );
@@ -442,7 +442,7 @@ export default function QuickDetailsModal({
   const handleSpecialtyChange = (value) => {
     formik.setFieldValue("specialty", value);
     formik.setFieldTouched("specialty", true);
-    sessionStorage.setItem("selectedSpecialty", value);
+    localStorage.setItem("selectedSpecialty", value);
   };
 
   // Update gender
