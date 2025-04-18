@@ -811,7 +811,7 @@ export default function LandingPage() {
                           formik.setFieldTouched("dob", true);
                         }}
                         onBlur={() => formik.setFieldTouched("dob", true)}
-                        dateFormat="yyyy-MM-dd"
+                        dateFormat="MM-dd-yyyy"
                         showYearDropdown
                         showMonthDropdown
                         dropdownMode="select"
