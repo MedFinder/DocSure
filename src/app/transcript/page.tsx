@@ -190,6 +190,7 @@ export default function Transcript() {
   const [transcriptArray, setTranscriptArray] = useState([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isCountLoading, setIsCountLoading] = useState(false);
   const loadMoreRef = useRef(null);
 
   const [totalDoctorsCount, setTotalDoctorsCount] = useState("");
@@ -356,6 +357,7 @@ export default function Transcript() {
     };
     // Initial load
     updateDoctorsList();
+    getTotalDoctorsList();
 
     // Listen for storage changes (detect when a new search is performed)
     const handleStorageChange = () => updateDoctorsList();
@@ -1151,7 +1153,7 @@ export default function Transcript() {
                     <p className="text-sm md:text-sm text-gray-700">
                       Docsure AI is calling doctors in your area, sorted by
                       patient ratings. We'll notify you once your appointment is
-                      confirmed. to seek an appointment for you.
+                      confirmed.
                     </p>
                   </div>
                   <div className="pr-2 h-[calc(100%-60px)] pt-3 relative">
