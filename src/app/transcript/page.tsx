@@ -1229,7 +1229,7 @@ export default function Transcript() {
                       <button
                         onClick={handleTerminateRequest}
                         disabled={!callStatus?.isInitiated}
-                        className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                        className={`min-w-[250px] font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
                           callStatus?.isInitiated
                             ? "bg-black hover:bg-black text-white"
                             : "bg-black cursor-not-allowed text-white opacity-70"
