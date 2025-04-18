@@ -3,7 +3,7 @@
 import Navbar from "@/components/general-components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { LoaderCircle, Search } from "lucide-react";
 import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
@@ -1049,6 +1049,24 @@ export default function Transcript() {
                 {showTranscript ? "Back to List" : "View Transcript"}
               </button>
             </div>
+        <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
+        <section className="flex flex-col items-start px-7 mt-8 w-full h-[95%] max-md:px-5 max-md:max-w-full ">
+        {/* Info section with border bottom */}
+          <div className="w-full mt-20">
+            <p className="text-sm md:text-sm text-gray-700">
+              Docsure AI is calling the top-rated doctors in your area to seek an appointment for you.
+            </p>
+          </div>
+          <div className=" flex  w-full  text-[#333333] md:text-lg mt-5 ">
+            <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
+            <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
+            <button
+              onClick={toggleTranscript}
+              className="w-1/3 mt-6 md:mt-0 text-sm text whitespace-nowrap md:hidden text-[#E5573F] underline"
+            >
+              {showTranscript ? "Back to List" : "View Transcript"}
+            </button>
+          </div>
 
             <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
               <div className="flex gap-5 h-full max-md:flex-col">
@@ -1059,22 +1077,47 @@ export default function Transcript() {
                 >
                   {/* Scrollable doctor cards container */}
 
-                  <div className="relative h-[calc(100%-60px)]">
-                    <ExpandProvider>
-                      <ScrollArea className="h-full w-full md:w-auto">
-                        <Column
+                <div className="pr-2 h-[calc(100%-60px)]">
+                  <ExpandProvider>
+                    <ScrollArea className="h-[90%] w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0 overflow-y-auto">
+                      <Column
+                        activeCallIndex={activeCallIndex}
+                        tasks={doctors}
+                        //onDelete={handleDelete}
+                        isDraggable={!isConfirmed}
+                        callStatus={callStatus}
+                        transcriptSummary={transcriptSummary}
+                        setTranscriptSummary={setTranscriptSummary}
+                        transcriptLoading={transcriptLoading}
+                        setTranscriptLoading={setTranscriptLoading}
+                        isAppointmentBooked={isAppointmentBooked}
+                        wsRef={wsSummaryRef}
+                        reconnectWebSocket={connectWebSocketSummary}
+                        fromTranscript={true}
+                        onSkip={() => {
+                          track("Skip_Call_Btn_Clicked");
+                          moveToNextDoctor(
+                            callStatus?.ssid,
+                            activeCallIndexRef.current,
+                            formData.request_id
+                          );
+                        }} // Move to next doctor
+                        />
+                      {/* {doctors.map((doctor, index) => (
+                        <DoctorCard
+                          key={index}
+                          index={index}
+                          wsRef={wsRef}
+                          id={doctor.id}
                           activeCallIndex={activeCallIndex}
-                          tasks={doctors}
-                          isDraggable={!isConfirmed}
+                          doctor={doctor}
                           callStatus={callStatus}
                           transcriptSummary={transcriptSummary}
                           setTranscriptSummary={setTranscriptSummary}
                           transcriptLoading={transcriptLoading}
                           setTranscriptLoading={setTranscriptLoading}
                           isAppointmentBooked={isAppointmentBooked}
-                          wsRef={wsSummaryRef}
-                          reconnectWebSocket={connectWebSocketSummary}
-                          fromTranscript={true}
+                          reconnectWebSocket={connectWebSocket}
                           onSkip={() => {
                             track("Skip_Call_Btn_Clicked");
                             moveToNextDoctor(
@@ -1082,42 +1125,21 @@ export default function Transcript() {
                               activeCallIndexRef.current,
                               formData.request_id
                             );
-                          }}
+                          }} // Move to next doctor
                         />
-
-                        {/* Spacer so scroll doesn't hide buttons */}
-                        <div className="h-20" />
-                      </ScrollArea>
-                    </ExpandProvider>
-
-                    {/* FLOATING BUTTONS */}
-                    <div className="fixed bottom-0 left-0 w-full z-[40]">
-                      <div className="flex justify-center gap-4 px-4 py-3 bg-transparent">
-                        <button
-                          onClick={handleTerminateRequest}
-                          disabled={!callStatus?.isInitiated}
-                          className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
-                            callStatus?.isInitiated
-                              ? "bg-red-600 hover:bg-red-700 text-white"
-                              : "bg-red-300 cursor-not-allowed text-white opacity-70"
-                          }`}
-                        >
-                          Terminate Request
-                        </button>
-                        <button
-                          onClick={() => setOpenTerminateAndCallDialog(true)}
-                          disabled={!callStatus?.isInitiated}
-                          className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
-                            callStatus?.isInitiated
-                              ? "bg-orange-600 hover:bg-orange-700 text-white"
-                              : "bg-orange-300 cursor-not-allowed text-white opacity-70"
-                          }`}
-                        >
-                          Terminate And Call Myself
-                        </button>
-                      </div>
+                      ))} */}
+                  {/* Loading indicator for infinite scrolling */}
+                  <div
+                    ref={loadMoreRef}
+                    className="w-full py-4 flex justify-center"
+                  >
+                    {isLoadingMore && (
+                      <LoaderCircle className="w-6 h-6 text-gray-500 animate-spin" />
+                    )}
                     </div>
-                  </div>
+                    </ScrollArea>
+                  </ExpandProvider>
+                </div>
 
                   {/* Terminate Request Button - fixed at bottom */}
                   {/* <div className="flex justify-center mt-4 pb-2">

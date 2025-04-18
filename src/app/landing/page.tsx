@@ -110,7 +110,10 @@ const moreDoctorTypes = [
 // Custom styles for DatePicker
 const customDatePickerStyles = `
   .react-datepicker__input-container input {
-    border: none
+    border: none;
+  }
+  .react-datepicker__input-container input::placeholder {
+    color: #737373;
   }
 `;
 const validationSchema = Yup.object().shape({
@@ -811,7 +814,7 @@ export default function LandingPage() {
                           formik.setFieldTouched("dob", true);
                         }}
                         onBlur={() => formik.setFieldTouched("dob", true)}
-                        dateFormat="yyyy-MM-dd"
+                        dateFormat="MM-dd-yyyy"
                         showYearDropdown
                         showMonthDropdown
                         dropdownMode="select"

@@ -528,7 +528,7 @@ export default function SearchDoctorPage() {
                 height={0}
                 className="w-5 h-auto"
               />
-              <p>425 verified doctors in your area</p>
+              <p>{DrCount} verified doctors in your area</p>
             </div>
 
             {/* "View Map" button on mobile */}
