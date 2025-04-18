@@ -309,11 +309,11 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
             Help
           </Link>
           {/* <Link href="#">Log In</Link> */}
-          <Link href={'/'}>
+          {/* <Link href={'/'}>
             <Button className="bg-[#0074BA] text-white rounded-md">
               Get Started
             </Button>
-          </Link>
+          </Link> */}
         </div>
         {/* Mobile Hamburger */}
         {pathname == "/" && (
@@ -365,11 +365,11 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
               {/* <Link href="#">Browse</Link> */}
 
               {/* <Link href="#">Log In</Link> */}
-              <Link href="/">
+              {/* <Link href="/">
                 <Button className="bg-[#0074BA] text-white rounded-md">
                   Get Started
                 </Button>
-              </Link>
+              </Link> */}
             </nav>
           </div>
 

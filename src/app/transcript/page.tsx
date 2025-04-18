@@ -32,6 +32,7 @@ import FooterSection from "../landing/components/FooterSection";
 import { DoctorCard, ExpandProvider } from "./DoctorCard";
 import Column from "../search-doctor/features/column";
 import Image from "next/image";
+import QuickDetailsModal from "../landing/components/QuickDetailsModal";
 
 const _doctors: Doctor[] = [
   {
@@ -222,6 +223,8 @@ export default function Transcript() {
   const [openTerminateAndCallDialog, setOpenTerminateAndCallDialog] =
     useState(false); // Dialog for Terminate and Call Myself
   const [isTerminated, setIsTerminated] = useState(false);
+  const [openPhoneNumberDialog, setOpenPhoneNumberDialog] = useState(false);
+  const [openQuickDetailsModal, setOpenQuickDetailsModal] = useState(false);
 
   useEffect(() => {
     const storedFormData = localStorage.getItem("formData");
@@ -431,6 +434,16 @@ export default function Transcript() {
   const handleConfirmSequence = useCallback(async (formdata) => {
     // initiate call
     try {
+      // Check if patient_number exists
+      const currentFormData = formdata || formData;
+      if (!currentFormData?.phoneNumber) {
+        setOpenQuickDetailsModal(false);
+        // Phone number doesn't exist, show the dialog
+        setTimeout(() => {
+          setOpenPhoneNumberDialog(true);
+        }, 15000);
+      }
+      
       setIsConfirmed(true); // Disable button and dragging
       
       // Check if the first doctor's office is open
@@ -643,9 +656,9 @@ export default function Transcript() {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
 
-        // toast.error(error?.response?.data?.detail, {
-        //   duration: 20000,
-        // });
+        toast.error('We’re experiencing high traffic. Please try again shortly.', {
+          duration: 20000,
+        });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1230,7 +1243,7 @@ export default function Transcript() {
                         className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
                           callStatus?.isInitiated
                             ? "bg-[#0074BA]0 hover:bg-blue-400 text-white"
-                            : "bg-[#0074BA] cursor-not-allowed text-white opacity-70"
+                            : "bg-black cursor-not-allowed text-white opacity-70"
                         }`}
                       >
                         Terminate And Call Myself
@@ -1352,6 +1365,49 @@ export default function Transcript() {
               </div>
             </DialogContent>
           </Dialog>
+          <Dialog
+            open={openPhoneNumberDialog}
+            onOpenChange={setOpenPhoneNumberDialog}
+          >
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Notice</DialogTitle>
+              </DialogHeader>
+              <p className="text-gray-600">
+                Enter your phone number to get the appointment confirmation
+              </p>
+              <div className="flex justify-between gap-6">
+                <Button
+                  variant="secondary"
+                  className="w-1/2 rounded-md"
+                  onClick={() => setOpenPhoneNumberDialog(false)}
+                >
+                  Later
+                </Button>
+                <Button
+                  className="w-1/2 rounded-md bg-[#0074BA] hover:bg-blue-600"
+                  onClick={() => {
+                    setOpenPhoneNumberDialog(false);
+                    setTimeout(() => {
+                      setOpenQuickDetailsModal(true);
+                    }, 1000);
+                  }}
+                >
+                  OK
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          {/* Quick Details Modal for collecting phone number */}
+          <QuickDetailsModal 
+              open={openQuickDetailsModal} 
+              onOpenChange={setOpenQuickDetailsModal}
+              //initialSpecialty={specialty}
+              updatePreferences={true}
+              confirmUpdatePreferences={confirmUpdatePreferences}
+              setispreferencesUpdated={setIsPreferencesUpdated}
+              setIsPreferencesReinitialized={setIsPreferencesReinitialized}
+           />
           {/* <FooterSection /> */}
         </>
       )}
