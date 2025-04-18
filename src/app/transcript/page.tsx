@@ -247,8 +247,8 @@ export default function Transcript() {
   };
   const getTotalDoctorsList = async () => {
     setIsCountLoading(true);
-    const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const savedSpecialty = localStorage.getItem("selectedSpecialty");
+    const savedAddress = localStorage.getItem("selectedAddress");
     const addressParts = savedAddress?.split(",") || [];
     const cityName = addressParts
       .slice(-2)

@@ -81,7 +81,7 @@ export default function ContactNew() {
   });
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedFormData = sessionStorage.getItem("formData");
+      const storedFormData = localStorage.getItem("formData");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
         setFormData(parsedFormData);
@@ -101,7 +101,7 @@ export default function ContactNew() {
         formik.validateForm();
       }
 
-      const storedSearchData = sessionStorage.getItem("searchData");
+      const storedSearchData = localStorage.getItem("searchData");
       if (storedSearchData) {
         setSearchData(JSON.parse(storedSearchData));
       }
@@ -175,7 +175,7 @@ export default function ContactNew() {
         // Simulate a 1-second delay
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
-        window.sessionStorage.setItem(
+        window.localStorage.setItem(
           "formData",
           JSON.stringify(updatedFormData)
         );

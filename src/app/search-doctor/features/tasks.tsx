@@ -92,7 +92,7 @@ const getDrSummary = async (
   formatted_address: string,
   place_id: string
 ) => {
-  const formData = await JSON.parse(sessionStorage.getItem("formData"));
+  const formData = await JSON.parse(localStorage.getItem("formData"));
   const data = {
     name,
     formatted_address,
@@ -173,7 +173,7 @@ export const Task: React.FC<TaskProps> = ({
       setExpandedId(id);
 
       // Get request_id from session storage
-      const formData = await JSON.parse(sessionStorage.getItem("formData"));
+      const formData = await JSON.parse(localStorage.getItem("formData"));
       const request_id = formData?.request_id;
       try {
         // Initial fetch to trigger the summary generation
