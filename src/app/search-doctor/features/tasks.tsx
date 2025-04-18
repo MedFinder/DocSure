@@ -223,9 +223,9 @@ export const Task: React.FC<TaskProps> = ({
       >
         <td className={`flex md:table-cell ${fromTranscript ? "!px-0" : ""}`}>
           <TooltipProvider>
-            <div className="flex  md:gap-2 gap-2 ">
-              <div className="flex md:gap-2 gap-0">
-                <div className="flex  md:gap-2 gap-0 items-center">
+            <div className="flex  md:gap-2 gap-2  ">
+              <div className="flex md:gap-2 gap-0 ">
+                <div className="flex  md:gap-2 gap-0 items-center ">
                   {index < 10 ? (
                     <span className="hidden bg-[#0074BA] rounded-full w-8 h-8 my-4 sm:w-6 sm:h-6 text-white md:flex items-center justify-center text-xs sm:text-sm font-medium">
                       {index + 1}
@@ -252,25 +252,29 @@ export const Task: React.FC<TaskProps> = ({
                 </Tooltip>
               </div>
 
-              <div className="bg-[#F2F6F9] py-4 md:px-2  px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0 ">
-                {!fromTranscript && 
+              <div
+                className={`bg-[#F2F6F9] py-4 md:px-2 px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0 ${
+                  fromTranscript ? "md:px-6" : ""
+                }`}
+              >
+                {!fromTranscript && (
                   <Tooltip>
-                  <TooltipTrigger asChild>
-                    <img
-                      src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
-                      alt="Input design element"
-                      className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3 hidden md:block"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
-                  >
-                    {/* <span className="font-semibold">Tooltip example:</span> */}
-                    <span>Drag items to reorder the priority.</span>
-                  </TooltipContent>
-                </Tooltip>
-                }
+                    <TooltipTrigger asChild>
+                      <img
+                        src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
+                        alt="Input design element"
+                        className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3 hidden md:block"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="right"
+                      className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
+                    >
+                      {/* <span className="font-semibold">Tooltip example:</span> */}
+                      <span>Drag items to reorder the priority.</span>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
                 <div className="flex flex-col gap-2 font-normal w-full">
                   <div className="flex justify-between ">
                     <div className="flex flex-grow items-start gap-2 md:hidden w-full  ">
@@ -310,7 +314,7 @@ export const Task: React.FC<TaskProps> = ({
                       onClick={handleExpand}
                       onPointerDown={(e) => e.stopPropagation()}
                     >
-                      {title}
+                      {title}hhh
                     </p>
                     <div className="flex gap-16 pr-2">
                       <div className="md:flex  gap-1 font-normal text-[#333333] text-sm items-center hidden">
@@ -333,63 +337,63 @@ export const Task: React.FC<TaskProps> = ({
                           {distance || "-"}
                         </span>
                       </div>
-                      {!fromTranscript &&
+                      {!fromTranscript && (
                         <Tooltip>
-                        <TooltipTrigger asChild>
-                          <label>
-                            <TooltipTrigger asChild>
-                              <label className="relative inline-flex items-center cursor-pointer">
-                                <div className="relative w-6 h-6">
-                                  <input
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={(e) => {
-                                      e.stopPropagation();
-                                      setIsChecked(e.target.checked);
-                                    }}
-                                    onPointerDown={(e) => e.stopPropagation()}
-                                    className="appearance-none w-full h-full bg-white border border-gray-300 rounded-md 
+                          <TooltipTrigger asChild>
+                            <label>
+                              <TooltipTrigger asChild>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <div className="relative w-6 h-6">
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        e.stopPropagation();
+                                        setIsChecked(e.target.checked);
+                                      }}
+                                      onPointerDown={(e) => e.stopPropagation()}
+                                      className="appearance-none w-full h-full bg-white border border-gray-300 rounded-md 
                   checked:bg-[#00BA85] checked:border-transparent"
-                                  />
+                                    />
 
-                                  {/* White checkmark */}
-                                  {isChecked && (
-                                    <svg
-                                      className="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="3"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M5 13l4 4L19 7"
-                                      />
-                                    </svg>
-                                  )}
-                                </div>
-                              </label>
+                                    {/* White checkmark */}
+                                    {isChecked && (
+                                      <svg
+                                        className="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="3"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M5 13l4 4L19 7"
+                                        />
+                                      </svg>
+                                    )}
+                                  </div>
+                                </label>
 
-                              {/* White checkmark overlay */}
-                            </TooltipTrigger>
-                          </label>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="left"
-                          className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
-                        >
-                          {/* <span className="font-semibold">
+                                {/* White checkmark overlay */}
+                              </TooltipTrigger>
+                            </label>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="left"
+                            className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
+                          >
+                            {/* <span className="font-semibold">
                             Tooltip example:
                           </span> */}
-                          <span>
-                            {isChecked
-                              ? "Deselect doctors you don’t want us to call."
-                              : "Select doctors to call for an appointment."}
-                          </span>
-                        </TooltipContent>
-                      </Tooltip>
-                      }
+                            <span>
+                              {isChecked
+                                ? "Deselect doctors you don’t want us to call."
+                                : "Select doctors to call for an appointment."}
+                            </span>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
                   </div>
                   <span className=" text-sm text-[#636465]">{vicinity}</span>
@@ -451,7 +455,7 @@ export const Task: React.FC<TaskProps> = ({
                     {!isExpanded && fromTranscript && (
                       <div className="flex justify-end items-center">
                         <StatusBadge
-                          status={'queue'}
+                          status={"queue"}
                           index={index}
                           onSkip={onSkip}
                           activeCallIndex={activeCallIndex}
@@ -487,7 +491,7 @@ export const Task: React.FC<TaskProps> = ({
                         colSpan={5}
                         className=" p-4 transition-all bg-[#F2F6F9]"
                       >
-                        <div className="text-sm text-gray-600 animate-fadeIn bg-[#F2F6F9]">
+                        <div className="text-sm text-gray-600 animate-fadeIn md:w-2/3">
                           {transcriptLoading &&
                           transcriptSummary?.place_id === id ? (
                             <div className="flex items-center justify-center py-4 bg-[#F2F6F9] ">
@@ -513,7 +517,7 @@ export const Task: React.FC<TaskProps> = ({
                       </button>
                       <div className="flex justify-end items-center">
                         <StatusBadge
-                          status={'queue'}
+                          status={"queue"}
                           index={index}
                           onSkip={onSkip}
                           activeCallIndex={activeCallIndex}
@@ -528,7 +532,6 @@ export const Task: React.FC<TaskProps> = ({
             </div>
           </TooltipProvider>
         </td>
-
       </tr>
 
       {/* Expandable Description Panel - only visible on desktop */}
