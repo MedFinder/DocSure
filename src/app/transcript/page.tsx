@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoaderCircle, Search } from "lucide-react";
 import Link from "next/link";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { useParams, usePathname, useRouter } from "next/navigation";
@@ -25,6 +31,7 @@ import NavbarSection from "@/components/general-components/navbar-section";
 import FooterSection from "../landing/components/FooterSection";
 import { DoctorCard, ExpandProvider } from "./DoctorCard";
 import Column from "../search-doctor/features/column";
+import Image from "next/image";
 
 const _doctors: Doctor[] = [
   {
@@ -184,6 +191,8 @@ export default function Transcript() {
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadMoreRef = useRef(null);
+
+  const [totalDoctorsCount, setTotalDoctorsCount] = useState("");
   const [callStatus, setCallStatus] = useState({
     isInitiated: false,
     ssid: "",
@@ -236,7 +245,36 @@ export default function Transcript() {
     // console.log("doctors-numbers-up", numbers);
     setPhoneNumbers(numbers);
   };
-
+  const getTotalDoctorsList = async () => {
+    setIsCountLoading(true);
+    const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
+    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const addressParts = savedAddress?.split(",") || [];
+    const cityName = addressParts
+      .slice(-2)
+      .join(",")
+      .trim()
+      .replace(/[0-9]/g, "");
+    try {
+      const response = await axios.get(
+        `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_count?medical_speciality=${savedSpecialty}&area=${cityName}`
+      );
+      setIsCountLoading(false);
+      if (response.data && response.data.total_doctors) {
+        setTotalDoctorsCount(response.data.total_doctors);
+        return response.data.total_doctors;
+      } else {
+        console.log("Invalid response format:", response.data);
+        return "Could not fetch doctors count";
+      }
+    } catch (error) {
+      setIsCountLoading(false);
+      console.error("Error fetching doctors count:", error);
+      return 0;
+    } finally {
+      setIsCountLoading(false);
+    }
+  };
   useEffect(() => {
     const updateDoctorsList = () => {
       try {
@@ -1033,7 +1071,16 @@ export default function Transcript() {
   // };
   // console.log(transcriptSummary);
   // console.log(place_id);
-
+  const DrCount = useMemo(() => {
+    const drVal = parseInt(totalDoctorsCount);
+    if (drVal > 50) {
+      return drVal + "+";
+    } else if ((drVal < 50 || isNaN(drVal)) && !nextPageToken) {
+      return doctors.length + "+";
+    } else {
+      return "50+";
+    }
+  }, [doctors.length, totalDoctorsCount, nextPageToken]);
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <NavbarSection
@@ -1059,26 +1106,31 @@ export default function Transcript() {
       ) : (
         <>
           <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
-          <section className="flex flex-col items-start px-7 mt-8 w-full h-full max-md:px-5 max-md:max-w-full ">
-            {/* Info section with border bottom */}
-            <div className="w-full mt-20">
-              <p className="text-sm md:text-sm text-gray-700">
-                Docsure AI is calling the top-rated doctors in your area to seek
-                an appointment for you.
-              </p>
-            </div>
-            <div className=" flex  w-full  text-[#333333] md:text-lg mt-5 ">
-              <h2 className=" w-2/3 mt-6 md:mt-0">Request Status</h2>
-              <h2 className="w-1/3 pl-8 hidden md:block">Chat Transcript</h2>
-              <button
-                onClick={toggleTranscript}
-                className="w-1/3 mt-6 md:mt-0 text-sm text whitespace-nowrap md:hidden text-[#E5573F] underline"
-              >
-                {showTranscript ? "Back to List" : "View Transcript"}
-              </button>
+          <div className="flex md:mt-24 mt-16 px-4 md:py-4 py-3 border-b text-sm h-[90%] w-full justify-between items-center">
+            <div className="flex gap-2 items-center">
+              <Image
+                src="/Group 198.svg"
+                alt="Verified Logo"
+                width={0}
+                height={0}
+                className="w-5 h-auto"
+              />
+              <p>{DrCount} verified doctors in your area</p>
             </div>
 
-            <div className="self-stretch mt-6 flex-1 overflow-hidden max-md:max-w-full">
+            {/* Mobile only "Back to List" / "View Transcript" button */}
+            {/* <button
+              onClick={toggleTranscript}
+              className="text-sm text-[#E5573F] underline md:hidden"
+            >
+              {showTranscript ? "Back to List" : "View Transcript"}
+            </button> */}
+          </div>
+
+          <section className="flex flex-col items-start px-7 w-full h-[95%] max-md:px-5 max-md:max-w-full ">
+            {/* Info section with border bottom */}
+
+            <div className="self-stretch md:mt-2 mt-2 flex-1 overflow-hidden max-md:max-w-full">
               <div className="flex gap-5 h-full max-md:flex-col">
                 <div
                   className={`w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full ${
@@ -1086,8 +1138,23 @@ export default function Transcript() {
                   }`}
                 >
                   {/* Scrollable doctor cards container */}
+                  <div className="w-full ">
+                    <div className="flex self-end justify-end pr-4 mb-2">
+                      <button
+                        onClick={toggleTranscript}
+                        className="text-sm text-[#E5573F] underline md:hidden self-end"
+                      >
+                        {showTranscript ? "Back to List" : "View Transcript"}
+                      </button>
+                    </div>
 
-                  <div className="relative h-[calc(100%-60px)]">
+                    <p className="text-sm md:text-sm text-gray-700">
+                      Docsure AI is calling doctors in your area, sorted by
+                      patient ratings. We'll notify you once your appointment is
+                      confirmed. to seek an appointment for you.
+                    </p>
+                  </div>
+                  <div className="pr-2 h-[calc(100%-60px)] pt-3 relative">
                     <ExpandProvider>
                       <ScrollArea className="h-full w-full md:w-auto">
                         <Column
@@ -1112,39 +1179,19 @@ export default function Transcript() {
                             );
                           }}
                         />
+                        {/* Bottom spacer to make room for fixed buttons */}
 
-                        {/* Spacer so scroll doesn't hide buttons */}
-                        <div className="h-20" />
+                        <div
+                          ref={loadMoreRef}
+                          className="w-full py-4 flex justify-center"
+                        >
+                          {isLoadingMore && (
+                            <LoaderCircle className="w-6 h-6 text-gray-500 animate-spin" />
+                          )}
+                        </div>
+                        <div className="h-32" />
                       </ScrollArea>
                     </ExpandProvider>
-
-                    {/* FLOATING BUTTONS */}
-                    <div className="fixed bottom-0 left-0 w-full z-[40]">
-                      <div className="flex justify-center gap-4 px-4 py-3 bg-transparent">
-                        <button
-                          onClick={handleTerminateRequest}
-                          disabled={!callStatus?.isInitiated}
-                          className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
-                            callStatus?.isInitiated
-                              ? "bg-red-600 hover:bg-red-700 text-white"
-                              : "bg-red-300 cursor-not-allowed text-white opacity-70"
-                          }`}
-                        >
-                          Terminate Request
-                        </button>
-                        <button
-                          onClick={() => setOpenTerminateAndCallDialog(true)}
-                          disabled={!callStatus?.isInitiated}
-                          className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
-                            callStatus?.isInitiated
-                              ? "bg-orange-600 hover:bg-orange-700 text-white"
-                              : "bg-orange-300 cursor-not-allowed text-white opacity-70"
-                          }`}
-                        >
-                          Terminate And Call Myself
-                        </button>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Terminate Request Button - fixed at bottom */}
@@ -1161,8 +1208,9 @@ export default function Transcript() {
                     Terminate Request
                   </button>
                 </div> */}
-                  {/* <div className="fixed bottom-0 left-0 w-full z-50 pointer-events-auto">
-                    <div className="flex justify-center gap-4 px-4 py-3 bg-transparent ">
+                  {/* Floating Action Buttons */}
+                  <div className="fixed bottom-0 left-0 w-full z-50 px-4 pb-4 bg-gradient-to-t from-white/90 to-transparent">
+                    <div className="flex flex-row gap-4 justify-start md:justify-center overflow-x-auto whitespace-nowrap">
                       <button
                         onClick={handleTerminateRequest}
                         disabled={!callStatus?.isInitiated}
@@ -1172,7 +1220,7 @@ export default function Transcript() {
                             : "bg-red-300 cursor-not-allowed text-white opacity-70"
                         }`}
                       >
-                        Terminate Request
+                        Pause Calling
                       </button>
                       <button
                         onClick={() => setOpenTerminateAndCallDialog(true)}
@@ -1186,7 +1234,7 @@ export default function Transcript() {
                         Terminate And Call Myself
                       </button>
                     </div>
-                  </div> */}
+                  </div>
                 </div>
 
                 {/* Always show in desktop, conditionally in mobile */}
@@ -1208,7 +1256,7 @@ export default function Transcript() {
                     transcripts={getDisplayTranscript()}
                   />
                 </ScrollArea> */}
-                  <div className="h-[900px] overflow-y-auto ">
+                  <div className="h-[900px] overflow-y-auto pt-3 ">
                     <ChatSection
                       doctorName={doctors[activeCallIndex]?.name}
                       transcripts={getDisplayTranscript()}
@@ -1221,11 +1269,11 @@ export default function Transcript() {
           <Dialog open={openDialog} onOpenChange={setOpenDialog}>
             <DialogContent className="sm:max-w-lg h-52 px-4 ">
               <DialogHeader>
-                <DialogTitle>Terminate Request</DialogTitle>
+                <DialogTitle>Pause Calling</DialogTitle>
               </DialogHeader>
               <p className="text-gray-600">
-                This will terminate your appointment booking request and cannot
-                be undone. Continue?
+                This will pause your appointment booking request and cannot be
+                undone. Continue?
               </p>
               <div className="md:flex  flex  justify-between gap-6">
                 <Button
