@@ -635,6 +635,7 @@ export default function Transcript() {
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
           data
         );
+        setIsError(false);
         track("Initiated_new_call_successfully");
         connectWebSocket(callResponse.data.call_id);
         setCallStatus({
@@ -1275,7 +1276,8 @@ export default function Transcript() {
                     transcripts={getDisplayTranscript()}
                   />
                 </ScrollArea> */}
-                  <div className="h-[900px] overflow-y-auto pt-3 ">
+                  <h2 className="hidden md:block">Live AI Call Transcript</h2>
+                  <div className="h-[900px] overflow-y-auto pt-1 ">
                     <ChatSection
                       doctorName={doctors[activeCallIndex]?.name}
                       transcripts={getDisplayTranscript()}

@@ -231,7 +231,7 @@ export default function QuickDetailsModal({
       const updatedValues = {
         ...values,
         dob: formatDateToYYYYMMDD(values.dob),
-        objective: values.objective || `${formik.values.specialty ?formik.values.specialty +' consultation':''}`,
+        objective: values.objective || '',
         subscriberId: values.subscriberId,
         selectedOption: selectedInsurance ? "no" : "yes",
         availability: customAvailability
