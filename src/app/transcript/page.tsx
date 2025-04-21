@@ -191,6 +191,7 @@ export default function Transcript() {
   const [transcriptArray, setTranscriptArray] = useState([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [isCountLoading, setIsCountLoading] = useState(false);
   const loadMoreRef = useRef(null);
 
@@ -424,7 +425,7 @@ export default function Transcript() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doctors]);
   useEffect(() => {
-    if (phoneNumbers.length > 0 && !callStatus.isInitiated) {
+    if (phoneNumbers.length > 0 && !callStatus.isInitiated && !isError) {
       console.log("✅ Phone numbers available, initiating call...");
       handleConfirmSequence();
     }
@@ -435,14 +436,14 @@ export default function Transcript() {
     // initiate call
     try {
       // Check if patient_number exists
-      const currentFormData = formdata || formData;
-      if (!currentFormData?.phoneNumber) {
-        setOpenQuickDetailsModal(false);
-        // Phone number doesn't exist, show the dialog
-        setTimeout(() => {
-          setOpenPhoneNumberDialog(true);
-        }, 15000);
-      }
+      // const currentFormData = formdata || formData;
+      // if (!currentFormData?.phoneNumber) {
+      //   setOpenQuickDetailsModal(false);
+      //   // Phone number doesn't exist, show the dialog
+      //   setTimeout(() => {
+      //     setOpenPhoneNumberDialog(true);
+      //   }, 15000);
+      // }
       
       setIsConfirmed(true); // Disable button and dragging
       
@@ -655,7 +656,7 @@ export default function Transcript() {
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
-
+        setIsError(true);
         toast.error('We’re experiencing high traffic. Please try again shortly.', {
           duration: 20000,
         });
