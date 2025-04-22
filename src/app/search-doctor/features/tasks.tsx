@@ -81,6 +81,8 @@ interface TaskProps {
   onDelete: (id: string) => void; // Function to delete item
   description?: string; // Optional description/summary field
   onSkip?: () => void; // Function to skip the item
+  handleRemoveDoctor?: (index: string) => void; // Added for "Remove" functionality
+  onCallNext?: (index: number) => void; // Function to move doctor to next in queue
 }
 
 const getAlternateColor = (index: number) => {
@@ -92,7 +94,7 @@ const getDrSummary = async (
   formatted_address: string,
   place_id: string
 ) => {
-  const formData = await JSON.parse(sessionStorage.getItem("formData"));
+  const formData = await JSON.parse(localStorage.getItem("formData"));
   const data = {
     name,
     formatted_address,
@@ -143,6 +145,8 @@ export const Task: React.FC<TaskProps> = ({
   onDelete,
   description = "",
   onSkip,
+  onCallNext,
+  handleRemoveDoctor,
   //description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -173,7 +177,7 @@ export const Task: React.FC<TaskProps> = ({
       setExpandedId(id);
 
       // Get request_id from session storage
-      const formData = await JSON.parse(sessionStorage.getItem("formData"));
+      const formData = await JSON.parse(localStorage.getItem("formData"));
       const request_id = formData?.request_id;
       try {
         // Initial fetch to trigger the summary generation
@@ -458,9 +462,12 @@ export const Task: React.FC<TaskProps> = ({
                           status={"queue"}
                           index={index}
                           onSkip={onSkip}
+                          onCallNext={onCallNext}
+                          onRemove={() => handleRemoveDoctor && handleRemoveDoctor(index)}
                           activeCallIndex={activeCallIndex}
                           callStatus={callStatus}
                           isAppointmentBooked={isAppointmentBooked}
+                          openingStatus={openingStatus}
                         />
                       </div>
                     )}
@@ -498,9 +505,53 @@ export const Task: React.FC<TaskProps> = ({
                               <LoadingSumamry />
                             </div>
                           ) : (
-                            <span className="text-xs tracking-tight leading-5 text-zinc-800 bg-[#F2F6F9]">
-                              {transcriptSummary?.summary ?? doctorSummary}
-                            </span>
+                            <div className="text-xs tracking-tight leading-5 text-zinc-800 bg-[#F2F6F9]">
+                              {(transcriptSummary?.summary ?? doctorSummary)
+                                // Split the content for processing
+                                .split(/(\*\*[^*]+\*\*|(?:^|\n)- \*\*[^*\n]*\*\*:|(?:^|\n)- (?:\*\*)?[^*\n]*(?:\*\*)?)/g)
+                                .map((part, index) => {
+                                  // Handle special bullet points with bold text that end with colon (subheadings)
+                                  if (part.match(/^(\n)?- \*\*.*\*\*:$/)) {
+                                    // Extract text between the ** markers after the dash and before the colon
+                                    const headingText = part.replace(/^(\n)?- \*\*/, '').replace(/\*\*:$/, '');
+                                    return (
+                                      <h2 key={index} className="font-bold text-sm mt-3 mb-1">
+                                        {headingText}
+                                      </h2>
+                                    );
+                                  }
+                                  // Handle bullet points with bold text (starting with "-**")
+                                  else if (part.match(/^(\n)?- \*\*.*\*\*$/)) {
+                                    // Extract text between the ** markers after the dash
+                                    const bulletText = part.replace(/^(\n)?- \*\*/, '').replace(/\*\*$/, '');
+                                    return (
+                                      <div key={index} className="ml-2 mt-1 flex">
+                                        <span className="mr-1">•</span>
+                                        <span className="font-bold">{bulletText}</span>
+                                      </div>
+                                    );
+                                  }
+                                  // Handle regular bullet points (text starting with dash)
+                                  else if (part.match(/^(\n)?- /)) {
+                                    const bulletText = part.replace(/^(\n)?- /, '');
+                                    return (
+                                      <div key={index} className="ml-2 mt-1 flex">
+                                        <span className="mr-1">•</span>
+                                        <span>{bulletText}</span>
+                                      </div>
+                                    );
+                                  } 
+                                  // Handle bold text - only apply bold styling, no line breaks
+                                  else if (part.startsWith('**') && part.endsWith('**')) {
+                                    const boldText = part.slice(2, -2);
+                                    return <span key={index} className="font-bold">{boldText}</span>;
+                                  } 
+                                  // Regular text
+                                  else {
+                                    return <span key={index}>{part}</span>;
+                                  }
+                                })}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -520,8 +571,11 @@ export const Task: React.FC<TaskProps> = ({
                           status={"queue"}
                           index={index}
                           onSkip={onSkip}
+                          onCallNext={onCallNext}
+                          onRemove={() => handleRemoveDoctor && handleRemoveDoctor(index)}
                           activeCallIndex={activeCallIndex}
                           callStatus={callStatus}
+                          openingStatus={openingStatus}
                           isAppointmentBooked={isAppointmentBooked}
                         />
                       </div>

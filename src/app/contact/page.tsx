@@ -80,7 +80,7 @@ export default function Contact() {
   });
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedFormData = sessionStorage.getItem("formData");
+      const storedFormData = localStorage.getItem("formData");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
         setFormData(parsedFormData);
@@ -100,7 +100,7 @@ export default function Contact() {
         formik.validateForm();
       }
 
-      const storedSearchData = sessionStorage.getItem("searchData");
+      const storedSearchData = localStorage.getItem("searchData");
       if (storedSearchData) {
         setSearchData(JSON.parse(storedSearchData));
       }
@@ -174,7 +174,7 @@ export default function Contact() {
         // Simulate a 1-second delay
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
-        window.sessionStorage.setItem(
+        window.localStorage.setItem(
           "formData",
           JSON.stringify(updatedFormData)
         );
@@ -246,7 +246,7 @@ export default function Contact() {
   };
 
   useEffect(() => {
-    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const savedAddress = localStorage.getItem("selectedAddress");
     if (savedAddress) {
       formik.setFieldValue("address", savedAddress);
     }
@@ -302,7 +302,7 @@ export default function Contact() {
                   selected={formik.values.dob}
                   onChange={handleDateChange}
                   onBlur={formik.handleBlur}
-                  dateFormat="MM-dd-yyyy"
+                  dateFormat="MM/dd/yyyy"
                   showYearDropdown
                   showMonthDropdown
                   dropdownMode="select"

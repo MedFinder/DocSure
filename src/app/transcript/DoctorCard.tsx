@@ -37,6 +37,7 @@ const useExpand = () => useContext(ExpandContext);
 interface DoctorCardProps {
   doctor: Doctor;
   onSkip?: () => void;
+  onCallNext?: (index: number) => void; // Added callback for "Call next" functionality
   index: number;
   id: string;
   transcriptSummary: { place_id: ""; summary: "" };
@@ -47,6 +48,7 @@ interface DoctorCardProps {
   setTranscriptSummary: ({ place_id: string, summary: string }) => void;
   setTranscriptLoading: (loading: boolean) => void;
   reconnectWebSocket: Promise<void>;
+  openingStatus?: string;
   wsRef: React.RefObject<WebSocket | null>;
   description?: string;
 }
@@ -56,7 +58,7 @@ const getDrSummary = async (
   formatted_address: string,
   place_id: string
 ) => {
-  const formData = await JSON.parse(sessionStorage.getItem("formData"));
+  const formData = await JSON.parse(localStorage.getItem("formData"));
   const data = {
     name,
     formatted_address,
@@ -83,6 +85,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
   index,
   id,
   onSkip,
+  onCallNext,
   activeCallIndex,
   isAppointmentBooked,
   callStatus,
@@ -90,6 +93,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
   setTranscriptLoading,
   transcriptSummary,
   transcriptLoading,
+  openingStatus,
   reconnectWebSocket,
   wsRef,
   description = "",
@@ -109,7 +113,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
       setTranscriptSummary({ place_id: id, summary: "" });
       setExpandedId(id);
 
-      const formData = await JSON.parse(sessionStorage.getItem("formData"));
+      const formData = await JSON.parse(localStorage.getItem("formData"));
       const request_id = formData?.request_id;
 
       try {
@@ -206,8 +210,10 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                     status={doctor.status}
                     index={index}
                     onSkip={onSkip}
+                    onCallNext={onCallNext}
                     activeCallIndex={activeCallIndex}
                     callStatus={callStatus}
+                    openingStatus={openingStatus}
                     isAppointmentBooked={isAppointmentBooked}
                   />
                 </div>
@@ -393,8 +399,10 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                 status={doctor.status}
                 index={index}
                 onSkip={onSkip}
+                onCallNext={onCallNext}
                 activeCallIndex={activeCallIndex}
                 callStatus={callStatus}
+                openingStatus={openingStatus}
                 isAppointmentBooked={isAppointmentBooked}
               />
             </div>

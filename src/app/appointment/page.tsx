@@ -67,7 +67,7 @@ export default function AppointmentPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedFormData = sessionStorage.getItem("formData");
+      const storedFormData = localStorage.getItem("formData");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
         console.log(parsedFormData);
@@ -110,7 +110,7 @@ export default function AppointmentPage() {
         formik.validateForm();
       }
 
-      const storedSearchData = sessionStorage.getItem("searchData");
+      const storedSearchData = localStorage.getItem("searchData");
       if (storedSearchData) {
         setSearchData(JSON.parse(storedSearchData));
       }
@@ -131,8 +131,8 @@ export default function AppointmentPage() {
   };
   useEffect(() => {
     async function fetchAndLogData() {
-      const drsData = sessionStorage.getItem("statusData");
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      const drsData = localStorage.getItem("statusData");
+      const formData = JSON.parse(localStorage.getItem("formData"));
       console.log(formData);
       if (drsData) {
         const parsedDrsData = JSON.parse(drsData);
@@ -195,8 +195,8 @@ export default function AppointmentPage() {
     validationSchema,
     onSubmit: async (values) => {
       track("AppointmentDetail_Btn_Clicked");
-      const savedSpecialty = sessionStorage.getItem("selectedSpecialty");
-      const formData = JSON.parse(sessionStorage.getItem("formData"));
+      const savedSpecialty = localStorage.getItem("selectedSpecialty");
+      const formData = JSON.parse(localStorage.getItem("formData"));
 
       if (!formik.isValid) {
         toast.error("Please fill up all the required information");
@@ -229,7 +229,7 @@ export default function AppointmentPage() {
       console.log(updatedValues);
       setIsLoading(true);
       logPatientData(updatedValues);
-      sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+      localStorage.setItem("formData", JSON.stringify(updatedValues));
       setTimeout(() => {
         router.push("/contact");
       }, 1500);
@@ -345,7 +345,7 @@ export default function AppointmentPage() {
     });
   };
   useEffect(() => {
-    const savedInsurer = sessionStorage.getItem("selectedInsurer");
+    const savedInsurer = localStorage.getItem("selectedInsurer");
     if (savedInsurer) {
       formik.setFieldValue("insurer", savedInsurer);
     }
@@ -433,7 +433,7 @@ export default function AppointmentPage() {
                       formik.setFieldValue("timeOfAppointment", date);
                       formik.setFieldTouched("timeOfAppointment", true);
                     }}
-                    dateFormat="MM-dd-yyyy"
+                    dateFormat="MM/dd/yyyy"
                     showYearDropdown
                     showMonthDropdown
                     dropdownMode="select"

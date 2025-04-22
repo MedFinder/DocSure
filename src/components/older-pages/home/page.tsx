@@ -77,22 +77,23 @@ function HomePage() {
 
     if (address) {
       setPrefilledAddress(address);
-      sessionStorage.setItem("selectedAddress", address);
+      localStorage.setItem("selectedAddress", address);
       setAddressLocation(address); // Set the address location for input field
     }
     if (specialty) {
       setPrefilledSpecialty(specialty);
-      sessionStorage.setItem("selectedSpecialty", specialty);
+      localStorage.setItem("selectedSpecialty", specialty);
       formik.setFieldValue("specialty", specialty);
     }
 
     // Retrieve lat/lng if available
-    const savedLocation = sessionStorage.getItem("selectedLocation");
+    const savedLocation = localStorage.getItem("selectedLocation");
     if (savedLocation) {
       setSelectedLocation(JSON.parse(savedLocation));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
       const places = inputRefs.current[index].getPlaces();
@@ -105,17 +106,18 @@ function HomePage() {
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
 
-        // Store in sessionStorage
-        sessionStorage.setItem("selectedAddress", formattedAddress);
-        sessionStorage.setItem(
+        // Store in localStorage
+        localStorage.setItem("selectedAddress", formattedAddress);
+        localStorage.setItem(
           "selectedLocation",
           JSON.stringify({ lat, lng })
         );
       }
     }
   };
+
   const logRequestInfo = async () => {
-    const savedAddress = sessionStorage.getItem("selectedAddress");
+    const savedAddress = localStorage.getItem("selectedAddress");
     const data = {
       doctor_speciality: formik.values.specialty,
       preferred_location: savedAddress,
@@ -147,31 +149,53 @@ function HomePage() {
 
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-        sessionStorage.setItem("selectedSpecialty", values.specialty);
-        sessionStorage.setItem(
+        localStorage.setItem("selectedSpecialty", values.specialty);
+        localStorage.setItem(
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
 
         // Call logRequestInfo without awaiting
-        const requestIdPromise = logRequestInfo();
+        logRequestInfo();
 
-        const response = await axios.get(
-          `https://callai-backend-243277014955.us-central1.run.app/api/search_places?location=${lat},${lng}&radius=20000&keyword=${formik.values.specialty}`
+        const speciality_value =
+          formik.values.specialty === "Prescription / Refill"
+            ? "Primary Care Physician"
+            : formik.values.specialty;
+        const data = {
+          location: `${lat},${lng}`,
+          radius: 20000,
+          keyword: speciality_value,
+        };
+        const response = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+          data
         );
 
-        // Handle request_id when the promise resolves
-        requestIdPromise.then((request_id) => {
-          if (request_id) {
-            const updatedValues = { ...values, request_id };
-            sessionStorage.setItem("formData", JSON.stringify(updatedValues));
+        const updatedValues = {
+          specialty: values.specialty,
+          insurance_carrier: values.insurance_carrier,
+        };
+
+        // Here, we're updating the form data in localStorage
+        const existingFormData = localStorage.getItem("formData");
+        let mergedValues = updatedValues;
+        if (existingFormData) {
+          try {
+            mergedValues = {
+              ...JSON.parse(existingFormData),
+              ...updatedValues,
+            };
+          } catch (error) {
+            console.error("Error parsing form data:", error);
           }
-        });
+        }
 
-        sessionStorage.setItem("statusData", JSON.stringify(response.data));
-        sessionStorage.setItem("lastSearchSource", "home"); // Track last search source
+        localStorage.setItem("formData", JSON.stringify(mergedValues));
+        localStorage.setItem("statusData", JSON.stringify(response.data));
+        localStorage.setItem("lastSearchSource", "home"); // Track last search source
 
-        router.push("/search");
+        router.push("/search-doctor");
       } catch (error) {
         console.error("Error submitting form:", error);
       }
