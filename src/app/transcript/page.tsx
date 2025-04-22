@@ -174,6 +174,34 @@ const _doctors: Doctor[] = [
     waitTime: "Excellent wait time",
     appointments: "New patient appointments",
   },
+  {
+    name: "Dr. Igor Kletsman, MD",
+    title: "Primary Care Doctor",
+    image:
+      "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+    isSponsored: true,
+    rating: 4.52,
+    reviews: 86,
+    distance: "2.7 mi",
+    address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    status: "available",
+    waitTime: "Excellent wait time",
+    appointments: "New patient appointments",
+  },
+  {
+    name: "Dr. Igor Kletsman, MD",
+    title: "Primary Care Doctor",
+    image:
+      "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+    isSponsored: true,
+    rating: 4.52,
+    reviews: 86,
+    distance: "2.7 mi",
+    address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    status: "available",
+    waitTime: "Excellent wait time",
+    appointments: "New patient appointments",
+  },
   // Add other doctors here...
 ];
 
@@ -191,7 +219,6 @@ export default function Transcript() {
   const [transcriptArray, setTranscriptArray] = useState([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [isCountLoading, setIsCountLoading] = useState(false);
   const loadMoreRef = useRef(null);
 
@@ -212,6 +239,7 @@ export default function Transcript() {
   const activeCallIndexRef = useRef(activeCallIndex);
   const requestIdRef = useRef(formData?.request_id);
   const callStatusRef = useRef(callStatus);
+  const isPreferencesReinitializedRef = useRef(isPreferencesReinitialized)
   const [context, setcontext] = useState("");
   const [transcriptSummary, setTranscriptSummary] = useState({
     place_id: "",
@@ -224,8 +252,24 @@ export default function Transcript() {
   const [openTerminateAndCallDialog, setOpenTerminateAndCallDialog] =
     useState(false); // Dialog for Terminate and Call Myself
   const [isTerminated, setIsTerminated] = useState(false);
+  const [isPaused, setIsPaused] = useState(false); // Track whether calls are paused
+  const [openResumeDialog, setOpenResumeDialog] = useState(false); // Dialog for Resume Calling
   const [openPhoneNumberDialog, setOpenPhoneNumberDialog] = useState(false);
   const [openQuickDetailsModal, setOpenQuickDetailsModal] = useState(false);
+  const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
+  const [isError, setisError] = useState(false);
+  const [doctorToRemove, setDoctorToRemove] = useState<number | null>(null);
+  const isInitialMount = useRef(true);
+
+  // Function to find the next available doctor with "Open" status
+  const findNextOpenDoctor = (startIndex: number): number => {
+    for (let i = startIndex; i < doctors.length; i++) {
+      if (doctors[i]?.opening_hours?.status === "Open") {
+        return i;
+      }
+    }
+    return -1; // No open doctors found
+  };
 
   useEffect(() => {
     const storedFormData = localStorage.getItem("formData");
@@ -244,6 +288,9 @@ export default function Transcript() {
   useEffect(() => {
     callStatusRef.current = callStatus;
   }, [callStatus]);
+  useEffect(() => {
+    isPreferencesReinitializedRef.current = isPreferencesReinitialized;
+  }, [isPreferencesReinitialized]);
 
   const getPhoneNumbers = () => {
     const numbers = doctors.map((doctor) => doctor.phone_number || null);
@@ -426,13 +473,17 @@ export default function Transcript() {
   }, [doctors]);
   useEffect(() => {
     if (phoneNumbers.length > 0 && !callStatus.isInitiated && !isError) {
-      console.log("✅ Phone numbers available, initiating call...");
-      handleConfirmSequence();
+      if (isInitialMount.current || isPreferencesReinitializedRef.current) {
+        console.log("✅ Phone numbers available, initiating call...");
+        handleConfirmSequence();
+        isInitialMount.current = false;
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
+  }, [phoneNumbers]); // Still depends on phoneNumbers but only runs on initial mount
 
   const handleConfirmSequence = useCallback(async (formdata) => {
+    console.log('handleConfirmSequence called');
     // initiate call
     try {
       // Check if patient_number exists
@@ -450,7 +501,7 @@ export default function Transcript() {
       // Check if the first doctor's office is open
       if (doctors[activeCallIndex]?.opening_hours?.status !== "Open") {
         console.log("First doctor's office is closed. Finding next open doctor...");
-        toast.info("First doctor's office is closed. Finding next open doctor...");
+        // toast.info("First doctor's office is closed. Finding next open doctor...");
         // Call moveToNextDoctor to find an open doctor
         moveToNextDoctor(
           null, 
@@ -504,12 +555,14 @@ export default function Transcript() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [callStatus, doctors, wsRef]);
+  }, [callStatus, wsRef]);
   const terminateRequest = () => {
     // sent ws event to cancel call
     // wsRef?.current?.close();
     setIsConfirmed(false);
-    terminateCurrentCall(callStatus?.ssid);
+    if(callStatus.ssid) {
+      terminateCurrentCall(callStatus?.ssid);
+    }
     setTimeout(() => {
       setCallStatus({
         isInitiated: false,
@@ -517,9 +570,57 @@ export default function Transcript() {
         email: "",
       });
     }, 500);
+    setIsPaused(true); // Set paused state to true when terminating
   };
   const handleTerminateRequest = () => {
-    setOpenDialog(true);
+    if (isPaused) {
+      // If already paused, show resume dialog
+      setOpenResumeDialog(true);
+    } else {
+      // If active, show pause dialog
+      setOpenDialog(true);
+    }
+  };
+
+  const handleResumeRequest = () => {
+    setOpenResumeDialog(true);
+  };
+
+  const confirmResumeCall = () => {
+    track("Resume_Call_Btn_Clicked");
+    setOpenResumeDialog(false);
+    setIsPaused(false);
+    
+    // Get the current form data
+    const currentStoredFormData = JSON.parse(localStorage.getItem("formData") || "{}");
+    
+    // Find the next available doctor with open office hours
+    const openDoctorIndex = findNextOpenDoctor(activeCallIndex);
+    
+    if (openDoctorIndex === -1) {
+      toast.info("No doctors with open offices available. Cannot resume calls.");
+      return;
+    }
+    
+    // Set the active call index to the next open doctor
+    setActiveCallIndex(openDoctorIndex);
+    
+    // Re-initiate the call
+    setTimeout(() => {
+      const doctorPhoneNumber = phoneNumbers[openDoctorIndex] || doctors[openDoctorIndex]?.phone_number;
+      if (doctorPhoneNumber) {
+        initiateCall(
+          doctorPhoneNumber,
+          doctors[openDoctorIndex]?.name,
+          requestIdRef.current,
+          currentStoredFormData
+        );
+        setIsConfirmed(true);
+        toast.success("Calls resumed successfully.");
+      } else {
+        toast.error("Could not get doctor's phone number. Please try again.");
+      }
+    }, 500);
   };
   const confirmTermination = () => {
     track("Terminate_Request_Btn_Clicked");
@@ -581,7 +682,7 @@ export default function Transcript() {
         email,
         phoneNumber,
         patientName,
-        objective = `${savedSpecialty} consultation`,
+        objective,
         subscriberId,
         groupId,
         selectedOption = "no",
@@ -599,7 +700,7 @@ export default function Transcript() {
 
       let context =
         "Clinical concerns:" +
-        objective +
+        (objective ? objective : `${savedSpecialty} consultation`) +
         "; " +
         "Patient has insurance:" +
         selectedOption;
@@ -656,7 +757,7 @@ export default function Transcript() {
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
-        setIsError(true);
+        setisError(true)
         toast.error('We’re experiencing high traffic. Please try again shortly.', {
           duration: 20000,
         });
@@ -679,21 +780,12 @@ export default function Transcript() {
       terminateCurrentCall(id);
     }
     
-    // Function to find the next available doctor with "Open" status
-    const findNextOpenDoctor = (startIndex: number): number => {
-      for (let i = startIndex; i < doctors.length; i++) {
-        if (doctors[i]?.opening_hours?.status === "Open") {
-          return i;
-        }
-      }
-      return -1; // No open doctors found
-    };
-    
     // Find next open doctor
     const nextOpenIndex = findNextOpenDoctor(newIndex);
     
     // If no open doctors found, end the process
     if (nextOpenIndex === -1) {
+      terminateRequest()
       wsRef?.current?.close();
       toast.info("No more available doctors with open offices. Request terminated.");
       setIsConfirmed(false);
@@ -860,6 +952,75 @@ export default function Transcript() {
     }
     return "Waiting for conversation to begin...";
   };
+  const handleRemoveDoctor = (index: number) => {
+    // Set the index of the doctor to remove and show the dialog
+    setDoctorToRemove(index);
+    setOpenRemoveDialog(true);
+  };
+
+  const confirmRemoveDoctor = () => {
+    // Make sure doctorToRemove is not null
+    if (doctorToRemove === null) return;
+    
+    const index = doctorToRemove;
+    
+    // Handle case where the doctor being removed is the active one with an ongoing call
+    if (index === activeCallIndex && callStatus.isInitiated) {
+      // Terminate the current call first
+      terminateRequest();
+      toast.info("Active call terminated and doctor removed from the list.");
+    }
+    
+    // Clone the doctors array
+    const newDoctors = [...doctors];
+    
+    // Remove the doctor at the specified index
+    newDoctors.splice(index, 1);
+    
+    // Update the doctors array
+    setDoctors(newDoctors);
+    
+    // If you're also storing the data in localStorage, update it there too
+    const lastSearchSource = localStorage.getItem("lastSearchSource");
+    const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+    
+    const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    
+    const updatedData = {
+      ...currentData,
+      results: newDoctors
+    };
+    
+    localStorage.setItem(storageKey, JSON.stringify(updatedData));
+    
+    // Close the dialog and reset the doctorToRemove
+    setOpenRemoveDialog(false);
+    setDoctorToRemove(null);
+  };
+
+  const toggleTranscript = () => {
+    setShowTranscript((prev) => !prev);
+  };
+  const confirmModifyRequest = async () => {
+    setOpenModifyDialog(false); // Close the dialog
+    if (callStatus?.isInitiated) {
+      try {
+        await terminateCurrentCall(callStatus?.ssid);
+        console.log("Call has been terminated successfully.");
+      } catch (error) {
+        console.error("Failed to log call termination:", error);
+        toast.error("Failed to terminate the call. Please try again.");
+        return;
+      }
+
+      terminateRequest();
+
+      const savedAddress = localStorage.getItem("selectedAddress");
+      const specialty = formData?.specialty;
+
+      router.push("/appointment");
+    }
+  };
   const handleEndCall = useCallback(
     async (id: string, retries = 2): Promise<any> => {
       const index = activeCallIndexRef.current;
@@ -882,16 +1043,16 @@ export default function Transcript() {
         request_id: request_id ?? requestIdRef?.current,
         doctor_number: doctors[index]?.phone_number, // phoneNumbers[index]
         hospital_name: doctors[index]?.name,
-        doctor_address: doctors[index]?.vicinity,
-        hospital_address: doctors[index]?.vicinity,
+        doctor_address: doctors[index]?.formatted_address,
+        hospital_address: doctors[index]?.formatted_address,
         distance: doctors[index]?.distance,
         rating: doctors[index]?.rating?.toString(),
         hospital_rating: doctors[index]?.rating?.toString(),
         website: doctors[index]?.website,
         context,
         patient_name: patientName,
-        patient_email: email,
-        patient_number: phoneNumber,
+        patient_email: email || "care@meomind.com",
+        patient_number: phoneNumber || "510-902-8776",
         prompt: prompt ?? "Has the appointment been booked?",
         voice_used: voice_used ?? "Alex",
         interruption_threshold: interruption_threshold ?? 70,
@@ -935,31 +1096,9 @@ export default function Transcript() {
       return true;
     }
   };
-  const toggleTranscript = () => {
-    setShowTranscript((prev) => !prev);
-  };
-  const confirmModifyRequest = async () => {
-    setOpenModifyDialog(false); // Close the dialog
-    if (callStatus?.isInitiated) {
-      try {
-        await terminateCurrentCall(callStatus?.ssid);
-        console.log("Call has been terminated successfully.");
-      } catch (error) {
-        console.error("Failed to log call termination:", error);
-        toast.error("Failed to terminate the call. Please try again.");
-        return;
-      }
-
-      terminateRequest();
-
-      const savedAddress = localStorage.getItem("selectedAddress");
-      const specialty = formData?.specialty;
-
-      router.push("/appointment");
-    }
-  };
   const confirmUpdatePreferences = async () => {
-    if (callStatus?.isInitiated) {
+    console.log('confirming updated preferences........xxxx')
+    setisError(false)
       try {
         await terminateRequest();
         console.log("Current Call has been terminated successfully.");
@@ -967,7 +1106,8 @@ export default function Transcript() {
           const currentStoredFormData = JSON.parse(localStorage.getItem("formData") || "{}");
           requestIdRef.current = currentStoredFormData?.request_id;
           setFormData(currentStoredFormData);
-          if(!isPreferencesReinitialized){
+          if(!isPreferencesReinitializedRef.current){
+            console.log('fired from preferences reinitialization')
             handleConfirmSequence(currentStoredFormData);
           }
       } catch (error) {
@@ -975,7 +1115,6 @@ export default function Transcript() {
         toast.error("Failed to terminate the call. Please try again.");
         return;
       }
-    }
   };
 
   const confirmTerminateAndCallMyself = async () => {
@@ -1033,7 +1172,11 @@ export default function Transcript() {
           },
         }));
 
-        setDoctors((prevDoctors) => [...prevDoctors, ...newDoctors]);
+        // Create a combined array with existing and new doctors
+        const updatedDoctors = [...doctors, ...newDoctors];
+        
+        // Update state
+        setDoctors(updatedDoctors);
         setNextPageToken(response.data.next_page_token || null);
 
         const lastSearchSource = localStorage.getItem("lastSearchSource");
@@ -1051,6 +1194,42 @@ export default function Transcript() {
         };
 
         localStorage.setItem(storageKey, JSON.stringify(updatedData));
+        
+        // If there are no open doctors currently and we're not in an active call,
+        // check if any of the newly loaded doctors have open offices
+        if (!callStatus.isInitiated) {
+          // Check if there are any open doctors in the original list
+          const hasOpenDoctors = doctors.some(doctor => doctor.opening_hours?.status === "Open");
+          
+          if (!hasOpenDoctors) {
+            // Use the updatedDoctors array to search for open doctors
+            const findNextOpenDoctorInList = (startIndex: number, doctorsList: any[]): number => {
+              for (let i = startIndex; i < doctorsList.length; i++) {
+                if (doctorsList[i]?.opening_hours?.status === "Open") {
+                  return i;
+                }
+              }
+              return -1; // No open doctors found
+            };
+            
+            // Check if any doctor in the updated list has an open office
+            const openDoctorIndex = findNextOpenDoctorInList(0, updatedDoctors);
+            if (openDoctorIndex !== -1) {
+              toast.info("Found available doctors with open offices! Starting calls...");
+              const foundInfo = updatedDoctors[openDoctorIndex];
+              // console.log(foundInfo)
+              setActiveCallIndex(openDoctorIndex);
+              setTimeout(() => {
+                const firstDoctorPhoneNumber = foundInfo.phone_number; // '+2348168968260'
+                initiateCall(
+                  firstDoctorPhoneNumber,
+                  foundInfo?.name,
+                  requestIdRef?.current,
+                );
+              }, 500); // Small delay to ensure state updates have propagated
+            }
+          }
+        }
       }
     } catch (error) {
       console.error("Error loading more doctors:", error);
@@ -1081,6 +1260,38 @@ export default function Transcript() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextPageToken, isLoadingMore]);
+
+  // Function to move a doctor to the next position in the queue
+  const handleCallNext = (index: number) => {
+    if (index === activeCallIndex || index < activeCallIndex) {
+      return; // Don't move if it's the current active call or already processed
+    }
+    
+    // Clone the doctors array
+    const newDoctors = [...doctors];
+    
+    // Remove the doctor from their current position
+    const doctorToMove = newDoctors.splice(index, 1)[0];
+    
+    // Insert the doctor right after the current active doctor
+    newDoctors.splice(activeCallIndex + 1, 0, doctorToMove);
+    
+    // Update the doctors array
+    setDoctors(newDoctors);
+    
+    // Update localStorage with the new order
+    const lastSearchSource = localStorage.getItem("lastSearchSource");
+    const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+    
+    const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    
+    const updatedData = {
+      ...currentData,
+      results: newDoctors
+    };
+    
+    localStorage.setItem(storageKey, JSON.stringify(updatedData));
+  };
 
   // const handleCall = () => {
   //   window.location.href = `tel:${+2348167238042}`;
@@ -1197,6 +1408,8 @@ export default function Transcript() {
                               formData.request_id
                             );
                           }}
+                          onCallNext={handleCallNext}
+                          handleRemoveDoctor={handleRemoveDoctor}
                         />
                         {/* Bottom spacer to make room for fixed buttons */}
 
@@ -1232,22 +1445,22 @@ export default function Transcript() {
                     <div className="flex flex-row gap-4 justify-start md:justify-center overflow-x-auto whitespace-nowrap">
                       <button
                         onClick={handleTerminateRequest}
-                        disabled={!callStatus?.isInitiated}
+                        // disabled={!callStatus?.isInitiated}
                         className={`min-w-[250px] font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
-                          callStatus?.isInitiated
-                            ? "bg-black hover:bg-black text-white"
-                            : "bg-black cursor-not-allowed text-white opacity-70"
+                          isPaused
+                            ?  "bg-black hover:bg-black text-white" //"bg-[#0074BA] hover:bg-blue-600 text-white"
+                            : "bg-black hover:bg-black text-white"
                         }`}
                       >
-                        Pause Calling
+                        {isPaused ? 'Resume Calling' : 'Pause Calling'}
                       </button>
                       <button
                         onClick={() => setOpenTerminateAndCallDialog(true)}
                         disabled={!callStatus?.isInitiated}
                         className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
                           callStatus?.isInitiated
-                            ? "bg-[#0074BA]0 hover:bg-blue-400 text-white"
-                            : "bg-black cursor-not-allowed text-white opacity-70"
+                          ? "bg-black hover:bg-black text-white"
+                          : "bg-black cursor-not-allowed text-white opacity-70"
                         }`}
                       >
                         Terminate And Call Myself
@@ -1275,7 +1488,8 @@ export default function Transcript() {
                     transcripts={getDisplayTranscript()}
                   />
                 </ScrollArea> */}
-                  <div className="h-[900px] overflow-y-auto pt-3 ">
+                  <h2 className="hidden md:block">Live AI Call Transcript</h2>
+                  <div className="h-[900px] overflow-y-auto pt-1 ">
                     <ChatSection
                       doctorName={doctors[activeCallIndex]?.name}
                       transcripts={getDisplayTranscript()}
@@ -1412,6 +1626,57 @@ export default function Transcript() {
               setispreferencesUpdated={setIsPreferencesUpdated}
               setIsPreferencesReinitialized={setIsPreferencesReinitialized}
            />
+          <Dialog open={openRemoveDialog} onOpenChange={setOpenRemoveDialog}>
+            <DialogContent className="sm:max-w-lg h-52">
+              <DialogHeader>
+                <DialogTitle>Remove Doctor</DialogTitle>
+              </DialogHeader>
+              <p className="text-gray-600">
+                Are you sure you want to remove this doctor from the list?
+              </p>
+              <div className="md:flex flex justify-between gap-6">
+                <Button
+                  variant="secondary"
+                  className="w-1/2 rounded-md"
+                  onClick={() => setOpenRemoveDialog(false)}
+                >
+                  No
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="w-1/2 rounded-md"
+                  onClick={confirmRemoveDoctor}
+                >
+                  Yes
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={openResumeDialog} onOpenChange={setOpenResumeDialog}>
+            <DialogContent className="sm:max-w-lg h-52">
+              <DialogHeader>
+                <DialogTitle>Resume Calling</DialogTitle>
+              </DialogHeader>
+              <p className="text-gray-600">
+                This will resume your appointment booking request and begin calling the next available doctor. Continue?
+              </p>
+              <div className="md:flex flex justify-between gap-6">
+                <Button
+                  variant="secondary"
+                  className="w-1/2 rounded-md"
+                  onClick={() => setOpenResumeDialog(false)}
+                >
+                  No
+                </Button>
+                <Button
+                  className="w-1/2 rounded-md bg-[#0074BA] hover:bg-blue-600"
+                  onClick={confirmResumeCall}
+                >
+                  Yes
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           {/* <FooterSection /> */}
         </>
       )}
