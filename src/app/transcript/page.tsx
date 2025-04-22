@@ -758,6 +758,7 @@ export default function Transcript() {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
         setisError(true)
+        terminateRequest()
         toast.error('We’re experiencing high traffic. Please try again shortly.', {
           duration: 20000,
         });
