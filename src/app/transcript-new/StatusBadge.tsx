@@ -8,7 +8,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   activeCallIndex,
   isAppointmentBooked,
   callStatus,
-  onSkip 
+  onSkip,
+  onCallNext
 }) => {
   // Determine the actual status to display based on conditions
   const status = (() => {
@@ -20,11 +21,10 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     else if (index === activeCallIndex && isAppointmentBooked) {
       return "available";
     }
-
-      // If this doctor is the active one and appointment is booked
-      else if (activeCallIndex > index && !isAppointmentBooked) {
-        return "unavailable";
-      }
+    // If this doctor has already been processed and appointment wasn't booked
+    else if (activeCallIndex > index && !isAppointmentBooked) {
+      return "unavailable";
+    }
     // Otherwise use the provided status or default to "queue"
     else {
       return initialStatus || "queue";
@@ -58,6 +58,15 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
             <span className="gap-1 px-3.5 py-2 text-orange-500 bg-orange-50 rounded">
               In Queue
             </span>
+            {/* Only show "Call next" button if we're not the active call and onCallNext is provided */}
+            {index !== activeCallIndex && onCallNext && (
+              <button
+                onClick={() => onCallNext(index)}
+                className="my-auto underline text-zinc-800"
+              >
+                Call next
+              </button>
+            )}
           </div>
         );
       case "available":
@@ -80,6 +89,15 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
             <span className="gap-1 px-3.5 py-2 text-orange-500 bg-orange-50 rounded">
               In Queue
             </span>
+            {/* Only show "Call next" button if we're not the active call and onCallNext is provided */}
+            {index !== activeCallIndex && onCallNext && (
+              <button
+                onClick={() => onCallNext(index)}
+                className="my-auto underline text-zinc-800"
+              >
+                Call next
+              </button>
+            )}
           </div>
         );
     }

@@ -226,6 +226,7 @@ export default function Transcript() {
   const [isTerminated, setIsTerminated] = useState(false);
   const [openPhoneNumberDialog, setOpenPhoneNumberDialog] = useState(false);
   const [openQuickDetailsModal, setOpenQuickDetailsModal] = useState(false);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     const storedFormData = localStorage.getItem("formData");
@@ -426,11 +427,14 @@ export default function Transcript() {
   }, [doctors]);
   useEffect(() => {
     if (phoneNumbers.length > 0 && !callStatus.isInitiated && !isError) {
-      console.log("✅ Phone numbers available, initiating call...");
-      handleConfirmSequence();
+      if (isInitialMount.current) {
+        console.log("✅ Phone numbers available, initiating call...");
+        handleConfirmSequence();
+        isInitialMount.current = false;
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phoneNumbers]); // 🌟 Runs ONLY when phoneNumbers updates
+  }, [phoneNumbers]); // Still depends on phoneNumbers but only runs on initial mount
 
   const handleConfirmSequence = useCallback(async (formdata) => {
     // initiate call
@@ -509,7 +513,9 @@ export default function Transcript() {
     // sent ws event to cancel call
     // wsRef?.current?.close();
     setIsConfirmed(false);
-    terminateCurrentCall(callStatus?.ssid);
+    if(callStatus.ssid) {
+      terminateCurrentCall(callStatus?.ssid);
+    }
     setTimeout(() => {
       setCallStatus({
         isInitiated: false,
@@ -581,7 +587,7 @@ export default function Transcript() {
         email,
         phoneNumber,
         patientName,
-        objective = `${savedSpecialty} consultation`,
+        objective,
         subscriberId,
         groupId,
         selectedOption = "no",
@@ -599,7 +605,7 @@ export default function Transcript() {
 
       let context =
         "Clinical concerns:" +
-        objective +
+        (objective ? objective : `${savedSpecialty} consultation`) +
         "; " +
         "Patient has insurance:" +
         selectedOption;
@@ -695,6 +701,7 @@ export default function Transcript() {
     
     // If no open doctors found, end the process
     if (nextOpenIndex === -1) {
+      terminateRequest()
       wsRef?.current?.close();
       toast.info("No more available doctors with open offices. Request terminated.");
       setIsConfirmed(false);
@@ -883,16 +890,16 @@ export default function Transcript() {
         request_id: request_id ?? requestIdRef?.current,
         doctor_number: doctors[index]?.phone_number, // phoneNumbers[index]
         hospital_name: doctors[index]?.name,
-        doctor_address: doctors[index]?.vicinity,
-        hospital_address: doctors[index]?.vicinity,
+        doctor_address: doctors[index]?.formatted_address,
+        hospital_address: doctors[index]?.formatted_address,
         distance: doctors[index]?.distance,
         rating: doctors[index]?.rating?.toString(),
         hospital_rating: doctors[index]?.rating?.toString(),
         website: doctors[index]?.website,
         context,
         patient_name: patientName,
-        patient_email: email,
-        patient_number: phoneNumber,
+        patient_email: email || "care@meomind.com",
+        patient_number: phoneNumber || "510-902-8776",
         prompt: prompt ?? "Has the appointment been booked?",
         voice_used: voice_used ?? "Alex",
         interruption_threshold: interruption_threshold ?? 70,
@@ -1083,6 +1090,38 @@ export default function Transcript() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextPageToken, isLoadingMore]);
 
+  // Function to move a doctor to the next position in the queue
+  const handleCallNext = (index: number) => {
+    if (index === activeCallIndex || index < activeCallIndex) {
+      return; // Don't move if it's the current active call or already processed
+    }
+    
+    // Clone the doctors array
+    const newDoctors = [...doctors];
+    
+    // Remove the doctor from their current position
+    const doctorToMove = newDoctors.splice(index, 1)[0];
+    
+    // Insert the doctor right after the current active doctor
+    newDoctors.splice(activeCallIndex + 1, 0, doctorToMove);
+    
+    // Update the doctors array
+    setDoctors(newDoctors);
+    
+    // Update localStorage with the new order
+    const lastSearchSource = localStorage.getItem("lastSearchSource");
+    const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+    
+    const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    
+    const updatedData = {
+      ...currentData,
+      results: newDoctors
+    };
+    
+    localStorage.setItem(storageKey, JSON.stringify(updatedData));
+  };
+
   // const handleCall = () => {
   //   window.location.href = `tel:${+2348167238042}`;
   // };
@@ -1198,6 +1237,7 @@ export default function Transcript() {
                               formData.request_id
                             );
                           }}
+                          onCallNext={handleCallNext}
                         />
                         {/* Bottom spacer to make room for fixed buttons */}
 

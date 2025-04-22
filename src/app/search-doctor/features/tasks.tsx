@@ -81,6 +81,7 @@ interface TaskProps {
   onDelete: (id: string) => void; // Function to delete item
   description?: string; // Optional description/summary field
   onSkip?: () => void; // Function to skip the item
+  onCallNext?: (index: number) => void; // Function to move doctor to next in queue
 }
 
 const getAlternateColor = (index: number) => {
@@ -143,6 +144,7 @@ export const Task: React.FC<TaskProps> = ({
   onDelete,
   description = "",
   onSkip,
+  onCallNext,
   //description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -458,6 +460,7 @@ export const Task: React.FC<TaskProps> = ({
                           status={"queue"}
                           index={index}
                           onSkip={onSkip}
+                          onCallNext={onCallNext}
                           activeCallIndex={activeCallIndex}
                           callStatus={callStatus}
                           isAppointmentBooked={isAppointmentBooked}
@@ -564,6 +567,7 @@ export const Task: React.FC<TaskProps> = ({
                           status={"queue"}
                           index={index}
                           onSkip={onSkip}
+                          onCallNext={onCallNext}
                           activeCallIndex={activeCallIndex}
                           callStatus={callStatus}
                           isAppointmentBooked={isAppointmentBooked}

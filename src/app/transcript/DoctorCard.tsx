@@ -37,6 +37,7 @@ const useExpand = () => useContext(ExpandContext);
 interface DoctorCardProps {
   doctor: Doctor;
   onSkip?: () => void;
+  onCallNext?: (index: number) => void; // Added callback for "Call next" functionality
   index: number;
   id: string;
   transcriptSummary: { place_id: ""; summary: "" };
@@ -83,6 +84,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
   index,
   id,
   onSkip,
+  onCallNext,
   activeCallIndex,
   isAppointmentBooked,
   callStatus,
@@ -206,6 +208,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                     status={doctor.status}
                     index={index}
                     onSkip={onSkip}
+                    onCallNext={onCallNext}
                     activeCallIndex={activeCallIndex}
                     callStatus={callStatus}
                     isAppointmentBooked={isAppointmentBooked}
@@ -393,6 +396,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                 status={doctor.status}
                 index={index}
                 onSkip={onSkip}
+                onCallNext={onCallNext}
                 activeCallIndex={activeCallIndex}
                 callStatus={callStatus}
                 isAppointmentBooked={isAppointmentBooked}
