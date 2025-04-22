@@ -717,7 +717,7 @@ export default function Transcript() {
         (objective ? objective : `${savedSpecialty} consultation`) +
         "; " +
         "Patient has insurance:" +
-        selectedOption;
+        (!insurer ? "no" : selectedOption);
 
       if (insurer) context += `; Insurance Provider:${insurer}`;
       if (subscriberId) context += `; Member Id:"${subscriberId}"`;
@@ -740,7 +740,7 @@ export default function Transcript() {
         patient_number: phoneNumber || "510-902-8776",
         patient_name: patientName,
         hospital_name: nameOfOrg,
-        patient_email: email || "care@meomind.com",
+        patient_email: email || "Not Available",
         doctor_number: doctorPhoneNumber,
       };
       localStorage.setItem("context", context);
@@ -1066,7 +1066,7 @@ export default function Transcript() {
         website: doctors[index]?.website,
         context,
         patient_name: patientName,
-        patient_email: email || "care@meomind.com",
+        patient_email: email || "Not Available",
         patient_number: phoneNumber || "510-902-8776",
         prompt: prompt ?? "Has the appointment been booked?",
         voice_used: voice_used ?? "Alex",
@@ -1526,7 +1526,7 @@ export default function Transcript() {
                   />
                 </ScrollArea> */}
                   <h2 className="hidden md:block">Live AI Call Transcript</h2>
-                  <div className="h-[900px] overflow-y-auto pt-1 ">
+                  <div className="h-[900px] overflow-y-auto pt-2 ">
                     <ChatSection
                       doctorName={doctors[activeCallIndex]?.name}
                       transcripts={getDisplayTranscript()}

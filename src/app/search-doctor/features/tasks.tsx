@@ -508,12 +508,22 @@ export const Task: React.FC<TaskProps> = ({
                             <div className="text-xs tracking-tight leading-5 text-zinc-800 bg-[#F2F6F9]">
                               {(transcriptSummary?.summary ?? doctorSummary)
                                 // Split the content for processing
-                                .split(/(\*\*[^*]+\*\*|(?:^|\n)- \*\*[^*\n]*\*\*:|(?:^|\n)- (?:\*\*)?[^*\n]*(?:\*\*)?)/g)
+                                .split(/(\*\*[^*]+\*\*:?|(?:^|\n)- \*\*[^*\n]*\*\*:?|(?:^|\n)- (?:\*\*)?[^*\n]*(?:\*\*)?)/g)
                                 .map((part, index) => {
-                                  // Handle special bullet points with bold text that end with colon (subheadings)
-                                  if (part.match(/^(\n)?- \*\*.*\*\*:$/)) {
-                                    // Extract text between the ** markers after the dash and before the colon
-                                    const headingText = part.replace(/^(\n)?- \*\*/, '').replace(/\*\*:$/, '');
+                                  // Handle any text wrapped in ** (as h2 heading regardless of format)
+                                  if (part.match(/^\*\*.*\*\*:?$/)) {
+                                    // Extract text between the ** markers (with or without colon)
+                                    const headingText = part.replace(/^\*\*/, '').replace(/\*\*:?$/, '');
+                                    return (
+                                      <h2 key={index} className="font-bold text-sm mt-3 mb-1">
+                                        {headingText}
+                                      </h2>
+                                    );
+                                  }
+                                  // Handle special bullet points with bold text (subheadings)
+                                  else if (part.match(/^(\n)?- \*\*.*\*\*:?$/)) {
+                                    // Extract text between the ** markers after the dash
+                                    const headingText = part.replace(/^(\n)?- \*\*/, '').replace(/\*\*:?$/, '');
                                     return (
                                       <h2 key={index} className="font-bold text-sm mt-3 mb-1">
                                         {headingText}
@@ -540,11 +550,6 @@ export const Task: React.FC<TaskProps> = ({
                                         <span>{bulletText}</span>
                                       </div>
                                     );
-                                  } 
-                                  // Handle bold text - only apply bold styling, no line breaks
-                                  else if (part.startsWith('**') && part.endsWith('**')) {
-                                    const boldText = part.slice(2, -2);
-                                    return <span key={index} className="font-bold">{boldText}</span>;
                                   } 
                                   // Regular text
                                   else {

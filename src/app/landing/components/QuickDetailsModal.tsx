@@ -51,6 +51,11 @@ const validationSchema = Yup.object().shape({
     then: () => Yup.string().notRequired(),
     otherwise: () => Yup.string().notRequired(),
   }),
+  insuranceType: Yup.string().when("insurer", {
+    is: (val) => val && val.length > 0,
+    then: () => Yup.string().required("Please select an insurance type (PPO or HMO)"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
 });
 
 const genderOptions = [
@@ -149,7 +154,7 @@ export default function QuickDetailsModal({
           specialty: parsedFormData.specialty || "",
           insurer: parsedFormData?.insurer || "",
           selectedOption: parsedFormData?.selectedOption || "yes",
-          insuranceType: parsedFormData?.insuranceType || "ppo",
+          insuranceType: parsedFormData?.insuranceType || "",
           availability: parsedFormData?.availability || "anytime",
           subscriberId: parsedFormData?.subscriberId || "",
           maxWait: parsedFormData?.maxWait
@@ -207,7 +212,7 @@ export default function QuickDetailsModal({
       maxWait: 3,
       insurer: "",
       subscriberId: "",
-      insuranceType: "ppo",
+      insuranceType: "",
       selectedOption: "yes",
       availabilityOption: "anytime",
       timeOfAppointment: new Date(),
@@ -215,7 +220,7 @@ export default function QuickDetailsModal({
     },
     validationSchema,
     onSubmit: async (values) => {
-      setIsPreferencesReinitialized(false)
+      updatePreferences && setIsPreferencesReinitialized(false)
       const speciality_value =
       formik.values.specialty === "Prescription / Refill"
         ? "Primary Care Physician"
@@ -355,7 +360,7 @@ export default function QuickDetailsModal({
       // Reset insurance-related fields when user selects "no insurance"
       formik.setFieldValue("insurer", "");
       formik.setFieldValue("subscriberId", "");
-      formik.setFieldValue("insuranceType", "ppo");
+      formik.setFieldValue("insuranceType", "");
 
       // Clear any validation errors for these fields
       const newErrors = { ...formik.errors };
@@ -681,6 +686,27 @@ export default function QuickDetailsModal({
                         value={formik.values.subscriberId || ""}
                         placeholder="Insurance Member ID"
                       />
+                    </div>
+                    <div>
+                    <RadioGroup
+                      value={formik.values.insuranceType}
+                      onValueChange={handleInsuranceTypeChange}
+                      className="flex gap-12 mt-5"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="ppo" id="r1" />
+                        <Label htmlFor="r1">PPO</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="hmo" id="r2" />
+                        <Label htmlFor="r2">HMO</Label>
+                      </div>
+                    </RadioGroup>
+                    {formik.touched.insuranceType && formik.errors.insuranceType && (
+                      <div className="text-red-500 text-sm mt-2">
+                        {formik.errors.insuranceType}
+                      </div>
+                    )}
                     </div>
                   </>
                 )}
