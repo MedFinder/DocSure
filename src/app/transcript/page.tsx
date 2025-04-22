@@ -188,6 +188,20 @@ const _doctors: Doctor[] = [
     waitTime: "Excellent wait time",
     appointments: "New patient appointments",
   },
+  {
+    name: "Dr. Igor Kletsman, MD",
+    title: "Primary Care Doctor",
+    image:
+      "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+    isSponsored: true,
+    rating: 4.52,
+    reviews: 86,
+    distance: "2.7 mi",
+    address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    status: "available",
+    waitTime: "Excellent wait time",
+    appointments: "New patient appointments",
+  },
   // Add other doctors here...
 ];
 
@@ -240,6 +254,9 @@ export default function Transcript() {
   const [isTerminated, setIsTerminated] = useState(false);
   const [openPhoneNumberDialog, setOpenPhoneNumberDialog] = useState(false);
   const [openQuickDetailsModal, setOpenQuickDetailsModal] = useState(false);
+  const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
+  const [isError, setisError] = useState(false);
+  const [doctorToRemove, setDoctorToRemove] = useState<number | null>(null);
   const isInitialMount = useRef(true);
 
   // Function to find the next available doctor with "Open" status
@@ -453,7 +470,7 @@ export default function Transcript() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doctors]);
   useEffect(() => {
-    if (phoneNumbers.length > 0 && !callStatus.isInitiated) {
+    if (phoneNumbers.length > 0 && !callStatus.isInitiated && !isError) {
       if (isInitialMount.current || isPreferencesReinitializedRef.current) {
         console.log("✅ Phone numbers available, initiating call...");
         handleConfirmSequence();
@@ -690,6 +707,7 @@ export default function Transcript() {
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
+        setisError(true)
         toast.error('We’re experiencing high traffic. Please try again shortly.', {
           duration: 20000,
         });
@@ -884,81 +902,52 @@ export default function Transcript() {
     }
     return "Waiting for conversation to begin...";
   };
-  const handleEndCall = useCallback(
-    async (id: string, retries = 2): Promise<any> => {
-      const index = activeCallIndexRef.current;
-      // console.log('cuurentIndex',index)
-      // const formData = JSON.parse(localStorage.getItem("formData"));
-      const context = localStorage.getItem("context");
-      const {
-        email,
-        phoneNumber,
-        patientName,
-        request_id,
-        prompt,
-        voice_used,
-        interruption_threshold,
-        temperature,
-        model,
-      } = formData;
-      const data = {
-        call_id: id,
-        request_id: request_id ?? requestIdRef?.current,
-        doctor_number: doctors[index]?.phone_number, // phoneNumbers[index]
-        hospital_name: doctors[index]?.name,
-        doctor_address: doctors[index]?.formatted_address,
-        hospital_address: doctors[index]?.formatted_address,
-        distance: doctors[index]?.distance,
-        rating: doctors[index]?.rating?.toString(),
-        hospital_rating: doctors[index]?.rating?.toString(),
-        website: doctors[index]?.website,
-        context,
-        patient_name: patientName,
-        patient_email: email || "care@meomind.com",
-        patient_number: phoneNumber || "510-902-8776",
-        prompt: prompt ?? "Has the appointment been booked?",
-        voice_used: voice_used ?? "Alex",
-        interruption_threshold: interruption_threshold ?? 70,
-        temperature: temperature ?? 0.7,
-        model: model ?? "gpt-4-turbo",
-      };
-      // console.log(data, 'end call data');
-
-      try {
-        const resp = await axios.post(
-          `https://callai-backend-243277014955.us-central1.run.app/api/appointment-booked-status`,
-          data
-        );
-        return resp.data;
-      } catch (error) {
-        if (error.response && error.response.status === 500 && retries > 0) {
-          console.log(
-            `Retrying to end call in 5 seconds... (${retries} retries left)`
-          );
-          await new Promise((resolve) => setTimeout(resolve, 5000));
-          return handleEndCall(id, retries - 1);
-        }
-        console.log(
-          "Failed to end call after multiple attempts. Returning true."
-        );
-        return true;
-      }
-    },
-    [doctors, formData]
-  );
-  const terminateCurrentCall = async (id: string): Promise<any> => {
-    // console.log(id,'xxx')
-    try {
-      const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/terminate-call`,
-        { call_id: id }
-      );
-      return resp.data;
-    } catch (error) {
-      // console.log("Error ending call:", error);
-      return true;
-    }
+  const handleRemoveDoctor = (index: number) => {
+    // Set the index of the doctor to remove and show the dialog
+    setDoctorToRemove(index);
+    setOpenRemoveDialog(true);
   };
+
+  const confirmRemoveDoctor = () => {
+    // Make sure doctorToRemove is not null
+    if (doctorToRemove === null) return;
+    
+    const index = doctorToRemove;
+    
+    // Handle case where the doctor being removed is the active one with an ongoing call
+    if (index === activeCallIndex && callStatus.isInitiated) {
+      // Terminate the current call first
+      terminateRequest();
+      toast.info("Active call terminated and doctor removed from the list.");
+    }
+    
+    // Clone the doctors array
+    const newDoctors = [...doctors];
+    
+    // Remove the doctor at the specified index
+    newDoctors.splice(index, 1);
+    
+    // Update the doctors array
+    setDoctors(newDoctors);
+    
+    // If you're also storing the data in localStorage, update it there too
+    const lastSearchSource = localStorage.getItem("lastSearchSource");
+    const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+    
+    const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    
+    const updatedData = {
+      ...currentData,
+      results: newDoctors
+    };
+    
+    localStorage.setItem(storageKey, JSON.stringify(updatedData));
+    
+    // Close the dialog and reset the doctorToRemove
+    setOpenRemoveDialog(false);
+    setDoctorToRemove(null);
+  };
+
   const toggleTranscript = () => {
     setShowTranscript((prev) => !prev);
   };
@@ -982,8 +971,22 @@ export default function Transcript() {
       router.push("/appointment");
     }
   };
+  const terminateCurrentCall = async (id: string): Promise<any> => {
+    // console.log(id,'xxx')
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/terminate-call`,
+        { call_id: id }
+      );
+      return resp.data;
+    } catch (error) {
+      // console.log("Error ending call:", error);
+      return true;
+    }
+  };
   const confirmUpdatePreferences = async () => {
     console.log('confirming updated preferences........xxxx')
+    setisError(false)
       try {
         await terminateRequest();
         console.log("Current Call has been terminated successfully.");
@@ -1294,6 +1297,7 @@ export default function Transcript() {
                             );
                           }}
                           onCallNext={handleCallNext}
+                          handleRemoveDoctor={handleRemoveDoctor}
                         />
                         {/* Bottom spacer to make room for fixed buttons */}
 
@@ -1343,8 +1347,8 @@ export default function Transcript() {
                         disabled={!callStatus?.isInitiated}
                         className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
                           callStatus?.isInitiated
-                            ? "bg-[#0074BA]0 hover:bg-blue-400 text-white"
-                            : "bg-black cursor-not-allowed text-white opacity-70"
+                          ? "bg-black hover:bg-black text-white"
+                          : "bg-black cursor-not-allowed text-white opacity-70"
                         }`}
                       >
                         Terminate And Call Myself
@@ -1510,6 +1514,32 @@ export default function Transcript() {
               setispreferencesUpdated={setIsPreferencesUpdated}
               setIsPreferencesReinitialized={setIsPreferencesReinitialized}
            />
+          <Dialog open={openRemoveDialog} onOpenChange={setOpenRemoveDialog}>
+            <DialogContent className="sm:max-w-lg h-52">
+              <DialogHeader>
+                <DialogTitle>Remove Doctor</DialogTitle>
+              </DialogHeader>
+              <p className="text-gray-600">
+                Are you sure you want to remove this doctor from the list?
+              </p>
+              <div className="md:flex flex justify-between gap-6">
+                <Button
+                  variant="secondary"
+                  className="w-1/2 rounded-md"
+                  onClick={() => setOpenRemoveDialog(false)}
+                >
+                  No
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="w-1/2 rounded-md"
+                  onClick={confirmRemoveDoctor}
+                >
+                  Yes
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           {/* <FooterSection /> */}
         </>
       )}

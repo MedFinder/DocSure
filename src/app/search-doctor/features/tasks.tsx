@@ -81,6 +81,7 @@ interface TaskProps {
   onDelete: (id: string) => void; // Function to delete item
   description?: string; // Optional description/summary field
   onSkip?: () => void; // Function to skip the item
+  handleRemoveDoctor?: (index: string) => void; // Added for "Remove" functionality
   onCallNext?: (index: number) => void; // Function to move doctor to next in queue
 }
 
@@ -145,6 +146,7 @@ export const Task: React.FC<TaskProps> = ({
   description = "",
   onSkip,
   onCallNext,
+  handleRemoveDoctor,
   //description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -461,6 +463,7 @@ export const Task: React.FC<TaskProps> = ({
                           index={index}
                           onSkip={onSkip}
                           onCallNext={onCallNext}
+                          onRemove={() => handleRemoveDoctor && handleRemoveDoctor(index)}
                           activeCallIndex={activeCallIndex}
                           callStatus={callStatus}
                           isAppointmentBooked={isAppointmentBooked}
@@ -568,6 +571,7 @@ export const Task: React.FC<TaskProps> = ({
                           index={index}
                           onSkip={onSkip}
                           onCallNext={onCallNext}
+                          onRemove={() => handleRemoveDoctor && handleRemoveDoctor(index)}
                           activeCallIndex={activeCallIndex}
                           callStatus={callStatus}
                           isAppointmentBooked={isAppointmentBooked}

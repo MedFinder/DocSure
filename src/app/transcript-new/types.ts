@@ -27,7 +27,8 @@ export interface LocationInfoProps {
 export interface StatusBadgeProps {
   status: Doctor["status"];
   onSkip?: () => void;
-  onCallNext?: (index: number) => void; // Added callback for "Call next" functionality
+  onRemove?: () => void;
+  onCallNext?: (index: number) => void;
   index: number;
   activeCallIndex: number;
   isAppointmentBooked: boolean;

@@ -32,6 +32,7 @@ interface ColumnProps {
   callStatus: CallStatusType;
   onDelete: (id: string) => void;
   onSkip?: () => void;
+  handleRemoveDoctor?: (index: string) => void; // Added for "Remove" functionality
   onCallNext?: (index: number) => void; // Added for "Call next" functionality
 }
 const Column: React.FC<ColumnProps> = ({
@@ -49,6 +50,7 @@ const Column: React.FC<ColumnProps> = ({
   fromTranscript,
   onSkip,
   onCallNext,
+  handleRemoveDoctor,
 }) => {
   // Function to delete a task by ID
 
@@ -135,6 +137,7 @@ const Column: React.FC<ColumnProps> = ({
                     fromTranscript={fromTranscript}
                     onSkip={onSkip}
                     onCallNext={onCallNext}
+                    handleRemoveDoctor={handleRemoveDoctor}
                   />
                 );
               })}

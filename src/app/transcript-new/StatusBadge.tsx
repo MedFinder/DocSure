@@ -9,7 +9,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   isAppointmentBooked,
   callStatus,
   onSkip,
-  onCallNext
+  onCallNext,
+  onRemove
 }) => {
   // Determine the actual status to display based on conditions
   const status = (() => {
@@ -25,11 +26,19 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     else if (activeCallIndex > index && !isAppointmentBooked) {
       return "unavailable";
     }
+    // If this doctor is next in the queue
+    else if (index === activeCallIndex + 1) {
+      return "up-next";
+    }
     // Otherwise use the provided status or default to "queue"
     else {
       return initialStatus || "queue";
     }
   })();
+
+  // Check if the Remove button should be shown
+  // Show only if: it's the current doctor being called OR it's a doctor that comes after in the queue
+  const showRemoveButton = onRemove && (index >= activeCallIndex);
 
   const getStatusContent = () => {
     switch (status) {
@@ -50,6 +59,30 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
             >
               Skip
             </button>
+            {showRemoveButton && (
+              <button
+                onClick={onRemove}
+                className="my-auto underline text-red-600"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        );
+      case "up-next":
+        return (
+          <div className="flex gap-6 justify-end items-center text-xs tracking-tight text-center">
+            <span className="gap-1 px-3.5 py-2 text-orange-500 bg-orange-50 rounded">
+              Up Next
+            </span>
+            {showRemoveButton && (
+              <button
+                onClick={onRemove}
+                className="my-auto underline text-red-600"
+              >
+                Remove
+              </button>
+            )}
           </div>
         );
       case "queue":
@@ -65,6 +98,14 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
                 className="my-auto underline text-zinc-800"
               >
                 Call next
+              </button>
+            )}
+            {showRemoveButton && (
+              <button
+                onClick={onRemove}
+                className="my-auto underline text-red-600"
+              >
+                Remove
               </button>
             )}
           </div>
@@ -96,6 +137,14 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
                 className="my-auto underline text-zinc-800"
               >
                 Call next
+              </button>
+            )}
+            {showRemoveButton && (
+              <button
+                onClick={onRemove}
+                className="my-auto underline text-red-600"
+              >
+                Remove
               </button>
             )}
           </div>
