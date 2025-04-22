@@ -202,6 +202,20 @@ const _doctors: Doctor[] = [
     waitTime: "Excellent wait time",
     appointments: "New patient appointments",
   },
+  {
+    name: "Dr. Igor Kletsman, MD",
+    title: "Primary Care Doctor",
+    image:
+      "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+    isSponsored: true,
+    rating: 4.52,
+    reviews: 86,
+    distance: "2.7 mi",
+    address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    status: "available",
+    waitTime: "Excellent wait time",
+    appointments: "New patient appointments",
+  },
   // Add other doctors here...
 ];
 
@@ -1309,6 +1323,28 @@ export default function Transcript() {
       return "50+";
     }
   }, [doctors.length, totalDoctorsCount, nextPageToken]);
+
+  // Add cleanup effect to terminate request on component unmount
+  useEffect(() => {
+    // Return cleanup function that will run when component unmounts
+    return () => {
+      console.log("Component unmounting - terminating any active request");
+      if (callStatus.isInitiated) {
+        terminateRequest();
+      }
+      
+      // Close WebSocket connections
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+      
+      if (wsSummaryRef.current) {
+        wsSummaryRef.current.close();
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [callStatus.isInitiated]); // Re-create cleanup if call status changes
+
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <NavbarSection
