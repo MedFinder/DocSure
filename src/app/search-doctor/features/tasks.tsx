@@ -575,6 +575,7 @@ export const Task: React.FC<TaskProps> = ({
                           onRemove={() => handleRemoveDoctor && handleRemoveDoctor(index)}
                           activeCallIndex={activeCallIndex}
                           callStatus={callStatus}
+                          openingStatus={openingStatus}
                           isAppointmentBooked={isAppointmentBooked}
                         />
                       </div>

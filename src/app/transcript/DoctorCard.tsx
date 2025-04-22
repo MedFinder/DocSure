@@ -48,6 +48,7 @@ interface DoctorCardProps {
   setTranscriptSummary: ({ place_id: string, summary: string }) => void;
   setTranscriptLoading: (loading: boolean) => void;
   reconnectWebSocket: Promise<void>;
+  openingStatus?: string;
   wsRef: React.RefObject<WebSocket | null>;
   description?: string;
 }
@@ -92,6 +93,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
   setTranscriptLoading,
   transcriptSummary,
   transcriptLoading,
+  openingStatus,
   reconnectWebSocket,
   wsRef,
   description = "",
@@ -211,6 +213,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                     onCallNext={onCallNext}
                     activeCallIndex={activeCallIndex}
                     callStatus={callStatus}
+                    openingStatus={openingStatus}
                     isAppointmentBooked={isAppointmentBooked}
                   />
                 </div>
@@ -399,6 +402,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                 onCallNext={onCallNext}
                 activeCallIndex={activeCallIndex}
                 callStatus={callStatus}
+                openingStatus={openingStatus}
                 isAppointmentBooked={isAppointmentBooked}
               />
             </div>

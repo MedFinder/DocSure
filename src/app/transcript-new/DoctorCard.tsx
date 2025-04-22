@@ -11,6 +11,7 @@ interface DoctorCardProps {
   activeCallIndex: number;
   isAppointmentBooked: boolean;
   callStatus: CallStatusType;
+  openingStatus: string
 }
 
 export const DoctorCard: React.FC<DoctorCardProps> = ({
@@ -20,6 +21,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
   activeCallIndex,
   isAppointmentBooked,
   callStatus,
+  openingStatus
 }) => {
   const getAlternateColor = (index: number) => {
     const colors = ["#F7D07D", "#A0F1C2"]; // Gold & Light Green
@@ -78,6 +80,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
                 onSkip={onSkip}
                 activeCallIndex={activeCallIndex}
                 callStatus={callStatus}
+                openingStatus={openingStatus}
                 isAppointmentBooked={isAppointmentBooked}
               />
             </div>
@@ -141,6 +144,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
             onSkip={onSkip}
             activeCallIndex={activeCallIndex}
             callStatus={callStatus}
+            openingStatus={openingStatus}
             isAppointmentBooked={isAppointmentBooked}
           />
         </div>

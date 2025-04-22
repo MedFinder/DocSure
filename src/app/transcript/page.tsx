@@ -252,6 +252,8 @@ export default function Transcript() {
   const [openTerminateAndCallDialog, setOpenTerminateAndCallDialog] =
     useState(false); // Dialog for Terminate and Call Myself
   const [isTerminated, setIsTerminated] = useState(false);
+  const [isPaused, setIsPaused] = useState(false); // Track whether calls are paused
+  const [openResumeDialog, setOpenResumeDialog] = useState(false); // Dialog for Resume Calling
   const [openPhoneNumberDialog, setOpenPhoneNumberDialog] = useState(false);
   const [openQuickDetailsModal, setOpenQuickDetailsModal] = useState(false);
   const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
@@ -568,9 +570,57 @@ export default function Transcript() {
         email: "",
       });
     }, 500);
+    setIsPaused(true); // Set paused state to true when terminating
   };
   const handleTerminateRequest = () => {
-    setOpenDialog(true);
+    if (isPaused) {
+      // If already paused, show resume dialog
+      setOpenResumeDialog(true);
+    } else {
+      // If active, show pause dialog
+      setOpenDialog(true);
+    }
+  };
+
+  const handleResumeRequest = () => {
+    setOpenResumeDialog(true);
+  };
+
+  const confirmResumeCall = () => {
+    track("Resume_Call_Btn_Clicked");
+    setOpenResumeDialog(false);
+    setIsPaused(false);
+    
+    // Get the current form data
+    const currentStoredFormData = JSON.parse(localStorage.getItem("formData") || "{}");
+    
+    // Find the next available doctor with open office hours
+    const openDoctorIndex = findNextOpenDoctor(activeCallIndex);
+    
+    if (openDoctorIndex === -1) {
+      toast.info("No doctors with open offices available. Cannot resume calls.");
+      return;
+    }
+    
+    // Set the active call index to the next open doctor
+    setActiveCallIndex(openDoctorIndex);
+    
+    // Re-initiate the call
+    setTimeout(() => {
+      const doctorPhoneNumber = phoneNumbers[openDoctorIndex] || doctors[openDoctorIndex]?.phone_number;
+      if (doctorPhoneNumber) {
+        initiateCall(
+          doctorPhoneNumber,
+          doctors[openDoctorIndex]?.name,
+          requestIdRef.current,
+          currentStoredFormData
+        );
+        setIsConfirmed(true);
+        toast.success("Calls resumed successfully.");
+      } else {
+        toast.error("Could not get doctor's phone number. Please try again.");
+      }
+    }, 500);
   };
   const confirmTermination = () => {
     track("Terminate_Request_Btn_Clicked");
@@ -1395,14 +1445,14 @@ export default function Transcript() {
                     <div className="flex flex-row gap-4 justify-start md:justify-center overflow-x-auto whitespace-nowrap">
                       <button
                         onClick={handleTerminateRequest}
-                        disabled={!callStatus?.isInitiated}
+                        // disabled={!callStatus?.isInitiated}
                         className={`min-w-[250px] font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
-                          callStatus?.isInitiated
-                            ? "bg-black hover:bg-black text-white"
-                            : "bg-black cursor-not-allowed text-white opacity-70"
+                          isPaused
+                            ?  "bg-black hover:bg-black text-white" //"bg-[#0074BA] hover:bg-blue-600 text-white"
+                            : "bg-black hover:bg-black text-white"
                         }`}
                       >
-                        Pause Calling
+                        {isPaused ? 'Resume Calling' : 'Pause Calling'}
                       </button>
                       <button
                         onClick={() => setOpenTerminateAndCallDialog(true)}
@@ -1596,6 +1646,31 @@ export default function Transcript() {
                   variant="destructive"
                   className="w-1/2 rounded-md"
                   onClick={confirmRemoveDoctor}
+                >
+                  Yes
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={openResumeDialog} onOpenChange={setOpenResumeDialog}>
+            <DialogContent className="sm:max-w-lg h-52">
+              <DialogHeader>
+                <DialogTitle>Resume Calling</DialogTitle>
+              </DialogHeader>
+              <p className="text-gray-600">
+                This will resume your appointment booking request and begin calling the next available doctor. Continue?
+              </p>
+              <div className="md:flex flex justify-between gap-6">
+                <Button
+                  variant="secondary"
+                  className="w-1/2 rounded-md"
+                  onClick={() => setOpenResumeDialog(false)}
+                >
+                  No
+                </Button>
+                <Button
+                  className="w-1/2 rounded-md bg-[#0074BA] hover:bg-blue-600"
+                  onClick={confirmResumeCall}
                 >
                   Yes
                 </Button>
