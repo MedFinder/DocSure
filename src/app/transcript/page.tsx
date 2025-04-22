@@ -174,6 +174,20 @@ const _doctors: Doctor[] = [
     waitTime: "Excellent wait time",
     appointments: "New patient appointments",
   },
+  {
+    name: "Dr. Igor Kletsman, MD",
+    title: "Primary Care Doctor",
+    image:
+      "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+    isSponsored: true,
+    rating: 4.52,
+    reviews: 86,
+    distance: "2.7 mi",
+    address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    status: "available",
+    waitTime: "Excellent wait time",
+    appointments: "New patient appointments",
+  },
   // Add other doctors here...
 ];
 
@@ -191,7 +205,6 @@ export default function Transcript() {
   const [transcriptArray, setTranscriptArray] = useState([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [isCountLoading, setIsCountLoading] = useState(false);
   const loadMoreRef = useRef(null);
 
@@ -212,6 +225,7 @@ export default function Transcript() {
   const activeCallIndexRef = useRef(activeCallIndex);
   const requestIdRef = useRef(formData?.request_id);
   const callStatusRef = useRef(callStatus);
+  const isPreferencesReinitializedRef = useRef(isPreferencesReinitialized)
   const [context, setcontext] = useState("");
   const [transcriptSummary, setTranscriptSummary] = useState({
     place_id: "",
@@ -227,6 +241,16 @@ export default function Transcript() {
   const [openPhoneNumberDialog, setOpenPhoneNumberDialog] = useState(false);
   const [openQuickDetailsModal, setOpenQuickDetailsModal] = useState(false);
   const isInitialMount = useRef(true);
+
+  // Function to find the next available doctor with "Open" status
+  const findNextOpenDoctor = (startIndex: number): number => {
+    for (let i = startIndex; i < doctors.length; i++) {
+      if (doctors[i]?.opening_hours?.status === "Open") {
+        return i;
+      }
+    }
+    return -1; // No open doctors found
+  };
 
   useEffect(() => {
     const storedFormData = localStorage.getItem("formData");
@@ -245,6 +269,9 @@ export default function Transcript() {
   useEffect(() => {
     callStatusRef.current = callStatus;
   }, [callStatus]);
+  useEffect(() => {
+    isPreferencesReinitializedRef.current = isPreferencesReinitialized;
+  }, [isPreferencesReinitialized]);
 
   const getPhoneNumbers = () => {
     const numbers = doctors.map((doctor) => doctor.phone_number || null);
@@ -426,8 +453,8 @@ export default function Transcript() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doctors]);
   useEffect(() => {
-    if (phoneNumbers.length > 0 && !callStatus.isInitiated && !isError) {
-      if (isInitialMount.current) {
+    if (phoneNumbers.length > 0 && !callStatus.isInitiated) {
+      if (isInitialMount.current || isPreferencesReinitializedRef.current) {
         console.log("✅ Phone numbers available, initiating call...");
         handleConfirmSequence();
         isInitialMount.current = false;
@@ -437,6 +464,7 @@ export default function Transcript() {
   }, [phoneNumbers]); // Still depends on phoneNumbers but only runs on initial mount
 
   const handleConfirmSequence = useCallback(async (formdata) => {
+    console.log('handleConfirmSequence called');
     // initiate call
     try {
       // Check if patient_number exists
@@ -454,7 +482,7 @@ export default function Transcript() {
       // Check if the first doctor's office is open
       if (doctors[activeCallIndex]?.opening_hours?.status !== "Open") {
         console.log("First doctor's office is closed. Finding next open doctor...");
-        toast.info("First doctor's office is closed. Finding next open doctor...");
+        // toast.info("First doctor's office is closed. Finding next open doctor...");
         // Call moveToNextDoctor to find an open doctor
         moveToNextDoctor(
           null, 
@@ -508,7 +536,7 @@ export default function Transcript() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [callStatus, doctors, wsRef]);
+  }, [callStatus, wsRef]);
   const terminateRequest = () => {
     // sent ws event to cancel call
     // wsRef?.current?.close();
@@ -641,7 +669,6 @@ export default function Transcript() {
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
           data
         );
-        setIsError(false);
         track("Initiated_new_call_successfully");
         connectWebSocket(callResponse.data.call_id);
         setCallStatus({
@@ -663,7 +690,6 @@ export default function Transcript() {
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
-        setIsError(true);
         toast.error('We’re experiencing high traffic. Please try again shortly.', {
           duration: 20000,
         });
@@ -685,16 +711,6 @@ export default function Transcript() {
       // wsRef?.current?.close(); // temp solution; disconnect websocket and connect to a new one
       terminateCurrentCall(id);
     }
-    
-    // Function to find the next available doctor with "Open" status
-    const findNextOpenDoctor = (startIndex: number): number => {
-      for (let i = startIndex; i < doctors.length; i++) {
-        if (doctors[i]?.opening_hours?.status === "Open") {
-          return i;
-        }
-      }
-      return -1; // No open doctors found
-    };
     
     // Find next open doctor
     const nextOpenIndex = findNextOpenDoctor(newIndex);
@@ -967,7 +983,7 @@ export default function Transcript() {
     }
   };
   const confirmUpdatePreferences = async () => {
-    if (callStatus?.isInitiated) {
+    console.log('confirming updated preferences........xxxx')
       try {
         await terminateRequest();
         console.log("Current Call has been terminated successfully.");
@@ -975,7 +991,8 @@ export default function Transcript() {
           const currentStoredFormData = JSON.parse(localStorage.getItem("formData") || "{}");
           requestIdRef.current = currentStoredFormData?.request_id;
           setFormData(currentStoredFormData);
-          if(!isPreferencesReinitialized){
+          if(!isPreferencesReinitializedRef.current){
+            console.log('fired from preferences reinitialization')
             handleConfirmSequence(currentStoredFormData);
           }
       } catch (error) {
@@ -983,7 +1000,6 @@ export default function Transcript() {
         toast.error("Failed to terminate the call. Please try again.");
         return;
       }
-    }
   };
 
   const confirmTerminateAndCallMyself = async () => {
@@ -1041,7 +1057,11 @@ export default function Transcript() {
           },
         }));
 
-        setDoctors((prevDoctors) => [...prevDoctors, ...newDoctors]);
+        // Create a combined array with existing and new doctors
+        const updatedDoctors = [...doctors, ...newDoctors];
+        
+        // Update state
+        setDoctors(updatedDoctors);
         setNextPageToken(response.data.next_page_token || null);
 
         const lastSearchSource = localStorage.getItem("lastSearchSource");
@@ -1059,6 +1079,42 @@ export default function Transcript() {
         };
 
         localStorage.setItem(storageKey, JSON.stringify(updatedData));
+        
+        // If there are no open doctors currently and we're not in an active call,
+        // check if any of the newly loaded doctors have open offices
+        if (!callStatus.isInitiated) {
+          // Check if there are any open doctors in the original list
+          const hasOpenDoctors = doctors.some(doctor => doctor.opening_hours?.status === "Open");
+          
+          if (!hasOpenDoctors) {
+            // Use the updatedDoctors array to search for open doctors
+            const findNextOpenDoctorInList = (startIndex: number, doctorsList: any[]): number => {
+              for (let i = startIndex; i < doctorsList.length; i++) {
+                if (doctorsList[i]?.opening_hours?.status === "Open") {
+                  return i;
+                }
+              }
+              return -1; // No open doctors found
+            };
+            
+            // Check if any doctor in the updated list has an open office
+            const openDoctorIndex = findNextOpenDoctorInList(0, updatedDoctors);
+            if (openDoctorIndex !== -1) {
+              toast.info("Found available doctors with open offices! Starting calls...");
+              const foundInfo = updatedDoctors[openDoctorIndex];
+              // console.log(foundInfo)
+              setActiveCallIndex(openDoctorIndex);
+              setTimeout(() => {
+                const firstDoctorPhoneNumber = foundInfo.phone_number; // '+2348168968260'
+                initiateCall(
+                  firstDoctorPhoneNumber,
+                  foundInfo?.name,
+                  requestIdRef?.current,
+                );
+              }, 500); // Small delay to ensure state updates have propagated
+            }
+          }
+        }
       }
     } catch (error) {
       console.error("Error loading more doctors:", error);

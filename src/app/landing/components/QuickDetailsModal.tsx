@@ -215,6 +215,7 @@ export default function QuickDetailsModal({
     },
     validationSchema,
     onSubmit: async (values) => {
+      setIsPreferencesReinitialized(false)
       const speciality_value =
       formik.values.specialty === "Prescription / Refill"
         ? "Primary Care Physician"
