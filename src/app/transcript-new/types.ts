@@ -32,5 +32,6 @@ export interface StatusBadgeProps {
   index: number;
   activeCallIndex: number;
   isAppointmentBooked: boolean;
+  openingStatus: string;
   callStatus: CallStatusType;
 }

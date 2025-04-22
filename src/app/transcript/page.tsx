@@ -971,6 +971,68 @@ export default function Transcript() {
       router.push("/appointment");
     }
   };
+  const handleEndCall = useCallback(
+    async (id: string, retries = 2): Promise<any> => {
+      const index = activeCallIndexRef.current;
+      // console.log('cuurentIndex',index)
+      // const formData = JSON.parse(localStorage.getItem("formData"));
+      const context = localStorage.getItem("context");
+      const {
+        email,
+        phoneNumber,
+        patientName,
+        request_id,
+        prompt,
+        voice_used,
+        interruption_threshold,
+        temperature,
+        model,
+      } = formData;
+      const data = {
+        call_id: id,
+        request_id: request_id ?? requestIdRef?.current,
+        doctor_number: doctors[index]?.phone_number, // phoneNumbers[index]
+        hospital_name: doctors[index]?.name,
+        doctor_address: doctors[index]?.formatted_address,
+        hospital_address: doctors[index]?.formatted_address,
+        distance: doctors[index]?.distance,
+        rating: doctors[index]?.rating?.toString(),
+        hospital_rating: doctors[index]?.rating?.toString(),
+        website: doctors[index]?.website,
+        context,
+        patient_name: patientName,
+        patient_email: email || "care@meomind.com",
+        patient_number: phoneNumber || "510-902-8776",
+        prompt: prompt ?? "Has the appointment been booked?",
+        voice_used: voice_used ?? "Alex",
+        interruption_threshold: interruption_threshold ?? 70,
+        temperature: temperature ?? 0.7,
+        model: model ?? "gpt-4-turbo",
+      };
+      // console.log(data, 'end call data');
+
+      try {
+        const resp = await axios.post(
+          `https://callai-backend-243277014955.us-central1.run.app/api/appointment-booked-status`,
+          data
+        );
+        return resp.data;
+      } catch (error) {
+        if (error.response && error.response.status === 500 && retries > 0) {
+          console.log(
+            `Retrying to end call in 5 seconds... (${retries} retries left)`
+          );
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          return handleEndCall(id, retries - 1);
+        }
+        console.log(
+          "Failed to end call after multiple attempts. Returning true."
+        );
+        return true;
+      }
+    },
+    [doctors, formData]
+  );
   const terminateCurrentCall = async (id: string): Promise<any> => {
     // console.log(id,'xxx')
     try {

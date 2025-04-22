@@ -10,6 +10,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   callStatus,
   onSkip,
   onCallNext,
+  openingStatus,
   onRemove
 }) => {
   // Determine the actual status to display based on conditions
@@ -39,6 +40,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   // Check if the Remove button should be shown
   // Show only if: it's the current doctor being called OR it's a doctor that comes after in the queue
   const showRemoveButton = onRemove && (index >= activeCallIndex);
+  
+  // Hide "In Queue" status and "Call Next" button for doctors with index < 10
+  const hideQueueElements = openingStatus !== 'Open' ||   index > 10;
 
   const getStatusContent = () => {
     switch (status) {
@@ -88,11 +92,13 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       case "queue":
         return (
           <div className="flex gap-6 justify-end items-center text-xs tracking-tight text-center">
-            <span className="gap-1 px-3.5 py-2 text-orange-500 bg-orange-50 rounded">
-              In Queue
-            </span>
+            {!hideQueueElements &&
+                <span className="gap-1 px-3.5 py-2 text-orange-500 bg-orange-50 rounded">
+                In Queue
+              </span> }
+        
             {/* Only show "Call next" button if we're not the active call and onCallNext is provided */}
-            {index !== activeCallIndex && onCallNext && (
+            {!hideQueueElements && index !== activeCallIndex && onCallNext && (
               <button
                 onClick={() => onCallNext(index)}
                 className="my-auto underline text-zinc-800"

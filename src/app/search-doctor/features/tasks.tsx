@@ -467,6 +467,7 @@ export const Task: React.FC<TaskProps> = ({
                           activeCallIndex={activeCallIndex}
                           callStatus={callStatus}
                           isAppointmentBooked={isAppointmentBooked}
+                          openingStatus={openingStatus}
                         />
                       </div>
                     )}
