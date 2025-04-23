@@ -790,7 +790,6 @@ export default function Transcript() {
         });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [formData]
   );
   const moveToNextDoctor = async (
