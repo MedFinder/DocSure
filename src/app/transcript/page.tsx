@@ -783,21 +783,11 @@ export default function Transcript() {
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
-<<<<<<< HEAD
-        setisError(true);
-        toast.error(
-          "We’re experiencing high traffic. Please try again shortly.",
-          {
-            duration: 20000,
-          }
-        );
-=======
         setisError(true)
         terminateRequest()
         toast.error('We’re experiencing high traffic. Please try again shortly.', {
           duration: 20000,
         });
->>>>>>> d87dac2027187677bcfb31234b3ab935f82b9783
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
