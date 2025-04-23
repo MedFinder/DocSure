@@ -39,7 +39,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   // Check if the Remove button should be shown
   // Show only if: it's the current doctor being called OR it's a doctor that comes after in the queue
-  const showRemoveButton = onRemove && (index >= activeCallIndex);
+  const showRemoveButton = onRemove && (index > activeCallIndex);
   
   // Hide "In Queue" status and "Call Next" button for doctors with index < 10
   const hideQueueElements = openingStatus !== 'Open' ||   index > 10;
@@ -76,7 +76,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       case "up-next":
         return (
           <div className="flex gap-6 justify-end items-center text-xs tracking-tight text-center">
-            <span className="gap-1 px-3.5 py-2 text-orange-500 bg-orange-50 rounded">
+            <span className="gap-1 px-3.5 py-2 text-green-600 bg-green-50 rounded">
               Up Next
             </span>
             {showRemoveButton && (
@@ -92,11 +92,6 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       case "queue":
         return (
           <div className="flex gap-6 justify-end items-center text-xs tracking-tight text-center">
-            {!hideQueueElements &&
-                <span className="gap-1 px-3.5 py-2 text-orange-500 bg-orange-50 rounded">
-                In Queue
-              </span> }
-        
             {/* Only show "Call next" button if we're not the active call and onCallNext is provided */}
             {!hideQueueElements && index !== activeCallIndex && onCallNext && (
               <button
@@ -114,6 +109,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
                 Remove
               </button>
             )}
+            {!hideQueueElements &&
+                <span className="gap-1 px-3.5 py-2 text-orange-500 bg-orange-50 rounded">
+                In Queue
+              </span> 
+            }
           </div>
         );
       case "available":
@@ -133,11 +133,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       default:
         return (
           <div className="flex gap-6 justify-end items-center text-xs tracking-tight text-center">
-            <span className="gap-1 px-3.5 py-2 text-orange-500 bg-orange-50 rounded">
-              In Queue
-            </span>
             {/* Only show "Call next" button if we're not the active call and onCallNext is provided */}
-            {index !== activeCallIndex && onCallNext && (
+              {index !== activeCallIndex && onCallNext && (
               <button
                 onClick={() => onCallNext(index)}
                 className="my-auto underline text-zinc-800"
@@ -153,6 +150,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
                 Remove
               </button>
             )}
+            <span className="gap-1 px-3.5 py-2 text-orange-500 bg-orange-50 rounded">
+              In Queue
+            </span>
           </div>
         );
     }

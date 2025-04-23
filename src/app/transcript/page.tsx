@@ -202,6 +202,20 @@ const _doctors: Doctor[] = [
     waitTime: "Excellent wait time",
     appointments: "New patient appointments",
   },
+  {
+    name: "Dr. Igor Kletsman, MD",
+    title: "Primary Care Doctor",
+    image:
+      "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+    isSponsored: true,
+    rating: 4.52,
+    reviews: 86,
+    distance: "2.7 mi",
+    address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    status: "available",
+    waitTime: "Excellent wait time",
+    appointments: "New patient appointments",
+  },
   // Add other doctors here...
 ];
 
@@ -715,7 +729,7 @@ export default function Transcript() {
         (objective ? objective : `${savedSpecialty} consultation`) +
         "; " +
         "Patient has insurance:" +
-        selectedOption;
+        (!insurer ? "no" : selectedOption);
 
       if (insurer) context += `; Insurance Provider:${insurer}`;
       if (subscriberId) context += `; Member Id:"${subscriberId}"`;
@@ -738,7 +752,7 @@ export default function Transcript() {
         patient_number: phoneNumber || "510-902-8776",
         patient_name: patientName,
         hospital_name: nameOfOrg,
-        patient_email: email || "care@meomind.com",
+        patient_email: email || "Not Available",
         doctor_number: doctorPhoneNumber,
       };
       localStorage.setItem("context", context);
@@ -769,6 +783,7 @@ export default function Transcript() {
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
+<<<<<<< HEAD
         setisError(true);
         toast.error(
           "We’re experiencing high traffic. Please try again shortly.",
@@ -776,6 +791,13 @@ export default function Transcript() {
             duration: 20000,
           }
         );
+=======
+        setisError(true)
+        terminateRequest()
+        toast.error('We’re experiencing high traffic. Please try again shortly.', {
+          duration: 20000,
+        });
+>>>>>>> d87dac2027187677bcfb31234b3ab935f82b9783
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1075,7 +1097,7 @@ export default function Transcript() {
         website: doctors[index]?.website,
         context,
         patient_name: patientName,
-        patient_email: email || "care@meomind.com",
+        patient_email: email || "Not Available",
         patient_number: phoneNumber || "510-902-8776",
         prompt: prompt ?? "Has the appointment been booked?",
         voice_used: voice_used ?? "Alex",
@@ -1342,6 +1364,28 @@ export default function Transcript() {
       return "50+";
     }
   }, [doctors.length, totalDoctorsCount, nextPageToken]);
+
+  // Add cleanup effect to terminate request on component unmount
+  useEffect(() => {
+    // Return cleanup function that will run when component unmounts
+    return () => {
+      console.log("Component unmounting - terminating any active request");
+      if (callStatus.isInitiated) {
+        terminateRequest();
+      }
+      
+      // Close WebSocket connections
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+      
+      if (wsSummaryRef.current) {
+        wsSummaryRef.current.close();
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [callStatus.isInitiated]); // Re-create cleanup if call status changes
+
   return (
     <main className="flex flex-col bg-white h-screen overflow-hidden">
       <NavbarSection
@@ -1516,7 +1560,7 @@ export default function Transcript() {
                   />
                 </ScrollArea> */}
                   <h2 className="hidden md:block">Live AI Call Transcript</h2>
-                  <div className="h-[900px] overflow-y-auto pt-1 ">
+                  <div className="h-[900px] overflow-y-auto pt-2 ">
                     <ChatSection
                       doctorName={doctors[activeCallIndex]?.name}
                       transcripts={getDisplayTranscript()}
