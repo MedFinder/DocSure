@@ -1396,34 +1396,24 @@ export default function Transcript() {
 
           <section className="flex flex-col items-start px-7 w-full h-[95%] max-md:px-5 max-md:max-w-full ">
             {/* Info section with border bottom */}
-
-            <div className="self-stretch md:mt-2 mt-2 flex-1 overflow-hidden max-md:max-w-full">
-              <div className="flex gap-5 h-full max-md:flex-col">
+            <div className="flex self-end justify-end pr-4 mb-2">
+              <button
+                onClick={toggleTranscript}
+                className="text-sm text-[#E5573F] underline md:hidden self-end pt-4"
+              >
+                {showTranscript ? "Back to List" : "View Transcript"}
+              </button>
+            </div>
+            <div className="self-stretch md:mt-2  flex-1 overflow-hidden max-md:max-w-full ">
+              <div className="flex gap-5 h-full max-md:flex-col ">
                 <div
-                  className={`w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full ${
+                  className={`w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full  ${
                     showTranscript ? "hidden md:block" : "block"
                   }`}
                 >
-                  {/* Scrollable doctor cards container */}
-                  <div className="w-full ">
-                    <div className="flex self-end justify-end pr-4 mb-2">
-                      <button
-                        onClick={toggleTranscript}
-                        className="text-sm text-[#E5573F] underline md:hidden self-end"
-                      >
-                        {showTranscript ? "Back to List" : "View Transcript"}
-                      </button>
-                    </div>
-
-                    {/* <p className="text-sm md:text-sm text-gray-700">
-                      Docsure AI is calling doctors in your area that accept your insurance, sorted by
-                      patient ratings. We'll notify you once your appointment is
-                      confirmed.
-                    </p> */}
-                  </div>
-                  <div className="pr-2 h-[calc(100%-60px)] pt-3 relative">
+                  <div className="pr-2 h-[calc(100%-60px)] pt-3 relative ">
                     <ExpandProvider>
-                      <ScrollArea className="h-full w-full md:w-auto">
+                      <ScrollArea className="h-full w-full md:w-auto ">
                         <Column
                           activeCallIndex={activeCallIndex}
                           tasks={doctors}
@@ -1508,7 +1498,7 @@ export default function Transcript() {
 
                 {/* Always show in desktop, conditionally in mobile */}
                 <div
-                  className={`w-[32%] flex flex-col max-md:ml-0 max-md:w-full ${
+                  className={`w-[32%] flex flex-col max-md:ml-0 max-md:w-full  ${
                     showTranscript ? "block" : "hidden md:block"
                   }`}
                 >

@@ -220,14 +220,14 @@ export const Task: React.FC<TaskProps> = ({
         style={style}
         {...attributes}
         {...listeners}
-        className="transition-all duration-300 w-full py-4 "
+        className="transition-all duration-300 w-full py-4  "
         // type="button"
         // onClick={handleExpand}
         // onPointerDown={(e) => e.stopPropagation()}
       >
         <td className={`flex md:table-cell ${fromTranscript ? "!px-0" : ""}`}>
           <TooltipProvider>
-            <div className="flex  md:gap-2 gap-2  ">
+            <div className="flex  md:gap-2 gap-2   ">
               <div className="flex md:gap-2 gap-0 ">
                 <div className="flex  md:gap-2 gap-0 items-center ">
                   {index < 10 ? (
@@ -238,27 +238,37 @@ export const Task: React.FC<TaskProps> = ({
                     <span className="md:w-6 md:h-6 md:my-4 " /> // Empty space with same dimensions
                   )}
                 </div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <img
-                      src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
-                      alt="Input design element"
-                      className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3 md:hidden block"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
-                  >
-                    {/* <span className="font-semibold">Tooltip example:</span> */}
-                    <span>Select doctors to call for an appointment.</span>
-                  </TooltipContent>
-                </Tooltip>
+
+                {fromTranscript ? (
+                  <div className="md:hidden flex justify-center items-center">
+                    {index < 10 ? (
+                      <span className="bg-[#0074BA] rounded-full w-5 h-5 text-white flex items-center justify-center text-xs font-medium mt-[2px] shrink-0">
+                        {index + 1}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <img
+                        src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
+                        alt="Input design element"
+                        className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3 md:hidden block"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="right"
+                      className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
+                    >
+                      <span>Select doctors to call for an appointment.</span>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
 
               <div
-                className={`bg-[#F2F6F9] py-4 md:px-2 px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0 ${
-                  fromTranscript ? "md:px-6" : ""
+                className={`bg-[#F2F6F9]  py-4 md:px-2 px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0   ${
+                  fromTranscript ? "md:px-6 min-w-[85vw] " : ""
                 }`}
               >
                 {!fromTranscript && (
@@ -279,14 +289,17 @@ export const Task: React.FC<TaskProps> = ({
                     </TooltipContent>
                   </Tooltip>
                 )}
-                <div className="flex flex-col gap-2 font-normal w-full">
+                <div className="flex flex-col gap-2 font-normal w-full  pl-0">
                   <div className="flex justify-between ">
                     <div className="flex flex-grow items-start gap-2 md:hidden w-full  ">
-                      {index < 10 ? (
-                        <span className="bg-[#0074BA] rounded-full w-4 h-4 text-white flex items-center justify-center text-xs font-medium mt-[2px] shrink-0">
-                          {index + 1}
-                        </span>
-                      ) : null}
+                      {!fromTranscript &&
+                        (index < 10 ? (
+                          <span className="bg-[#0074BA] rounded-full w-4 h-4 text-white flex items-center justify-center text-xs font-medium mt-[2px] shrink-0">
+                            {index + 1}
+                          </span>
+                        ) : (
+                          <span className="md:w-6 md:h-6 md:my-4 " />
+                        ))}
 
                       <p
                         // href={website}
@@ -318,7 +331,7 @@ export const Task: React.FC<TaskProps> = ({
                       onClick={handleExpand}
                       onPointerDown={(e) => e.stopPropagation()}
                     >
-                      {title}hhh
+                      {title}
                     </p>
                     <div className="flex gap-16 pr-2">
                       <div className="md:flex  gap-1 font-normal text-[#333333] text-sm items-center hidden">
@@ -441,7 +454,7 @@ export const Task: React.FC<TaskProps> = ({
                       {openingStatus}
                     </span>
                     <span>•</span>
-                    <span>{openingTimeInfo}</span>
+                    <span className="">{openingTimeInfo}</span>
                   </div>
                   <div className="flex justify-between items-center w-full">
                     <button
@@ -457,13 +470,15 @@ export const Task: React.FC<TaskProps> = ({
                       )}
                     </button>
                     {!isExpanded && fromTranscript && (
-                      <div className="flex justify-end items-center">
+                      <div className="md:flex justify-end items-center hidden ">
                         <StatusBadge
                           status={"queue"}
                           index={index}
                           onSkip={onSkip}
                           onCallNext={onCallNext}
-                          onRemove={() => handleRemoveDoctor && handleRemoveDoctor(index)}
+                          onRemove={() =>
+                            handleRemoveDoctor && handleRemoveDoctor(index)
+                          }
                           activeCallIndex={activeCallIndex}
                           callStatus={callStatus}
                           isAppointmentBooked={isAppointmentBooked}
@@ -492,6 +507,25 @@ export const Task: React.FC<TaskProps> = ({
                       )}
                     </button> */}
                   </div>
+                  <div className="pr-6 md:hidden block ">
+                    {!isExpanded && fromTranscript && (
+                      <div className="flex justify-end items-center">
+                        <StatusBadge
+                          status={"queue"}
+                          index={index}
+                          onSkip={onSkip}
+                          onCallNext={onCallNext}
+                          onRemove={() =>
+                            handleRemoveDoctor && handleRemoveDoctor(index)
+                          }
+                          activeCallIndex={activeCallIndex}
+                          callStatus={callStatus}
+                          isAppointmentBooked={isAppointmentBooked}
+                          openingStatus={openingStatus}
+                        />
+                      </div>
+                    )}
+                  </div>
                   {isExpanded && (
                     <div className="md:!table-row w-full bg-[#F2F6F9]  ">
                       <div
@@ -508,14 +542,21 @@ export const Task: React.FC<TaskProps> = ({
                             <div className="text-xs tracking-tight leading-5 text-zinc-800 bg-[#F2F6F9]">
                               {(transcriptSummary?.summary ?? doctorSummary)
                                 // Split the content for processing
-                                .split(/(\*\*[^*]+\*\*|(?:^|\n)- \*\*[^*\n]*\*\*:|(?:^|\n)- (?:\*\*)?[^*\n]*(?:\*\*)?)/g)
+                                .split(
+                                  /(\*\*[^*]+\*\*|(?:^|\n)- \*\*[^*\n]*\*\*:|(?:^|\n)- (?:\*\*)?[^*\n]*(?:\*\*)?)/g
+                                )
                                 .map((part, index) => {
                                   // Handle special bullet points with bold text that end with colon (subheadings)
                                   if (part.match(/^(\n)?- \*\*.*\*\*:$/)) {
                                     // Extract text between the ** markers after the dash and before the colon
-                                    const headingText = part.replace(/^(\n)?- \*\*/, '').replace(/\*\*:$/, '');
+                                    const headingText = part
+                                      .replace(/^(\n)?- \*\*/, "")
+                                      .replace(/\*\*:$/, "");
                                     return (
-                                      <h2 key={index} className="font-bold text-sm mt-3 mb-1">
+                                      <h2
+                                        key={index}
+                                        className="font-bold text-sm mt-3 mb-1"
+                                      >
                                         {headingText}
                                       </h2>
                                     );
@@ -523,29 +564,49 @@ export const Task: React.FC<TaskProps> = ({
                                   // Handle bullet points with bold text (starting with "-**")
                                   else if (part.match(/^(\n)?- \*\*.*\*\*$/)) {
                                     // Extract text between the ** markers after the dash
-                                    const bulletText = part.replace(/^(\n)?- \*\*/, '').replace(/\*\*$/, '');
+                                    const bulletText = part
+                                      .replace(/^(\n)?- \*\*/, "")
+                                      .replace(/\*\*$/, "");
                                     return (
-                                      <div key={index} className="ml-2 mt-1 flex">
+                                      <div
+                                        key={index}
+                                        className="ml-2 mt-1 flex"
+                                      >
                                         <span className="mr-1">•</span>
-                                        <span className="font-bold">{bulletText}</span>
+                                        <span className="font-bold">
+                                          {bulletText}
+                                        </span>
                                       </div>
                                     );
                                   }
                                   // Handle regular bullet points (text starting with dash)
                                   else if (part.match(/^(\n)?- /)) {
-                                    const bulletText = part.replace(/^(\n)?- /, '');
+                                    const bulletText = part.replace(
+                                      /^(\n)?- /,
+                                      ""
+                                    );
                                     return (
-                                      <div key={index} className="ml-2 mt-1 flex">
+                                      <div
+                                        key={index}
+                                        className="ml-2 mt-1 flex"
+                                      >
                                         <span className="mr-1">•</span>
                                         <span>{bulletText}</span>
                                       </div>
                                     );
-                                  } 
+                                  }
                                   // Handle bold text - only apply bold styling, no line breaks
-                                  else if (part.startsWith('**') && part.endsWith('**')) {
+                                  else if (
+                                    part.startsWith("**") &&
+                                    part.endsWith("**")
+                                  ) {
                                     const boldText = part.slice(2, -2);
-                                    return <span key={index} className="font-bold">{boldText}</span>;
-                                  } 
+                                    return (
+                                      <span key={index} className="font-bold">
+                                        {boldText}
+                                      </span>
+                                    );
+                                  }
                                   // Regular text
                                   else {
                                     return <span key={index}>{part}</span>;
@@ -572,7 +633,9 @@ export const Task: React.FC<TaskProps> = ({
                           index={index}
                           onSkip={onSkip}
                           onCallNext={onCallNext}
-                          onRemove={() => handleRemoveDoctor && handleRemoveDoctor(index)}
+                          onRemove={() =>
+                            handleRemoveDoctor && handleRemoveDoctor(index)
+                          }
                           activeCallIndex={activeCallIndex}
                           callStatus={callStatus}
                           openingStatus={openingStatus}
