@@ -824,7 +824,7 @@ export default function LandingPage() {
                         autoComplete="off"
                         aria-autocomplete="none"
                         placeholderText="Date of birth"
-                        className="w-full border-none!important focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+                        className="md:w-full border-none!important focus:ring-0 focus:outline-none h-12 !pl-4  md:!pl-0 pr-2 shadow-none text-[15px]"
                         wrapperClassName="w-full"
                       />
                     </div>

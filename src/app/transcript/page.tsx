@@ -783,11 +783,14 @@ export default function Transcript() {
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
-        setisError(true)
-        terminateRequest()
-        toast.error('We’re experiencing high traffic. Please try again shortly.', {
-          duration: 20000,
-        });
+        setisError(true);
+        terminateRequest();
+        toast.error(
+          "We’re experiencing high traffic. Please try again shortly.",
+          {
+            duration: 20000,
+          }
+        );
       }
     },
     [formData]
@@ -1362,17 +1365,17 @@ export default function Transcript() {
       if (callStatus.isInitiated) {
         terminateRequest();
       }
-      
+
       // Close WebSocket connections
       if (wsRef.current) {
         wsRef.current.close();
       }
-      
+
       if (wsSummaryRef.current) {
         wsSummaryRef.current.close();
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callStatus.isInitiated]); // Re-create cleanup if call status changes
 
   return (

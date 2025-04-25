@@ -413,7 +413,9 @@ export const Task: React.FC<TaskProps> = ({
                       )}
                     </div>
                   </div>
-                  <span className=" text-sm text-[#636465]">{vicinity}</span>
+                  <span className=" text-sm text-[#636465]  pr-16 md:pr-0">
+                    {vicinity}
+                  </span>
                   <div className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words">
                     <img
                       src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
@@ -429,7 +431,7 @@ export const Task: React.FC<TaskProps> = ({
                     </span>
                     <span className="px-1">|</span>
 
-                    <div className="md:hidden gap-1 text-sm text-[#333333] flex  ">
+                    <div className="md:hidden gap-1 text-sm text-[#333333] flex items-center  ">
                       <span
                         className={
                           openingStatus === "Open"
@@ -507,9 +509,9 @@ export const Task: React.FC<TaskProps> = ({
                       )}
                     </button> */}
                   </div>
-                  <div className="pr-6 md:hidden block ">
+                  <div className="pr-6 md:hidden  flex justify-start">
                     {!isExpanded && fromTranscript && (
-                      <div className="flex justify-end items-center">
+                      <div className="flex justify-start items-center">
                         <StatusBadge
                           status={"queue"}
                           index={index}
@@ -527,7 +529,7 @@ export const Task: React.FC<TaskProps> = ({
                     )}
                   </div>
                   {isExpanded && (
-                    <div className="md:!table-row w-full bg-[#F2F6F9]  ">
+                    <div className="md:!table-row w-full bg-[#F2F6F9]  pr-16 md:pr-0 ">
                       <div
                         colSpan={5}
                         className=" p-4 transition-all bg-[#F2F6F9]"
@@ -632,7 +634,7 @@ export const Task: React.FC<TaskProps> = ({
                       >
                         view less
                       </button>
-                      <div className="flex justify-end items-center">
+                      <div className="md:flex hidden justify-end items-center">
                         <StatusBadge
                           status={"queue"}
                           index={index}
