@@ -36,7 +36,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   };
 
   return (
-    <aside className="flex flex-col px-7 py-9 w-full rounded bg-sky-600 bg-opacity-10 max-md:px-5 max-md:mt-6 max-md:max-w-full h-full overflow-hidden">
+    <aside className="flex flex-col px-7 py-4 w-full rounded bg-sky-600 bg-opacity-10 max-md:px-5 max-md:mt-6 max-md:max-w-full h-full overflow-hidden">
       <p className="self-start text-xs tracking-tight text-zinc-800 ">
         {/* Calling {doctorName || "Doctor"}… */}
       </p>

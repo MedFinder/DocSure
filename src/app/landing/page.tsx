@@ -119,7 +119,9 @@ const customDatePickerStyles = `
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"),
   userName: Yup.string().required("Your name is required"),
-  dob: Yup.date().required("Date of birth is required").max(new Date(), "Date of birth cannot be in the future"),
+  dob: Yup.date()
+    .required("Date of birth is required")
+    .max(new Date(), "Date of birth cannot be in the future"),
 });
 const scrollToSection = (id: string, offset: number) => {
   const element = document.getElementById(id);
@@ -265,14 +267,13 @@ export default function LandingPage() {
       if (parsedFormData.patientName) {
         formik.setFieldValue("userName", parsedFormData.patientName);
       }
-      if(parsedFormData.dob){
+      if (parsedFormData.dob) {
         formik.setFieldValue("dob", new Date(parsedFormData.dob));
       }
-
     }
-    if(storedSpeciality){
+    if (storedSpeciality) {
       setPrefilledSpecialty(storedSpeciality);
-      formik.setFieldValue("specialty", storedSpeciality);  
+      formik.setFieldValue("specialty", storedSpeciality);
     }
     if (storedLocation) {
       const { lat, lng } = JSON.parse(storedLocation);
@@ -307,7 +308,7 @@ export default function LandingPage() {
           );
 
           const address =
-            geocodeResponse.data.results[0]?.formatted_address || ""; 
+            geocodeResponse.data.results[0]?.formatted_address || "";
           setSelectedLocation({ lat, lng });
           setAddressLocation(address); // Set the fetched address
           localStorage.setItem("selectedAddress", address);
@@ -320,10 +321,7 @@ export default function LandingPage() {
           if (popularDoctors?.results?.length > 0) {
             const doctorlists = popularDoctors?.results?.slice(0, 20);
             setpopulardoctors(doctorlists);
-            localStorage.setItem(
-              "popularDoctors",
-              JSON.stringify(doctorlists)
-            );
+            localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
           }
         } catch (error) {
           console.error("Error fetching address or popular doctors:", error);
@@ -356,23 +354,27 @@ export default function LandingPage() {
 
   // Function to get location from IP address
   const getLocationFromIP = async () => {
-    console.log('fetching location from ip....')
+    console.log("fetching location from ip....");
     try {
       // Use IP-based geolocation as fallback
-      const ipGeolocationResponse = await axios.get('https://ipapi.co/json/');
-      if (ipGeolocationResponse.data && ipGeolocationResponse.data.latitude && ipGeolocationResponse.data.longitude) {
+      const ipGeolocationResponse = await axios.get("https://ipapi.co/json/");
+      if (
+        ipGeolocationResponse.data &&
+        ipGeolocationResponse.data.latitude &&
+        ipGeolocationResponse.data.longitude
+      ) {
         const lat = ipGeolocationResponse.data.latitude;
         const lng = ipGeolocationResponse.data.longitude;
         const city = ipGeolocationResponse.data.city;
         const region = ipGeolocationResponse.data.region;
         const country = ipGeolocationResponse.data.country_name;
         const formattedAddress = `${city}, ${region}, ${country}`;
-        
+
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress);
         localStorage.setItem("selectedAddress", formattedAddress);
         localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
-        
+
         const popularDoctors = await getPopularDrs(lat, lng);
         if (popularDoctors?.results?.length > 0) {
           const doctorlists = popularDoctors?.results?.slice(0, 20);
@@ -381,7 +383,9 @@ export default function LandingPage() {
         }
       } else {
         // IP geolocation failed, use default location
-        toast.error("Could not determine your location. Using default location.");
+        toast.error(
+          "Could not determine your location. Using default location."
+        );
         getDefaultLocation();
       }
     } catch (error) {
@@ -398,8 +402,11 @@ export default function LandingPage() {
     setSelectedLocation({ lat: defaultLat, lng: defaultLng });
     setAddressLocation("San Francisco, CA, USA");
     localStorage.setItem("selectedAddress", "San Francisco, CA, USA");
-    localStorage.setItem("selectedLocation", JSON.stringify({ lat: defaultLat, lng: defaultLng }));
-    
+    localStorage.setItem(
+      "selectedLocation",
+      JSON.stringify({ lat: defaultLat, lng: defaultLng })
+    );
+
     const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
     if (popularDoctors?.results?.length > 0) {
       const doctorlists = popularDoctors?.results?.slice(0, 20);
@@ -453,7 +460,7 @@ export default function LandingPage() {
 
         // Call logRequestInfo and get the promise
         const requestIdPromise = logRequestInfo();
-        
+
         const speciality_value =
           formik.values.specialty === "Prescription / Refill"
             ? "Primary Care Physician"
@@ -463,28 +470,28 @@ export default function LandingPage() {
           radius: 20000,
           keyword: speciality_value,
         };
-        
+
         // Make API call to search places
         const response = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
           data
         );
-        
+
         // Wait for the request ID promise to resolve
         const request_id = await requestIdPromise;
-        
+
         // Once request_id is available, update formData
         if (request_id) {
-          const updatedValues = { 
-            ...values, 
+          const updatedValues = {
+            ...values,
             request_id,
-            patientName: values.userName // Add userName as patientName for compatibility
+            patientName: values.userName, // Add userName as patientName for compatibility
           };
-          
+
           // Get existing form data if it exists
           const existingFormData = localStorage.getItem("formData");
           let mergedValues = updatedValues;
-          
+
           if (existingFormData) {
             try {
               const parsedExistingData = JSON.parse(existingFormData);
@@ -494,7 +501,7 @@ export default function LandingPage() {
               console.error("Error parsing existing form data:", error);
             }
           }
-          
+
           // Save the updated form data to localStorage
           localStorage.setItem("formData", JSON.stringify(mergedValues));
         }
@@ -502,7 +509,7 @@ export default function LandingPage() {
         // Save search results to localStorage
         localStorage.setItem("statusData", JSON.stringify(response.data));
         localStorage.setItem("lastSearchSource", "home"); // Track last search source
-        
+
         // Now that everything is saved to localStorage, navigate to transcript page
         router.push("/transcript?confirmed=true");
       } catch (error) {
@@ -535,10 +542,7 @@ export default function LandingPage() {
 
         // Store in localStorage
         localStorage.setItem("selectedAddress", formattedAddress);
-        localStorage.setItem(
-          "selectedLocation",
-          JSON.stringify({ lat, lng })
-        );
+        localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
       }
     }
   };
@@ -820,19 +824,19 @@ export default function LandingPage() {
                         autoComplete="off"
                         aria-autocomplete="none"
                         placeholderText="Date of birth"
-                        className="w-full border-none!important focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+                        className="md:w-full border-none!important focus:ring-0 focus:outline-none h-12 !pl-4  md:!pl-0 pr-2 shadow-none text-[15px]"
                         wrapperClassName="w-full"
                       />
                     </div>
                   </div>
                   <div className="mx-3">
-                    <Button 
+                    <Button
                       className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 my-4 h-12 items-center justify-center w-full md:w-auto md:hidden"
                       disabled={
-                        isLoading || 
-                        !formik.values.specialty || 
-                        !selectedLocation || 
-                        !formik.values.userName || 
+                        isLoading ||
+                        !formik.values.specialty ||
+                        !selectedLocation ||
+                        !formik.values.userName ||
                         !formik.values.dob
                       }
                       onClick={formik.handleSubmit}
@@ -845,10 +849,10 @@ export default function LandingPage() {
               </div>
               <Button
                 disabled={
-                  isLoading || 
-                  !formik.values.specialty || 
-                  !selectedLocation || 
-                  !formik.values.userName || 
+                  isLoading ||
+                  !formik.values.specialty ||
+                  !selectedLocation ||
+                  !formik.values.userName ||
                   !formik.values.dob
                 }
                 onClick={formik.handleSubmit} // Explicitly trigger form submission
@@ -869,7 +873,7 @@ export default function LandingPage() {
               </Button>
             </form>
             <div
-              className="text-[#E5573F] md:flex space-x-2 items-center hidden cursor-pointer hover:underline"
+              className="text-[#E5573F] md:flex space-x-2 items-center hidden  cursor-pointer hover:underline"
               onClick={() => {
                 // Save selected specialty before opening modal
                 if (selectedSpecialty) {
@@ -879,7 +883,22 @@ export default function LandingPage() {
               }}
             >
               <p>Provide additional details to get appointments faster</p>
-              <ArrowRight />
+              <ArrowRight className="" />
+            </div>
+            <div
+              className="flex md:hidden text-[#E5573F] items-center"
+              onClick={() => {
+                // Save selected specialty before opening modal
+                if (selectedSpecialty) {
+                  localStorage.setItem("selectedSpecialty", selectedSpecialty);
+                }
+                setIsModalOpen(true);
+              }}
+            >
+              <div className="flex items-center gap-1">
+                Provide additional details to get appointments faster
+                <ArrowRight className="" />
+              </div>
             </div>
             {/* Specialty Selection */}
             <ScrollArea className="w-full whitespace-nowrap md:flex gap-4 md:pt-4 pt-0 hidden">
@@ -1169,10 +1188,10 @@ export default function LandingPage() {
         {/* Footer Section */}
         <FooterSection />
       </main>
-      
+
       {/* Quick Details Modal */}
-      <QuickDetailsModal 
-        open={isModalOpen} 
+      <QuickDetailsModal
+        open={isModalOpen}
         onOpenChange={setIsModalOpen}
         initialSpecialty={selectedSpecialty}
       />

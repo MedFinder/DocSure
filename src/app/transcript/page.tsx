@@ -253,7 +253,7 @@ export default function Transcript() {
   const activeCallIndexRef = useRef(activeCallIndex);
   const requestIdRef = useRef(formData?.request_id);
   const callStatusRef = useRef(callStatus);
-  const isPreferencesReinitializedRef = useRef(isPreferencesReinitialized)
+  const isPreferencesReinitializedRef = useRef(isPreferencesReinitialized);
   const [context, setcontext] = useState("");
   const [transcriptSummary, setTranscriptSummary] = useState({
     place_id: "",
@@ -353,8 +353,8 @@ export default function Transcript() {
             ssid: "",
             email: "",
           });
-          setActiveCallIndex(0)
-          setTranscriptArray([])
+          setActiveCallIndex(0);
+          setTranscriptArray([]);
           rawData = localStorage.getItem("statusDataNav");
         } else {
           rawData = localStorage.getItem("statusData");
@@ -408,7 +408,7 @@ export default function Transcript() {
           //     },
           //   };
           // });
-          console.log(sortedData)
+          console.log(sortedData);
           setDoctors(sortedData);
           setNextPageToken(parsedData.next_page_token || null);
         } else {
@@ -436,7 +436,7 @@ export default function Transcript() {
       window.removeEventListener("storage", handleStorageChange);
       router.events?.off("routeChangeComplete", handleRouteChange);
     };
-  }, [router,apiKey]);
+  }, [router, apiKey]);
 
   const handleDragEnd = (event) => {
     if (isConfirmed) return; // Prevent reordering if call sequence has started
@@ -496,49 +496,54 @@ export default function Transcript() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phoneNumbers]); // Still depends on phoneNumbers but only runs on initial mount
 
-  const handleConfirmSequence = useCallback(async (formdata) => {
-    console.log('handleConfirmSequence called');
-    // initiate call
-    try {
-      // Check if patient_number exists
-      // const currentFormData = formdata || formData;
-      // if (!currentFormData?.phoneNumber) {
-      //   setOpenQuickDetailsModal(false);
-      //   // Phone number doesn't exist, show the dialog
-      //   setTimeout(() => {
-      //     setOpenPhoneNumberDialog(true);
-      //   }, 15000);
-      // }
-      
-      setIsConfirmed(true); // Disable button and dragging
-      
-      // Check if the first doctor's office is open
-      if (doctors[activeCallIndex]?.opening_hours?.status !== "Open") {
-        console.log("First doctor's office is closed. Finding next open doctor...");
-        // toast.info("First doctor's office is closed. Finding next open doctor...");
-        // Call moveToNextDoctor to find an open doctor
-        moveToNextDoctor(
-          null, 
-          activeCallIndex - 1, // Start from current index - 1 so moveToNextDoctor will check from current index
-          requestIdRef?.current
+  const handleConfirmSequence = useCallback(
+    async (formdata) => {
+      console.log("handleConfirmSequence called");
+      // initiate call
+      try {
+        // Check if patient_number exists
+        // const currentFormData = formdata || formData;
+        // if (!currentFormData?.phoneNumber) {
+        //   setOpenQuickDetailsModal(false);
+        //   // Phone number doesn't exist, show the dialog
+        //   setTimeout(() => {
+        //     setOpenPhoneNumberDialog(true);
+        //   }, 15000);
+        // }
+
+        setIsConfirmed(true); // Disable button and dragging
+
+        // Check if the first doctor's office is open
+        if (doctors[activeCallIndex]?.opening_hours?.status !== "Open") {
+          console.log(
+            "First doctor's office is closed. Finding next open doctor..."
+          );
+          // toast.info("First doctor's office is closed. Finding next open doctor...");
+          // Call moveToNextDoctor to find an open doctor
+          moveToNextDoctor(
+            null,
+            activeCallIndex - 1, // Start from current index - 1 so moveToNextDoctor will check from current index
+            requestIdRef?.current
+          );
+          return;
+        }
+
+        const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
+        await initiateCall(
+          firstDoctorPhoneNumber,
+          doctors[activeCallIndex]?.name,
+          requestIdRef?.current,
+          formdata
         );
         return;
+      } catch (error) {
+        console.error("Error initiating call:", error);
+        setIsConfirmed(false); // Re-enable button and dragging if there's an error
       }
-      
-      const firstDoctorPhoneNumber = phoneNumbers[activeCallIndex]; // '+2348168968260'
-      await initiateCall(
-        firstDoctorPhoneNumber,
-        doctors[activeCallIndex]?.name,
-        requestIdRef?.current,
-        formdata
-      );
-      return;
-    } catch (error) {
-      console.error("Error initiating call:", error);
-      setIsConfirmed(false); // Re-enable button and dragging if there's an error
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCallIndex, doctors, phoneNumbers]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [activeCallIndex, doctors, phoneNumbers]
+  );
   //console.log(phoneNumbers.length);
   useEffect(() => {
     if (callStatus.isInitiated && callStatus.ssid && wsRef.current) {
@@ -574,7 +579,7 @@ export default function Transcript() {
     // sent ws event to cancel call
     // wsRef?.current?.close();
     setIsConfirmed(false);
-    if(callStatus.ssid) {
+    if (callStatus.ssid) {
       terminateCurrentCall(callStatus?.ssid);
     }
     setTimeout(() => {
@@ -604,24 +609,29 @@ export default function Transcript() {
     track("Resume_Call_Btn_Clicked");
     setOpenResumeDialog(false);
     setIsPaused(false);
-    
+
     // Get the current form data
-    const currentStoredFormData = JSON.parse(localStorage.getItem("formData") || "{}");
-    
+    const currentStoredFormData = JSON.parse(
+      localStorage.getItem("formData") || "{}"
+    );
+
     // Find the next available doctor with open office hours
     const openDoctorIndex = findNextOpenDoctor(activeCallIndex);
-    
+
     if (openDoctorIndex === -1) {
-      toast.info("No doctors with open offices available. Cannot resume calls.");
+      toast.info(
+        "No doctors with open offices available. Cannot resume calls."
+      );
       return;
     }
-    
+
     // Set the active call index to the next open doctor
     setActiveCallIndex(openDoctorIndex);
-    
+
     // Re-initiate the call
     setTimeout(() => {
-      const doctorPhoneNumber = phoneNumbers[openDoctorIndex] || doctors[openDoctorIndex]?.phone_number;
+      const doctorPhoneNumber =
+        phoneNumbers[openDoctorIndex] || doctors[openDoctorIndex]?.phone_number;
       if (doctorPhoneNumber) {
         initiateCall(
           doctorPhoneNumber,
@@ -685,9 +695,11 @@ export default function Transcript() {
       // Use customformdata if available, otherwise use the state formData
       const currentFormData = customformdata || formData;
       const savedSpecialty = localStorage.getItem("selectedSpecialty");
-      
+
       if (!currentFormData || !doctorPhoneNumber) {
-        console.error("No formData found in localStorage or provided as parameter.");
+        console.error(
+          "No formData found in localStorage or provided as parameter."
+        );
         return;
       }
 
@@ -771,14 +783,16 @@ export default function Transcript() {
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
-        setisError(true)
-        terminateRequest()
-        toast.error('We’re experiencing high traffic. Please try again shortly.', {
-          duration: 20000,
-        });
+        setisError(true);
+        terminateRequest();
+        toast.error(
+          "We’re experiencing high traffic. Please try again shortly.",
+          {
+            duration: 20000,
+          }
+        );
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [formData]
   );
   const moveToNextDoctor = async (
@@ -794,15 +808,17 @@ export default function Transcript() {
       // wsRef?.current?.close(); // temp solution; disconnect websocket and connect to a new one
       terminateCurrentCall(id);
     }
-    
+
     // Find next open doctor
     const nextOpenIndex = findNextOpenDoctor(newIndex);
-    
+
     // If no open doctors found, end the process
     if (nextOpenIndex === -1) {
-      terminateRequest()
+      terminateRequest();
       wsRef?.current?.close();
-      toast.info("No more available doctors with open offices. Request terminated.");
+      toast.info(
+        "No more available doctors with open offices. Request terminated."
+      );
       setIsConfirmed(false);
       setCallStatus({
         isInitiated: false,
@@ -811,20 +827,22 @@ export default function Transcript() {
       });
       return;
     }
-    
+
     // Set the active call index to the next open doctor
     setActiveCallIndex(nextOpenIndex);
-    
+
     // If the next open doctor isn't the immediate next one, log which ones we're skipping
     if (nextOpenIndex > newIndex) {
-      toast.info(`Skipping ${nextOpenIndex - newIndex} doctor(s) with closed offices`);
+      toast.info(
+        `Skipping ${nextOpenIndex - newIndex} doctor(s) with closed offices`
+      );
     }
-    
+
     // Proceed with the next open doctor
     const nextDoctor = doctors[nextOpenIndex];
     const phoneNumber = phoneNumbers[nextOpenIndex] ?? nextDoctor?.phone_number;
     const nameOfOrg = nextDoctor?.name;
-    
+
     if (phoneNumber) {
       await initiateCall(
         phoneNumber,
@@ -835,7 +853,11 @@ export default function Transcript() {
       console.log("No phone number available for the next doctor.");
       toast.error("Next doctor has no phone number. Skipping...");
       // Try the next doctor
-      moveToNextDoctor(null, nextOpenIndex, request_id ?? requestIdRef?.current);
+      moveToNextDoctor(
+        null,
+        nextOpenIndex,
+        request_id ?? requestIdRef?.current
+      );
     }
   };
   const logDrLists = async (data) => {
@@ -976,38 +998,39 @@ export default function Transcript() {
   const confirmRemoveDoctor = () => {
     // Make sure doctorToRemove is not null
     if (doctorToRemove === null) return;
-    
+
     const index = doctorToRemove;
-    
+
     // Handle case where the doctor being removed is the active one with an ongoing call
     if (index === activeCallIndex && callStatus.isInitiated) {
       // Terminate the current call first
       terminateRequest();
       toast.info("Active call terminated and doctor removed from the list.");
     }
-    
+
     // Clone the doctors array
     const newDoctors = [...doctors];
-    
+
     // Remove the doctor at the specified index
     newDoctors.splice(index, 1);
-    
+
     // Update the doctors array
     setDoctors(newDoctors);
-    
+
     // If you're also storing the data in localStorage, update it there too
     const lastSearchSource = localStorage.getItem("lastSearchSource");
-    const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
-    
+    const storageKey =
+      lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+
     const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
-    
+
     const updatedData = {
       ...currentData,
-      results: newDoctors
+      results: newDoctors,
     };
-    
+
     localStorage.setItem(storageKey, JSON.stringify(updatedData));
-    
+
     // Close the dialog and reset the doctorToRemove
     setOpenRemoveDialog(false);
     setDoctorToRemove(null);
@@ -1112,24 +1135,26 @@ export default function Transcript() {
     }
   };
   const confirmUpdatePreferences = async () => {
-    console.log('confirming updated preferences........xxxx')
-    setisError(false)
-      try {
-        await terminateRequest();
-        console.log("Current Call has been terminated successfully.");
-          // Modify handleConfirmSequence to use the latest form data from local storage
-          const currentStoredFormData = JSON.parse(localStorage.getItem("formData") || "{}");
-          requestIdRef.current = currentStoredFormData?.request_id;
-          setFormData(currentStoredFormData);
-          if(!isPreferencesReinitializedRef.current){
-            console.log('fired from preferences reinitialization')
-            handleConfirmSequence(currentStoredFormData);
-          }
-      } catch (error) {
-        console.error("Failed to log call termination:", error);
-        toast.error("Failed to terminate the call. Please try again.");
-        return;
+    console.log("confirming updated preferences........xxxx");
+    setisError(false);
+    try {
+      await terminateRequest();
+      console.log("Current Call has been terminated successfully.");
+      // Modify handleConfirmSequence to use the latest form data from local storage
+      const currentStoredFormData = JSON.parse(
+        localStorage.getItem("formData") || "{}"
+      );
+      requestIdRef.current = currentStoredFormData?.request_id;
+      setFormData(currentStoredFormData);
+      if (!isPreferencesReinitializedRef.current) {
+        console.log("fired from preferences reinitialization");
+        handleConfirmSequence(currentStoredFormData);
       }
+    } catch (error) {
+      console.error("Failed to log call termination:", error);
+      toast.error("Failed to terminate the call. Please try again.");
+      return;
+    }
   };
 
   const confirmTerminateAndCallMyself = async () => {
@@ -1189,7 +1214,7 @@ export default function Transcript() {
 
         // Create a combined array with existing and new doctors
         const updatedDoctors = [...doctors, ...newDoctors];
-        
+
         // Update state
         setDoctors(updatedDoctors);
         setNextPageToken(response.data.next_page_token || null);
@@ -1209,16 +1234,21 @@ export default function Transcript() {
         };
 
         localStorage.setItem(storageKey, JSON.stringify(updatedData));
-        
+
         // If there are no open doctors currently and we're not in an active call,
         // check if any of the newly loaded doctors have open offices
         if (!callStatus.isInitiated) {
           // Check if there are any open doctors in the original list
-          const hasOpenDoctors = doctors.some(doctor => doctor.opening_hours?.status === "Open");
-          
+          const hasOpenDoctors = doctors.some(
+            (doctor) => doctor.opening_hours?.status === "Open"
+          );
+
           if (!hasOpenDoctors) {
             // Use the updatedDoctors array to search for open doctors
-            const findNextOpenDoctorInList = (startIndex: number, doctorsList: any[]): number => {
+            const findNextOpenDoctorInList = (
+              startIndex: number,
+              doctorsList: any[]
+            ): number => {
               for (let i = startIndex; i < doctorsList.length; i++) {
                 if (doctorsList[i]?.opening_hours?.status === "Open") {
                   return i;
@@ -1226,11 +1256,13 @@ export default function Transcript() {
               }
               return -1; // No open doctors found
             };
-            
+
             // Check if any doctor in the updated list has an open office
             const openDoctorIndex = findNextOpenDoctorInList(0, updatedDoctors);
             if (openDoctorIndex !== -1) {
-              toast.info("Found available doctors with open offices! Starting calls...");
+              toast.info(
+                "Found available doctors with open offices! Starting calls..."
+              );
               const foundInfo = updatedDoctors[openDoctorIndex];
               // console.log(foundInfo)
               setActiveCallIndex(openDoctorIndex);
@@ -1239,7 +1271,7 @@ export default function Transcript() {
                 initiateCall(
                   firstDoctorPhoneNumber,
                   foundInfo?.name,
-                  requestIdRef?.current,
+                  requestIdRef?.current
                 );
               }, 500); // Small delay to ensure state updates have propagated
             }
@@ -1281,30 +1313,31 @@ export default function Transcript() {
     if (index === activeCallIndex || index < activeCallIndex) {
       return; // Don't move if it's the current active call or already processed
     }
-    
+
     // Clone the doctors array
     const newDoctors = [...doctors];
-    
+
     // Remove the doctor from their current position
     const doctorToMove = newDoctors.splice(index, 1)[0];
-    
+
     // Insert the doctor right after the current active doctor
     newDoctors.splice(activeCallIndex + 1, 0, doctorToMove);
-    
+
     // Update the doctors array
     setDoctors(newDoctors);
-    
+
     // Update localStorage with the new order
     const lastSearchSource = localStorage.getItem("lastSearchSource");
-    const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
-    
+    const storageKey =
+      lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+
     const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
-    
+
     const updatedData = {
       ...currentData,
-      results: newDoctors
+      results: newDoctors,
     };
-    
+
     localStorage.setItem(storageKey, JSON.stringify(updatedData));
   };
 
@@ -1332,17 +1365,17 @@ export default function Transcript() {
       if (callStatus.isInitiated) {
         terminateRequest();
       }
-      
+
       // Close WebSocket connections
       if (wsRef.current) {
         wsRef.current.close();
       }
-      
+
       if (wsSummaryRef.current) {
         wsSummaryRef.current.close();
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callStatus.isInitiated]); // Re-create cleanup if call status changes
 
   return (
@@ -1380,9 +1413,12 @@ export default function Transcript() {
                 className="w-5 h-auto"
               />
               {/* <p>{DrCount} verified doctors in your area</p> */}
-              <p>  Docsure AI is calling doctors in your area that accept your insurance, sorted by
-                      patient ratings. We'll notify you once your appointment is
-                      confirmed.</p>
+              <p>
+                {" "}
+                Docsure AI is calling doctors in your area that accept your
+                insurance, sorted by patient ratings. We'll notify you once your
+                appointment is confirmed.
+              </p>
             </div>
 
             {/* Mobile only "Back to List" / "View Transcript" button */}
@@ -1396,34 +1432,24 @@ export default function Transcript() {
 
           <section className="flex flex-col items-start px-7 w-full h-[95%] max-md:px-5 max-md:max-w-full ">
             {/* Info section with border bottom */}
-
-            <div className="self-stretch md:mt-2 mt-2 flex-1 overflow-hidden max-md:max-w-full">
-              <div className="flex gap-5 h-full max-md:flex-col">
+            <div className="flex self-end justify-end pr-4 mb-2">
+              <button
+                onClick={toggleTranscript}
+                className="text-sm text-[#E5573F] underline md:hidden self-end pt-4"
+              >
+                {showTranscript ? "Back to List" : "View Transcript"}
+              </button>
+            </div>
+            <div className="self-stretch md:mt-2  flex-1 overflow-hidden max-md:max-w-full ">
+              <div className="flex gap-5 h-full max-md:flex-col ">
                 <div
-                  className={`w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full ${
+                  className={`w-[68%] flex flex-col max-md:ml-0 max-md:w-full relative h-full  ${
                     showTranscript ? "hidden md:block" : "block"
                   }`}
                 >
-                  {/* Scrollable doctor cards container */}
-                  <div className="w-full ">
-                    <div className="flex self-end justify-end pr-4 mb-2">
-                      <button
-                        onClick={toggleTranscript}
-                        className="text-sm text-[#E5573F] underline md:hidden self-end"
-                      >
-                        {showTranscript ? "Back to List" : "View Transcript"}
-                      </button>
-                    </div>
-
-                    {/* <p className="text-sm md:text-sm text-gray-700">
-                      Docsure AI is calling doctors in your area that accept your insurance, sorted by
-                      patient ratings. We'll notify you once your appointment is
-                      confirmed.
-                    </p> */}
-                  </div>
-                  <div className="pr-2 h-[calc(100%-60px)] pt-3 relative">
+                  <div className="pr-2 h-[calc(100%-60px)] pt-3 relative ">
                     <ExpandProvider>
-                      <ScrollArea className="h-full w-full md:w-auto">
+                      <ScrollArea className="h-full w-full md:w-auto ">
                         <Column
                           activeCallIndex={activeCallIndex}
                           tasks={doctors}
@@ -1485,19 +1511,19 @@ export default function Transcript() {
                         // disabled={!callStatus?.isInitiated}
                         className={`min-w-[250px] font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
                           isPaused
-                            ?  "bg-black hover:bg-black text-white" //"bg-[#0074BA] hover:bg-blue-600 text-white"
+                            ? "bg-black hover:bg-black text-white" //"bg-[#0074BA] hover:bg-blue-600 text-white"
                             : "bg-black hover:bg-black text-white"
                         }`}
                       >
-                        {isPaused ? 'Resume Calling' : 'Pause Calling'}
+                        {isPaused ? "Resume Calling" : "Pause Calling"}
                       </button>
                       <button
                         onClick={() => setOpenTerminateAndCallDialog(true)}
                         disabled={!callStatus?.isInitiated}
                         className={`font-medium py-2 px-4 md:px-8 text-sm md:text-base rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 ${
                           callStatus?.isInitiated
-                          ? "bg-black hover:bg-black text-white"
-                          : "bg-black cursor-not-allowed text-white opacity-70"
+                            ? "bg-black hover:bg-black text-white"
+                            : "bg-black cursor-not-allowed text-white opacity-70"
                         }`}
                       >
                         Terminate And Call Myself
@@ -1508,7 +1534,7 @@ export default function Transcript() {
 
                 {/* Always show in desktop, conditionally in mobile */}
                 <div
-                  className={`w-[32%] flex flex-col max-md:ml-0 max-md:w-full ${
+                  className={`w-[32%] flex flex-col max-md:ml-0 max-md:w-full  ${
                     showTranscript ? "block" : "hidden md:block"
                   }`}
                 >
@@ -1654,15 +1680,15 @@ export default function Transcript() {
             </DialogContent>
           </Dialog>
           {/* Quick Details Modal for collecting phone number */}
-          <QuickDetailsModal 
-              open={openQuickDetailsModal} 
-              onOpenChange={setOpenQuickDetailsModal}
-              //initialSpecialty={specialty}
-              updatePreferences={true}
-              confirmUpdatePreferences={confirmUpdatePreferences}
-              setispreferencesUpdated={setIsPreferencesUpdated}
-              setIsPreferencesReinitialized={setIsPreferencesReinitialized}
-           />
+          <QuickDetailsModal
+            open={openQuickDetailsModal}
+            onOpenChange={setOpenQuickDetailsModal}
+            //initialSpecialty={specialty}
+            updatePreferences={true}
+            confirmUpdatePreferences={confirmUpdatePreferences}
+            setispreferencesUpdated={setIsPreferencesUpdated}
+            setIsPreferencesReinitialized={setIsPreferencesReinitialized}
+          />
           <Dialog open={openRemoveDialog} onOpenChange={setOpenRemoveDialog}>
             <DialogContent className="sm:max-w-lg h-52">
               <DialogHeader>
@@ -1695,7 +1721,8 @@ export default function Transcript() {
                 <DialogTitle>Resume Calling</DialogTitle>
               </DialogHeader>
               <p className="text-gray-600">
-                This will resume your appointment booking request and begin calling the next available doctor. Continue?
+                This will resume your appointment booking request and begin
+                calling the next available doctor. Continue?
               </p>
               <div className="md:flex flex justify-between gap-6">
                 <Button

@@ -40,7 +40,13 @@ interface NavbarSectionProps {
   setIsPreferencesReinitialized?: (value: boolean) => void; // Callback to set preferences reinitialized state
 }
 
-export default function NavbarSection({ updatePreferences = false, confirmUpdatePreferences,  openModal = false, setIsPreferencesUpdated, setIsPreferencesReinitialized }: NavbarSectionProps) {
+export default function NavbarSection({
+  updatePreferences = false,
+  confirmUpdatePreferences,
+  openModal = false,
+  setIsPreferencesUpdated,
+  setIsPreferencesReinitialized,
+}: NavbarSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(openModal);
   const pathname = usePathname(); // Get the current route
@@ -72,11 +78,11 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
     if (typeof window !== "undefined") {
       const savedSpecialty = localStorage.getItem("selectedSpecialty");
       const formData = localStorage.getItem("formData");
-      if(formData){
+      if (formData) {
         const parsedFormData = JSON.parse(formData);
         if (parsedFormData?.insurer) {
           setInsurer(parsedFormData?.insurer);
-          formik.setFieldValue("insurance_carrier", parsedFormData?.insurer); // ✅ correct field 
+          formik.setFieldValue("insurance_carrier", parsedFormData?.insurer); // ✅ correct field
         }
       }
       if (savedSpecialty) {
@@ -111,8 +117,8 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
 
       // If updatePreferences is true, open the modal instead of searching
       if (updatePreferences) {
-        setIsPreferencesUpdated(false)
-        setIsPreferencesReinitialized(false)
+        setIsPreferencesUpdated(false);
+        setIsPreferencesReinitialized(false);
         setIsModalOpen(true);
         return;
       }
@@ -156,7 +162,7 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
   const handleFieldClick = () => {
     if (updatePreferences) {
       formik.submitForm();
-      return
+      return;
     }
   };
 
@@ -172,10 +178,7 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
         localStorage.setItem("selectedAddress", formattedAddress);
-        localStorage.setItem(
-          "selectedLocation",
-          JSON.stringify({ lat, lng })
-        );
+        localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
       }
     }
   };
@@ -218,7 +221,10 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
                     <div className="flex items-center justify-center px-3 md:hidden">
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div onClick={handleFieldClick} className="flex-1 border-b border-gray-400 md:border-none">
+                    <div
+                      onClick={handleFieldClick}
+                      className="flex-1 border-b border-gray-400 md:border-none"
+                    >
                       <Autocomplete
                         id="specialty"
                         name="specialty"
@@ -232,7 +238,7 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
                         }}
                         clearable={false}
                         navbar
-                        enabled={updatePreferences?false: true}
+                        enabled={updatePreferences ? false : true}
                       />
                     </div>
                   </div>
@@ -241,7 +247,10 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
                     <div className="flex items-center justify-center px-3">
                       <BookText className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div onClick={handleFieldClick} className="flex-1 border-b border-gray-400 md:border-none">
+                    <div
+                      onClick={handleFieldClick}
+                      className="flex-1 border-b border-gray-400 md:border-none"
+                    >
                       <Autocomplete
                         id="insurer"
                         name="insurer"
@@ -254,48 +263,59 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
                           formik.setFieldValue("insurance_carrier", value);
                         }}
                         clearable={false}
-                        enabled={updatePreferences?false: true}
+                        enabled={updatePreferences ? false : true}
                       />
                     </div>
                   </div>
                   {/* Location Section */}
-                  {!updatePreferences &&
-                  <div className="flex items-center w-full sm:flex-1">
-                    <div className="flex items-center justify-center px-3 h-full">
-                      <MapPin className="w-5 h-5 text-gray-500" />
+                  {!updatePreferences && (
+                    <div className="flex items-center w-full sm:flex-1">
+                      <div className="flex items-center justify-center px-3 h-full">
+                        <MapPin className="w-5 h-5 text-gray-500" />
+                      </div>
+                      <div onClick={handleFieldClick} className="flex-1">
+                        {isLoaded && (
+                          <StandaloneSearchBox
+                            onLoad={(ref) => (inputRefs.current[0] = ref)}
+                            onPlacesChanged={() => handleOnPlacesChanged(0)}
+                          >
+                            <Input
+                              type="text"
+                              placeholder="Address, city, zip code"
+                              className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
+                              value={addressLocation || ""}
+                              onChange={(e) =>
+                                setAddressLocation(e.target.value)
+                              }
+                              autoComplete="off"
+                              aria-autocomplete="none"
+                            />
+                          </StandaloneSearchBox>
+                        )}
+                      </div>
                     </div>
-                    <div onClick={handleFieldClick} className="flex-1">
-                      {isLoaded && (
-                        <StandaloneSearchBox
-                          onLoad={(ref) => (inputRefs.current[0] = ref)}
-                          onPlacesChanged={() => handleOnPlacesChanged(0)}
-                        >
-                          <Input
-                            type="text"
-                            placeholder="Address, city, zip code"
-                            className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
-                            value={addressLocation || ""}
-                            onChange={(e) => setAddressLocation(e.target.value)}
-                            autoComplete="off"
-                            aria-autocomplete="none"
-                          />
-                        </StandaloneSearchBox>
-                      )}
-                    </div>
-                  </div>
-                  }
+                  )}
                 </div>
 
                 {/* Search Button - Stays on the right, filling height on mobile */}
                 <button
                   className={`text-white rounded-none px-2 md:px-5 md:h-12 h-full md:w-auto absolute md:static right-0 top-0 bottom-0 border-l-0 
   bg-[#0074BA] md:bg-[#E5573F] hover:bg-[#0074BA] hover:text-white md:hover:bg-[#0074BA] md:hover:text-white rounded-tr-sm rounded-br-sm
+  min-w-[48px] md:min-w-0
   ${updatePreferences ? "md:min-w-[200px]" : ""}`}
                 >
                   {updatePreferences ? (
-                    <span className="hidden md:inline-block text-white">Update Preferences</span>
+                    <>
+                      {/* Mobile Text */}
+                      <Search className="w-5 h-5 md:hidden font-semibold text-white" />
+
+                      {/* Desktop Text */}
+                      <span className="hidden md:inline-block text-white">
+                        Update Preferences
+                      </span>
+                    </>
                   ) : (
-                    <Search className="w-5 h-5 font-semibold text-white md:text-white md:hover:text-white" />
+                    <Search className="w-5 h-5 font-semibold text-white" />
                   )}
                 </button>
               </div>
@@ -381,8 +401,8 @@ export default function NavbarSection({ updatePreferences = false, confirmUpdate
       )}
 
       {/* Quick Details Modal */}
-      <QuickDetailsModal 
-        open={isModalOpen} 
+      <QuickDetailsModal
+        open={isModalOpen}
         onOpenChange={setIsModalOpen}
         initialSpecialty={specialty}
         updatePreferences={updatePreferences}

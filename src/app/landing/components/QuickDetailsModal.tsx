@@ -502,7 +502,7 @@ export default function QuickDetailsModal({
         </button>
 
         <div className="mb-6">
-          <h2 className="text-xl font-bold">
+          <h2 className="text-xl pr-12 font-bold">
             Provide additional details to get appointments faster
           </h2>
         </div>
@@ -916,7 +916,7 @@ export default function QuickDetailsModal({
           </div>
 
           <div className="mt-8">
-            <div className="flex md:mt-12 my-2 w-[80%] mx-auto">
+            <div className="flex md:mt-12 my-2 md:w-[80%] w-full mx-auto">
               <Button
                 type="submit"
                 className="bg-[#E5573F] text-white px-6 py-5 w-full flex rounded-md"

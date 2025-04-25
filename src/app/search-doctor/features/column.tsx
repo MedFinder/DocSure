@@ -100,7 +100,7 @@ const Column: React.FC<ColumnProps> = ({
   // );
   return (
     <div className="w-full">
-      <table className="task-table w-full border-collapse md:table">
+      <table className="task-table w-full border-collapse md:table ">
         <tbody className="block md:table-row-group">
           <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
             <TaskList>
