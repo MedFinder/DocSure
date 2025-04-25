@@ -245,7 +245,9 @@ export const Task: React.FC<TaskProps> = ({
                       <span className="bg-[#0074BA] rounded-full w-5 h-5 text-white flex items-center justify-center text-xs font-medium mt-[2px] shrink-0">
                         {index + 1}
                       </span>
-                    ) : null}
+                    ) : (
+                      <span className="w-5 h-5 my-4 " /> // Empty space with same dimensions
+                    )}
                   </div>
                 ) : (
                   <Tooltip>
@@ -305,7 +307,7 @@ export const Task: React.FC<TaskProps> = ({
                         // href={website}
                         // target="_blank"
                         // rel="noopener noreferrer"
-                        className="block w-full  sm:max-w-full whitespace-normal overflow-hidden text-ellipsis cursor-pointer font-medium text-base leading-snug break-words"
+                        className="block w-full sm:max-w-full pr-16 md:pr-0 whitespace-normal overflow-hidden text-ellipsis cursor-pointer font-medium text-base leading-snug break-words"
                         // onClick={(e) => {
                         //   e.stopPropagation();
                         //   track("Dr_Website_Clicked");
@@ -322,7 +324,7 @@ export const Task: React.FC<TaskProps> = ({
                       // href={website}
                       // target="_blank"
                       // rel="noopener noreferrer"
-                      className="cursor-pointer font-medium text-base sm:text-base hidden md:block "
+                      className="cursor-pointer font-medium text-base sm:text-base hidden   md:block "
                       // onClick={(e) => {
                       //   e.stopPropagation();
                       //   track("Dr_Website_Clicked");
@@ -416,7 +418,7 @@ export const Task: React.FC<TaskProps> = ({
                   <span className=" text-sm text-[#636465]  pr-16 md:pr-0">
                     {vicinity}
                   </span>
-                  <div className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words">
+                  <div className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words pr-16 md:pr-0">
                     <img
                       src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
                       className="object-contain w-3 rounded-sm"
@@ -429,8 +431,23 @@ export const Task: React.FC<TaskProps> = ({
                     <span className="whitespace-nowrap ">
                       {review || 0} reviews
                     </span>
-                    <span className="px-1">|</span>
+                    {/* <span className="px-1">|</span> */}
 
+                    {/* <div className="md:hidden gap-1 text-sm text-[#333333] flex items-center  ">
+                      <span
+                        className={
+                          openingStatus === "Open"
+                            ? "text-[#00BA85]"
+                            : "text-[#E5573F]"
+                        }
+                      >
+                        {openingStatus}
+                      </span>
+                      <span>•</span>
+                      <span>{openingTimeInfo}</span>
+                    </div> */}
+                  </div>
+                  <div className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words pr-16 md:pr-0">
                     <div className="md:hidden gap-1 text-sm text-[#333333] flex items-center  ">
                       <span
                         className={
