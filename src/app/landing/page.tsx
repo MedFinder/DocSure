@@ -885,7 +885,7 @@ export default function LandingPage() {
               </Button>
             </form>
             <div
-              className="text-[#E5573F] md:flex space-x-2 items-center hidden  cursor-pointer hover:underline"
+              className="text-[#E5573F] flex space-x-2 items-center   cursor-pointer hover:underline"
               onClick={() => {
                 // Save selected specialty before opening modal
                 if (selectedSpecialty) {
@@ -895,23 +895,9 @@ export default function LandingPage() {
               }}
             >
               <p>Provide additional details to get appointments faster</p>
-              <ArrowRight className="" />
+              <ArrowRight className="hidden md:block" />
             </div>
-            <div
-              className="flex md:hidden text-[#E5573F] items-center"
-              onClick={() => {
-                // Save selected specialty before opening modal
-                if (selectedSpecialty) {
-                  localStorage.setItem("selectedSpecialty", selectedSpecialty);
-                }
-                setIsModalOpen(true);
-              }}
-            >
-              <div className="flex items-center gap-1">
-                Provide additional details to get appointments faster
-                <ArrowRight className="" />
-              </div>
-            </div>
+
             {/* Specialty Selection */}
             <ScrollArea className="w-full whitespace-nowrap md:flex gap-4 md:pt-4 pt-0 hidden">
               <div className="flex gap-4 px-1 pb-2 md:max-w-full max-w-[50%] justify-center">
@@ -1056,7 +1042,7 @@ export default function LandingPage() {
 
         <section
           id="doctors"
-          className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2] border-b md:pt-16 md:pb-16 py-8 pb-16 px-0"
+          className="flex flex-col items-center justify-center gap-4 bg-[#FCF8F2] border-b md:pt-16 md:pb-16 py-8 pb-16 px-0"
         >
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
             Top-rated doctors near me
