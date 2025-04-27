@@ -216,6 +216,48 @@ const _doctors: Doctor[] = [
     waitTime: "Excellent wait time",
     appointments: "New patient appointments",
   },
+  {
+    name: "Dr. Igor Kletsman, MD",
+    title: "Primary Care Doctor",
+    image:
+      "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+    isSponsored: true,
+    rating: 4.52,
+    reviews: 86,
+    distance: "2.7 mi",
+    address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    status: "available",
+    waitTime: "Excellent wait time",
+    appointments: "New patient appointments",
+  },
+  {
+    name: "Dr. Igor Kletsman, MD",
+    title: "Primary Care Doctor",
+    image:
+      "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+    isSponsored: true,
+    rating: 4.52,
+    reviews: 86,
+    distance: "2.7 mi",
+    address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    status: "available",
+    waitTime: "Excellent wait time",
+    appointments: "New patient appointments",
+  },
+  {
+    name: "Dr. Igor Kletsman, MD",
+    title: "Primary Care Doctor",
+    image:
+      "https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/32f8cd0111f56e136efcbd6101e6337252cafc553df7f9f44ddaf8ad44ca8914?placeholderIfAbsent=true",
+    isSponsored: true,
+    rating: 4.52,
+    reviews: 86,
+    distance: "2.7 mi",
+    address: "317 E 34th St - 317 E 34th St, New York, NY 10016",
+    status: "available",
+    waitTime: "Excellent wait time",
+    appointments: "New patient appointments",
+  },
   // Add other doctors here...
 ];
 
@@ -422,7 +464,7 @@ export default function Transcript() {
     };
     // Initial load
     updateDoctorsList();
-    getTotalDoctorsList();
+    // getTotalDoctorsList();
 
     // Listen for storage changes (detect when a new search is performed)
     const handleStorageChange = () => updateDoctorsList();
@@ -1191,6 +1233,18 @@ export default function Transcript() {
       const searchData = await JSON.parse(localStorage.getItem("searchData"));
       const lat = searchData?.lat || 0;
       const lng = searchData?.lng || 0;
+      
+      // Retrieve the fetch_open_now parameter from the last search
+      let fetch_open_now = "false";
+      const lastSearchSource = localStorage.getItem("lastSearchSource");
+      const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+      const previousSearchData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      
+      // Check if fetch_open_now was part of the previous search
+      if (previousSearchData && typeof previousSearchData.fetch_open_now !== "undefined") {
+        fetch_open_now = previousSearchData.fetch_open_now;
+      }
+      
       const response = await axios.post(
         "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
         {
@@ -1199,6 +1253,7 @@ export default function Transcript() {
           keyword: savedSpecialty,
           next_page_token: nextPageToken,
           prev_page_data: doctors,
+          fetch_open_now: fetch_open_now, // Include the fetch_open_now parameter
         }
       );
 

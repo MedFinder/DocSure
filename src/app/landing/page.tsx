@@ -256,6 +256,14 @@ export default function LandingPage() {
     },
   ];
   useEffect(() => {
+    const script = document.createElement('script');
+    script.src = '//js-na2.hs-scripts.com/242621305.js';
+    script.async = true;
+    script.defer = true;
+    script.id = 'hs-script-loader';
+    document.body.appendChild(script);
+  }, []);
+  useEffect(() => {
     // Load saved data from localStorage on mount
     const storedDoctors = localStorage.getItem("popularDoctors");
     const storedSpeciality = localStorage.getItem("selectedSpecialty");
@@ -366,12 +374,13 @@ export default function LandingPage() {
         const lat = ipGeolocationResponse.data.latitude;
         const lng = ipGeolocationResponse.data.longitude;
         const city = ipGeolocationResponse.data.city;
+        const ip_address = ipGeolocationResponse.data.ip;
         const region = ipGeolocationResponse.data.region;
         const country = ipGeolocationResponse.data.country_name;
         const formattedAddress = `${city}, ${region}, ${country}`;
-
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress);
+        localStorage.setItem("ipAddress", ip_address);
         localStorage.setItem("selectedAddress", formattedAddress);
         localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
 
@@ -416,9 +425,12 @@ export default function LandingPage() {
   };
   const logRequestInfo = async () => {
     const savedAddress = localStorage.getItem("selectedAddress");
+    const ipAddress = localStorage.getItem("ipAddress");
     const data = {
       doctor_speciality: formik.values.specialty,
       preferred_location: savedAddress,
+      device_id_address: ipAddress ?? '',
+      device_category: "web",
     };
     try {
       const resp = await axios.post(
