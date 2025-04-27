@@ -757,39 +757,40 @@ export default function Transcript() {
       };
       localStorage.setItem("context", context);
       console.log(data);
-      // try {
-      //   const callResponse = await axios.post(
-      //     "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
-      //     data
-      //   );
-      //   track("Initiated_new_call_successfully");
-      //   connectWebSocket(callResponse.data.call_id);
-      //   setCallStatus({
-      //     isInitiated: true,
-      //     ssid: callResponse.data.call_id,
-      //     email: email,
-      //   });
-      //   const updatedFormData = {
-      //     ...formData,
-      //     request_id,
-      //     prompt: callResponse.data.prompt,
-      //     voice_used: callResponse.data.voice_used,
-      //     interruption_threshold: callResponse.data.interruption_threshold,
-      //     temperature: callResponse.data.temperature,
-      //     model: callResponse.data.model,
-      //   };
-      //   setFormData(updatedFormData);
-      //   localStorage.setItem("formData", JSON.stringify(updatedFormData));
-      // } catch (error) {
-      //   track("Initiated_new_call_failed");
-      //   console.log(error, "error initiating bland AI");
-      //   setisError(true)
-      //   terminateRequest()
-      //   toast.error('We’re experiencing high traffic. Please try again shortly.', {
-      //     duration: 20000,
-      //   });
-      // }
+      try {
+        const callResponse = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call",
+          data
+        );
+        track("Initiated_new_call_successfully");
+        connectWebSocket(callResponse.data.call_id);
+        setCallStatus({
+          isInitiated: true,
+          ssid: callResponse.data.call_id,
+          email: email,
+        });
+        const updatedFormData = {
+          ...formData,
+          request_id,
+          prompt: callResponse.data.prompt,
+          voice_used: callResponse.data.voice_used,
+          interruption_threshold: callResponse.data.interruption_threshold,
+          temperature: callResponse.data.temperature,
+          model: callResponse.data.model,
+        };
+        setFormData(updatedFormData);
+        localStorage.setItem("formData", JSON.stringify(updatedFormData));
+      } catch (error) {
+        track("Initiated_new_call_failed");
+        console.log(error, "error initiating bland AI");
+        setisError(true)
+        terminateRequest()
+        toast.error('We’re experiencing high traffic. Please try again shortly.', {
+          duration: 20000,
+        });
+      }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [formData]
   );
   const moveToNextDoctor = async (
