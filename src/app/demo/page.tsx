@@ -237,6 +237,15 @@ export default function LandingPage() {
     },
   ];
   useEffect(() => {
+    const storedSpeciality = localStorage.getItem("selectedSpecialty");
+    const selectedInsurer = localStorage.getItem("selectedInsurer");
+    if (storedSpeciality) {
+        setPrefilledSpecialty(storedSpeciality);
+        formik.setFieldValue("specialty", storedSpeciality);
+      }
+      if(selectedInsurer){
+        setSelectedInsurer(selectedInsurer);
+      }
     fetchUserLocationAndPopularDrs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
