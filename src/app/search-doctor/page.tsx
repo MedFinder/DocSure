@@ -165,6 +165,18 @@ export default function SearchDoctorPage() {
       const searchData = await JSON.parse(localStorage.getItem("searchData"));
       const lat = searchData?.lat || 0;
       const lng = searchData?.lng || 0;
+      
+      // Retrieve the fetch_open_now parameter from the last search
+      let fetch_open_now = "false";
+      const lastSearchSource = localStorage.getItem("lastSearchSource");
+      const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+      const previousSearchData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      
+      // Check if fetch_open_now was part of the previous search
+      if (previousSearchData && typeof previousSearchData.fetch_open_now !== "undefined") {
+        fetch_open_now = previousSearchData.fetch_open_now;
+      }
+      
       const response = await axios.post(
         "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
         {
@@ -173,6 +185,7 @@ export default function SearchDoctorPage() {
           keyword: savedSpecialty,
           next_page_token: nextPageToken,
           prev_page_data: doctors,
+          fetch_open_now: fetch_open_now, // Include the fetch_open_now parameter
         }
       );
 
@@ -186,7 +199,11 @@ export default function SearchDoctorPage() {
           },
         }));
 
-        setDoctors((prevDoctors) => [...prevDoctors, ...newDoctors]);
+        // Create a combined array with existing and new doctors
+        const updatedDoctors = [...doctors, ...newDoctors];
+
+        // Update state
+        setDoctors(updatedDoctors);
         setNextPageToken(response.data.next_page_token || null);
 
         const lastSearchSource = localStorage.getItem("lastSearchSource");
@@ -509,7 +526,7 @@ export default function SearchDoctorPage() {
           <p className="text-gray-500 mt-2">
             We could not find any doctors that meet this criteria.
           </p>
-          <Link href="/">
+          <Link href="/demo">
             <Button className=" bg-[#7DA1B7] text-white px-6 py-5 mt-8 w-full sm:w-auto">
               Search Again
             </Button>

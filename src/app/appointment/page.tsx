@@ -4,7 +4,7 @@ import Navbar from "@/components/general-components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useJsApiLoader } from "@react-google-maps/api";
+import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import axios from "axios";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { track } from "@vercel/analytics";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Loader2, X } from "lucide-react";
+import { ArrowRight, Loader2, X } from "lucide-react";
 
 import NavbarSection from "@/components/general-components/navbar-section";
 import { Badge } from "@/components/ui/badge";
@@ -25,25 +25,34 @@ import { insuranceCarrierOptions } from "@/constants/store-constants";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import FooterSection from "../landing/components/FooterSection";
+import QuickDetailsModal from "../landing/components/QuickDetailsModal";
 
 const validationSchema = Yup.object().shape({
-  objective: Yup.string().required("Please add at least one topic to discuss"),
-  // insurer: Yup.string().when("selectedOption", {
-  //   is: "yes",
-  //   then: () => Yup.string().required("Insurance carrier is required"),
-  //   otherwise: () => Yup.string().notRequired(),
+  // objective: Yup.string().required("Please add at least one topic to discuss"),
+  // // insurer: Yup.string().when("selectedOption", {
+  // //   is: "yes",
+  // //   then: () => Yup.string().required("Insurance carrier is required"),
+  // //   otherwise: () => Yup.string().notRequired(),
+  // // }),
+  // timeOfAppointment: Yup.date().when("availabilityOption", {
+  //   is: "input-availability",
+  //   then: () =>
+  //     Yup.date()
+  //       .required("Please select an appointment date")
+  //       .min(new Date(), "Appointment date cannot be in the past"),
+  //   otherwise: () => Yup.date().notRequired(),
   // }),
-  timeOfAppointment: Yup.date().when("availabilityOption", {
-    is: "input-availability",
-    then: () =>
-      Yup.date()
-        .required("Please select an appointment date")
-        .min(new Date(), "Appointment date cannot be in the past"),
-    otherwise: () => Yup.date().notRequired(),
-  }),
-  availabilityOption: Yup.string().required(
-    "Please select an availability option"
-  ),
+  // availabilityOption: Yup.string().required(
+  //   "Please select an availability option"
+  // ),
+    patientName: Yup.string().required("Patient name is required"),
+    //email: Yup.string().email("Invalid email").required("Email is required"),
+    phoneNumber: Yup.string().required("Phone number is required"),
+    dob: Yup.date()
+      .required("Date of birth is required")
+      .max(new Date(), "Date of birth cannot be in the future"),
+   // address: Yup.string().required("Address is required"),
+    // gender: Yup.string().required("Please select a gender"),
 });
 
 export default function AppointmentPage() {
@@ -52,6 +61,8 @@ export default function AppointmentPage() {
   const [formData, setFormData] = useState({});
   const [searchData, setSearchData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const router = useRouter();
 
   const [customAvailability, setCustomAvailability] = useState("");
@@ -68,6 +79,7 @@ export default function AppointmentPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedFormData = localStorage.getItem("formData");
+      const storedSpeciality = localStorage.getItem("selectedSpecialty");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
         console.log(parsedFormData);
@@ -75,6 +87,9 @@ export default function AppointmentPage() {
 
         // Prefill formik values
         formik.setValues({
+          patientName: parsedFormData?.patientName || "",
+          dob: parsedFormData.dob ? new Date(parsedFormData.dob) : null,
+          phoneNumber: parsedFormData.phoneNumber || "",
           objective: parsedFormData?.objective || "",
           insurer: parsedFormData?.insurer || "",
           selectedOption: parsedFormData?.selectedOption || "yes",
@@ -91,6 +106,7 @@ export default function AppointmentPage() {
             ? new Date(parsedFormData.timeOfAppointment)
             : new Date(),
         });
+        setSelectedSpecialty(storedSpeciality);
         // setPills(
         //   parsedFormData?.objective ? parsedFormData.objective.split(", ") : []
         // );
@@ -181,16 +197,22 @@ export default function AppointmentPage() {
 
   const formik = useFormik({
     initialValues: {
-      objective: "",
-      availability: "anytime",
-      maxWait: 3,
-      insurer: "",
-      subscriberId: "",
-      insuranceType: "ppo",
-      selectedOption: "yes",
-      isNewPatient: "yes",
-      availabilityOption: "anytime",
-      timeOfAppointment: new Date(),
+      // objective: "",
+      // availability: "anytime",
+      // maxWait: 3,
+      // insurer: "",
+      // subscriberId: "",
+      // insuranceType: "ppo",
+      // selectedOption: "yes",
+      // isNewPatient: "yes",
+      // availabilityOption: "anytime",
+      // timeOfAppointment: new Date(),
+      patientName: formData.patientName || "",
+      phoneNumber: formData.phoneNumber || "",
+      email: formData.email || "",
+      address: formData.address || "",
+      dob: formData.dob ? new Date(formData.dob) : null, // Initialize with null or parsed date
+      gender: formData.gender || "", // Add gender to formik values
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -202,37 +224,48 @@ export default function AppointmentPage() {
         toast.error("Please fill up all the required information");
         return;
       }
-      if (selectedInsurance === false && values.insurer === "") {
-        setSelectedInsurance(true);
-      }
-      const updatedValues = {
-        groupId: values.groupId ?? "",
-        subscriberId: values.subscriberId,
-        objective: pills.length > 0 ? pills.join(", ") : values.objective,
-        insurer: values.insurer ?? "",
-        selectedOption:
-          selectedInsurance === true ||
-          (selectedInsurance === false && values.insurer === "")
-            ? "no"
-            : "yes",
-        availability: customAvailability
-          ? customAvailability
-          : availabilityOption,
-        availabilityOption,
-        specialty: savedSpecialty,
-        timeOfAppointment,
-        insuranceType: values.insuranceType,
-        maxWait: values.maxWait,
-        isNewPatient: isNewPatient ? "yes" : "no",
-        request_id: formData?.request_id,
+      // if (selectedInsurance === false && values.insurer === "") {
+      //   setSelectedInsurance(true);
+      // }
+      // const updatedValues = {
+      //   groupId: values.groupId ?? "",
+      //   subscriberId: values.subscriberId,
+      //   objective: pills.length > 0 ? pills.join(", ") : values.objective,
+      //   insurer: values.insurer ?? "",
+      //   selectedOption:
+      //     selectedInsurance === true ||
+      //     (selectedInsurance === false && values.insurer === "")
+      //       ? "no"
+      //       : "yes",
+      //   availability: customAvailability
+      //     ? customAvailability
+      //     : availabilityOption,
+      //   availabilityOption,
+      //   specialty: savedSpecialty,
+      //   timeOfAppointment,
+      //   insuranceType: values.insuranceType,
+      //   maxWait: values.maxWait,
+      //   isNewPatient: isNewPatient ? "yes" : "no",
+      //   request_id: formData?.request_id,
+      // };
+      // console.log(updatedValues);
+      const updatedFormData = {
+        ...formData,
+        ...values,
+        dob: formatDateToYYYYMMDD(values.dob),
       };
-      console.log(updatedValues);
+      console.log(updatedFormData);
+      // logPatientData(updatedFormData);
       setIsLoading(true);
-      logPatientData(updatedValues);
-      localStorage.setItem("formData", JSON.stringify(updatedValues));
-      setTimeout(() => {
-        router.push("/contact");
-      }, 1500);
+       // Simulate a 1-second delay
+       await new Promise((resolve) => setTimeout(resolve, 3000));
+
+       window.localStorage.setItem(
+         "formData",
+         JSON.stringify(updatedFormData)
+       );
+
+       router.push("/transcript?confirmed=true"); // Redirect after delay
     },
     validateOnChange: true,
     validateOnBlur: true,
@@ -331,7 +364,6 @@ export default function AppointmentPage() {
     Object.keys(formik.values).forEach((field) => {
       formik.setFieldTouched(field, true);
     });
-    formik.setFieldTouched("objective", true);
 
     // Validate all fields
     formik.validateForm().then((errors) => {
@@ -344,6 +376,11 @@ export default function AppointmentPage() {
       }
     });
   };
+  // Custom handler for date picker
+  const handleDateChange = (date) => {
+    formik.setFieldValue("dob", date);
+    formik.setFieldTouched("dob", true); // Mark as touched when changed
+  };
   useEffect(() => {
     const savedInsurer = localStorage.getItem("selectedInsurer");
     if (savedInsurer) {
@@ -352,17 +389,103 @@ export default function AppointmentPage() {
   }, []);
 
   return (
-    <div>
+    <>
       <NavbarSection />
       <form
         onSubmit={handleSubmit}
         className="flex flex-col justify-center items-center md:px-6 sm:px-10 mt-40 md:mt-16"
       >
         <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg ">
-          <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">
+          <p className="text-2xl sm:text-4xl mt-10 font-semibold text-[#333333]">
             Appointment Details
           </p>
-          <div className="w-full space-y-4 py-4">
+          <p className="text-xs text-gray-500 mt-1">We use this information to call the clinic and book your appointment</p>
+          <div className="space-y-6 py-6">
+            <div className="space-y-2">
+              <Label className="text-[#333333]">Patient name</Label>
+              <Input
+                className={
+                  formik.errors.patientName && formik.touched.patientName
+                    ? "border-red-500 rounded-none"
+                    : "border border-[#333333] rounded-md"
+                }
+                name="patientName"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.patientName}
+              />
+              {formik.errors.patientName && formik.touched.patientName && (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.patientName}
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[#333333]">Date of Birth </Label>
+              <div
+                className={`w-full ${
+                  formik.errors.dob && formik.touched.dob
+                    ? "date-picker-error"
+                    : ""
+                }`}
+              >
+                <DatePicker
+                  selected={formik.values.dob}
+                  onChange={handleDateChange}
+                  onBlur={formik.handleBlur}
+                  dateFormat="MM/dd/yyyy"
+                  showYearDropdown
+                  showMonthDropdown
+                  dropdownMode="select"
+                  yearDropdownItemNumber={100}
+                  scrollableYearDropdown
+                  maxDate={new Date()}
+                  autoComplete="off"
+                  aria-autocomplete="none"
+                  name="dob"
+                  className="w-full p-2 border rounded-none"
+                  wrapperClassName="w-full"
+                />
+              </div>
+              {formik.errors.dob && formik.touched.dob && (
+                <div className="text-red-500 text-sm">{formik.errors.dob}</div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[#333333]">Phone number</Label>
+              <Input
+                name="phoneNumber"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.phoneNumber}
+                className={
+                  formik.errors.phoneNumber && formik.touched.phoneNumber
+                    ? "border-red-500 rounded-none"
+                    : "border border-[#333333] rounded-md"
+                }
+              />
+              {formik.errors.phoneNumber && formik.touched.phoneNumber && (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.phoneNumber}
+                </div>
+              )}
+             <p className="text-xs text-gray-500 mt-1">Appointment confirmation will be sent to this phone number.</p>
+            </div>
+          </div>
+          <div
+              className=" mt-5 mb-20 text-[#E5573F] text-xs flex space-x-2 items-center cursor-pointer hover:underline"
+              onClick={() => {
+                // Save selected specialty before opening modal
+                if (selectedSpecialty) {
+                  localStorage.setItem("selectedSpecialty", selectedSpecialty);
+                }
+                setIsModalOpen(true);
+              }}
+            >
+              <p>Provide additional details to get appointments faster</p>
+              <ArrowRight className="hidden md:block" />
+            </div>
+          {/* <div className="w-full space-y-4 py-4">
             <Label className="text-sm space-y-2 text-[#333333BF]">
               What would you like to discuss?
             </Label>
@@ -405,8 +528,8 @@ export default function AppointmentPage() {
                 ))}
               </div>
             )}
-          </div>
-          <div className="flex flex-col space-y-4 pt-4">
+          </div> */}
+          {/* <div className="flex flex-col space-y-4 pt-4">
             <Label className="text-[#333333BF]">Patient availability</Label>
 
             <RadioGroup
@@ -461,20 +584,14 @@ export default function AppointmentPage() {
                     )}
                 </div>
               )}
-
-              {/* <div className="flex items-center space-x-2">
-                <RadioGroupItem value="link-calender" id="r3" />
-                <Label className="underline">Link your calendar</Label>
-              </div> */}
             </RadioGroup>
             {formik.touched.availability && formik.errors.availability && (
               <div className="text-red-500 text-sm">
                 {formik.errors.availability}
               </div>
             )}
-          </div>
-          <div className="space-y-6 pt-4">
-            {/* <Label className="text-[#333333BF] text-sm">Max Wait</Label> */}
+          </div> */}
+          {/* <div className="space-y-6 pt-4">
             <Slider
               //showTooltip={true}
               value={[formik.values.maxWait]}
@@ -494,11 +611,8 @@ export default function AppointmentPage() {
                 {formik.errors.maxWait}
               </div>
             )}
-          </div>
-          {/* <span className="text-xs block pt-8 text-[#E5573F]">
-            Longer wait time = better doctors
-          </span> */}
-          <div className="flex flex-col space-y-3 pt-4">
+          </div> */}
+          {/* <div className="flex flex-col space-y-3 pt-4">
             <div className="flex justify-between">
               <Label className="text-[#333333BF] text-base">Insurance</Label>
               <span className="text-sm text-gray-600 block pt-2">
@@ -550,9 +664,9 @@ export default function AppointmentPage() {
                 </div>
               </>
             )}
-          </div>
+          </div> */}
 
-          {!selectedInsurance && (
+          {/* {!selectedInsurance && (
             <div className="space-y-6">
               <div className="space-y-4 pt-4">
                 <Label className="text-[#333333BF] text-sm space-y-2">
@@ -598,7 +712,7 @@ export default function AppointmentPage() {
                 </div>
               )}
             </div>
-          )}
+          )} */}
 
           <div className="flex md:mt-12 mt-6 w-full">
             <Button
@@ -615,9 +729,19 @@ export default function AppointmentPage() {
               )}
             </Button>
           </div>
+          <span className="text-[#333333BF] text-sm">
+            By continuing, you authorize us to book an appointment on your
+            behalf.
+          </span>
         </div>
       </form>
+      {/* Quick Details Modal */}
+      <QuickDetailsModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        initialSpecialty={selectedSpecialty}
+      />
       <FooterSection />
-    </div>
+    </>
   );
 }
