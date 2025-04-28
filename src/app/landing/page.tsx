@@ -10,8 +10,6 @@ import {
   MapPin,
   Menu,
   Search,
-  User,
-  CalendarIcon,
   X,
 } from "lucide-react";
 import Image from "next/image";
@@ -24,16 +22,14 @@ import {
   medicalSpecialtiesOptions,
 } from "@/constants/store-constants";
 import Link from "next/link";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import DoctorCard from "./DoctorCard";
-import DoctorCardCarousel from "./components/DoctorCardCarousel";
-import TestSwiper from "./components/test";
+import DoctorCardCarousel from "../landing/components/DoctorCardCarousel";
+import TestSwiper from "../landing/components/test";
 import axios from "axios";
-import TestimonialCarousel from "./components/Testimonial";
-import TestimonialGrid from "./components/Testimonial";
-import Places from "./components/Places";
-import HealthConcerns from "./components/HealthConcerns";
+import TestimonialCarousel from "../landing/components/Testimonial";
+import TestimonialGrid from "../landing/components/Testimonial";
+import Places from "../landing/components/Places";
+import HealthConcerns from "../landing/components/HealthConcerns";
 import * as Yup from "yup";
 import { track } from "@vercel/analytics";
 import { useFormik } from "formik";
@@ -41,12 +37,11 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { log } from "console";
-import "./components/style.css";
-import AboutContentRight from "./components/AboutContentRight";
-import AboutContentLeft from "./components/AboutContentLeft";
+import "../landing/components/style.css";
+import AboutContentRight from "../landing/components/AboutContentRight";
+import AboutContentLeft from "../landing/components/AboutContentLeft";
 import { Footer } from "react-day-picker";
-import FooterSection from "./components/FooterSection";
-import QuickDetailsModal from "./components/QuickDetailsModal";
+import FooterSection from "../landing/components/FooterSection";
 
 const doctorTypes = [
   { value: "Primary care doctor", label: "Primary care doctor" },
@@ -107,21 +102,8 @@ const moreDoctorTypes = [
     label: "Nephrologist / Kidney Specialist",
   },
 ];
-// Custom styles for DatePicker
-const customDatePickerStyles = `
-  .react-datepicker__input-container input {
-    border: none;
-  }
-  .react-datepicker__input-container input::placeholder {
-    color: #737373;
-  }
-`;
 const validationSchema = Yup.object().shape({
-  specialty: Yup.string().required("Specialty is required"),
-  userName: Yup.string().required("Your name is required"),
-  dob: Yup.date()
-    .required("Date of birth is required")
-    .max(new Date(), "Date of birth cannot be in the future"),
+  specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
 const scrollToSection = (id: string, offset: number) => {
   const element = document.getElementById(id);
@@ -134,7 +116,6 @@ const scrollToSection = (id: string, offset: number) => {
 export default function LandingPage() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [selectedInsurer, setSelectedInsurer] = useState("");
   const [isLoading, setisLoading] = useState(false);
@@ -256,91 +237,25 @@ export default function LandingPage() {
     },
   ];
   useEffect(() => {
+    const storedSpeciality = localStorage.getItem("selectedSpecialty");
+    const selectedInsurer = localStorage.getItem("selectedInsurer");
+    if (storedSpeciality) {
+        setPrefilledSpecialty(storedSpeciality);
+        formik.setFieldValue("specialty", storedSpeciality);
+      }
+      if(selectedInsurer){
+        setSelectedInsurer(selectedInsurer);
+      }
+    fetchUserLocationAndPopularDrs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
     const script = document.createElement('script');
     script.src = '//js-na2.hs-scripts.com/242621305.js';
     script.async = true;
     script.defer = true;
     script.id = 'hs-script-loader';
     document.body.appendChild(script);
-  }, []);
-  useEffect(() => {
-    // Load saved data from localStorage on mount
-    const storedDoctors = localStorage.getItem("popularDoctors");
-    const storedSpeciality = localStorage.getItem("selectedSpecialty");
-    const storedLocation = localStorage.getItem("selectedLocation");
-    const formData = localStorage.getItem("formData");
-
-    if (formData) {
-      const parsedFormData = JSON.parse(formData);
-      if (parsedFormData.patientName) {
-        formik.setFieldValue("userName", parsedFormData.patientName);
-      }
-      if (parsedFormData.dob) {
-        formik.setFieldValue("dob", new Date(parsedFormData.dob));
-      }
-    }
-    if (storedSpeciality) {
-      setPrefilledSpecialty(storedSpeciality);
-      formik.setFieldValue("specialty", storedSpeciality);
-    }
-    if (storedLocation) {
-      const { lat, lng } = JSON.parse(storedLocation);
-      setSelectedLocation({ lat, lng });
-    }
-    if (storedDoctors) {
-      const parsedDoctors = JSON.parse(storedDoctors);
-      if (parsedDoctors?.length > 0) {
-        setpopulardoctors(parsedDoctors);
-        return;
-      }
-    }
-
-    const defaultLat = 37.7749; // Default latitude (e.g., San Francisco)
-    const defaultLng = -122.4194; // Default longitude (e.g., San Francisco)
-
-    // If geolocation is not supported by the browser
-    if (!navigator.geolocation) {
-      getLocationFromIP();
-      return;
-    }
-    // If geolocation is supported, try to get user's position
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-
-        try {
-          // Fetch the address using Google Maps Geocoding API
-          const geocodeResponse = await axios.get(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
-          );
-
-          const address =
-            geocodeResponse.data.results[0]?.formatted_address || "";
-          setSelectedLocation({ lat, lng });
-          setAddressLocation(address); // Set the fetched address
-          localStorage.setItem("selectedAddress", address);
-          localStorage.setItem(
-            "selectedLocation",
-            JSON.stringify({ lat, lng })
-          );
-
-          const popularDoctors = await getPopularDrs(lat, lng);
-          if (popularDoctors?.results?.length > 0) {
-            const doctorlists = popularDoctors?.results?.slice(0, 20);
-            setpopulardoctors(doctorlists);
-            localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
-          }
-        } catch (error) {
-          console.error("Error fetching address or popular doctors:", error);
-          await getLocationFromIP();
-        }
-      },
-      async (error) => {
-        console.log("Error getting location:", error);
-        await getLocationFromIP();
-      }
-    );
   }, []);
   const getPopularDrs = async (lat, lng) => {
     try {
@@ -360,69 +275,117 @@ export default function LandingPage() {
     }
   };
 
-  // Function to get location from IP address
-  const getLocationFromIP = async () => {
-    console.log("fetching location from ip....");
-    try {
-      // Use IP-based geolocation as fallback
-      const ipGeolocationResponse = await axios.get("https://ipapi.co/json/");
-      if (
-        ipGeolocationResponse.data &&
-        ipGeolocationResponse.data.latitude &&
-        ipGeolocationResponse.data.longitude
-      ) {
-        const lat = ipGeolocationResponse.data.latitude;
-        const lng = ipGeolocationResponse.data.longitude;
-        const city = ipGeolocationResponse.data.city;
-        const ip_address = ipGeolocationResponse.data.ip;
-        const region = ipGeolocationResponse.data.region;
-        const country = ipGeolocationResponse.data.country_name;
-        const formattedAddress = `${city}, ${region}, ${country}`;
-        setSelectedLocation({ lat, lng });
-        setAddressLocation(formattedAddress);
-        localStorage.setItem("ipAddress", ip_address);
-        localStorage.setItem("selectedAddress", formattedAddress);
-        localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
-
-        const popularDoctors = await getPopularDrs(lat, lng);
-        if (popularDoctors?.results?.length > 0) {
-          const doctorlists = popularDoctors?.results?.slice(0, 20);
-          setpopulardoctors(doctorlists);
-          localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
-        }
-      } else {
-        // IP geolocation failed, use default location
-        toast.error(
-          "Could not determine your location. Using default location."
-        );
-        getDefaultLocation();
+  const fetchUserLocationAndPopularDrs = async () => {
+    const storedDoctors = localStorage.getItem("popularDoctors");
+    const storedAddress = localStorage.getItem("selectedAddress");
+    const storedLocation = localStorage.getItem("selectedLocation");
+    if (storedAddress) {
+      setAddressLocation(storedAddress);
+    }
+    if (storedLocation) {
+      const { lat, lng } = JSON.parse(storedLocation);
+      setSelectedLocation({ lat, lng });
+    }
+    if (storedDoctors) {
+      const parsedDoctors = JSON.parse(storedDoctors);
+      if (parsedDoctors?.length > 0) {
+        setpopulardoctors(parsedDoctors);
+        return;
       }
-    } catch (error) {
-      console.error("Error with IP geolocation:", error);
-      toast.error("Could not determine your location. Using default location.");
-      getDefaultLocation();
     }
-  };
 
-  // Function to use default location when all else fails
-  const getDefaultLocation = async () => {
-    const defaultLat = 37.7749; // San Francisco
-    const defaultLng = -122.4194;
-    setSelectedLocation({ lat: defaultLat, lng: defaultLng });
-    setAddressLocation("San Francisco, CA, USA");
-    localStorage.setItem("selectedAddress", "San Francisco, CA, USA");
-    localStorage.setItem(
-      "selectedLocation",
-      JSON.stringify({ lat: defaultLat, lng: defaultLng })
+    const defaultLat = 37.7749; // Default latitude (e.g., San Francisco)
+    const defaultLng = -122.4194; // Default longitude (e.g., San Francisco)
+
+    if (!navigator.geolocation) {
+      getLocationFromIP();
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        try {
+          // Fetch the address using Google Maps Geocoding API
+          const geocodeResponse = await axios.get(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
+          );
+
+          const address =
+            geocodeResponse.data.results[0]?.formatted_address || "";
+          // console.log(address)
+          setSelectedLocation({ lat, lng });
+          setAddressLocation(address); // Set the fetched address
+          localStorage.setItem("selectedAddress", address);
+          localStorage.setItem(
+            "selectedLocation",
+            JSON.stringify({ lat, lng })
+          );
+
+          const popularDoctors = await getPopularDrs(lat, lng);
+          if (popularDoctors?.results?.length > 0) {
+            const doctorlists = popularDoctors?.results?.slice(0, 20);
+            setpopulardoctors(doctorlists);
+            localStorage.setItem(
+              "popularDoctors",
+              JSON.stringify(doctorlists)
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching address or popular doctors:", error);
+          await getLocationFromIP();
+        }
+      },
+      async (error) => {
+        console.error("Error getting location:", error);
+        await getLocationFromIP();
+      }
     );
-
-    const popularDoctors = await getPopularDrs(defaultLat, defaultLng);
-    if (popularDoctors?.results?.length > 0) {
-      const doctorlists = popularDoctors?.results?.slice(0, 20);
-      setpopulardoctors(doctorlists);
-      localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
-    }
   };
+    // Function to get location from IP address
+    const getLocationFromIP = async () => {
+        console.log("fetching location from ip....");
+        try {
+            // Use IP-based geolocation as fallback
+            const ipGeolocationResponse = await axios.get("https://ipapi.co/json/");
+            if (
+            ipGeolocationResponse.data &&
+            ipGeolocationResponse.data.latitude &&
+            ipGeolocationResponse.data.longitude
+            ) {
+            const lat = ipGeolocationResponse.data.latitude;
+            const lng = ipGeolocationResponse.data.longitude;
+            const city = ipGeolocationResponse.data.city;
+            const ip_address = ipGeolocationResponse.data.ip;
+            const region = ipGeolocationResponse.data.region;
+            const country = ipGeolocationResponse.data.country_name;
+            const formattedAddress = `${city}, ${region}, ${country}`;
+            setSelectedLocation({ lat, lng });
+            setAddressLocation(formattedAddress);
+            localStorage.setItem("ipAddress", ip_address);
+            localStorage.setItem("selectedAddress", formattedAddress);
+            localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
+
+            const popularDoctors = await getPopularDrs(lat, lng);
+            if (popularDoctors?.results?.length > 0) {
+                const doctorlists = popularDoctors?.results?.slice(0, 20);
+                setpopulardoctors(doctorlists);
+                localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+            }
+            } else {
+            // IP geolocation failed, use default location
+            toast.error(
+                "Could not determine your location. Using default location."
+            );
+            getDefaultLocation();
+            }
+        } catch (error) {
+            console.error("Error with IP geolocation:", error);
+            toast.error("Could not determine your location. Using default location.");
+            getDefaultLocation();
+        }
+    };
   const logRequestInfo = async () => {
     const savedAddress = localStorage.getItem("selectedAddress");
     const ipAddress = localStorage.getItem("ipAddress");
@@ -445,8 +408,7 @@ export default function LandingPage() {
   const formik = useFormik({
     initialValues: {
       specialty: prefilledSpecialty || "",
-      userName: "",
-      dob: null,
+      insurance_carrier: "",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -460,9 +422,8 @@ export default function LandingPage() {
         toast.error("No location selected");
         return;
       }
-      const storedLocation = localStorage.getItem("selectedLocation");
       try {
-        const { lat, lng } = JSON.parse(storedLocation);
+        const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
         localStorage.setItem("selectedSpecialty", values.specialty);
         localStorage.setItem("selectedInsurer", values.insurance_carrier);
         localStorage.setItem(
@@ -470,9 +431,8 @@ export default function LandingPage() {
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
 
-        // Call logRequestInfo and get the promise
+        // Call logRequestInfo without awaiting
         const requestIdPromise = logRequestInfo();
-
         const speciality_value =
           formik.values.specialty === "Prescription / Refill"
             ? "Primary Care Physician"
@@ -482,52 +442,25 @@ export default function LandingPage() {
           radius: 20000,
           keyword: speciality_value,
         };
-
-        // Make API call to search places
         const response = await axios.post(
           "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
           data
         );
 
-        // Wait for the request ID promise to resolve
-        const request_id = await requestIdPromise;
-
-        // Once request_id is available, update formData
-        if (request_id) {
-          const updatedValues = {
-            ...values,
-            request_id,
-            patientName: values.userName, // Add userName as patientName for compatibility
-          };
-
-          // Get existing form data if it exists
-          const existingFormData = localStorage.getItem("formData");
-          let mergedValues = updatedValues;
-
-          if (existingFormData) {
-            try {
-              const parsedExistingData = JSON.parse(existingFormData);
-              // Merge existing data with new values (new values take precedence)
-              mergedValues = { ...parsedExistingData, ...updatedValues };
-            } catch (error) {
-              console.error("Error parsing existing form data:", error);
-            }
+        // Handle request_id when the promise resolves
+        requestIdPromise.then((request_id) => {
+          if (request_id) {
+            const updatedValues = { ...values, request_id };
+            localStorage.setItem("formData", JSON.stringify(updatedValues));
           }
+        });
 
-          // Save the updated form data to localStorage
-          localStorage.setItem("formData", JSON.stringify(mergedValues));
-        }
-
-        // Save search results to localStorage
         localStorage.setItem("statusData", JSON.stringify(response.data));
         localStorage.setItem("lastSearchSource", "home"); // Track last search source
-
-        // Now that everything is saved to localStorage, navigate to transcript page
-        router.push("/transcript?confirmed=true");
+        router.push("/search-doctor");
       } catch (error) {
         console.error("Error submitting form:", error);
-        toast.error("An error occurred. Please try again.");
-        setisLoading(false);
+        setisLoading(false)
       }
     },
   });
@@ -554,7 +487,10 @@ export default function LandingPage() {
 
         // Store in localStorage
         localStorage.setItem("selectedAddress", formattedAddress);
-        localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
+        localStorage.setItem(
+          "selectedLocation",
+          JSON.stringify({ lat, lng })
+        );
       }
     }
   };
@@ -567,10 +503,6 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">
       {/* Navbar */}
-      {/* Add style tag for custom DatePicker styling */}
-      <style jsx global>
-        {customDatePickerStyles}
-      </style>
       <nav className="fixed top-0 w-full bg-[#FCF8F1] shadow-sm p-4 flex justify-between items-center z-50  text-sm nav-header">
         <div className="flex justify-between items-center gap-6 ">
           <Image
@@ -755,7 +687,7 @@ export default function LandingPage() {
                 Book top rated doctors near you
               </h2>
               <h2 className="text-xl font-normal">
-                Let our AI call clinics and secure your appointment for free
+                Let our AI call clinics and secure your appointment for free.
               </h2>
             </div>
 
@@ -788,84 +720,62 @@ export default function LandingPage() {
                       />
                     </div>
                   </div>
-                  {/* Name section (replacing insurer section) */}
+                  {/* Insurer section */}
                   <div className="flex items-center w-full sm:w-auto sm:flex-1">
                     <div className="flex items-center justify-center px-3">
-                      <User className="w-5 h-5 text-gray-500" />
+                      <BookText className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1 border-gray-400 md:border-none">
-                      <Input
-                        id="userName"
-                        name="userName"
-                        className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none"
-                        placeholder="Patient name"
-                        autoComplete="off"
-                        aria-autocomplete="none"
-                        value={formik.values.userName || ""}
-                        onChange={(e) => {
-                          formik.setFieldValue("userName", e.target.value);
+                    <div className="flex-1  border-gray-400 md:border-none">
+                      <Autocomplete
+                        id="insurer"
+                        name="insurer"
+                        className="w-full"
+                        options={insuranceCarrierOptions}
+                        placeholder="Insurance carrier (optional)"
+                        value={selectedInsurer}
+                        selected={formik.values.insurance_carrier}
+                        onChange={(value) => {
+                          formik.setFieldValue("insurance_carrier", value);
+                          setSelectedInsurer(value);
                         }}
+                        clearable={false}
                       />
                     </div>
-                    {formik.errors.userName && formik.touched.userName && (
-                      <div className="text-red-500 text-xs px-2">
-                        {formik.errors.userName}
-                      </div>
-                    )}
                   </div>
-                  {/* DOB section (replacing Location section) */}
+                  {/* Location section */}
                   <div className="flex items-center w-full sm:flex-1">
                     <div className="flex items-center justify-center px-3 h-full">
-                      <CalendarIcon className="w-5 h-5 text-gray-500" />
+                      <MapPin className="w-5 h-5 text-gray-500" />
                     </div>
                     <div className="flex-1">
-                      <DatePicker
-                        selected={formik.values.dob}
-                        onChange={(date) => {
-                          formik.setFieldValue("dob", date);
-                          formik.setFieldTouched("dob", true);
-                        }}
-                        onBlur={() => formik.setFieldTouched("dob", true)}
-                        dateFormat="MM/dd/yyyy"
-                        showYearDropdown
-                        showMonthDropdown
-                        dropdownMode="select"
-                        yearDropdownItemNumber={100}
-                        scrollableYearDropdown
-                        maxDate={new Date()}
-                        autoComplete="off"
-                        aria-autocomplete="none"
-                        placeholderText="Date of birth"
-                        className="md:w-full border-none!important focus:ring-0 focus:outline-none h-12 !pl-4  md:!pl-0 pr-2 shadow-none text-[15px]"
-                        wrapperClassName="w-full"
-                      />
+                      {isLoaded && (
+                        <StandaloneSearchBox
+                          onLoad={(ref) => (inputRefs.current[0] = ref)}
+                          onPlacesChanged={() => handleOnPlacesChanged(0)}
+                        >
+                          <Input
+                            type="text"
+                            placeholder="Address, city, zip code"
+                            className="w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none text-ellipsis"
+                            value={addressLocation || ""}
+                            onChange={(e) => setAddressLocation(e.target.value)}
+                            autoComplete="off"
+                            aria-autocomplete="none"
+                          />
+                        </StandaloneSearchBox>
+                      )}
                     </div>
                   </div>
                   <div className="mx-3">
-                    <Button
-                      className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 my-4 h-12 items-center justify-center w-full md:w-auto md:hidden"
-                      disabled={
-                        isLoading ||
-                        !formik.values.specialty ||
-                        !selectedLocation ||
-                        !formik.values.userName ||
-                        !formik.values.dob
-                      }
-                      onClick={formik.handleSubmit}
-                      type="submit"
-                    >
-                      <Search className="w-5 h-5 text-white" /> Book
+                    <Button className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 my-4 h-12 items-center justify-center w-full md:w-auto md:hidden">
+                      <Search className="w-5 h-5 text-white" /> Search
                     </Button>
                   </div>
                 </div>
               </div>
               <Button
                 disabled={
-                  isLoading ||
-                  !formik.values.specialty ||
-                  !selectedLocation ||
-                  !formik.values.userName ||
-                  !formik.values.dob
+                  isLoading || !formik.values.specialty || !selectedLocation
                 }
                 onClick={formik.handleSubmit} // Explicitly trigger form submission
                 type="submit"
@@ -875,28 +785,15 @@ export default function LandingPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 text-white animate-spin" />{" "}
-                    Booking
+                    Searching
                   </>
                 ) : (
                   <>
-                    <Search className="w-5 h-5 text-white" /> Book
+                    <Search className="w-5 h-5 text-white" /> Search
                   </>
                 )}
               </Button>
             </form>
-            <div
-              className="text-[#E5573F] flex space-x-2 items-center   cursor-pointer hover:underline"
-              onClick={() => {
-                // Save selected specialty before opening modal
-                if (selectedSpecialty) {
-                  localStorage.setItem("selectedSpecialty", selectedSpecialty);
-                }
-                setIsModalOpen(true);
-              }}
-            >
-              <p>Provide additional details to get appointments faster</p>
-              <ArrowRight className="hidden md:block" />
-            </div>
 
             {/* Specialty Selection */}
             <ScrollArea className="w-full whitespace-nowrap md:flex gap-4 md:pt-4 pt-0 hidden">
@@ -1042,7 +939,7 @@ export default function LandingPage() {
 
         <section
           id="doctors"
-          className="flex flex-col items-center justify-center gap-4 bg-[#FCF8F2] border-b md:pt-16 md:pb-16 py-8 pb-16 px-0"
+          className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2] border-b md:pt-16 md:pb-16 py-8 pb-16 px-0"
         >
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
             Top-rated doctors near me
@@ -1186,13 +1083,6 @@ export default function LandingPage() {
         {/* Footer Section */}
         <FooterSection />
       </main>
-
-      {/* Quick Details Modal */}
-      <QuickDetailsModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        initialSpecialty={selectedSpecialty}
-      />
     </div>
   );
 }
