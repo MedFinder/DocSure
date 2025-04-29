@@ -60,6 +60,7 @@ interface ContentRightProps {
     }
   ];
   scrollToSection: (a: string, b: number) => void;
+  updateprefillAvailability: () => void;
   title: string;
   subtitle?: string;
   Component?: React.ComponentType<any>;
@@ -69,6 +70,7 @@ interface ContentRightProps {
 const AboutContentLeft: React.FC<ContentRightProps> = ({
   insuranceRightLogos,
   scrollToSection,
+  updateprefillAvailability,
   title,
   subtitle,
 }) => {
@@ -149,7 +151,9 @@ const AboutContentLeft: React.FC<ContentRightProps> = ({
             <Link
               onClick={(e) => {
                 e.preventDefault();
-                scrollToSection("home", 40);
+                // scrollToSection("home", 40);
+                updateprefillAvailability &&
+                  updateprefillAvailability();
               }}
               href=""
               className=" text-[#E5573F] flex gap-1 pt-12 hover:text-black"

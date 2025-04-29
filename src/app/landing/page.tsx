@@ -43,6 +43,19 @@ import AboutContentLeft from "../landing/components/AboutContentLeft";
 import { Footer } from "react-day-picker";
 import FooterSection from "../landing/components/FooterSection";
 
+// Add global spinner component
+const GlobalSpinner = ({ isVisible }) => {
+  if (!isVisible) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+      <div className="bg-white p-5 rounded-full">
+        <Loader2 className="w-10 h-10 text-[#E5573F] animate-spin" />
+      </div>
+    </div>
+  );
+};
+
 const doctorTypes = [
   { value: "Primary care doctor", label: "Primary care doctor" },
   {
@@ -105,13 +118,6 @@ const moreDoctorTypes = [
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
-const scrollToSection = (id: string, offset: number) => {
-  const element = document.getElementById(id);
-  if (element) {
-    const topPosition = element.offsetTop - offset; // Calculate position with offset
-    window.scrollTo({ top: topPosition, behavior: "smooth" });
-  }
-};
 
 export default function LandingPage() {
   const router = useRouter();
@@ -119,6 +125,7 @@ export default function LandingPage() {
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [selectedInsurer, setSelectedInsurer] = useState("");
   const [isLoading, setisLoading] = useState(false);
+  const [globalLoading, setGlobalLoading] = useState(false); // Add state for global spinner
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [prefilledAddress, setPrefilledAddress] = useState(""); // State for prefilled address
   const [prefilledSpecialty, setPrefilledSpecialty] = useState(""); // State for prefilled specialty
@@ -131,8 +138,16 @@ export default function LandingPage() {
     formik.setFieldValue("specialty", value);
     setSelectedSpecialty(value); // Update specialty when button is clicked
   };
+  const scrollToSection = (id: string, offset: number) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const topPosition = element.offsetTop - offset; // Calculate position with offset
+      window.scrollTo({ top: topPosition, behavior: "smooth" });
+    }
+  };
   const checkPrefillAvailability = (value: string) => {
-    scrollToSection("home", 40); // Scroll to the "home" section
+    setGlobalLoading(true); // Set global loading to true when starting the process
+    // scrollToSection("home", 40); // Scroll to the "home" section
     handleDoctorTypeClick("Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
     formik.handleSubmit(); // Trigger formik's onSubmit function
   };
@@ -416,11 +431,13 @@ export default function LandingPage() {
       track("Homepage_Search_Btn_Clicked");
       if (values.specialty === "unsure" || values.specialty === "Other") {
         router.push("/coming-soon");
+        setGlobalLoading(false); // Turn off global loading if redirecting
         return;
       }
       setisLoading(true);
       if (!selectedLocation) {
         toast.error("No location selected");
+        setGlobalLoading(false); // Turn off global loading if there's an error
         return;
       }
       try {
@@ -459,9 +476,11 @@ export default function LandingPage() {
         localStorage.setItem("statusData", JSON.stringify(response.data));
         localStorage.setItem("lastSearchSource", "home"); // Track last search source
         router.push("/search-doctor");
+        // Note: We don't need to turn off global loading here as we're navigating away
       } catch (error) {
         console.error("Error submitting form:", error);
-        setisLoading(false)
+        setisLoading(false);
+        setGlobalLoading(false); // Turn off global loading if there's an error
       }
     },
   });
@@ -503,6 +522,9 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">
+      {/* Global Loading Spinner */}
+      <GlobalSpinner isVisible={globalLoading} />
+      
       {/* Navbar */}
       <nav className="fixed top-0 w-full bg-[#FCF8F1] shadow-sm p-4 flex justify-between items-center z-50  text-sm nav-header">
         <div className="flex justify-between items-center gap-6 ">
@@ -593,7 +615,8 @@ export default function LandingPage() {
           <Button
             onClick={(e) => {
               e.preventDefault();
-              scrollToSection("home", 40);
+              // scrollToSection("home", 40);
+              checkPrefillAvailability()
             }}
             className="text-white bg-[#0074BA] rounded-md"
           >
@@ -850,17 +873,20 @@ export default function LandingPage() {
           <div className="about_wrapper mx-auto py-[7%] px-[10px]">
             <AboutContentLeft
               scrollToSection={scrollToSection}
+              updateprefillAvailability={checkPrefillAvailability}
               insuranceLeftLogos={insuranceLeftLogos}
               title="Find doctors in any insurance network"
               ImgDisplayFor="InsuranceNetwork"
             />
             <AboutContentRight
               scrollToSection={scrollToSection}
+              updateprefillAvailability={checkPrefillAvailability}
               insuranceRightLogos={insuranceRightLogos}
               title="Find providers at top health systems"
             />
             <AboutContentLeft
               scrollToSection={scrollToSection}
+              updateprefillAvailability={checkPrefillAvailability}
               title="Find doctors accepting new patients"
               subtitle="Same-day and last-minute appointments"
               ImgDisplayFor="NewPatient"
@@ -1062,7 +1088,8 @@ export default function LandingPage() {
             <Link
               onClick={(e) => {
                 e.preventDefault();
-                scrollToSection("home", 40);
+               // scrollToSection("home", 40);
+                checkPrefillAvailability()
               }}
               href=""
               className=" flex justify-center gap-1 pt-12 hover:text-gray-700"
