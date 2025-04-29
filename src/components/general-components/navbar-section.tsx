@@ -77,6 +77,7 @@ export default function NavbarSection({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedSpecialty = localStorage.getItem("selectedSpecialty");
+      const selectedInsurer = localStorage.getItem("selectedInsurer");
       const formData = localStorage.getItem("formData");
       if (formData) {
         const parsedFormData = JSON.parse(formData);
@@ -88,6 +89,9 @@ export default function NavbarSection({
       if (savedSpecialty) {
         setSpecialty(savedSpecialty);
         formik.setFieldValue("specialty", savedSpecialty);
+      }
+      if(selectedInsurer){
+        formik.setFieldValue("insurance_carrier", selectedInsurer);
       }
       const savedAddress = localStorage.getItem("selectedAddress");
       const savedAddressLocation = localStorage.getItem("selectedLocation");

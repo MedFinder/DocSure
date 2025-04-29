@@ -650,7 +650,7 @@ export default function SearchDoctorPage() {
                   </Button>
                 </div>
               </div> */}
-              <div className="flex md:hidden px-2 py-2 text-sm items-center border">
+              {/* <div className="flex md:hidden px-2 py-2 text-sm items-center border">
                 <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
                   <Checkbox
                     id="open-now"
@@ -662,7 +662,6 @@ export default function SearchDoctorPage() {
                   </Label>
                 </div>
                 <div className="flex gap-2 pl-2">
-                  {/* Rating Dropdown */}
                   <DropdownMenu onOpenChange={(open) => setIsRatingOpen(open)}>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -725,7 +724,6 @@ export default function SearchDoctorPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  {/* Distance Dropdown */}
                   <DropdownMenu onOpenChange={setIsDistanceOpen}>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -770,7 +768,7 @@ export default function SearchDoctorPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              </div>
+              </div> */}
               <DndContext
                 onDragEnd={handleDragEnd}
                 collisionDetection={closestCenter}

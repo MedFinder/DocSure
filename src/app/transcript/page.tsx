@@ -850,11 +850,6 @@ export default function Transcript() {
     currentindex: number,
     request_id: string
   ) => {
-    if (!isAutoCallEnabledRef.current) {
-      toast.info("Auto-call is disabled. Calls will not proceed.");
-      return; // Exit if the switch is off
-    }
-
     // console.log(id,currentindex,request_id)
     setIsPreferencesReinitialized(false);
     setIsPreferencesUpdated(false);
@@ -987,14 +982,19 @@ export default function Transcript() {
             );
           } else {
             if (callStatusRef.current.ssid === data?.call_sid) {
-              toast.warning(
-                "Appointment could not be booked. Trying next doctor..."
-              );
-              moveToNextDoctor(
-                null,
-                activeCallIndexRef.current,
-                formData.request_id
-              );
+              if (!isAutoCallEnabledRef.current) {
+                toast.info("Auto-call is disabled. Calls will not proceed.");
+                return; // Exit if the switch is off
+              }else {
+                toast.warning(
+                  "Appointment could not be booked. Trying next doctor..."
+                );
+                moveToNextDoctor(
+                  null,
+                  activeCallIndexRef.current,
+                  formData.request_id
+                );
+              }
             }
           }
         }, 5000);
