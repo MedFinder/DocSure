@@ -421,7 +421,22 @@ export default function SearchDoctorPage() {
       };
       logPatientData(updatedValues);
 
-      localStorage.setItem("formData", JSON.stringify(updatedValues));
+      // Get existing form data if it exists
+      const existingFormData = localStorage.getItem("formData");
+      let mergedValues = updatedValues;
+
+      if (existingFormData) {
+        try {
+          const parsedExistingData = JSON.parse(existingFormData);
+          // Merge existing data with new values (new values take precedence)
+          mergedValues = { ...parsedExistingData, ...updatedValues };
+        } catch (error) {
+          console.error("Error parsing existing form data:", error);
+        }
+      }
+
+      // Save the updated form data to localStorage
+      localStorage.setItem("formData", JSON.stringify(mergedValues));
 
       setTimeout(() => {
         router.push("/appointment");
@@ -603,7 +618,7 @@ export default function SearchDoctorPage() {
           onSubmit={formik.handleSubmit}
         >
           <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3  border-t-0 text-sm h-[60px] shrink-0">
-            <div className="flex gap-2 items-center">
+            <div className="md:flex hidden gap-2 items-center">
               <Image
                 src="/Group 198.svg"
                 alt="Verified Logo"

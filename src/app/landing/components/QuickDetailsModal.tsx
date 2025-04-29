@@ -604,7 +604,8 @@ export default function QuickDetailsModal({
                   </div>
                 </>
               )}
-              <div className="space-y-2">
+              {updatePreferences && 
+                <div className="space-y-2">
                 <Label className="text-[#333333BF] text-sm">Phone number</Label>
                 <Input
                   className={
@@ -626,7 +627,8 @@ export default function QuickDetailsModal({
                     {formik.errors.phoneNumber}
                   </div>
                 )}
-              </div>
+                </div>
+              }
               <div className="space-y-3">
                 <div className="flex justify-between pb-5">
                   <Label className="text-[#333333BF] text-base">Insurance</Label>
