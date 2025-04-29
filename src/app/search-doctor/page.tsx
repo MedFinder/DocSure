@@ -165,18 +165,24 @@ export default function SearchDoctorPage() {
       const searchData = await JSON.parse(localStorage.getItem("searchData"));
       const lat = searchData?.lat || 0;
       const lng = searchData?.lng || 0;
-      
+
       // Retrieve the fetch_open_now parameter from the last search
       let fetch_open_now = "false";
       const lastSearchSource = localStorage.getItem("lastSearchSource");
-      const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
-      const previousSearchData = JSON.parse(localStorage.getItem(storageKey) || "{}");
-      
+      const storageKey =
+        lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+      const previousSearchData = JSON.parse(
+        localStorage.getItem(storageKey) || "{}"
+      );
+
       // Check if fetch_open_now was part of the previous search
-      if (previousSearchData && typeof previousSearchData.fetch_open_now !== "undefined") {
+      if (
+        previousSearchData &&
+        typeof previousSearchData.fetch_open_now !== "undefined"
+      ) {
         fetch_open_now = previousSearchData.fetch_open_now;
       }
-      
+
       const response = await axios.post(
         "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
         {
@@ -423,28 +429,87 @@ export default function SearchDoctorPage() {
     },
   });
 
-  const handleFormSubmit = () => {
-    // Touch all fields to trigger validation
-    // formik.validateForm().then((errors) => {
-    //   // If there are validation errors
-    //   if (Object.keys(errors).length > 0) {
-    //     // Set all fields as touched to show validation errors
-    //     const touchedFields = {};
-    //     Object.keys(formik.values).forEach((key) => {
-    //       touchedFields[key] = true;
-    //     });
-    //     formik.setTouched(touchedFields);
+  // const handleFormSubmit = () => {
+  //   // Touch all fields to trigger validation
+  //   // formik.validateForm().then((errors) => {
+  //   //   // If there are validation errors
+  //   //   if (Object.keys(errors).length > 0) {
+  //   //     // Set all fields as touched to show validation errors
+  //   //     const touchedFields = {};
+  //   //     Object.keys(formik.values).forEach((key) => {
+  //   //       touchedFields[key] = true;
+  //   //     });
+  //   //     formik.setTouched(touchedFields);
 
-    //     // Show toast error
-    //     toast.error("Please fill up all the required information");
-    //     return;
-    //   }
+  //   //     // Show toast error
+  //   //     toast.error("Please fill up all the required information");
+  //   //     return;
+  //   //   }
 
-    //   // If no errors, submit the form
-    //   formik.handleSubmit();
-    // });
+  //   //   // If no errors, submit the form
+  //   //   formik.handleSubmit();
+  //   // });
+  // formik.handleSubmit();
+  // };
+
+  //this one moves it to the top before switching to next page but booking shows
+
+  const handleFormSubmit = async (index: number) => {
+    // Move the selected doctor to the top of the list
+    const newDoctors = [...doctors];
+    const selectedDoctor = newDoctors.splice(index, 1)[0]; // Remove the selected doctor
+    newDoctors.unshift(selectedDoctor); // Add the selected doctor to the top
+
+    // Update the state with the new order
+    setDoctors(newDoctors);
+
+    // Update localStorage with the new order
+    const lastSearchSource = localStorage.getItem("lastSearchSource");
+    const storageKey =
+      lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+
+    const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+
+    const updatedData = {
+      ...currentData,
+      results: newDoctors,
+    };
+
+    localStorage.setItem(storageKey, JSON.stringify(updatedData));
     formik.handleSubmit();
+
+    // Simulate form submission delay
+    return new Promise((resolve) => setTimeout(resolve, 3000));
   };
+  // const handleFormSubmit = async (index: number) => {
+  //   // Keep the doctors list as is in the UI
+  //   const newDoctors = [...doctors];
+
+  //   // Update localStorage with the selected doctor moved to the top
+  //   const selectedDoctor = newDoctors.splice(index, 1)[0]; // Remove the selected doctor
+  //   newDoctors.unshift(selectedDoctor); // Add the selected doctor to the top
+
+  //   // Perform form submission
+  //   formik.handleSubmit();
+
+  //   // Wait for navigation to complete
+  //   setTimeout(() => {
+  //     // Update localStorage after navigation
+  //     const lastSearchSource = localStorage.getItem("lastSearchSource");
+  //     const storageKey =
+  //       lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+
+  //     const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+
+  //     const updatedData = {
+  //       ...currentData,
+  //       results: newDoctors, // Update with the reordered list
+  //     };
+
+  //     localStorage.setItem(storageKey, JSON.stringify(updatedData));
+  //   }, 1500); // Delay to ensure navigation is complete
+  // };
+
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
     libraries: ["places"],
@@ -526,7 +591,7 @@ export default function SearchDoctorPage() {
           <p className="text-gray-500 mt-2">
             We could not find any doctors that meet this criteria.
           </p>
-          <Link href="/demo">
+          <Link href="/">
             <Button className=" bg-[#7DA1B7] text-white px-6 py-5 mt-8 w-full sm:w-auto">
               Search Again
             </Button>
@@ -537,7 +602,7 @@ export default function SearchDoctorPage() {
           className="flex flex-col flex-grow overflow-hidden"
           onSubmit={formik.handleSubmit}
         >
-          <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3 border border-t-0 border-b-1 text-sm h-[60px] shrink-0">
+          <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3  border-t-0 text-sm h-[60px] shrink-0">
             <div className="flex gap-2 items-center">
               <Image
                 src="/Group 198.svg"
@@ -571,7 +636,7 @@ export default function SearchDoctorPage() {
                 isMapView ? "hidden md:block" : "block"
               }`}
             >
-              <div className="md:flex hidden justify-between px-4 py-2 text-sm items-center">
+              {/* <div className="md:flex hidden justify-between px-4 py-2 text-sm items-center">
                 <div className="flex gap-2">
                   Docsure AI will call top-rated doctors in this sequence, seek
                   an appointment for you, and enquire about insurance.
@@ -584,8 +649,8 @@ export default function SearchDoctorPage() {
                     {isLoading ? "Booking..." : "Book appointment"}
                   </Button>
                 </div>
-              </div>
-              <div className="flex md:hidden px-2 py-2 text-sm items-center border">
+              </div> */}
+              {/* <div className="flex md:hidden px-2 py-2 text-sm items-center border">
                 <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
                   <Checkbox
                     id="open-now"
@@ -597,7 +662,6 @@ export default function SearchDoctorPage() {
                   </Label>
                 </div>
                 <div className="flex gap-2 pl-2">
-                  {/* Rating Dropdown */}
                   <DropdownMenu onOpenChange={(open) => setIsRatingOpen(open)}>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -660,7 +724,6 @@ export default function SearchDoctorPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  {/* Distance Dropdown */}
                   <DropdownMenu onOpenChange={setIsDistanceOpen}>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -705,12 +768,12 @@ export default function SearchDoctorPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              </div>
+              </div> */}
               <DndContext
                 onDragEnd={handleDragEnd}
                 collisionDetection={closestCenter}
               >
-                <ScrollArea className="h-[90%] w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0 overflow-y-auto">
+                <ScrollArea className="h-[100%] w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0 overflow-y-auto">
                   <div className="flex flex-col md:flex-row w-full">
                     <Column
                       activeCallIndex={activeCallIndex}
@@ -725,6 +788,8 @@ export default function SearchDoctorPage() {
                       isAppointmentBooked={isAppointmentBooked}
                       wsRef={wsRef}
                       reconnectWebSocket={connectWebSocket}
+                      handleFormSubmit={handleFormSubmit}
+                      isLoading={isLoading}
                     />
                   </div>
                   {/* Loading indicator for infinite scrolling */}

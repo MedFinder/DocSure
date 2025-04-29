@@ -245,6 +245,7 @@ export default function LandingPage() {
       }
       if(selectedInsurer){
         setSelectedInsurer(selectedInsurer);
+        formik.setFieldValue("insurance_carrier", selectedInsurer);
       }
     fetchUserLocationAndPopularDrs();
     // eslint-disable-next-line react-hooks/exhaustive-deps

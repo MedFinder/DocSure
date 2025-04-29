@@ -83,6 +83,8 @@ interface TaskProps {
   onSkip?: () => void; // Function to skip the item
   handleRemoveDoctor?: (index: string) => void; // Added for "Remove" functionality
   onCallNext?: (index: number) => void; // Function to move doctor to next in queue
+  handleFormSubmit: any;
+  isLoading?: boolean;
 }
 
 const getAlternateColor = (index: number) => {
@@ -147,11 +149,14 @@ export const Task: React.FC<TaskProps> = ({
   onSkip,
   onCallNext,
   handleRemoveDoctor,
+  handleFormSubmit,
+  isLoading,
   //description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
   const [isSelected, setIsSelected] = useState(true);
+  const [isCardLoading, setIsCardLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(() => {
     // Only check items that are both open and within the first 10
@@ -213,6 +218,16 @@ export const Task: React.FC<TaskProps> = ({
     transform: CSS.Transform.toString(transform),
   };
 
+  const handleBookClick = async () => {
+    setIsCardLoading(true); // Set loading state for this card
+    try {
+      await handleFormSubmit(index); // Call the handleFormSubmit function with the index
+    } catch (error) {
+      console.error("Error booking appointment:", error);
+    } finally {
+      setIsCardLoading(false); // Reset loading state
+    }
+  };
   return (
     <>
       <tr
@@ -229,7 +244,7 @@ export const Task: React.FC<TaskProps> = ({
           <TooltipProvider>
             <div className="flex  md:gap-2 gap-2   ">
               <div className="flex md:gap-2 gap-0 ">
-                <div className="flex  md:gap-2 gap-0 items-center ">
+                {/* <div className="flex  md:gap-2 gap-0 items-center ">
                   {index < 10 ? (
                     <span className="hidden bg-[#0074BA] rounded-full w-8 h-8 my-4 sm:w-6 sm:h-6 text-white md:flex items-center justify-center text-xs sm:text-sm font-medium">
                       {index + 1}
@@ -237,26 +252,26 @@ export const Task: React.FC<TaskProps> = ({
                   ) : (
                     <span className="md:w-6 md:h-6 md:my-4 " /> // Empty space with same dimensions
                   )}
-                </div>
+                </div> */}
 
                 {fromTranscript ? (
                   <div className="md:hidden flex justify-center items-center">
-                    {index < 10 ? (
+                    {/* {index < 10 ? (
                       <span className="bg-[#0074BA] rounded-full w-5 h-5 text-white flex items-center justify-center text-xs font-medium mt-[2px] shrink-0">
                         {index + 1}
                       </span>
                     ) : (
                       <span className="w-5 h-5 my-4 " /> // Empty space with same dimensions
-                    )}
+                    )} */}
                   </div>
                 ) : (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <img
+                      {/* <img
                         src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
                         alt="Input design element"
                         className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3 md:hidden block"
-                      />
+                      /> */}
                     </TooltipTrigger>
                     <TooltipContent
                       side="right"
@@ -269,18 +284,18 @@ export const Task: React.FC<TaskProps> = ({
               </div>
 
               <div
-                className={`bg-[#F2F6F9]  py-4 md:px-2 px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0   ${
+                className={`bg-[#F2F6F9]  py-4 md:px-4 px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0   ${
                   fromTranscript ? "md:px-6 min-w-[85vw] " : ""
                 }`}
               >
                 {!fromTranscript && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <img
+                      {/* <img
                         src="https://cdn.builder.io/api/v1/image/assets%2F1fce0463b354425a961fa14453bc1061%2F3ab7f5eb61b64319aa2f2a85994bff66"
                         alt="Input design element"
                         className="box-border object-contain overflow-hidden shrink-0 w-full aspect-[1.37] max-w-[9px] min-h-3 min-w-3 hidden md:block"
-                      />
+                      /> */}
                     </TooltipTrigger>
                     <TooltipContent
                       side="right"
@@ -294,20 +309,20 @@ export const Task: React.FC<TaskProps> = ({
                 <div className="flex flex-col gap-2 font-normal w-full  pl-0">
                   <div className="flex justify-between ">
                     <div className="flex flex-grow items-start gap-2 md:hidden w-full  ">
-                      {!fromTranscript &&
+                      {/* {!fromTranscript &&
                         (index < 10 ? (
                           <span className="bg-[#0074BA] rounded-full w-4 h-4 text-white flex items-center justify-center text-xs font-medium mt-[2px] shrink-0">
                             {index + 1}
                           </span>
                         ) : (
                           <span className="md:w-6 md:h-6 md:my-4 " />
-                        ))}
+                        ))} */}
 
                       <p
                         // href={website}
                         // target="_blank"
                         // rel="noopener noreferrer"
-                        className="block w-full sm:max-w-full pr-16 md:pr-0 whitespace-normal overflow-hidden text-ellipsis cursor-pointer font-medium text-base leading-snug break-words"
+                        className="block sm:max-w-full pr-16 md:pr-0 whitespace-normal overflow-hidden text-ellipsis cursor-pointer font-medium text-base leading-snug break-words w-full"
                         // onClick={(e) => {
                         //   e.stopPropagation();
                         //   track("Dr_Website_Clicked");
@@ -324,7 +339,7 @@ export const Task: React.FC<TaskProps> = ({
                       // href={website}
                       // target="_blank"
                       // rel="noopener noreferrer"
-                      className="cursor-pointer font-medium text-base sm:text-base hidden   md:block "
+                      className="cursor-pointer font-medium text-base sm:text-base hidden   md:block md:w-[60%] "
                       // onClick={(e) => {
                       //   e.stopPropagation();
                       //   track("Dr_Website_Clicked");
@@ -335,87 +350,112 @@ export const Task: React.FC<TaskProps> = ({
                     >
                       {title}
                     </p>
-                    <div className="flex gap-16 pr-2">
-                      <div className="md:flex  gap-1 font-normal text-[#333333] text-sm items-center hidden">
-                        <img
-                          src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
-                          className="object-contain w-3 rounded-sm"
-                          alt="Rating star"
-                        />
-                        <span className="whitespace-nowrap">
-                          {rating !== undefined ? rating : "-"}
-                        </span>
-                        <span>•</span>
-                        <span className="whitespace-nowrap ">
-                          {review || 0} reviews
-                        </span>
+
+                    <div className="flex flex-wrap justify-between items-start pr-[120px] relative gap-y-2">
+                      <div className="flex gap-4 flex-wrap">
+                        <div className="md:flex gap-1 font-normal text-[#333333] text-sm items-center hidden">
+                          <img
+                            src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
+                            className="object-contain w-3 rounded-sm"
+                            alt="Rating star"
+                          />
+                          <span className="whitespace-nowrap">
+                            {rating !== undefined ? rating : "-"}
+                          </span>
+                          <span>•</span>
+                          <span className="whitespace-nowrap">
+                            {review || 0} reviews
+                          </span>
+                        </div>
+
+                        <div className="md:flex hidden items-center gap-1">
+                          <MapPin size={13} />
+                          <span className="whitespace-nowrap text-[#333333] text-sm">
+                            {distance || "-"}
+                          </span>
+                        </div>
                       </div>
-                      <div className="md:flex hidden items-center gap-1">
-                        <MapPin size={13} />
-                        <span className="whitespace-nowrap text-[#333333] text-sm">
-                          {distance || "-"}
-                        </span>
-                      </div>
+
                       {!fromTranscript && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <label>
-                              <TooltipTrigger asChild>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                  <div className="relative w-6 h-6">
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={(e) => {
-                                        e.stopPropagation();
-                                        setIsChecked(e.target.checked);
-                                      }}
-                                      onPointerDown={(e) => e.stopPropagation()}
-                                      className="appearance-none w-full h-full bg-white border border-gray-300 rounded-md 
-                  checked:bg-[#00BA85] checked:border-transparent"
-                                    />
+                        <div className="absolute right-0 top-0 md:flex flex-col gap-[4px] items-center justify-center w-28 ">
+                          <div className="flex items-center justify-center self-center">
+                            <Button
+                              className="bg-[#E5573F] text-white rounded-md md:w-20 "
+                              type="button"
+                              onClick={handleBookClick}
+                              disabled={isCardLoading}
+                              onPointerDown={(e) => e.stopPropagation()}
+                            >
+                              {isCardLoading ? "Booking..." : "Book"}
+                            </Button>
+                          </div>
 
-                                    {/* White checkmark */}
-                                    {isChecked && (
-                                      <svg
-                                        className="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="3"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          d="M5 13l4 4L19 7"
-                                        />
-                                      </svg>
-                                    )}
-                                  </div>
-                                </label>
+                          <div className="flex flex-col items-center justify-center gap-0">
+                            <p className="text-[10px]">
+                              We’ll collect your info
+                            </p>
+                            <p className="text-[10px]">and call the clinic</p>
+                          </div>
+                        </div>
+                        //       <Tooltip>
+                        //         <TooltipTrigger asChild>
+                        //           <label>
+                        //             <TooltipTrigger asChild>
+                        //               <label className="relative inline-flex items-center cursor-pointer">
+                        //                 <div className="relative w-6 h-6">
+                        //                   <input
+                        //                     type="checkbox"
+                        //                     checked={isChecked}
+                        //                     onChange={(e) => {
+                        //                       e.stopPropagation();
+                        //                       setIsChecked(e.target.checked);
+                        //                     }}
+                        //                     onPointerDown={(e) => e.stopPropagation()}
+                        //                     className="appearance-none w-full h-full bg-white border border-gray-300 rounded-md
+                        // checked:bg-[#00BA85] checked:border-transparent"
+                        //                   />
 
-                                {/* White checkmark overlay */}
-                              </TooltipTrigger>
-                            </label>
-                          </TooltipTrigger>
-                          <TooltipContent
-                            side="left"
-                            className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
-                          >
-                            {/* <span className="font-semibold">
-                            Tooltip example:
-                          </span> */}
-                            <span>
-                              {isChecked
-                                ? "Deselect doctors you don’t want us to call."
-                                : "Select doctors to call for an appointment."}
-                            </span>
-                          </TooltipContent>
-                        </Tooltip>
+                        //                   {/* White checkmark */}
+                        //                   {isChecked && (
+                        //                     <svg
+                        //                       className="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"
+                        //                       fill="none"
+                        //                       stroke="currentColor"
+                        //                       strokeWidth="3"
+                        //                       viewBox="0 0 24 24"
+                        //                     >
+                        //                       <path
+                        //                         strokeLinecap="round"
+                        //                         strokeLinejoin="round"
+                        //                         d="M5 13l4 4L19 7"
+                        //                       />
+                        //                     </svg>
+                        //                   )}
+                        //                 </div>
+                        //               </label>
+
+                        //               {/* White checkmark overlay */}
+                        //             </TooltipTrigger>
+                        //           </label>
+                        //         </TooltipTrigger>
+                        //         <TooltipContent
+                        //           side="left"
+                        //           className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
+                        //         >
+                        //           {/* <span className="font-semibold">
+                        //           Tooltip example:
+                        //         </span> */}
+                        //           <span>
+                        //             {isChecked
+                        //               ? "Deselect doctors you don’t want us to call."
+                        //               : "Select doctors to call for an appointment."}
+                        //           </span>
+                        //         </TooltipContent>
+                        //       </Tooltip>
                       )}
                     </div>
                   </div>
-                  <span className=" text-sm text-[#636465]  pr-16 md:pr-0">
+                  <span className=" text-sm text-[#636465]  pr-16 md:pr-0 md:w-[60%] w-[85%]">
                     {vicinity}
                   </span>
                   <div className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words pr-16 md:pr-0">

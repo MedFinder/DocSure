@@ -33,6 +33,8 @@ import { DoctorCard, ExpandProvider } from "./DoctorCard";
 import Column from "../search-doctor/features/column";
 import Image from "next/image";
 import QuickDetailsModal from "../landing/components/QuickDetailsModal";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const _doctors: Doctor[] = [
   {
@@ -291,11 +293,13 @@ export default function Transcript() {
   const [isPreferencesUpdated, setIsPreferencesUpdated] = useState(false);
   const [isPreferencesReinitialized, setIsPreferencesReinitialized] =
     useState(false);
+  const [isAutoCallEnabled, setIsAutoCallEnabled] = useState(true); // Default to "on"
 
   const activeCallIndexRef = useRef(activeCallIndex);
   const requestIdRef = useRef(formData?.request_id);
   const callStatusRef = useRef(callStatus);
   const isPreferencesReinitializedRef = useRef(isPreferencesReinitialized);
+  const isAutoCallEnabledRef = useRef(isAutoCallEnabled);
   const [context, setcontext] = useState("");
   const [transcriptSummary, setTranscriptSummary] = useState({
     place_id: "",
@@ -347,6 +351,9 @@ export default function Transcript() {
   useEffect(() => {
     isPreferencesReinitializedRef.current = isPreferencesReinitialized;
   }, [isPreferencesReinitialized]);
+  useEffect(() => {
+    isAutoCallEnabledRef.current = isAutoCallEnabled;
+  }, [isAutoCallEnabled]);
 
   const getPhoneNumbers = () => {
     const numbers = doctors.map((doctor) => doctor.phone_number || null);
@@ -825,11 +832,14 @@ export default function Transcript() {
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
-        setisError(true)
-        terminateRequest()
-        toast.error('We’re experiencing high traffic. Please try again shortly.', {
-          duration: 20000,
-        });
+        setisError(true);
+        terminateRequest();
+        toast.error(
+          "We’re experiencing high traffic. Please try again shortly.",
+          {
+            duration: 20000,
+          }
+        );
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -972,14 +982,19 @@ export default function Transcript() {
             );
           } else {
             if (callStatusRef.current.ssid === data?.call_sid) {
-              toast.warning(
-                "Appointment could not be booked. Trying next doctor..."
-              );
-              moveToNextDoctor(
-                null,
-                activeCallIndexRef.current,
-                formData.request_id
-              );
+              if (!isAutoCallEnabledRef.current) {
+                toast.info("Auto-call is disabled. Calls will not proceed.");
+                return; // Exit if the switch is off
+              }else {
+                toast.warning(
+                  "Appointment could not be booked. Trying next doctor..."
+                );
+                moveToNextDoctor(
+                  null,
+                  activeCallIndexRef.current,
+                  formData.request_id
+                );
+              }
             }
           }
         }, 5000);
@@ -1231,18 +1246,24 @@ export default function Transcript() {
       const searchData = await JSON.parse(localStorage.getItem("searchData"));
       const lat = searchData?.lat || 0;
       const lng = searchData?.lng || 0;
-      
+
       // Retrieve the fetch_open_now parameter from the last search
       let fetch_open_now = "false";
       const lastSearchSource = localStorage.getItem("lastSearchSource");
-      const storageKey = lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
-      const previousSearchData = JSON.parse(localStorage.getItem(storageKey) || "{}");
-      
+      const storageKey =
+        lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+      const previousSearchData = JSON.parse(
+        localStorage.getItem(storageKey) || "{}"
+      );
+
       // Check if fetch_open_now was part of the previous search
-      if (previousSearchData && typeof previousSearchData.fetch_open_now !== "undefined") {
+      if (
+        previousSearchData &&
+        typeof previousSearchData.fetch_open_now !== "undefined"
+      ) {
         fetch_open_now = previousSearchData.fetch_open_now;
       }
-      
+
       const response = await axios.post(
         "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
         {
@@ -1458,20 +1479,28 @@ export default function Transcript() {
           <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
           <div className="flex md:mt-24 mt-16 px-4 md:py-4 py-3 border-b text-sm h-[90%] w-full justify-between items-center">
             <div className="flex gap-2 items-center">
-              <Image
+              <Switch
+                id="auto-call"
+                checked={isAutoCallEnabled}
+                onCheckedChange={(checked) => setIsAutoCallEnabled(checked)} // Update state
+              />
+              <Label htmlFor="auto-call">
+                Auto call next doctor if the current doctor is not available.
+              </Label>
+              {/* <Image
                 src="/Group 198.svg"
                 alt="Verified Logo"
                 width={0}
                 height={0}
                 className="w-5 h-auto"
               />
-              {/* <p>{DrCount} verified doctors in your area</p> */}
+              <p>{DrCount} verified doctors in your area</p>
               <p>
                 {" "}
                 Docsure AI is calling doctors in your area that accept your
                 insurance, sorted by patient ratings. We'll notify you once your
                 appointment is confirmed.
-              </p>
+              </p> */}
             </div>
 
             {/* Mobile only "Back to List" / "View Transcript" button */}

@@ -47,7 +47,7 @@ const validationSchema = Yup.object().shape({
   // ),
     patientName: Yup.string().required("Patient name is required"),
     //email: Yup.string().email("Invalid email").required("Email is required"),
-    phoneNumber: Yup.string().required("Phone number is required"),
+    //phoneNumber: Yup.string().required("Phone number is required"),
     dob: Yup.date()
       .required("Date of birth is required")
       .max(new Date(), "Date of birth cannot be in the future"),
@@ -451,7 +451,7 @@ export default function AppointmentPage() {
                 <div className="text-red-500 text-sm">{formik.errors.dob}</div>
               )}
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label className="text-[#333333]">Phone number</Label>
               <Input
                 name="phoneNumber"
@@ -470,10 +470,10 @@ export default function AppointmentPage() {
                 </div>
               )}
              <p className="text-xs text-gray-500 mt-1">Appointment confirmation will be sent to this phone number.</p>
-            </div>
+            </div> */}
           </div>
           <div
-              className=" mt-5 mb-20 text-[#E5573F] text-xs flex space-x-2 items-center cursor-pointer hover:underline"
+              className=" mt-5 mb-40 text-[#E5573F] text-xs flex space-x-2 items-center cursor-pointer hover:underline"
               onClick={() => {
                 // Save selected specialty before opening modal
                 if (selectedSpecialty) {
