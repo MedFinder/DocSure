@@ -299,6 +299,7 @@ export default function Transcript() {
   const requestIdRef = useRef(formData?.request_id);
   const callStatusRef = useRef(callStatus);
   const isPreferencesReinitializedRef = useRef(isPreferencesReinitialized);
+  const isAutoCallEnabledRef = useRef(isAutoCallEnabled);
   const [context, setcontext] = useState("");
   const [transcriptSummary, setTranscriptSummary] = useState({
     place_id: "",
@@ -350,6 +351,9 @@ export default function Transcript() {
   useEffect(() => {
     isPreferencesReinitializedRef.current = isPreferencesReinitialized;
   }, [isPreferencesReinitialized]);
+  useEffect(() => {
+    isAutoCallEnabledRef.current = isAutoCallEnabled;
+  }, [isAutoCallEnabled]);
 
   const getPhoneNumbers = () => {
     const numbers = doctors.map((doctor) => doctor.phone_number || null);
@@ -846,7 +850,7 @@ export default function Transcript() {
     currentindex: number,
     request_id: string
   ) => {
-    if (!isAutoCallEnabled) {
+    if (!isAutoCallEnabledRef.current) {
       toast.info("Auto-call is disabled. Calls will not proceed.");
       return; // Exit if the switch is off
     }

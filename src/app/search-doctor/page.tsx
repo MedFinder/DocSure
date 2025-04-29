@@ -591,7 +591,7 @@ export default function SearchDoctorPage() {
           <p className="text-gray-500 mt-2">
             We could not find any doctors that meet this criteria.
           </p>
-          <Link href="/demo">
+          <Link href="/">
             <Button className=" bg-[#7DA1B7] text-white px-6 py-5 mt-8 w-full sm:w-auto">
               Search Again
             </Button>
@@ -775,7 +775,7 @@ export default function SearchDoctorPage() {
                 onDragEnd={handleDragEnd}
                 collisionDetection={closestCenter}
               >
-                <ScrollArea className="h-[90%] w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0 overflow-y-auto">
+                <ScrollArea className="h-[100%] w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0 overflow-y-auto">
                   <div className="flex flex-col md:flex-row w-full">
                     <Column
                       activeCallIndex={activeCallIndex}
