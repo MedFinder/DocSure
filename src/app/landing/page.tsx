@@ -116,7 +116,7 @@ const moreDoctorTypes = [
   },
 ];
 const validationSchema = Yup.object().shape({
-  specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
+ // specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
 
 export default function LandingPage() {
@@ -128,7 +128,7 @@ export default function LandingPage() {
   const [globalLoading, setGlobalLoading] = useState(false); // Add state for global spinner
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [prefilledAddress, setPrefilledAddress] = useState(""); // State for prefilled address
-  const [prefilledSpecialty, setPrefilledSpecialty] = useState(""); // State for prefilled specialty
+  const [prefilledSpecialty, setPrefilledSpecialty] = useState("Primary Care Physician"); // State for prefilled specialty
   const [addressLocation, setAddressLocation] = useState(null);
   const [populardoctors, setpopulardoctors] = useState([]);
   const inputRefs = useRef([]);
@@ -798,9 +798,9 @@ export default function LandingPage() {
                 </div>
               </div>
               <Button
-                disabled={
-                  isLoading || !formik.values.specialty || !selectedLocation
-                }
+                // disabled={
+                //   isLoading || !formik.values.specialty || !selectedLocation
+                // }
                 onClick={formik.handleSubmit} // Explicitly trigger form submission
                 type="submit"
                 className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 h-12 md:flex items-center justify-center w-full md:w-auto hidden"
@@ -820,8 +820,8 @@ export default function LandingPage() {
             </form>
 
             {/* Specialty Selection */}
-            <ScrollArea className="w-full whitespace-nowrap md:flex gap-4 md:pt-4 pt-0 hidden">
-              <div className="flex gap-4 px-1 pb-2 md:max-w-full max-w-[50%] justify-center">
+            <ScrollArea className="w-full whitespace-nowrap md:flex gap-4 md:pt-4 pt-0">
+              <div className="flex gap-4 px-1 pb-2 md:max-w-full justify-center">
                 {doctorTypes.map((value, index) => (
                   <Button
                     key={index}
