@@ -454,61 +454,61 @@ export default function SearchDoctorPage() {
 
   //this one moves it to the top before switching to next page but booking shows
 
-  // const handleFormSubmit = async (index: number) => {
-  //   // Move the selected doctor to the top of the list
-  //   const newDoctors = [...doctors];
-  //   const selectedDoctor = newDoctors.splice(index, 1)[0]; // Remove the selected doctor
-  //   newDoctors.unshift(selectedDoctor); // Add the selected doctor to the top
-
-  //   // Update the state with the new order
-  //   setDoctors(newDoctors);
-
-  //   // Update localStorage with the new order
-  //   const lastSearchSource = localStorage.getItem("lastSearchSource");
-  //   const storageKey =
-  //     lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
-
-  //   const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
-
-  //   const updatedData = {
-  //     ...currentData,
-  //     results: newDoctors,
-  //   };
-
-  //   localStorage.setItem(storageKey, JSON.stringify(updatedData));
-  //   formik.handleSubmit();
-
-  //   // Simulate form submission delay
-  //   return new Promise((resolve) => setTimeout(resolve, 3000));
-  // };
   const handleFormSubmit = async (index: number) => {
-    // Keep the doctors list as is in the UI
+    // Move the selected doctor to the top of the list
     const newDoctors = [...doctors];
-
-    // Update localStorage with the selected doctor moved to the top
     const selectedDoctor = newDoctors.splice(index, 1)[0]; // Remove the selected doctor
     newDoctors.unshift(selectedDoctor); // Add the selected doctor to the top
 
-    // Perform form submission
+    // Update the state with the new order
+    setDoctors(newDoctors);
+
+    // Update localStorage with the new order
+    const lastSearchSource = localStorage.getItem("lastSearchSource");
+    const storageKey =
+      lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+
+    const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+
+    const updatedData = {
+      ...currentData,
+      results: newDoctors,
+    };
+
+    localStorage.setItem(storageKey, JSON.stringify(updatedData));
     formik.handleSubmit();
 
-    // Wait for navigation to complete
-    setTimeout(() => {
-      // Update localStorage after navigation
-      const lastSearchSource = localStorage.getItem("lastSearchSource");
-      const storageKey =
-        lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
-
-      const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
-
-      const updatedData = {
-        ...currentData,
-        results: newDoctors, // Update with the reordered list
-      };
-
-      localStorage.setItem(storageKey, JSON.stringify(updatedData));
-    }, 1500); // Delay to ensure navigation is complete
+    // Simulate form submission delay
+    return new Promise((resolve) => setTimeout(resolve, 3000));
   };
+  // const handleFormSubmit = async (index: number) => {
+  //   // Keep the doctors list as is in the UI
+  //   const newDoctors = [...doctors];
+
+  //   // Update localStorage with the selected doctor moved to the top
+  //   const selectedDoctor = newDoctors.splice(index, 1)[0]; // Remove the selected doctor
+  //   newDoctors.unshift(selectedDoctor); // Add the selected doctor to the top
+
+  //   // Perform form submission
+  //   formik.handleSubmit();
+
+  //   // Wait for navigation to complete
+  //   setTimeout(() => {
+  //     // Update localStorage after navigation
+  //     const lastSearchSource = localStorage.getItem("lastSearchSource");
+  //     const storageKey =
+  //       lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+
+  //     const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+
+  //     const updatedData = {
+  //       ...currentData,
+  //       results: newDoctors, // Update with the reordered list
+  //     };
+
+  //     localStorage.setItem(storageKey, JSON.stringify(updatedData));
+  //   }, 1500); // Delay to ensure navigation is complete
+  // };
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
