@@ -239,6 +239,7 @@ export default function NavbarSection({
                         onChange={(value) => {
                           setSpecialty(value);
                           formik.setFieldValue("specialty", value);
+                          localStorage.setItem("selectedSpecialty", value);
                         }}
                         clearable={false}
                         navbar

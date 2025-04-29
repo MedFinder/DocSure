@@ -959,6 +959,7 @@ export default function Transcript() {
 
     wsRef.current.onmessage = async (event) => {
       const data = JSON.parse(event.data);
+      console.log("WebSocket message received:", data);
 
       // Handle call-ended event
       if (data.event === "call_ended") {
