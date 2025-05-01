@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ReactModal from "react-modal";
 import axios from "axios";
@@ -125,6 +124,26 @@ export default function QuickDetailsModal({
     else {
         return ''
     }
+  };
+
+  const formatDateToMmDdYyyy = (date) => {
+    if (date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${month}/${day}/${year}`;
+    } else {
+      return '';
+    }
+  };
+
+  const formatDateInput = (input) => {
+    const cleanedInput = input.replace(/[^\d]/g, '');
+    const parts = [];
+    if (cleanedInput.length > 0) parts.push(cleanedInput.slice(0, 2));
+    if (cleanedInput.length > 2) parts.push(cleanedInput.slice(2, 4));
+    if (cleanedInput.length > 4) parts.push(cleanedInput.slice(4, 8));
+    return parts.join('/');
   };
 
   const { isLoaded } = useJsApiLoader({
@@ -577,23 +596,46 @@ export default function QuickDetailsModal({
                           : ""
                       }`}
                     >
-                      <DatePicker
-                        selected={formik.values.dob}
-                        onChange={handleDateChange}
-                        onBlur={formik.handleBlur}
-                        dateFormat="MM/dd/yyyy"
-                        showYearDropdown
-                        showMonthDropdown
-                        dropdownMode="select"
-                        yearDropdownItemNumber={100}
-                        scrollableYearDropdown
-                        maxDate={new Date()}
-                        autoComplete="off"
-                        aria-autocomplete="none"
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="MM/DD/YYYY"
                         name="dob"
-                        className="w-full p-2 border border-[#333333] rounded-md"
-                        wrapperClassName="w-full"
-                        placeholderText="Select date of birth"
+                        className={
+                          formik.errors.dob && formik.touched.dob
+                            ? "border-red-500 w-full p-2 rounded-md"
+                            : "w-full p-2 border border-[#333333] rounded-md"
+                        }
+                        value={
+                          formik.values.dob
+                            ? typeof formik.values.dob === 'string'
+                              ? formik.values.dob
+                              : formatDateToMmDdYyyy(formik.values.dob)
+                            : ''
+                        }
+                        onChange={(e) => {
+                          const input = e.target.value;
+                          const formattedInput = formatDateInput(input);
+                          
+                          if (formattedInput !== input) {
+                            e.target.value = formattedInput;
+                          }
+                          
+                          // Convert formatted string to Date object if complete
+                          if (formattedInput.length === 10) {
+                            const [month, day, year] = formattedInput.split('/');
+                            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                            
+                            if (!isNaN(date.getTime()) && date <= new Date()) {
+                              formik.setFieldValue('dob', date);
+                            } else {
+                              formik.setFieldValue('dob', formattedInput);
+                            }
+                          } else {
+                            formik.setFieldValue('dob', formattedInput);
+                          }
+                        }}
+                        onBlur={formik.handleBlur}
                       />
                     </div>
                     {formik.errors.dob && formik.touched.dob && (
@@ -674,6 +716,9 @@ export default function QuickDetailsModal({
                           {formik.errors.insurer}
                         </div>
                       )}
+                      <span className="text-[#333333BF] text-xs text-center">
+                        We will verify that the clinic accepts your insurance.
+                      </span>
                     </div>
 
                     <div className="space-y-2 mt-3">

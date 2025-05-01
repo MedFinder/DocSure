@@ -404,7 +404,7 @@ export default function Transcript() {
           });
           setActiveCallIndex(0);
           setTranscriptArray([]);
-          rawData = localStorage.getItem("statusDataNav");
+          rawData = localStorage.getItem("statusData");
         } else {
           rawData = localStorage.getItem("statusData");
         }
@@ -709,7 +709,7 @@ export default function Transcript() {
     wsSummaryRef.current = new WebSocket(url);
 
     wsSummaryRef.current.onopen = () => {
-      console.log("Summary WebSocket connected successfully and opened.");
+      //console.log("Summary WebSocket connected successfully and opened.");
     };
     wsSummaryRef.current.onmessage = async (event) => {
       const message = JSON.parse(event.data);
@@ -1074,9 +1074,7 @@ export default function Transcript() {
     setDoctors(newDoctors);
 
     // If you're also storing the data in localStorage, update it there too
-    const lastSearchSource = localStorage.getItem("lastSearchSource");
-    const storageKey =
-      lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+    const storageKey = "statusData";
 
     const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
 
@@ -1250,9 +1248,7 @@ export default function Transcript() {
 
       // Retrieve the fetch_open_now parameter from the last search
       let fetch_open_now = "false";
-      const lastSearchSource = localStorage.getItem("lastSearchSource");
-      const storageKey =
-        lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+      const storageKey = "statusData";
       const previousSearchData = JSON.parse(
         localStorage.getItem(storageKey) || "{}"
       );
@@ -1294,9 +1290,7 @@ export default function Transcript() {
         setDoctors(updatedDoctors);
         setNextPageToken(response.data.next_page_token || null);
 
-        const lastSearchSource = localStorage.getItem("lastSearchSource");
-        const storageKey =
-          lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+        const storageKey =  "statusData";
 
         const currentData = JSON.parse(
           localStorage.getItem(storageKey) || "{}"
@@ -1402,9 +1396,7 @@ export default function Transcript() {
     setDoctors(newDoctors);
 
     // Update localStorage with the new order
-    const lastSearchSource = localStorage.getItem("lastSearchSource");
-    const storageKey =
-      lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+    const storageKey = "statusData";
 
     const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
 

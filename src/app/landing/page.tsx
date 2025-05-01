@@ -148,8 +148,8 @@ export default function LandingPage() {
   const checkPrefillAvailability = (value: string) => {
     setGlobalLoading(true); // Set global loading to true when starting the process
     // scrollToSection("home", 40); // Scroll to the "home" section
-    handleDoctorTypeClick("Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
-    localStorage.setItem("selectedSpecialty", "Primary Care Physician");
+    handleDoctorTypeClick(value ?? "Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
+    localStorage.setItem("selectedSpecialty", value ?? "Primary Care Physician");
     formik.handleSubmit(); // Trigger formik's onSubmit function
   };
   const { isLoaded } = useJsApiLoader({
@@ -258,6 +258,7 @@ export default function LandingPage() {
     if (storedSpeciality) {
         setPrefilledSpecialty(storedSpeciality);
         formik.setFieldValue("specialty", storedSpeciality);
+        setSelectedSpecialty(storedSpeciality); // Update specialty when button is clicked
       }
       if(selectedInsurer){
         setSelectedInsurer(selectedInsurer);
@@ -843,7 +844,7 @@ export default function LandingPage() {
                         ? "bg-slate-800 text-white" // Selected state
                         : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800" // Normal state
                     }`}
-                    onClick={() => handleDoctorTypeClick(value.value)}
+                    onClick={() =>   checkPrefillAvailability(value.value)} // get s
                   >
                     {value.label}
                   </Button>
@@ -1018,8 +1019,8 @@ export default function LandingPage() {
                     : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800" // Normal state
                 }`}
                 onClick={() => {
-                  scrollToSection("home", 40);
-                  handleDoctorTypeClick(value.value);
+                 // scrollToSection("home", 40);
+                 checkPrefillAvailability(value.value)
                 }}
               >
                 {value.label}
