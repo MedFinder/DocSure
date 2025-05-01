@@ -317,7 +317,7 @@ export default function QuickDetailsModal({
           data
         );
 
-        localStorage.setItem("statusDataNav", JSON.stringify(response.data));
+        localStorage.setItem("statusData", JSON.stringify(response.data));
         localStorage.setItem("lastSearchSource", "navbar"); // Track last search source
 
         window.dispatchEvent(new Event("storage"));

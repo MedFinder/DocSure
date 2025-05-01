@@ -438,13 +438,7 @@ export default function SearchPage() {
     const updateDoctorsList = () => {
       try {
         const lastSearchSource = localStorage.getItem("lastSearchSource");
-        let rawData;
-
-        if (lastSearchSource === "navbar") {
-          rawData = localStorage.getItem("statusDataNav");
-        } else {
-          rawData = localStorage.getItem("statusData");
-        }
+        let rawData = localStorage.getItem("statusData");
 
         if (!rawData) {
           console.warn("No search data found in localStorage.");

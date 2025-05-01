@@ -128,7 +128,7 @@ export default function LandingPage() {
   const [globalLoading, setGlobalLoading] = useState(false); // Add state for global spinner
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [prefilledAddress, setPrefilledAddress] = useState(""); // State for prefilled address
-  const [prefilledSpecialty, setPrefilledSpecialty] = useState("Primary Care Physician"); // State for prefilled specialty
+  const [prefilledSpecialty, setPrefilledSpecialty] = useState(""); // State for prefilled specialty
   const [addressLocation, setAddressLocation] = useState(null);
   const [populardoctors, setpopulardoctors] = useState([]);
   const inputRefs = useRef([]);
@@ -149,6 +149,7 @@ export default function LandingPage() {
     setGlobalLoading(true); // Set global loading to true when starting the process
     // scrollToSection("home", 40); // Scroll to the "home" section
     handleDoctorTypeClick("Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
+    localStorage.setItem("selectedSpecialty", "Primary Care Physician");
     formik.handleSubmit(); // Trigger formik's onSubmit function
   };
   const { isLoaded } = useJsApiLoader({
@@ -469,7 +470,19 @@ export default function LandingPage() {
         requestIdPromise.then((request_id) => {
           if (request_id) {
             const updatedValues = { ...values, request_id };
-            localStorage.setItem("formData", JSON.stringify(updatedValues));
+            const existingFormData = localStorage.getItem("formData");
+            let mergedValues = updatedValues;
+      
+            if (existingFormData) {
+              try {
+                const parsedExistingData = JSON.parse(existingFormData);
+                // Merge existing data with new values (new values take precedence)
+                mergedValues = { ...parsedExistingData, ...updatedValues };
+              } catch (error) {
+                console.error("Error parsing existing form data:", error);
+              }
+            }
+            localStorage.setItem("formData", JSON.stringify(mergedValues));
           }
         });
 
