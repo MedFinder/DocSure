@@ -168,9 +168,7 @@ export default function SearchDoctorPage() {
 
       // Retrieve the fetch_open_now parameter from the last search
       let fetch_open_now = "false";
-      const lastSearchSource = localStorage.getItem("lastSearchSource");
-      const storageKey =
-        lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+      const storageKey = "statusData";
       const previousSearchData = JSON.parse(
         localStorage.getItem(storageKey) || "{}"
       );
@@ -212,9 +210,7 @@ export default function SearchDoctorPage() {
         setDoctors(updatedDoctors);
         setNextPageToken(response.data.next_page_token || null);
 
-        const lastSearchSource = localStorage.getItem("lastSearchSource");
-        const storageKey =
-          lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+        const storageKey = "statusData";
 
         const currentData = JSON.parse(
           localStorage.getItem(storageKey) || "{}"
@@ -280,15 +276,7 @@ export default function SearchDoctorPage() {
   useEffect(() => {
     const updateDoctorsList = () => {
       try {
-        const lastSearchSource = localStorage.getItem("lastSearchSource");
-        let rawData;
-
-        if (lastSearchSource === "navbar") {
-          rawData = localStorage.getItem("statusDataNav");
-        } else {
-          rawData = localStorage.getItem("statusData");
-        }
-
+        let rawData  = localStorage.getItem("statusData");
         if (!rawData) {
           router.push("/");
           return;
@@ -479,9 +467,7 @@ export default function SearchDoctorPage() {
     setDoctors(newDoctors);
 
     // Update localStorage with the new order
-    const lastSearchSource = localStorage.getItem("lastSearchSource");
-    const storageKey =
-      lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+    const storageKey = "statusData";
 
     const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
 
@@ -512,7 +498,7 @@ export default function SearchDoctorPage() {
   //     // Update localStorage after navigation
   //     const lastSearchSource = localStorage.getItem("lastSearchSource");
   //     const storageKey =
-  //       lastSearchSource === "navbar" ? "statusDataNav" : "statusData";
+  //       lastSearchSource === "navbar" ? "statusData" : "statusData";
 
   //     const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
 
@@ -575,7 +561,7 @@ export default function SearchDoctorPage() {
   const DrCount = useMemo(() => {
     const drVal = parseInt(totalDoctorsCount);
     if (drVal > 50) {
-      return drVal + "+";
+      return 50 + "+";
     } else if ((drVal < 50 || isNaN(drVal)) && !nextPageToken) {
       return doctors.length + "+";
     } else {
@@ -618,7 +604,7 @@ export default function SearchDoctorPage() {
           onSubmit={formik.handleSubmit}
         >
           <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3  border-t-0 text-sm h-[60px] shrink-0">
-            <div className="md:flex hidden gap-2 items-center">
+            <div className="flex gap-2 items-center">
               <Image
                 src="/Group 198.svg"
                 alt="Verified Logo"
