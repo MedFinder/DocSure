@@ -602,11 +602,10 @@ export default function LandingPage() {
             className="text-white bg-[#0074BA] rounded-md block text-xs "
             onClick={(e) => {
               e.preventDefault();
-              // scrollToSection("home", 40);
-              checkPrefillAvailability();
+              router.push("/get-gift");
             }}
           >
-            Get Started
+            Get $100
           </Button>
           <button className="" onClick={() => setIsOpen(true)}>
             <AlignLeft size={24} />
