@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Book,
   BookText,
+  GiftIcon,
   Loader2,
   MapPin,
   Menu,
@@ -317,49 +318,7 @@ export default function LandingPage() {
 
     const defaultLat = 37.7749; // Default latitude (e.g., San Francisco)
     const defaultLng = -122.4194; // Default longitude (e.g., San Francisco)
-
-    if (!navigator.geolocation) {
-      getLocationFromIP();
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-
-        try {
-          // Fetch the address using Google Maps Geocoding API
-          const geocodeResponse = await axios.get(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
-          );
-
-          const address =
-            geocodeResponse.data.results[0]?.formatted_address || "";
-          // console.log(address)
-          setSelectedLocation({ lat, lng });
-          setAddressLocation(address); // Set the fetched address
-          localStorage.setItem("selectedAddress", address);
-          localStorage.setItem(
-            "selectedLocation",
-            JSON.stringify({ lat, lng })
-          );
-
-          const popularDoctors = await getPopularDrs(lat, lng);
-          if (popularDoctors?.results?.length > 0) {
-            const doctorlists = popularDoctors?.results?.slice(0, 20);
-            setpopulardoctors(doctorlists);
-            localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
-          }
-        } catch (error) {
-          console.error("Error fetching address or popular doctors:", error);
-          await getLocationFromIP();
-        }
-      },
-      async (error) => {
-        console.error("Error getting location:", error);
-        await getLocationFromIP();
-      }
-    );
+    getLocationFromIP();
   };
   // Function to get location from IP address
   const getLocationFromIP = async () => {
@@ -410,7 +369,7 @@ export default function LandingPage() {
     const data = {
       doctor_speciality: formik.values.specialty,
       preferred_location: savedAddress,
-      device_id_address: ipAddress ?? "",
+      device_ip_address: ipAddress ?? '',
       device_category: "web",
     };
     try {
@@ -630,12 +589,11 @@ export default function LandingPage() {
           <Button
             onClick={(e) => {
               e.preventDefault();
-              // scrollToSection("home", 40);
-              checkPrefillAvailability();
+              router.push("/get-gift");
             }}
             className="text-white bg-[#0074BA] rounded-md"
           >
-            Get Started
+              <GiftIcon className="h-5 w-5" /> Get $100
           </Button>
         </div>
 
@@ -815,7 +773,7 @@ export default function LandingPage() {
                   <div className="mx-3">
                     <Button className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 my-4 h-12 items-center justify-center w-full md:w-auto md:hidden">
                       {/* <Search className="w-5 h-5 text-white" /> Search */}
-                      {isLoading ? (
+                      {isLoading && !globalLoading ? (
                         <>
                           <Loader2 className="w-5 h-5 text-white animate-spin" />{" "}
                           Searching
@@ -838,7 +796,7 @@ export default function LandingPage() {
                 className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 h-12 md:flex items-center justify-center w-full md:w-auto hidden"
               >
                 {/* <Search className="w-5 h-5 text-white" /> Search */}
-                {isLoading ? (
+                {isLoading && !globalLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 text-white animate-spin" />{" "}
                     Searching

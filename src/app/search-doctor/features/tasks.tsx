@@ -180,6 +180,7 @@ export const Task: React.FC<TaskProps> = ({
   // Check if doctor accepts the selected insurer
   const [selectedInsurer, setSelectedInsurer] = useState<string | null>(null);
 
+  // Initialize selectedInsurer from localStorage and set up listener for changes
   useEffect(() => {
     // Get selected insurer from localStorage
     if (typeof window !== "undefined") {
@@ -187,6 +188,23 @@ export const Task: React.FC<TaskProps> = ({
       if (storedInsurer) {
         setSelectedInsurer(storedInsurer);
       }
+
+      // Function to handle storage changes
+      const handleStorageChange = (e: StorageEvent) => {
+        const lastSearchSource = localStorage.getItem("lastSearchSource");
+        const storedInsurer = localStorage.getItem("selectedInsurer");
+        if (lastSearchSource === "insurance" && storedInsurer ) {
+          setSelectedInsurer(storedInsurer);
+        }
+      };
+
+      // Add event listener for storage changes
+      window.addEventListener("storage", handleStorageChange);
+
+      // Clean up event listener on component unmount
+      return () => {
+        window.removeEventListener("storage", handleStorageChange);
+      };
     }
   }, []);
 
