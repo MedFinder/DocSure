@@ -277,7 +277,7 @@ export default function SearchDoctorPage() {
   useEffect(() => {
     const updateDoctorsList = () => {
       try {
-        let rawData  = localStorage.getItem("statusData");
+        let rawData = localStorage.getItem("statusData");
         if (!rawData) {
           router.push("/");
           return;
@@ -501,9 +501,9 @@ export default function SearchDoctorPage() {
           });
 
           // Get the IDs of the top 2 doctors with most reviews
-          const top2DoctorIds = sortedByReviews.slice(0, 2).map((doctor) =>
-            doctor.place_id || doctor.id
-          );
+          const top2DoctorIds = sortedByReviews
+            .slice(0, 2)
+            .map((doctor) => doctor.place_id || doctor.id);
           //console.log('top2DoctorIds', top2DoctorIds);
           setTopReviewDoctors(top2DoctorIds);
         }
@@ -613,7 +613,7 @@ export default function SearchDoctorPage() {
   }, [doctors]);
 
   return (
-    <section className="h-screen flex flex-col overflow-hidden">
+    <section className="h-screen flex flex-col md:overflow-hidden">
       <NavbarSection />
       {doctors.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-screen text-center ">

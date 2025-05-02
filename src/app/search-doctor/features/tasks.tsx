@@ -338,7 +338,7 @@ export const Task: React.FC<TaskProps> = ({
                   </div>
                 )}
                 {!fromTranscript && showAcceptsInsurerBadge && (
-                  <div className="absolute top-28 right-2 md:right-6 z-10">
+                  <div className="hidden md:flex  absolute top-28 right-2 md:right-6 z-10">
                     <span className="flex text-xs gap-1 justify-center items-center">
                       <CircleCheck className="text-[#00BA85]" /> Accepts{" "}
                       {selectedInsurer}
@@ -663,6 +663,7 @@ export const Task: React.FC<TaskProps> = ({
                       </span>
                       <span>•</span>
                       <span>{openingTimeInfo}</span>
+                     
                     </div>
                   </div>
                   <div
