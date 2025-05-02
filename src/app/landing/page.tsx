@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Book,
   BookText,
+  GiftIcon,
   Loader2,
   MapPin,
   Menu,
@@ -588,12 +589,11 @@ export default function LandingPage() {
           <Button
             onClick={(e) => {
               e.preventDefault();
-              // scrollToSection("home", 40);
-              checkPrefillAvailability();
+              router.push("/get-gift");
             }}
             className="text-white bg-[#0074BA] rounded-md"
           >
-            Get Started
+              <GiftIcon className="h-5 w-5" /> Get $100
           </Button>
         </div>
 
@@ -773,7 +773,7 @@ export default function LandingPage() {
                   <div className="mx-3">
                     <Button className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 my-4 h-12 items-center justify-center w-full md:w-auto md:hidden">
                       {/* <Search className="w-5 h-5 text-white" /> Search */}
-                      {isLoading ? (
+                      {isLoading && !globalLoading ? (
                         <>
                           <Loader2 className="w-5 h-5 text-white animate-spin" />{" "}
                           Searching
@@ -796,7 +796,7 @@ export default function LandingPage() {
                 className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 h-12 md:flex items-center justify-center w-full md:w-auto hidden"
               >
                 {/* <Search className="w-5 h-5 text-white" /> Search */}
-                {isLoading ? (
+                {isLoading && !globalLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 text-white animate-spin" />{" "}
                     Searching
