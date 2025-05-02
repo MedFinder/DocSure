@@ -85,6 +85,7 @@ interface TaskProps {
   onCallNext?: (index: number) => void; // Function to move doctor to next in queue
   handleFormSubmit: any;
   isLoading?: boolean;
+  topReviewDoctors?: string[];
 }
 
 const getAlternateColor = (index: number) => {
@@ -151,6 +152,7 @@ export const Task: React.FC<TaskProps> = ({
   handleRemoveDoctor,
   handleFormSubmit,
   isLoading,
+  topReviewDoctors,
   //description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -167,6 +169,19 @@ export const Task: React.FC<TaskProps> = ({
   const isExpanded = expandedId === id;
 
   const [doctorSummary, setDoctorSummary] = useState(description);
+  // Check if doctor accepts the selected insurer
+  const [selectedInsurer, setSelectedInsurer] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get selected insurer from localStorage
+    if (typeof window !== "undefined") {
+      const storedInsurer = localStorage.getItem("selectedInsurer");
+      if (storedInsurer) {
+        setSelectedInsurer(storedInsurer);
+      }
+    }
+  }, []);
+
   // Function to handle expanding and fetching summary
   const handleExpand = async (e) => {
     e.stopPropagation();
@@ -228,6 +243,15 @@ export const Task: React.FC<TaskProps> = ({
       setIsCardLoading(false); // Reset loading state
     }
   };
+
+  // Determine badge display logic
+  const isTopPick = index === 0;
+  const hasHighReviews = topReviewDoctors.includes(id);
+  const showFillingFastBadge = hasHighReviews && !isTopPick;
+
+  // Determine if we should show the insurer acceptance badge
+  const showAcceptsInsurerBadge = selectedInsurer && index < 8;
+
   return (
     <>
       <tr
@@ -286,8 +310,31 @@ export const Task: React.FC<TaskProps> = ({
               <div
                 className={`bg-[#F2F6F9]  py-4 md:px-4 px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0   ${
                   fromTranscript ? "md:px-6 min-w-[85vw] " : ""
-                }`}
+                } relative`}
               >
+                {/* Add the badges conditionally */}
+                {isTopPick && (
+                  <div className="absolute top-2 right-2 md:right-32 z-10">
+                    <span className="bg-[#0074BA] text-white text-xs font-semibold px-2 py-1 rounded-full">
+                      Top pick
+                    </span>
+                  </div>
+                )}
+                {showFillingFastBadge && (
+                  <div className="absolute top-2 right-2 md:right-32 z-10">
+                    <span className="bg-[#E5573F] text-white text-xs font-semibold px-2 py-1 rounded-full">
+                      Filling fast
+                    </span>
+                  </div>
+                )}
+                {showAcceptsInsurerBadge && (
+                  <div className="absolute bottom-2 right-2 md:right-2 z-10">
+                    <span className="bg-[#00BA85] text-white text-xs font-semibold px-2 py-1 rounded-full">
+                      Accepts {selectedInsurer}
+                    </span>
+                  </div>
+                )}
+
                 {!fromTranscript && (
                   <Tooltip>
                     <TooltipTrigger asChild>

@@ -442,6 +442,10 @@ export default function LandingPage() {
         setGlobalLoading(false); // Turn off global loading if there's an error
         return;
       }
+      if (!values.specialty) {
+        checkPrefillAvailability()
+        return;
+      }
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
         localStorage.setItem("selectedSpecialty", values.specialty);
