@@ -317,49 +317,7 @@ export default function LandingPage() {
 
     const defaultLat = 37.7749; // Default latitude (e.g., San Francisco)
     const defaultLng = -122.4194; // Default longitude (e.g., San Francisco)
-
-    if (!navigator.geolocation) {
-      getLocationFromIP();
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-
-        try {
-          // Fetch the address using Google Maps Geocoding API
-          const geocodeResponse = await axios.get(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
-          );
-
-          const address =
-            geocodeResponse.data.results[0]?.formatted_address || "";
-          // console.log(address)
-          setSelectedLocation({ lat, lng });
-          setAddressLocation(address); // Set the fetched address
-          localStorage.setItem("selectedAddress", address);
-          localStorage.setItem(
-            "selectedLocation",
-            JSON.stringify({ lat, lng })
-          );
-
-          const popularDoctors = await getPopularDrs(lat, lng);
-          if (popularDoctors?.results?.length > 0) {
-            const doctorlists = popularDoctors?.results?.slice(0, 20);
-            setpopulardoctors(doctorlists);
-            localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
-          }
-        } catch (error) {
-          console.error("Error fetching address or popular doctors:", error);
-          await getLocationFromIP();
-        }
-      },
-      async (error) => {
-        console.error("Error getting location:", error);
-        await getLocationFromIP();
-      }
-    );
+    getLocationFromIP();
   };
   // Function to get location from IP address
   const getLocationFromIP = async () => {
