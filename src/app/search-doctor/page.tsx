@@ -631,7 +631,7 @@ export default function SearchDoctorPage() {
         </div>
       ) : (
         <form
-          className="flex flex-col flex-grow overflow-hidden"
+          className="flex flex-col flex-grow md:overflow-hidden "
           onSubmit={formik.handleSubmit}
         >
           <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3  border-t-0 text-sm h-[60px] shrink-0">
