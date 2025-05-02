@@ -211,7 +211,7 @@ export default function NavbarSection({
             </span>
             <span className="flex flex-col pl-2">
               <p className="text-lg">{specialty}</p>
-              <p className="text-gray-500">{formik.values.insurance_carrier}</p>
+              <p className="text-gray-500">{addressLocation}</p>
             </span>
           </div>
         )}
