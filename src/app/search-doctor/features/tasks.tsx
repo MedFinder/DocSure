@@ -631,7 +631,16 @@ export const Task: React.FC<TaskProps> = ({
                       {review || 0} reviews
                     </span>
                     {/* <span className="px-1">|</span> */}
-
+                    <div
+                      className="flex items-center gap-1"
+                      onClick={handleExpand}
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
+                      <MapPin size={13} />
+                      <span className="whitespace-nowrap text-[#333333] text-sm">
+                        {distance || "-"}
+                      </span>
+                    </div>
                     {/* <div className="md:hidden gap-1 text-sm text-[#333333] flex items-center  ">
                       <span
                         className={

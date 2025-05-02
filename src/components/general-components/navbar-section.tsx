@@ -204,7 +204,7 @@ export default function NavbarSection({
         {pathname !== "/" && (
           <div
             className="md:hidden flex w-full border border-gray-500  p-1"
-            onClick={() => setOpenNavbarDialog(true)}
+            // onClick={() => setOpenNavbarDialog(true)}
           >
             <span className="flex items-center p-1">
               <Search />
