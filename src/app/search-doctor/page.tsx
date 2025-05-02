@@ -483,15 +483,14 @@ export default function SearchDoctorPage() {
     // Simulate form submission delay
     return new Promise((resolve) => setTimeout(resolve, 3000));
   };
-  useEffect(() => {
-    // Fetch the doctors list from localStorage to find the top 2 by reviews
+  const getTopDrsWithReviews = async () => { 
     const storedData = localStorage.getItem("statusData");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
         if (parsedData?.results?.length) {
           // Get the first 10 doctors from the results
-          const first10Doctors = parsedData.results.slice(0, 20);
+          const first10Doctors = parsedData.results.slice(0, 10);
 
           // Sort doctors by review count in descending order
           const sortedByReviews = [...first10Doctors].sort((a, b) => {
@@ -511,36 +510,36 @@ export default function SearchDoctorPage() {
         console.error("Error parsing doctors data for review badges:", error);
       }
     }
+  }
+  useEffect(() => {
+    // Fetch the doctors list from localStorage to find the top 2 by reviews
+    getTopDrsWithReviews()
   }, []);
-
-  // const handleFormSubmit = async (index: number) => {
-  //   // Keep the doctors list as is in the UI
-  //   const newDoctors = [...doctors];
-
-  //   // Update localStorage with the selected doctor moved to the top
-  //   const selectedDoctor = newDoctors.splice(index, 1)[0]; // Remove the selected doctor
-  //   newDoctors.unshift(selectedDoctor); // Add the selected doctor to the top
-
-  //   // Perform form submission
-  //   formik.handleSubmit();
-
-  //   // Wait for navigation to complete
-  //   setTimeout(() => {
-  //     // Update localStorage after navigation
-  //     const lastSearchSource = localStorage.getItem("lastSearchSource");
-  //     const storageKey =
-  //       lastSearchSource === "navbar" ? "statusData" : "statusData";
-
-  //     const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
-
-  //     const updatedData = {
-  //       ...currentData,
-  //       results: newDoctors, // Update with the reordered list
-  //     };
-
-  //     localStorage.setItem(storageKey, JSON.stringify(updatedData));
-  //   }, 1500); // Delay to ensure navigation is complete
-  // };
+    useEffect(() => {
+      const updateDoctorsList = () => {
+        try {
+          const lastSearchSource = localStorage.getItem("lastSearchSource");
+          let rawData;
+  
+          if (lastSearchSource === "navbar") {
+            getTopDrsWithReviews()
+          }
+  
+        } catch (error) {
+          console.error("Error parsing localStorage data:", error);
+        }
+      };
+      updateDoctorsList();
+      // getTotalDoctorsList();
+  
+      // Listen for storage changes (detect when a new search is performed)
+      const handleStorageChange = () => updateDoctorsList();
+      window.addEventListener("storage", handleStorageChange);
+  
+      return () => {
+        window.removeEventListener("storage", handleStorageChange);
+      };
+    }, [router]);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",

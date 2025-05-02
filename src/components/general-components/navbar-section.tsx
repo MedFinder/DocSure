@@ -283,6 +283,8 @@ export default function NavbarSection({
                           setInsurer(value);
                           formik.setFieldValue("insurance_carrier", value);
                           localStorage.setItem("selectedInsurer", value);
+                          localStorage.setItem("lastSearchSource", "insurance"); // Track last search source
+                          window.dispatchEvent(new Event("storage"));
                         }}
                         clearable={false}
                         enabled={updatePreferences ? false : true}

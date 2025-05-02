@@ -410,7 +410,7 @@ export default function LandingPage() {
     const data = {
       doctor_speciality: formik.values.specialty,
       preferred_location: savedAddress,
-      device_id_address: ipAddress ?? "",
+      device_ip_address: ipAddress ?? '',
       device_category: "web",
     };
     try {
