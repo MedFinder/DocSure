@@ -177,3 +177,24 @@ body {
   border-radius: 0;
   border: 1px solid #e2e8f0;
 }
+
+.flag-badge {
+  background-color: #f59e0b;
+  position: relative;
+  display: inline-block;
+  clip-path: polygon(10px 0%, 100% 0%, 100% 100%, 10px 100%, 0% 50%);
+  padding: 4px 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+.flag-fast-badge {
+  background-color: #0074ba;
+  position: relative;
+  display: inline-block;
+  clip-path: polygon(10px 0%, 100% 0%, 100% 100%, 10px 100%, 0% 50%);
+  padding: 4px 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.75rem;
+}

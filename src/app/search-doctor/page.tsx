@@ -43,6 +43,7 @@ export default function SearchDoctorPage() {
   const router = useRouter();
   const [doctors, setDoctors] = useState([]);
   const [phoneNumbers, setPhoneNumbers] = useState<(string | null)[]>([]);
+  const [topReviewDoctors, setTopReviewDoctors] = useState<string[]>([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isAppointmentBooked, setIsAppointmentBooked] = useState(false);
   const [transcriptSummary, setTranscriptSummary] = useState({
@@ -276,7 +277,7 @@ export default function SearchDoctorPage() {
   useEffect(() => {
     const updateDoctorsList = () => {
       try {
-        let rawData  = localStorage.getItem("statusData");
+        let rawData = localStorage.getItem("statusData");
         if (!rawData) {
           router.push("/");
           return;
@@ -482,6 +483,36 @@ export default function SearchDoctorPage() {
     // Simulate form submission delay
     return new Promise((resolve) => setTimeout(resolve, 3000));
   };
+  useEffect(() => {
+    // Fetch the doctors list from localStorage to find the top 2 by reviews
+    const storedData = localStorage.getItem("statusData");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        if (parsedData?.results?.length) {
+          // Get the first 10 doctors from the results
+          const first10Doctors = parsedData.results.slice(0, 20);
+
+          // Sort doctors by review count in descending order
+          const sortedByReviews = [...first10Doctors].sort((a, b) => {
+            const reviewsA = a.user_ratings_total || a.review || 0;
+            const reviewsB = b.user_ratings_total || b.review || 0;
+            return reviewsB - reviewsA;
+          });
+
+          // Get the IDs of the top 2 doctors with most reviews
+          const top2DoctorIds = sortedByReviews
+            .slice(0, 2)
+            .map((doctor) => doctor.place_id || doctor.id);
+          //console.log('top2DoctorIds', top2DoctorIds);
+          setTopReviewDoctors(top2DoctorIds);
+        }
+      } catch (error) {
+        console.error("Error parsing doctors data for review badges:", error);
+      }
+    }
+  }, []);
+
   // const handleFormSubmit = async (index: number) => {
   //   // Keep the doctors list as is in the UI
   //   const newDoctors = [...doctors];
@@ -582,7 +613,7 @@ export default function SearchDoctorPage() {
   }, [doctors]);
 
   return (
-    <section className="h-screen flex flex-col overflow-hidden">
+    <section className="h-screen flex flex-col md:overflow-hidden">
       <NavbarSection />
       {doctors.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-screen text-center ">
@@ -600,7 +631,7 @@ export default function SearchDoctorPage() {
         </div>
       ) : (
         <form
-          className="flex flex-col flex-grow overflow-hidden"
+          className="flex flex-col flex-grow md:overflow-hidden "
           onSubmit={formik.handleSubmit}
         >
           <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3  border-t-0 text-sm h-[60px] shrink-0">
@@ -791,6 +822,7 @@ export default function SearchDoctorPage() {
                       reconnectWebSocket={connectWebSocket}
                       handleFormSubmit={handleFormSubmit}
                       isLoading={isLoading}
+                      topReviewDoctors={topReviewDoctors}
                     />
                   </div>
                   {/* Loading indicator for infinite scrolling */}

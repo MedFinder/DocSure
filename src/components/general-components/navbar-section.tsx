@@ -266,6 +266,7 @@ export default function NavbarSection({
                         onChange={(value) => {
                           setInsurer(value);
                           formik.setFieldValue("insurance_carrier", value);
+                          localStorage.setItem("selectedInsurer", value);
                         }}
                         clearable={false}
                         enabled={updatePreferences ? false : true}
