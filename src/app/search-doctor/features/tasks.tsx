@@ -323,23 +323,23 @@ export const Task: React.FC<TaskProps> = ({
                 {/* Add the badges conditionally */}
 
                 {!fromTranscript && isTopPick && (
-                  <div className="absolute top-2 right-6 md:right-7 z-10 ">
-                    <span className="flag-badge text-white text-xs font-semibold py-[2px] px-3">
+                  <div className="absolute top-0 right-0 z-10 ">
+                    <span className="flag-badge text-white text-xs font-normal    md:font-normal">
                       Top pick
                     </span>
                   </div>
                 )}
 
                 {!fromTranscript && showFillingFastBadge && (
-                  <div className="absolute top-2 right-6 md:right-8 z-10">
-                    <span className=" flag-fast-badge text-white text-xs font-semibold py-[2px] px-3">
+                  <div className="absolute top-0 right-0 z-10">
+                    <span className=" flag-fast-badge text-white text-xs font-normal py-[2px] px-3 md:font-normal">
                       Filling fast
                     </span>
                   </div>
                 )}
                 {!fromTranscript && showAcceptsInsurerBadge && (
                   <div className="hidden md:flex  absolute top-28 right-2 md:right-6 z-10">
-                    <span className="flex text-xs gap-1 justify-center items-center">
+                    <span className="flex text-xs gap-1 justify-center items-center md:font-normal">
                       <CircleCheck className="text-[#00BA85]" /> Accepts{" "}
                       {selectedInsurer}
                     </span>
@@ -460,12 +460,12 @@ export const Task: React.FC<TaskProps> = ({
                             </Button>
                           </div>
 
-                          <div className="flex flex-col items-center justify-center gap-0">
+                          {/* <div className="flex flex-col items-center justify-center gap-0 ">
                             <p className="text-[10px]">
                               We’ll collect your info
                             </p>
                             <p className="text-[10px]">and call the clinic</p>
-                          </div>
+                          </div> */}
                         </div>
                         //       <Tooltip>
                         //         <TooltipTrigger asChild>
@@ -607,7 +607,7 @@ export const Task: React.FC<TaskProps> = ({
                     </div>
                   </div>
                   <span
-                    className=" text-sm text-[#636465]  pr-16 md:pr-0 md:w-[60%] w-[85%]"
+                    className=" text-sm text-[#636465]  pr-16 md:pr-0 md:w-[60%] w-[85%] md:flex "
                     onClick={handleExpand}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
@@ -663,7 +663,6 @@ export const Task: React.FC<TaskProps> = ({
                       </span>
                       <span>•</span>
                       <span>{openingTimeInfo}</span>
-                     
                     </div>
                   </div>
                   <div

@@ -613,7 +613,7 @@ export default function SearchDoctorPage() {
   }, [doctors]);
 
   return (
-    <section className="h-screen flex flex-col md:overflow-hidden">
+    <section className="h-screen flex flex-col md:overflow-hidden ">
       <NavbarSection />
       {doctors.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-screen text-center ">
@@ -634,7 +634,7 @@ export default function SearchDoctorPage() {
           className="flex flex-col flex-grow md:overflow-hidden "
           onSubmit={formik.handleSubmit}
         >
-          <div className="flex justify-between md:mt-24 mt-44 px-4 md:py-2 py-3  border-t-0 text-sm h-[60px] shrink-0">
+          <div className="flex justify-between md:mt-24 mt-[86px] px-4 md:py-2 py-3  border-t-0 text-sm h-[60px] shrink-0">
             <div className="flex gap-2 items-center">
               <Image
                 src="/Group 198.svg"
@@ -805,7 +805,7 @@ export default function SearchDoctorPage() {
                 onDragEnd={handleDragEnd}
                 collisionDetection={closestCenter}
               >
-                <ScrollArea className="h-[100%] w-full md:w-auto pb-14 md:pb-0 pt-4 md:pt-0 overflow-y-auto">
+                <ScrollArea className="h-[100%] w-full md:w-auto pb-14 md:pb-0  md:pt-0 overflow-y-auto">
                   <div className="flex flex-col md:flex-row w-full">
                     <Column
                       activeCallIndex={activeCallIndex}
