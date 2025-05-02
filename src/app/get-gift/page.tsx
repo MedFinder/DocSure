@@ -82,13 +82,13 @@ export default function GetGift() {
           </div>
 
           {/* Get started button */}
-          <div className="mt-10 flex justify-center">
+          {/* <div className="mt-10 flex justify-center">
             <Link href="/landing">
               <Button className="bg-[#E5573F] text-white px-8 py-2 rounded-md hover:bg-[#d04835]">
                 Book an Appointment
               </Button>
             </Link>
-          </div>
+          </div> */}
         </div>
           <FooterSection />
       </main>
