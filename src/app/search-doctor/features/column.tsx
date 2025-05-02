@@ -34,6 +34,7 @@ interface ColumnProps {
   onSkip?: () => void;
   handleFormSubmit: any;
   isLoading?: boolean;
+  topReviewDoctors?: string[];
   handleRemoveDoctor?: (index: string) => void; // Added for "Remove" functionality
   onCallNext?: (index: number) => void; // Added for "Call next" functionality
 }
@@ -55,6 +56,7 @@ const Column: React.FC<ColumnProps> = ({
   handleRemoveDoctor,
   handleFormSubmit,
   isLoading,
+  topReviewDoctors,
 }) => {
   // Function to delete a task by ID
 
@@ -143,6 +145,7 @@ const Column: React.FC<ColumnProps> = ({
                     onCallNext={onCallNext}
                     handleRemoveDoctor={handleRemoveDoctor}
                     handleFormSubmit={handleFormSubmit}
+                    topReviewDoctors={topReviewDoctors}
                     isLoading={isLoading}
                   />
                 );

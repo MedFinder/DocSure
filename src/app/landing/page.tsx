@@ -46,7 +46,7 @@ import FooterSection from "../landing/components/FooterSection";
 // Add global spinner component
 const GlobalSpinner = ({ isVisible }) => {
   if (!isVisible) return null;
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
       <div className="bg-white p-5 rounded-full">
@@ -116,7 +116,7 @@ const moreDoctorTypes = [
   },
 ];
 const validationSchema = Yup.object().shape({
- // specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
+  // specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
 
 export default function LandingPage() {
@@ -149,7 +149,10 @@ export default function LandingPage() {
     setGlobalLoading(true); // Set global loading to true when starting the process
     // scrollToSection("home", 40); // Scroll to the "home" section
     handleDoctorTypeClick(value ?? "Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
-    localStorage.setItem("selectedSpecialty", value ?? "Primary Care Physician");
+    localStorage.setItem(
+      "selectedSpecialty",
+      value ?? "Primary Care Physician"
+    );
     formik.handleSubmit(); // Trigger formik's onSubmit function
   };
   const { isLoaded } = useJsApiLoader({
@@ -256,23 +259,23 @@ export default function LandingPage() {
     const storedSpeciality = localStorage.getItem("selectedSpecialty");
     const selectedInsurer = localStorage.getItem("selectedInsurer");
     if (storedSpeciality) {
-        setPrefilledSpecialty(storedSpeciality);
-        formik.setFieldValue("specialty", storedSpeciality);
-        setSelectedSpecialty(storedSpeciality); // Update specialty when button is clicked
-      }
-      if(selectedInsurer){
-        setSelectedInsurer(selectedInsurer);
-        formik.setFieldValue("insurance_carrier", selectedInsurer);
-      }
+      setPrefilledSpecialty(storedSpeciality);
+      formik.setFieldValue("specialty", storedSpeciality);
+      setSelectedSpecialty(storedSpeciality); // Update specialty when button is clicked
+    }
+    if (selectedInsurer) {
+      setSelectedInsurer(selectedInsurer);
+      formik.setFieldValue("insurance_carrier", selectedInsurer);
+    }
     fetchUserLocationAndPopularDrs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = '//js-na2.hs-scripts.com/242621305.js';
+    const script = document.createElement("script");
+    script.src = "//js-na2.hs-scripts.com/242621305.js";
     script.async = true;
     script.defer = true;
-    script.id = 'hs-script-loader';
+    script.id = "hs-script-loader";
     document.body.appendChild(script);
   }, []);
   const getPopularDrs = async (lat, lng) => {
@@ -345,10 +348,7 @@ export default function LandingPage() {
           if (popularDoctors?.results?.length > 0) {
             const doctorlists = popularDoctors?.results?.slice(0, 20);
             setpopulardoctors(doctorlists);
-            localStorage.setItem(
-              "popularDoctors",
-              JSON.stringify(doctorlists)
-            );
+            localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
           }
         } catch (error) {
           console.error("Error fetching address or popular doctors:", error);
@@ -361,56 +361,56 @@ export default function LandingPage() {
       }
     );
   };
-    // Function to get location from IP address
-    const getLocationFromIP = async () => {
-        console.log("fetching location from ip....");
-        try {
-            // Use IP-based geolocation as fallback
-            const ipGeolocationResponse = await axios.get("https://ipapi.co/json/");
-            if (
-            ipGeolocationResponse.data &&
-            ipGeolocationResponse.data.latitude &&
-            ipGeolocationResponse.data.longitude
-            ) {
-            const lat = ipGeolocationResponse.data.latitude;
-            const lng = ipGeolocationResponse.data.longitude;
-            const city = ipGeolocationResponse.data.city;
-            const ip_address = ipGeolocationResponse.data.ip;
-            const region = ipGeolocationResponse.data.region;
-            const country = ipGeolocationResponse.data.country_name;
-            const formattedAddress = `${city}, ${region}, ${country}`;
-            setSelectedLocation({ lat, lng });
-            setAddressLocation(formattedAddress);
-            localStorage.setItem("ipAddress", ip_address);
-            localStorage.setItem("selectedAddress", formattedAddress);
-            localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
+  // Function to get location from IP address
+  const getLocationFromIP = async () => {
+    console.log("fetching location from ip....");
+    try {
+      // Use IP-based geolocation as fallback
+      const ipGeolocationResponse = await axios.get("https://ipapi.co/json/");
+      if (
+        ipGeolocationResponse.data &&
+        ipGeolocationResponse.data.latitude &&
+        ipGeolocationResponse.data.longitude
+      ) {
+        const lat = ipGeolocationResponse.data.latitude;
+        const lng = ipGeolocationResponse.data.longitude;
+        const city = ipGeolocationResponse.data.city;
+        const ip_address = ipGeolocationResponse.data.ip;
+        const region = ipGeolocationResponse.data.region;
+        const country = ipGeolocationResponse.data.country_name;
+        const formattedAddress = `${city}, ${region}, ${country}`;
+        setSelectedLocation({ lat, lng });
+        setAddressLocation(formattedAddress);
+        localStorage.setItem("ipAddress", ip_address);
+        localStorage.setItem("selectedAddress", formattedAddress);
+        localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
 
-            const popularDoctors = await getPopularDrs(lat, lng);
-            if (popularDoctors?.results?.length > 0) {
-                const doctorlists = popularDoctors?.results?.slice(0, 20);
-                setpopulardoctors(doctorlists);
-                localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
-            }
-            } else {
-            // IP geolocation failed, use default location
-            toast.error(
-                "Could not determine your location. Using default location."
-            );
-            getDefaultLocation();
-            }
-        } catch (error) {
-            console.error("Error with IP geolocation:", error);
-            toast.error("Could not determine your location. Using default location.");
-            getDefaultLocation();
+        const popularDoctors = await getPopularDrs(lat, lng);
+        if (popularDoctors?.results?.length > 0) {
+          const doctorlists = popularDoctors?.results?.slice(0, 20);
+          setpopulardoctors(doctorlists);
+          localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
         }
-    };
+      } else {
+        // IP geolocation failed, use default location
+        toast.error(
+          "Could not determine your location. Using default location."
+        );
+        getDefaultLocation();
+      }
+    } catch (error) {
+      console.error("Error with IP geolocation:", error);
+      toast.error("Could not determine your location. Using default location.");
+      getDefaultLocation();
+    }
+  };
   const logRequestInfo = async () => {
     const savedAddress = localStorage.getItem("selectedAddress");
     const ipAddress = localStorage.getItem("ipAddress");
     const data = {
       doctor_speciality: formik.values.specialty,
       preferred_location: savedAddress,
-      device_id_address: ipAddress ?? '',
+      device_id_address: ipAddress ?? "",
       device_category: "web",
     };
     try {
@@ -440,6 +440,10 @@ export default function LandingPage() {
       if (!selectedLocation) {
         toast.error("No location selected");
         setGlobalLoading(false); // Turn off global loading if there's an error
+        return;
+      }
+      if (!values.specialty) {
+        checkPrefillAvailability();
         return;
       }
       try {
@@ -473,7 +477,7 @@ export default function LandingPage() {
             const updatedValues = { ...values, request_id };
             const existingFormData = localStorage.getItem("formData");
             let mergedValues = updatedValues;
-      
+
             if (existingFormData) {
               try {
                 const parsedExistingData = JSON.parse(existingFormData);
@@ -521,10 +525,7 @@ export default function LandingPage() {
 
         // Store in localStorage
         localStorage.setItem("selectedAddress", formattedAddress);
-        localStorage.setItem(
-          "selectedLocation",
-          JSON.stringify({ lat, lng })
-        );
+        localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
       }
     }
   };
@@ -538,7 +539,7 @@ export default function LandingPage() {
     <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">
       {/* Global Loading Spinner */}
       <GlobalSpinner isVisible={globalLoading} />
-      
+
       {/* Navbar */}
       <nav className="fixed top-0 w-full bg-[#FCF8F1] shadow-sm p-4 flex justify-between items-center z-50  text-sm nav-header">
         <div className="flex justify-between items-center gap-6 ">
@@ -630,7 +631,7 @@ export default function LandingPage() {
             onClick={(e) => {
               e.preventDefault();
               // scrollToSection("home", 40);
-              checkPrefillAvailability()
+              checkPrefillAvailability();
             }}
             className="text-white bg-[#0074BA] rounded-md"
           >
@@ -639,7 +640,14 @@ export default function LandingPage() {
         </div>
 
         <div className="flex space-x-4 mobile">
-          <Button className="text-white bg-[#0074BA] rounded-md block text-xs ">
+          <Button
+            className="text-white bg-[#0074BA] rounded-md block text-xs "
+            onClick={(e) => {
+              e.preventDefault();
+              // scrollToSection("home", 40);
+              checkPrefillAvailability();
+            }}
+          >
             Get Started
           </Button>
           <button className="" onClick={() => setIsOpen(true)}>
@@ -806,7 +814,17 @@ export default function LandingPage() {
                   </div>
                   <div className="mx-3">
                     <Button className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 my-4 h-12 items-center justify-center w-full md:w-auto md:hidden">
-                      <Search className="w-5 h-5 text-white" /> Search
+                      {/* <Search className="w-5 h-5 text-white" /> Search */}
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 text-white animate-spin" />{" "}
+                          Searching
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-5 h-5 text-white" /> Search
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -844,7 +862,7 @@ export default function LandingPage() {
                         ? "bg-slate-800 text-white" // Selected state
                         : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800" // Normal state
                     }`}
-                    onClick={() =>   checkPrefillAvailability(value.value)} // get s
+                    onClick={() => checkPrefillAvailability(value.value)} // get s
                   >
                     {value.label}
                   </Button>
@@ -1019,8 +1037,8 @@ export default function LandingPage() {
                     : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800" // Normal state
                 }`}
                 onClick={() => {
-                 // scrollToSection("home", 40);
-                 checkPrefillAvailability(value.value)
+                  // scrollToSection("home", 40);
+                  checkPrefillAvailability(value.value);
                 }}
               >
                 {value.label}
@@ -1102,8 +1120,8 @@ export default function LandingPage() {
             <Link
               onClick={(e) => {
                 e.preventDefault();
-               // scrollToSection("home", 40);
-                checkPrefillAvailability()
+                // scrollToSection("home", 40);
+                checkPrefillAvailability();
               }}
               href=""
               className=" flex justify-center gap-1 pt-12 hover:text-gray-700"

@@ -3,7 +3,15 @@
 import { useState, useEffect, createContext, useContext, useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MapPin, Trash2, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import {
+  MapPin,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  Check,
+  CircleCheck,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import axios from "axios";
 import {
@@ -85,6 +93,7 @@ interface TaskProps {
   onCallNext?: (index: number) => void; // Function to move doctor to next in queue
   handleFormSubmit: any;
   isLoading?: boolean;
+  topReviewDoctors?: string[];
 }
 
 const getAlternateColor = (index: number) => {
@@ -151,6 +160,7 @@ export const Task: React.FC<TaskProps> = ({
   handleRemoveDoctor,
   handleFormSubmit,
   isLoading,
+  topReviewDoctors,
   //description = "No additional information available for this provider.", // Default description
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -167,6 +177,19 @@ export const Task: React.FC<TaskProps> = ({
   const isExpanded = expandedId === id;
 
   const [doctorSummary, setDoctorSummary] = useState(description);
+  // Check if doctor accepts the selected insurer
+  const [selectedInsurer, setSelectedInsurer] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get selected insurer from localStorage
+    if (typeof window !== "undefined") {
+      const storedInsurer = localStorage.getItem("selectedInsurer");
+      if (storedInsurer) {
+        setSelectedInsurer(storedInsurer);
+      }
+    }
+  }, []);
+
   // Function to handle expanding and fetching summary
   const handleExpand = async (e) => {
     e.stopPropagation();
@@ -228,6 +251,15 @@ export const Task: React.FC<TaskProps> = ({
       setIsCardLoading(false); // Reset loading state
     }
   };
+
+  // Determine badge display logic
+  const isTopPick = index === 0;
+  const hasHighReviews = topReviewDoctors?.includes(id);
+  const showFillingFastBadge = hasHighReviews && !isTopPick;
+
+  // Determine if we should show the insurer acceptance badge
+  const showAcceptsInsurerBadge = selectedInsurer && index < 8;
+
   return (
     <>
       <tr
@@ -286,8 +318,34 @@ export const Task: React.FC<TaskProps> = ({
               <div
                 className={`bg-[#F2F6F9]  py-4 md:px-4 px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0   ${
                   fromTranscript ? "md:px-6 min-w-[85vw] " : ""
-                }`}
+                } relative`}
               >
+                {/* Add the badges conditionally */}
+
+                {!fromTranscript && isTopPick && (
+                  <div className="absolute top-2 right-6 md:right-7 z-10 ">
+                    <span className="flag-badge text-white text-xs font-semibold py-[2px] px-3">
+                      Top pick
+                    </span>
+                  </div>
+                )}
+
+                {!fromTranscript && showFillingFastBadge && (
+                  <div className="absolute top-2 right-6 md:right-8 z-10">
+                    <span className=" flag-fast-badge text-white text-xs font-semibold py-[2px] px-3">
+                      Filling fast
+                    </span>
+                  </div>
+                )}
+                {!fromTranscript && showAcceptsInsurerBadge && (
+                  <div className="absolute top-28 right-2 md:right-6 z-10">
+                    <span className="flex text-xs gap-1 justify-center items-center">
+                      <CircleCheck className="text-[#00BA85]" /> Accepts{" "}
+                      {selectedInsurer}
+                    </span>
+                  </div>
+                )}
+
                 {!fromTranscript && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -353,7 +411,11 @@ export const Task: React.FC<TaskProps> = ({
 
                     <div className="flex flex-wrap justify-between items-start pr-[120px] relative gap-y-2">
                       <div className="flex gap-4 flex-wrap">
-                        <div className="md:flex gap-1 font-normal text-[#333333] text-sm items-center hidden">
+                        <div
+                          className="md:flex gap-1 font-normal text-[#333333] text-sm items-center hidden"
+                          onClick={handleExpand}
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
                           <img
                             src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
                             className="object-contain w-3 rounded-sm"
@@ -368,7 +430,11 @@ export const Task: React.FC<TaskProps> = ({
                           </span>
                         </div>
 
-                        <div className="md:flex hidden items-center gap-1">
+                        <div
+                          className="md:flex hidden items-center gap-1"
+                          onClick={handleExpand}
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
                           <MapPin size={13} />
                           <span className="whitespace-nowrap text-[#333333] text-sm">
                             {distance || "-"}
@@ -377,7 +443,7 @@ export const Task: React.FC<TaskProps> = ({
                       </div>
 
                       {!fromTranscript && (
-                        <div className="absolute right-0 top-0 md:flex flex-col gap-[4px] items-center justify-center w-28 ">
+                        <div className="absolute hidden  md:right-0 top-6 md:flex flex-col gap-[4px] items-center justify-center w-28">
                           <div className="flex items-center justify-center self-center">
                             <Button
                               className="bg-[#E5573F] text-white rounded-md md:w-20 "
@@ -386,7 +452,92 @@ export const Task: React.FC<TaskProps> = ({
                               disabled={isCardLoading}
                               onPointerDown={(e) => e.stopPropagation()}
                             >
-                              {isCardLoading ? "Booking..." : "Book"}
+                              {isCardLoading ? (
+                                <Loader2 className="w-5 h-5 text-white animate-spin" />
+                              ) : (
+                                "Book"
+                              )}
+                            </Button>
+                          </div>
+
+                          <div className="flex flex-col items-center justify-center gap-0">
+                            <p className="text-[10px]">
+                              We’ll collect your info
+                            </p>
+                            <p className="text-[10px]">and call the clinic</p>
+                          </div>
+                        </div>
+                        //       <Tooltip>
+                        //         <TooltipTrigger asChild>
+                        //           <label>
+                        //             <TooltipTrigger asChild>
+                        //               <label className="relative inline-flex items-center cursor-pointer">
+                        //                 <div className="relative w-6 h-6">
+                        //                   <input
+                        //                     type="checkbox"
+                        //                     checked={isChecked}
+                        //                     onChange={(e) => {
+                        //                       e.stopPropagation();
+                        //                       setIsChecked(e.target.checked);
+                        //                     }}
+                        //                     onPointerDown={(e) => e.stopPropagation()}
+                        //                     className="appearance-none w-full h-full bg-white border border-gray-300 rounded-md
+                        // checked:bg-[#00BA85] checked:border-transparent"
+                        //                   />
+
+                        //                   {/* White checkmark */}
+                        //                   {isChecked && (
+                        //                     <svg
+                        //                       className="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"
+                        //                       fill="none"
+                        //                       stroke="currentColor"
+                        //                       strokeWidth="3"
+                        //                       viewBox="0 0 24 24"
+                        //                     >
+                        //                       <path
+                        //                         strokeLinecap="round"
+                        //                         strokeLinejoin="round"
+                        //                         d="M5 13l4 4L19 7"
+                        //                       />
+                        //                     </svg>
+                        //                   )}
+                        //                 </div>
+                        //               </label>
+
+                        //               {/* White checkmark overlay */}
+                        //             </TooltipTrigger>
+                        //           </label>
+                        //         </TooltipTrigger>
+                        //         <TooltipContent
+                        //           side="left"
+                        //           className="bg-[#0074BA] text-white p-4 w-60 flex flex-col gap-2"
+                        //         >
+                        //           {/* <span className="font-semibold">
+                        //           Tooltip example:
+                        //         </span> */}
+                        //           <span>
+                        //             {isChecked
+                        //               ? "Deselect doctors you don’t want us to call."
+                        //               : "Select doctors to call for an appointment."}
+                        //           </span>
+                        //         </TooltipContent>
+                        //       </Tooltip>
+                      )}
+                      {!fromTranscript && (
+                        <div className="absolute  md:hidden left-4 top-6 flex flex-col gap-[4px] items-center justify-center w-28">
+                          <div className="flex items-center justify-center self-center">
+                            <Button
+                              className="bg-[#E5573F] text-white rounded-md md:w-20 "
+                              type="button"
+                              onClick={handleBookClick}
+                              disabled={isCardLoading}
+                              onPointerDown={(e) => e.stopPropagation()}
+                            >
+                              {isCardLoading ? (
+                                <Loader2 className="w-5 h-5 text-white animate-spin" />
+                              ) : (
+                                "Book"
+                              )}
                             </Button>
                           </div>
 
@@ -455,10 +606,18 @@ export const Task: React.FC<TaskProps> = ({
                       )}
                     </div>
                   </div>
-                  <span className=" text-sm text-[#636465]  pr-16 md:pr-0 md:w-[60%] w-[85%]">
+                  <span
+                    className=" text-sm text-[#636465]  pr-16 md:pr-0 md:w-[60%] w-[85%]"
+                    onClick={handleExpand}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
                     {vicinity}
                   </span>
-                  <div className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words pr-16 md:pr-0">
+                  <div
+                    className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words pr-16 md:pr-0"
+                    onClick={handleExpand}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
                     <img
                       src="https://cdn.builder.io/api/v1/image/assets/1fce0463b354425a961fa14453bc1061/b0f5fa409dd54a5f57c16e94df238e3e2d3efae03a4fe0431e6a27269654a1a1?placeholderIfAbsent=true"
                       className="object-contain w-3 rounded-sm"
@@ -487,7 +646,11 @@ export const Task: React.FC<TaskProps> = ({
                       <span>{openingTimeInfo}</span>
                     </div> */}
                   </div>
-                  <div className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words pr-16 md:pr-0">
+                  <div
+                    className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words pr-16 md:pr-0"
+                    onClick={handleExpand}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
                     <div className="md:hidden gap-1 text-sm text-[#333333] flex items-center  ">
                       <span
                         className={
@@ -502,7 +665,11 @@ export const Task: React.FC<TaskProps> = ({
                       <span>{openingTimeInfo}</span>
                     </div>
                   </div>
-                  <div className="md:flex gap-1 text-sm text-[#333333]  hidden ">
+                  <div
+                    className="md:flex gap-1 text-sm text-[#333333]  hidden "
+                    onClick={handleExpand}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
                     <span
                       className={
                         openingStatus === "Open"
@@ -515,7 +682,11 @@ export const Task: React.FC<TaskProps> = ({
                     <span>•</span>
                     <span className="">{openingTimeInfo}</span>
                   </div>
-                  <div className="flex justify-between items-center w-full">
+                  <div
+                    className="flex justify-between items-center w-full"
+                    onClick={handleExpand}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
                     <button
                       type="button"
                       onClick={handleExpand}
@@ -529,7 +700,7 @@ export const Task: React.FC<TaskProps> = ({
                       )}
                     </button>
                     {!isExpanded && fromTranscript && (
-                      <div className="md:flex justify-end items-center hidden ">
+                      <div className="md:flex justify-end items-center hidden  ">
                         <StatusBadge
                           status={"queue"}
                           index={index}
@@ -545,30 +716,10 @@ export const Task: React.FC<TaskProps> = ({
                         />
                       </div>
                     )}
-                    {/* 
-                    <button
-                      type="button"
-                      onClick={handleExpand}
-                      className=" hover:text-gray-700 transition-colors cursor-pointer  block"
-                      onPointerDown={(e) => e.stopPropagation()}
-                    >
-                      {transcriptLoading &&
-                      transcriptSummary?.place_id === id ? (
-                        <Loader2 className="mx-auto animate-spin" size={18} />
-                      ) : isExpanded ? (
-                        <span className="mx-auto text-sm underline hidden">
-                          view less
-                        </span>
-                      ) : (
-                        <span className="mx-auto text-sm underline ">
-                          view more
-                        </span>
-                      )}
-                    </button> */}
                   </div>
                   <div className="pr-6 md:hidden  flex justify-start">
                     {!isExpanded && fromTranscript && (
-                      <div className="flex justify-start items-center">
+                      <div className="flex justify-start items-center ">
                         <StatusBadge
                           status={"queue"}
                           index={index}
@@ -683,7 +834,11 @@ export const Task: React.FC<TaskProps> = ({
                     </div>
                   )}
                   {isExpanded && fromTranscript && (
-                    <div className="flex justify-between text-start items-center">
+                    <div
+                      className="flex justify-between text-start items-center"
+                      onClick={handleExpand}
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
                       <button
                         onClick={handleExpand}
                         className="text-sm underline mt-4"
@@ -691,7 +846,7 @@ export const Task: React.FC<TaskProps> = ({
                       >
                         view less
                       </button>
-                      <div className="md:flex hidden justify-end items-center">
+                      <div className="md:flex hidden justify-end items-center ">
                         <StatusBadge
                           status={"queue"}
                           index={index}
@@ -706,6 +861,22 @@ export const Task: React.FC<TaskProps> = ({
                           isAppointmentBooked={isAppointmentBooked}
                         />
                       </div>
+                    </div>
+                  )}
+                  {!fromTranscript && (
+                    <div className="flex justify-between items-center w-full">
+                      {isExpanded || transcriptLoading ? (
+                        <button
+                          type="button"
+                          onClick={handleExpand}
+                          className="hover:text-gray-700 transition-colors cursor-pointer block"
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
+                          <span className="mx-auto text-sm underline">
+                            view less
+                          </span>
+                        </button>
+                      ) : null}
                     </div>
                   )}
                 </div>

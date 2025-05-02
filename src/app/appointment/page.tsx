@@ -209,13 +209,10 @@ export default function AppointmentPage() {
       // console.log(updatedFormData);
       // logPatientData(updatedFormData);
       setIsLoading(true);
-       // Simulate a 1-second delay
-       await new Promise((resolve) => setTimeout(resolve, 3000));
+      // Simulate a 1-second delay
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
-      window.localStorage.setItem(
-        "formData",
-        JSON.stringify(updatedFormData)
-      );
+      window.localStorage.setItem("formData", JSON.stringify(updatedFormData));
 
       router.push("/transcript?confirmed=true");
     },
@@ -334,7 +331,9 @@ export default function AppointmentPage() {
           <p className="text-2xl sm:text-4xl mt-10 font-semibold text-[#333333]">
             Appointment Details
           </p>
-          <p className="text-xs text-gray-500 mt-1">We use this information to call the clinic and book your appointment</p>
+          <p className="text-xs text-gray-500 mt-1">
+            We use this information to call the clinic and book your appointment
+          </p>
           <div className="space-y-6 py-6">
             <div className="space-y-2">
               <Label className="text-[#333333]">Patient name</Label>
@@ -369,31 +368,35 @@ export default function AppointmentPage() {
                 }
                 value={
                   formik.values.dob
-                    ? typeof formik.values.dob === 'string'
+                    ? typeof formik.values.dob === "string"
                       ? formik.values.dob
                       : formatDateToMmDdYyyy(formik.values.dob)
-                    : ''
+                    : ""
                 }
                 onChange={(e) => {
                   const input = e.target.value;
                   const formattedInput = formatDateInput(input);
-                  
+
                   if (formattedInput !== input) {
                     e.target.value = formattedInput;
                   }
-                  
+
                   // Convert formatted string to Date object if complete
                   if (formattedInput.length === 10) {
-                    const [month, day, year] = formattedInput.split('/');
-                    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                    
+                    const [month, day, year] = formattedInput.split("/");
+                    const date = new Date(
+                      parseInt(year),
+                      parseInt(month) - 1,
+                      parseInt(day)
+                    );
+
                     if (!isNaN(date.getTime()) && date <= new Date()) {
-                      formik.setFieldValue('dob', date);
+                      formik.setFieldValue("dob", date);
                     } else {
-                      formik.setFieldValue('dob', formattedInput);
+                      formik.setFieldValue("dob", formattedInput);
                     }
                   } else {
-                    formik.setFieldValue('dob', formattedInput);
+                    formik.setFieldValue("dob", formattedInput);
                   }
                 }}
                 onBlur={formik.handleBlur}
@@ -406,6 +409,7 @@ export default function AppointmentPage() {
               <Label className="text-[#333333]">Phone number</Label>
               <Input
                 name="phoneNumber"
+                type="tel"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.phoneNumber}
@@ -420,27 +424,36 @@ export default function AppointmentPage() {
                   {formik.errors.phoneNumber}
                 </div>
               )}
-             <p className="text-xs text-gray-500 mt-1">Appointment confirmation will be sent to this phone number.</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Appointment confirmation will be sent to this phone number.
+              </p>
             </div>
           </div>
           <div
-              className=" mb-20 text-[#E5573F] text-xs flex space-x-2 items-center cursor-pointer hover:underline"
-              onClick={() => {
-                // Save selected specialty before opening modal
-                if (selectedSpecialty) {
-                  localStorage.setItem("selectedSpecialty", selectedSpecialty);
-                }
-                setIsModalOpen(true);
-              }}
-            >
-              <p className="font-bold text-base underline">Add insurance and availability details</p>
-              <ArrowRight className="hidden md:block" />
-            </div>
+            className=" mb-20 text-[#E5573F] text-xs flex space-x-2 items-center cursor-pointer hover:underline"
+            onClick={() => {
+              // Save selected specialty before opening modal
+              if (selectedSpecialty) {
+                localStorage.setItem("selectedSpecialty", selectedSpecialty);
+              }
+              setIsModalOpen(true);
+            }}
+          >
+            <p className="font-bold text-base underline">
+              Add insurance and availability details
+            </p>
+            <ArrowRight className="hidden md:block" />
+          </div>
           <div className="flex md:mt-12 my-6 w-full">
             <div className="w-full flex flex-col space-y-2 mb-3">
               <ul className="list-disc pl-4 space-y-1">
-                <li className="text-xs text-gray-600">We will confirm your insurance coverage (if provided) with the doctor's office.</li>
-                <li className="text-xs text-gray-600">Your doctor has 1 hour to confirm.</li>
+                <li className="text-xs text-gray-600">
+                  We will confirm your insurance coverage (if provided) with the
+                  doctor's office.
+                </li>
+                <li className="text-xs text-gray-600">
+                  Your doctor has 1 hour to confirm.
+                </li>
               </ul>
             </div>
           </div>
