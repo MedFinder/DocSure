@@ -1446,7 +1446,7 @@ export default function Transcript() {
   }, [callStatus.isInitiated]); // Re-create cleanup if call status changes
 
   return (
-    <main className="flex flex-col bg-white h-screen overflow-hidden">
+    <main className="flex flex-col  h-screen overflow-hidden bg-white">
       <NavbarSection
         updatePreferences
         confirmUpdatePreferences={confirmUpdatePreferences}
@@ -1469,7 +1469,7 @@ export default function Transcript() {
         </div>
       ) : (
         <>
-          <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-16" />
+          <div className=" w-full border border-solid border-black border-opacity-10 min-h-px max-md:max-w-full md:hidden mx-2 px-4 mt-10" />
           <div className="flex md:mt-24 mt-16 px-4 md:py-4 py-3 border-b text-sm h-[90%] w-full justify-between items-center">
             <div className="flex gap-2 items-center">
               <Switch
