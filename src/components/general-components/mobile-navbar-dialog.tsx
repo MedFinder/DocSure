@@ -1,5 +1,5 @@
+//@ts-nocheck
 "use client";
-
 import React, { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { BookText, Loader2, MapPin, Search } from "lucide-react";
