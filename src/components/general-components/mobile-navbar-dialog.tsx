@@ -1,12 +1,12 @@
 //@ts-nocheck
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { BookText, Loader2, MapPin, Search } from "lucide-react";
+import { BookText, Loader2, MapPin, Search, X } from "lucide-react";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Autocomplete } from "../../../components/ui/autocomplete";
+import ReactModal from "react-modal";
 import {
   insuranceCarrierOptions,
   medicalSpecialtiesOptions,
@@ -16,6 +16,14 @@ import { useRouter } from "next/navigation";
 import * as Yup from "yup";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { track } from "@vercel/analytics";
+import axios from "axios";
+
+// Set the app element for accessibility - moved out of component to avoid React hooks rules issues
+if (typeof window !== "undefined") {
+  // In Next.js, we use document.body as a reliable app element
+  ReactModal.setAppElement(document.body);
+}
 
 interface MobileNavbarDialogProps {
   isOpen: boolean;
@@ -36,6 +44,36 @@ export default function MobileNavbarDialog({
   setispreferencesUpdated,
   setIsPreferencesReinitialized,
 }: MobileNavbarDialogProps) {
+  // Custom styles for react-modal
+  const customStyles = {
+    overlay: {
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      zIndex: 1000,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    content: {
+      position: "relative",
+      top: "auto",
+      left: "auto",
+      right: "auto",
+      bottom: "auto",
+      maxWidth: "lg",
+      width: "90%",
+      maxHeight: "90vh",
+      padding: "1.5rem",
+      borderRadius: "0.5rem",
+      backgroundColor: "#fff",
+      boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+      overflow: "auto",
+      marginTop: "1rem",
+      '@media (minWidth: 768px)': {
+        display: 'none',
+      }
+    },
+  };
+
   const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [selectedInsurance, setSelectedInsurance] = useState(false);
@@ -52,12 +90,15 @@ export default function MobileNavbarDialog({
       const savedAddress = localStorage.getItem("selectedAddress");
       const temp_sepciality = localStorage.getItem("selectedSpecialty");
       const storedLocation = localStorage.getItem("selectedLocation");
-
+      const selectedInsurer = localStorage.getItem("selectedInsurer");
+      if (temp_sepciality) {
+        formik.setFieldValue("specialty", temp_sepciality);
+      }
       if (savedAddress) {
         formik.setFieldValue("address", savedAddress);
       }
-      if (temp_sepciality) {
-        formik.setFieldValue("specialty", temp_sepciality);
+      if (selectedInsurer) {
+        formik.setFieldValue("insurer", selectedInsurer);
       }
       if (storedLocation) {
         const { lat, lng } = JSON.parse(storedLocation);
@@ -73,76 +114,52 @@ export default function MobileNavbarDialog({
       insuranceType: "",
       specialty: initialSpecialty,
     },
-    // validationSchema,
     onSubmit: async (values) => {
-      updatePreferences && setIsPreferencesReinitialized(false);
+      // console.log(values);
+      track("Navbar_Search_Btn_Clicked");
+      const updatedValues = { ...values };
 
-      if (!formik.isValid) {
-        toast.error("Please fill up all the required information");
+      setIsLoading(true);
+      if (!selectedLocation) {
+        toast.error("No location selected");
         return;
       }
 
-      setIsLoading(true);
-
-      const updatedValues = {
-        ...values,
-      };
-
       try {
-        // Get existing form data if it exists
-        const existingFormData = localStorage.getItem("formData");
-        let mergedValues = updatedValues;
-        // if (formik.values.specialty) {
-        //   localStorage.setItem("selectedSpecialty", formik.values.specialty);
-        // }
+        const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
+        localStorage.setItem(
+          "searchData",
+          JSON.stringify({ lat, lng, specialty: values.specialty })
+        );
+        const data = {
+          location: `${lat},${lng}`,
+          radius: 20000,
+          keyword: formik.values.specialty,
+        };
+        const response = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+          data
+        );
 
-        if (existingFormData) {
-          try {
-            const parsedExistingData = JSON.parse(existingFormData);
+        localStorage.setItem("formDataNav", JSON.stringify(updatedValues));
+        localStorage.setItem("statusData", JSON.stringify(response.data));
+        localStorage.setItem("lastSearchSource", "navbar"); // Track last search source
 
-            // Check if address or specialty changed
-            const addressChanged =
-              parsedExistingData.address !== updatedValues.address;
-            const specialtyChanged =
-              parsedExistingData.specialty !== updatedValues.specialty;
+        window.dispatchEvent(new Event("storage"));
 
-            // Merge existing data with new values (new values take precedence)
-            mergedValues = { ...parsedExistingData, ...updatedValues };
-
-            // If address or specialty changed, refetch doctor lists
-            if (addressChanged || specialtyChanged) {
-              console.log("address or speciality changed");
-              updatePreferences && setIsPreferencesReinitialized(true);
-            }
-          } catch (error) {
-            console.error("Error parsing existing form data:", error);
-          }
-        }
-        // Store form data in localStorage
-        window.localStorage.setItem("formData", JSON.stringify(mergedValues));
-
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate processing
-
-        if (updatePreferences) {
-          setispreferencesUpdated(true);
-          onClose(false);
-          confirmUpdatePreferences();
-        } else {
-          onClose(false);
-          // router.push("/transcript?confirmed=true");
-        }
-      } catch (error) {
-        console.error("Error submitting form:", error);
-        toast.error("An error occurred. Please try again.");
-      } finally {
+        //console.log("Form Data:", values);
+        //console.log("API Response Data:", response.data);
         setIsLoading(false);
-        onClose(false); // Close modal
+        onClose(false)
+      } catch (error) {
+        setIsLoading(false);
+        console.error("Error submitting form:", error);
       }
     },
     validateOnChange: true,
     validateOnBlur: true,
   });
-  // Handle medical specialty change
+
   const handleSpecialtyChange = (value) => {
     formik.setFieldValue("specialty", value);
     formik.setFieldTouched("specialty", true);
@@ -171,14 +188,28 @@ export default function MobileNavbarDialog({
     }
   };
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg md:hidden">
-        <DialogHeader>
-          <DialogTitle>Search Doctors</DialogTitle>
-        </DialogHeader>
+    <ReactModal
+      isOpen={isOpen}
+      onRequestClose={() => onClose(false)}
+      style={customStyles}
+      contentLabel="Search Doctors"
+      closeTimeoutMS={300}
+      className="md:hidden"
+    >
+      <div className="relative">
+        <button
+          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+          onClick={() => onClose(false)}
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </button>
+
+        <div className="mb-6">
+          <h2 className="text-xl pr-12 font-bold">Search Doctors</h2>
+        </div>
 
         <div className="flex flex-col space-y-4 w-full bg-white rounded-md border border-black p-2">
-          {/* Specialty Input */}
           <div className="flex items-center w-full">
             <Search className="w-5 h-5 text-gray-500 mx-2" />
             <div className="flex-1">
@@ -188,16 +219,13 @@ export default function MobileNavbarDialog({
                 className="w-full"
                 options={medicalSpecialtiesOptions}
                 placeholder="Medical specialty"
-                selected={initialSpecialty || formik.values.specialty}
+                selected={formik.values.specialty}
                 onChange={handleSpecialtyChange}
                 clearable={false}
-                // navbar
-                // enabled={!updatePreferences}
               />
             </div>
           </div>
 
-          {/* Insurer Input */}
           <div className="flex items-center w-full">
             <BookText className="w-5 h-5 text-gray-500 mx-2" />
             <div className="flex-1">
@@ -216,6 +244,7 @@ export default function MobileNavbarDialog({
                 onChange={(value) => {
                   formik.setFieldValue("insurer", value);
                   formik.setFieldTouched("insurer", true);
+                  localStorage.setItem("selectedInsurer", value);
                 }}
                 clearable={false}
               />
@@ -227,7 +256,6 @@ export default function MobileNavbarDialog({
             </div>
           </div>
 
-          {/* Location Input */}
           {!updatePreferences && (
             <div className="flex items-center w-full">
               <MapPin className="w-5 h-5 text-gray-500 mx-2" />
@@ -247,7 +275,6 @@ export default function MobileNavbarDialog({
                       value={formik.values.address}
                       onChange={(e) => {
                         formik.handleChange(e);
-                        // Let the user type a custom address if they want
                       }}
                       onBlur={formik.handleBlur}
                       name="address"
@@ -263,11 +290,11 @@ export default function MobileNavbarDialog({
             </div>
           )}
 
-          {/* Search Button */}
           <Button
             type="submit"
             disabled={isLoading || formik.isSubmitting}
             className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 h-12 w-full"
+            onClick={formik.handleSubmit}
           >
             {isLoading || formik.isSubmitting ? (
               <>
@@ -281,7 +308,7 @@ export default function MobileNavbarDialog({
             )}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </ReactModal>
   );
 }

@@ -170,6 +170,52 @@ export default function NavbarSection({
       return;
     }
   };
+  useEffect(() => {
+    const updateStateValues = () => {
+      try {
+        const lastSearchSource = localStorage.getItem("lastSearchSource");
+        let rawData;
+
+        if (lastSearchSource === "navbar") {
+         // console.log("Navbar search triggered");
+         const savedSpecialty = localStorage.getItem("selectedSpecialty");
+         const selectedInsurer = localStorage.getItem("selectedInsurer");
+         // console.log(savedSpecialty, selectedInsurer);
+         if (savedSpecialty) {
+           setSpecialty(savedSpecialty);
+           formik.setFieldValue("specialty", savedSpecialty);
+         }
+         if (selectedInsurer) {
+           formik.setFieldValue("insurance_carrier", selectedInsurer);
+         }
+         const savedAddress = localStorage.getItem("selectedAddress");
+         const savedAddressLocation = localStorage.getItem("selectedLocation");
+         const AddressLocation = JSON.parse(savedAddressLocation);
+         if (savedAddress) {
+           setAddressLocation(savedAddress);
+         }
+         if (AddressLocation) {
+           setSelectedLocation({
+             lat: AddressLocation.lat,
+             lng: AddressLocation.lng,
+           });
+         }
+        }
+
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
+      }
+    };
+    updateStateValues();
+
+    const handleStorageChange = () => updateStateValues();
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[router])
 
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
