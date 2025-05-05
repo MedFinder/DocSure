@@ -1,6 +1,5 @@
-// @ts-nocheck
+//@ts-nocheck
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
@@ -19,7 +18,10 @@ import { Autocomplete } from "../../../../components/ui/autocomplete";
 import { Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import { insuranceCarrierOptions, medicalSpecialtiesOptions } from "@/constants/store-constants";
+import {
+  insuranceCarrierOptions,
+  medicalSpecialtiesOptions,
+} from "@/constants/store-constants";
 import { track } from "@vercel/analytics";
 import { toast } from "sonner";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
@@ -52,7 +54,8 @@ const validationSchema = Yup.object().shape({
   }),
   insuranceType: Yup.string().when("insurer", {
     is: (val) => val && val.length > 0,
-    then: () => Yup.string().required("Please select an insurance type (PPO or HMO)"),
+    then: () =>
+      Yup.string().required("Please select an insurance type (PPO or HMO)"),
     otherwise: () => Yup.string().notRequired(),
   }),
 });
@@ -70,7 +73,7 @@ export default function QuickDetailsModal({
   confirmUpdatePreferences,
   initialSpecialty = "",
   setispreferencesUpdated,
-  setIsPreferencesReinitialized
+  setIsPreferencesReinitialized,
 }) {
   const [inputValue, setInputValue] = useState("");
   const [pills, setPills] = useState<string[]>([]);
@@ -115,14 +118,13 @@ export default function QuickDetailsModal({
 
   // Utility function to format date without timezone issues
   const formatDateToYYYYMMDD = (date) => {
-    if(date){
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    }
-    else {
-        return ''
+    if (date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    } else {
+      return "";
     }
   };
 
@@ -133,17 +135,17 @@ export default function QuickDetailsModal({
       const day = String(date.getDate()).padStart(2, "0");
       return `${month}/${day}/${year}`;
     } else {
-      return '';
+      return "";
     }
   };
 
   const formatDateInput = (input) => {
-    const cleanedInput = input.replace(/[^\d]/g, '');
+    const cleanedInput = input.replace(/[^\d]/g, "");
     const parts = [];
     if (cleanedInput.length > 0) parts.push(cleanedInput.slice(0, 2));
     if (cleanedInput.length > 2) parts.push(cleanedInput.slice(2, 4));
     if (cleanedInput.length > 4) parts.push(cleanedInput.slice(4, 8));
-    return parts.join('/');
+    return parts.join("/");
   };
 
   const { isLoaded } = useJsApiLoader({
@@ -205,10 +207,10 @@ export default function QuickDetailsModal({
         formik.validateForm();
       }
       if (savedAddress) {
-        formik.setFieldValue("address", savedAddress)
+        formik.setFieldValue("address", savedAddress);
       }
-      if(temp_sepciality){
-        formik.setFieldValue("specialty", temp_sepciality)
+      if (temp_sepciality) {
+        formik.setFieldValue("specialty", temp_sepciality);
       }
       if (storedLocation) {
         const { lat, lng } = JSON.parse(storedLocation);
@@ -239,11 +241,11 @@ export default function QuickDetailsModal({
     },
     validationSchema,
     onSubmit: async (values) => {
-      updatePreferences && setIsPreferencesReinitialized(false)
+      updatePreferences && setIsPreferencesReinitialized(false);
       const speciality_value =
-      formik.values.specialty === "Prescription / Refill"
-        ? "Primary Care Physician"
-        : formik.values.specialty;
+        formik.values.specialty === "Prescription / Refill"
+          ? "Primary Care Physician"
+          : formik.values.specialty;
       track("QuickDetails_Btn_Clicked");
 
       if (!formik.isValid) {
@@ -256,7 +258,7 @@ export default function QuickDetailsModal({
       const updatedValues = {
         ...values,
         dob: formatDateToYYYYMMDD(values.dob),
-        objective: values.objective || '',
+        objective: values.objective || "",
         subscriberId: values.subscriberId,
         selectedOption: selectedInsurance ? "no" : "yes",
         availability: customAvailability
@@ -272,23 +274,25 @@ export default function QuickDetailsModal({
         // if (formik.values.specialty) {
         //   localStorage.setItem("selectedSpecialty", formik.values.specialty);
         // }
-        
+
         if (existingFormData) {
           try {
             const parsedExistingData = JSON.parse(existingFormData);
-            
+
             // Check if address or specialty changed
-            const addressChanged = parsedExistingData.address !== updatedValues.address;
-            const specialtyChanged = parsedExistingData.specialty !== updatedValues.specialty;
-            
+            const addressChanged =
+              parsedExistingData.address !== updatedValues.address;
+            const specialtyChanged =
+              parsedExistingData.specialty !== updatedValues.specialty;
+
             // Merge existing data with new values (new values take precedence)
             mergedValues = { ...parsedExistingData, ...updatedValues };
-            
+
             // If address or specialty changed, refetch doctor lists
             if (addressChanged || specialtyChanged) {
-                console.log('address or speciality changed')
-                updatePreferences && setIsPreferencesReinitialized(true)
-                refetchDrLists();
+              console.log("address or speciality changed");
+              updatePreferences && setIsPreferencesReinitialized(true);
+              refetchDrLists();
             }
           } catch (error) {
             console.error("Error parsing existing form data:", error);
@@ -304,8 +308,8 @@ export default function QuickDetailsModal({
           onOpenChange(false);
           confirmUpdatePreferences();
         } else {
-         onOpenChange(false);
-         // router.push("/transcript?confirmed=true");
+          onOpenChange(false);
+          // router.push("/transcript?confirmed=true");
         }
       } catch (error) {
         console.error("Error submitting form:", error);
@@ -321,32 +325,32 @@ export default function QuickDetailsModal({
 
   const refetchDrLists = async () => {
     try {
-        const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-        localStorage.setItem(
-          "searchData",
-          JSON.stringify({ lat, lng, specialty: formik.values.specialty })
-        );
-        const data = {
-          location: `${lat},${lng}`,
-          radius: 20000,
-          keyword: formik.values.specialty,
-        };
-        const response = await axios.post(
-          "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
-          data
-        );
+      const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
+      localStorage.setItem(
+        "searchData",
+        JSON.stringify({ lat, lng, specialty: formik.values.specialty })
+      );
+      const data = {
+        location: `${lat},${lng}`,
+        radius: 20000,
+        keyword: formik.values.specialty,
+      };
+      const response = await axios.post(
+        "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
+        data
+      );
 
-        localStorage.setItem("statusData", JSON.stringify(response.data));
-        localStorage.setItem("lastSearchSource", "navbar"); // Track last search source
+      localStorage.setItem("statusData", JSON.stringify(response.data));
+      localStorage.setItem("lastSearchSource", "navbar"); // Track last search source
 
-        window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("storage"));
 
-        // console.log("Form Data:", values);
-        console.log("API Response Data:", response.data);
-      } catch (error) {
-        console.error("Error submitting form:", error);
-      }
-  }
+      // console.log("Form Data:", values);
+      console.log("API Response Data:", response.data);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
   // Handle availability option change
   const handleAvailabilityChange = (value) => {
     setCustomAvailability("");
@@ -409,7 +413,10 @@ export default function QuickDetailsModal({
         localStorage.setItem("selectedAddress", address?.formatted_address);
         localStorage.setItem(
           "selectedLocation",
-          JSON.stringify({ lat:address.geometry.location.lat(), lng:address.geometry.location.lng() })
+          JSON.stringify({
+            lat: address.geometry.location.lat(),
+            lng: address.geometry.location.lng(),
+          })
         );
       }
     }
@@ -531,7 +538,7 @@ export default function QuickDetailsModal({
           <div className="grid md:grid-cols-2 gap-6">
             {/* Left column - Appointment details */}
             <div className="space-y-5">
-            {updatePreferences && (
+              {updatePreferences && (
                 <>
                   <div className="space-y-2">
                     <Label className="text-[#333333BF] text-sm">
@@ -566,8 +573,7 @@ export default function QuickDetailsModal({
                     </Label>
                     <Input
                       className={
-                        formik.errors.patientName &&
-                        formik.touched.patientName
+                        formik.errors.patientName && formik.touched.patientName
                           ? "border-red-500 rounded-md"
                           : "border border-[#333333] rounded-md"
                       }
@@ -608,31 +614,36 @@ export default function QuickDetailsModal({
                         }
                         value={
                           formik.values.dob
-                            ? typeof formik.values.dob === 'string'
+                            ? typeof formik.values.dob === "string"
                               ? formik.values.dob
                               : formatDateToMmDdYyyy(formik.values.dob)
-                            : ''
+                            : ""
                         }
                         onChange={(e) => {
                           const input = e.target.value;
                           const formattedInput = formatDateInput(input);
-                          
+
                           if (formattedInput !== input) {
                             e.target.value = formattedInput;
                           }
-                          
+
                           // Convert formatted string to Date object if complete
                           if (formattedInput.length === 10) {
-                            const [month, day, year] = formattedInput.split('/');
-                            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                            
+                            const [month, day, year] =
+                              formattedInput.split("/");
+                            const date = new Date(
+                              parseInt(year),
+                              parseInt(month) - 1,
+                              parseInt(day)
+                            );
+
                             if (!isNaN(date.getTime()) && date <= new Date()) {
-                              formik.setFieldValue('dob', date);
+                              formik.setFieldValue("dob", date);
                             } else {
-                              formik.setFieldValue('dob', formattedInput);
+                              formik.setFieldValue("dob", formattedInput);
                             }
                           } else {
-                            formik.setFieldValue('dob', formattedInput);
+                            formik.setFieldValue("dob", formattedInput);
                           }
                         }}
                         onBlur={formik.handleBlur}
@@ -646,34 +657,38 @@ export default function QuickDetailsModal({
                   </div>
                 </>
               )}
-              {updatePreferences && 
+              {updatePreferences && (
                 <div className="space-y-2">
-                <Label className="text-[#333333BF] text-sm">Phone number</Label>
-                <Input
-                  className={
-                    formik.errors.phoneNumber && formik.touched.phoneNumber
-                      ? "border-red-500 rounded-md"
-                      : "border border-[#333333] rounded-md"
-                  }
-                  name="phoneNumber"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.phoneNumber}
-                  placeholder="Your phone number"
-                />
-                <span className="text-[#333333BF] text-xs text-center">
-                  Appointment confirmation will be sent to this number.
-                </span>
-                {formik.errors.phoneNumber && formik.touched.phoneNumber && (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.phoneNumber}
-                  </div>
-                )}
+                  <Label className="text-[#333333BF] text-sm">
+                    Phone number
+                  </Label>
+                  <Input
+                    className={
+                      formik.errors.phoneNumber && formik.touched.phoneNumber
+                        ? "border-red-500 rounded-md"
+                        : "border border-[#333333] rounded-md"
+                    }
+                    name="phoneNumber"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    value={formik.values.phoneNumber}
+                    placeholder="Your phone number"
+                  />
+                  <span className="text-[#333333BF] text-xs text-center">
+                    Appointment confirmation will be sent to this number.
+                  </span>
+                  {formik.errors.phoneNumber && formik.touched.phoneNumber && (
+                    <div className="text-red-500 text-sm">
+                      {formik.errors.phoneNumber}
+                    </div>
+                  )}
                 </div>
-              }
+              )}
               <div className="space-y-3">
                 <div className="flex justify-between pb-5">
-                  <Label className="text-[#333333BF] text-base">Insurance</Label>
+                  <Label className="text-[#333333BF] text-base">
+                    Insurance
+                  </Label>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="no-insurance"
@@ -735,25 +750,26 @@ export default function QuickDetailsModal({
                       />
                     </div>
                     <div>
-                    <RadioGroup
-                      value={formik.values.insuranceType}
-                      onValueChange={handleInsuranceTypeChange}
-                      className="flex gap-12 mt-5"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="ppo" id="r1" />
-                        <Label htmlFor="r1">PPO</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="hmo" id="r2" />
-                        <Label htmlFor="r2">HMO</Label>
-                      </div>
-                    </RadioGroup>
-                    {formik.touched.insuranceType && formik.errors.insuranceType && (
-                      <div className="text-red-500 text-sm mt-2">
-                        {formik.errors.insuranceType}
-                      </div>
-                    )}
+                      <RadioGroup
+                        value={formik.values.insuranceType}
+                        onValueChange={handleInsuranceTypeChange}
+                        className="flex gap-12 mt-5"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="ppo" id="r1" />
+                          <Label htmlFor="r1">PPO</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="hmo" id="r2" />
+                          <Label htmlFor="r2">HMO</Label>
+                        </div>
+                      </RadioGroup>
+                      {formik.touched.insuranceType &&
+                        formik.errors.insuranceType && (
+                          <div className="text-red-500 text-sm mt-2">
+                            {formik.errors.insuranceType}
+                          </div>
+                        )}
                     </div>
                   </>
                 )}
@@ -887,14 +903,8 @@ export default function QuickDetailsModal({
                   className="flex flex-row gap-4"
                 >
                   {genderOptions.map((option) => (
-                    <div
-                      key={option.value}
-                      className="flex items-center gap-2"
-                    >
-                      <RadioGroupItem
-                        id={option.value}
-                        value={option.value}
-                      />
+                    <div key={option.value} className="flex items-center gap-2">
+                      <RadioGroupItem id={option.value} value={option.value} />
                       <Label htmlFor={option.value}>{option.label}</Label>
                     </div>
                   ))}
@@ -940,7 +950,9 @@ export default function QuickDetailsModal({
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[#333333BF] text-sm">Email address</Label>
+                <Label className="text-[#333333BF] text-sm">
+                  Email address
+                </Label>
                 <Input
                   name="email"
                   onChange={formik.handleChange}
@@ -981,13 +993,14 @@ export default function QuickDetailsModal({
               </Button>
             </div>
           </div>
-          {updatePreferences &&  <div className="w-full flex justify-center">
-            <span className="text-[#333333BF] text-xs text-center">
-              By continuing, you authorize us to book an appointment on your
-              behalf.
-            </span>
-          </div> }
-
+          {updatePreferences && (
+            <div className="w-full flex justify-center">
+              <span className="text-[#333333BF] text-xs text-center">
+                By continuing, you authorize us to book an appointment on your
+                behalf.
+              </span>
+            </div>
+          )}
         </form>
       </div>
     </ReactModal>

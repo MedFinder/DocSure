@@ -28,8 +28,7 @@ import {
 import { Autocomplete } from "../../../components/ui/autocomplete";
 import { track } from "@vercel/analytics";
 import QuickDetailsModal from "@/app/landing/components/QuickDetailsModal";
-import { Dialog } from "@radix-ui/react-dialog";
-import { DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import MobileNavbarDialog from "./mobile-navbar-dialog";
 
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
@@ -171,6 +170,52 @@ export default function NavbarSection({
       return;
     }
   };
+  useEffect(() => {
+    const updateStateValues = () => {
+      try {
+        const lastSearchSource = localStorage.getItem("lastSearchSource");
+        let rawData;
+
+        if (lastSearchSource === "navbar") {
+         // console.log("Navbar search triggered");
+         const savedSpecialty = localStorage.getItem("selectedSpecialty");
+         const selectedInsurer = localStorage.getItem("selectedInsurer");
+         // console.log(savedSpecialty, selectedInsurer);
+         if (savedSpecialty) {
+           setSpecialty(savedSpecialty);
+           formik.setFieldValue("specialty", savedSpecialty);
+         }
+         if (selectedInsurer) {
+           formik.setFieldValue("insurance_carrier", selectedInsurer);
+         }
+         const savedAddress = localStorage.getItem("selectedAddress");
+         const savedAddressLocation = localStorage.getItem("selectedLocation");
+         const AddressLocation = JSON.parse(savedAddressLocation);
+         if (savedAddress) {
+           setAddressLocation(savedAddress);
+         }
+         if (AddressLocation) {
+           setSelectedLocation({
+             lat: AddressLocation.lat,
+             lng: AddressLocation.lng,
+           });
+         }
+        }
+
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
+      }
+    };
+    updateStateValues();
+
+    const handleStorageChange = () => updateStateValues();
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[router])
 
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
@@ -194,7 +239,7 @@ export default function NavbarSection({
   }
 
   return (
-    <div className="fixed top-0 left-0 w-full  border-gray-200 bg-[#FCF8F1] z-50">
+    <div className="fixed top-0 left-0 w-full  border-gray-200 bg-[#FCF8F1] z-50 ">
       <div className="flex justify-between py-3 md:py-5 md:px-8 px-4 relative  border border-b-1  items-center gap-2 ">
         {pathname !== "/" && (
           <button onClick={toggleSidebar} className="md:hidden ">
@@ -203,15 +248,19 @@ export default function NavbarSection({
         )}
         {pathname !== "/" && (
           <div
-            className="md:hidden flex w-full border border-gray-500  p-1"
-            // onClick={() => setOpenNavbarDialog(true)}
+            className="md:hidden flex w-full border border-gray-500  p-1 "
+            onClick={() => setOpenNavbarDialog(true)}
           >
             <span className="flex items-center p-1">
               <Search />
             </span>
             <span className="flex flex-col pl-2">
-              <p className="text-lg">{specialty}</p>
-              <p className="text-gray-500">{addressLocation}</p>
+              <div className="flex items-center space-x-2 max-w-[300px]">
+                <p className="text-lg truncate">{specialty}</p>
+              </div>
+              <div className="flex items-center space-x-2 max-w-[300px]">
+                <p className="text-gray-500 truncate">{addressLocation}</p>
+              </div>
             </span>
           </div>
         )}
@@ -434,29 +483,15 @@ export default function NavbarSection({
         setispreferencesUpdated={setIsPreferencesUpdated}
         setIsPreferencesReinitialized={setIsPreferencesReinitialized}
       />
-      <Dialog open={openNavbarDialog} onOpenChange={setOpenNavbarDialog}>
-        <DialogContent className="sm:max-w-lg h-64 ">
-          <DialogHeader>
-            <DialogTitle>Resume Calling</DialogTitle>
-          </DialogHeader>
-          <p className="text-gray-600">xo</p>
-          <div className="md:flex flex justify-between gap-6">
-            <Button
-              variant="secondary"
-              className="w-1/2 rounded-md"
-              onClick={() => setOpenNavbarDialog(false)}
-            >
-              xo
-            </Button>
-            <Button
-              className="w-1/2 rounded-md bg-[#0074BA] hover:bg-blue-600"
-              // onClick={confirmResumeCall}
-            >
-              Yxo
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <MobileNavbarDialog
+        isOpen={openNavbarDialog}
+        onClose={() => setOpenNavbarDialog(false)}
+        initialSpecialty={specialty}
+        updatePreferences={updatePreferences}
+        confirmUpdatePreferences={confirmUpdatePreferences}
+        setispreferencesUpdated={setIsPreferencesUpdated}
+        setIsPreferencesReinitialized={setIsPreferencesReinitialized}
+      />
     </div>
   );
 }
