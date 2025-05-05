@@ -197,16 +197,18 @@ export default function MobileNavbarDialog({
       className="md:hidden"
     >
       <div className="relative">
-        <button
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
-          onClick={() => onClose(false)}
-        >
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </button>
+        <div className="flex items-center">
+          <button
+            className="absolute right-4 top-1 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+            onClick={() => onClose(false)}
+          >
+            <X className="h-5 w-6" />
+            <span className="sr-only">Close</span>
+          </button>
 
-        <div className="mb-6">
-          <h2 className="text-xl pr-12 font-bold">Search Doctors</h2>
+          <div className="mb-6">
+            <h2 className="text-xl pr-12 font-bold">Search Doctors</h2>
+          </div>
         </div>
 
         <div className="flex flex-col w-full bg-white rounded-md border border-black p-2">
@@ -290,7 +292,7 @@ export default function MobileNavbarDialog({
             </div>
           )}
 
-          <div className="my-3">
+          <div className="mt-3 mb-2">
             <Button
               type="submit"
               disabled={isLoading || formik.isSubmitting}
