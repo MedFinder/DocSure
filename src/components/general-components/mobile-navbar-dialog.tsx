@@ -68,9 +68,9 @@ export default function MobileNavbarDialog({
       boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
       overflow: "auto",
       marginTop: "1rem",
-      '@media (minWidth: 768px)': {
-        display: 'none',
-      }
+      "@media (minWidth: 768px)": {
+        display: "none",
+      },
     },
   };
 
@@ -150,7 +150,7 @@ export default function MobileNavbarDialog({
         //console.log("Form Data:", values);
         //console.log("API Response Data:", response.data);
         setIsLoading(false);
-        onClose(false)
+        onClose(false);
       } catch (error) {
         setIsLoading(false);
         console.error("Error submitting form:", error);
@@ -209,10 +209,10 @@ export default function MobileNavbarDialog({
           <h2 className="text-xl pr-12 font-bold">Search Doctors</h2>
         </div>
 
-        <div className="flex flex-col space-y-4 w-full bg-white rounded-md border border-black p-2">
+        <div className="flex flex-col w-full bg-white rounded-md border border-black p-2">
           <div className="flex items-center w-full">
             <Search className="w-5 h-5 text-gray-500 mx-2" />
-            <div className="flex-1">
+            <div className="flex-1 border-gray-400 md:border-none">
               <Autocomplete
                 id="specialty"
                 name="specialty"
@@ -233,7 +233,7 @@ export default function MobileNavbarDialog({
                 id="insurer"
                 name="insurer"
                 className={cn(
-                  "w-full border border-[#333333] rounded-md",
+                  "w-full   border-gray-400 md:border-none",
                   formik.touched.insurer && formik.errors.insurer
                     ? "border-red-500"
                     : ""
@@ -269,7 +269,7 @@ export default function MobileNavbarDialog({
                       className={
                         formik.errors.address && formik.touched.address
                           ? "border-red-500 rounded-none"
-                          : "rounded-none"
+                          : "w-full border-none focus:ring-0 focus:outline-none h-12 px-3 shadow-none text-ellipsis"
                       }
                       placeholder="Search address.."
                       value={formik.values.address}
@@ -290,23 +290,25 @@ export default function MobileNavbarDialog({
             </div>
           )}
 
-          <Button
-            type="submit"
-            disabled={isLoading || formik.isSubmitting}
-            className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 h-12 w-full"
-            onClick={formik.handleSubmit}
-          >
-            {isLoading || formik.isSubmitting ? (
-              <>
-                <Loader2 className="w-5 h-5 text-white animate-spin" />{" "}
-                Searching
-              </>
-            ) : (
-              <>
-                <Search className="w-5 h-5 text-white" /> Search
-              </>
-            )}
-          </Button>
+          <div className="my-3">
+            <Button
+              type="submit"
+              disabled={isLoading || formik.isSubmitting}
+              className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 h-12 w-full"
+              onClick={formik.handleSubmit}
+            >
+              {isLoading || formik.isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 text-white animate-spin" />{" "}
+                  Searching
+                </>
+              ) : (
+                <>
+                  <Search className="w-5 h-5 text-white" /> Search
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </ReactModal>
