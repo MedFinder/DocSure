@@ -224,9 +224,28 @@ export default function SearchDoctorPage() {
         };
 
         localStorage.setItem(storageKey, JSON.stringify(updatedData));
+      } else {
+        // If there are no results, clear the next page token to stop pagination
+        console.log("No more doctors to load");
+        setNextPageToken(null);
       }
     } catch (error) {
       console.error("Error loading more doctors:", error);
+      // Clear next page token to prevent infinite loop on error
+      setNextPageToken(null);
+      
+      // Update localStorage to reflect that there are no more pages
+      const storageKey = "statusData";
+      const currentData = JSON.parse(
+        localStorage.getItem(storageKey) || "{}"
+      );
+      
+      const updatedData = {
+        ...currentData,
+        next_page_token: null,
+      };
+      
+      localStorage.setItem(storageKey, JSON.stringify(updatedData));
     } finally {
       setIsLoadingMore(false);
     }
