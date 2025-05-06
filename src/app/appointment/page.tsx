@@ -160,17 +160,12 @@ export default function AppointmentPage() {
 
   const logPatientData = async (updatedValues) => {
     const data = {
-      request_id: updatedValues.request_id,
-      new_patient: updatedValues.isNewPatient,
-      time_of_appointment: updatedValues.timeOfAppointment,
-      patient_availability: updatedValues.maxWait + " days",
-      medical_concerns: updatedValues.objective,
-      member_id: updatedValues?.subscriberId ?? "",
-      insurer: updatedValues.insurer ?? "none",
-      insurance_type: updatedValues?.insuranceType ?? "",
-      group_number: updatedValues.groupId ?? "",
-      has_insurance: !!updatedValues.insurer,
+      patient_name: updatedValues.patientName,
+      phone_number: updatedValues.phoneNumber,
+      dob: updatedValues.dob,
+      insurer: updatedValues.insurer ?? '',
     };
+    // console.log(data);
     try {
       const resp = await axios.put(
         `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata/${formData.request_id}`,
@@ -207,14 +202,14 @@ export default function AppointmentPage() {
         dob: formatDateToYYYYMMDD(values.dob),
       };
       // console.log(updatedFormData);
-      // logPatientData(updatedFormData);
+      logPatientData(updatedFormData);
       setIsLoading(true);
       // Simulate a 1-second delay
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       window.localStorage.setItem("formData", JSON.stringify(updatedFormData));
 
-      router.push("/transcript?confirmed=true");
+      // router.push("/transcript?confirmed=true");
     },
     validateOnChange: true,
     validateOnBlur: true,

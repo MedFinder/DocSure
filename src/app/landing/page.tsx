@@ -296,6 +296,32 @@ export default function LandingPage() {
       return [];
     }
   };
+  const logNetworkInfo = async (ipaddress: string, logrequest:boolean) => {
+    const default_ip = localStorage.getItem("ipAddress");
+    try {
+      const data = {
+        device_category: 'web',
+        device_ip_address: ipaddress ?? default_ip,
+      };
+      const response = await axios.post(
+        "https://callai-backend-243277014955.us-central1.run.app/api/patient-network-info",
+        data
+      );
+      // console.log(response.data)
+      const existingFormData = localStorage.getItem("formData");
+      const parsedExistingData = JSON.parse(existingFormData);
+      // Merge existing data with new values (new values take precedence)
+      const mergedValues = { ...parsedExistingData, request_id: response.data.request_id };
+      localStorage.setItem("formData", JSON.stringify(mergedValues));
+      if(logrequest){
+        logRequestInfo(response.data?.request_id);
+      }
+      return response.data?.request_id;
+    } catch (error) {
+      console.error("Error fetching popular doctors:", error);
+      return [];
+    }
+  };
 
   const fetchUserLocationAndPopularDrs = async () => {
     const storedDoctors = localStorage.getItem("popularDoctors");
@@ -343,6 +369,7 @@ export default function LandingPage() {
         localStorage.setItem("ipAddress", ip_address);
         localStorage.setItem("selectedAddress", formattedAddress);
         localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
+        logNetworkInfo(ip_address);
 
         const popularDoctors = await getPopularDrs(lat, lng);
         if (popularDoctors?.results?.length > 0) {
@@ -363,18 +390,18 @@ export default function LandingPage() {
       getDefaultLocation();
     }
   };
-  const logRequestInfo = async () => {
+  const logRequestInfo = async (request_id) => {
     const savedAddress = localStorage.getItem("selectedAddress");
     const ipAddress = localStorage.getItem("ipAddress");
     const data = {
+      request_id,
       doctor_speciality: formik.values.specialty,
+      insurer: formik.values.insurance_carrier,
       preferred_location: savedAddress,
-      device_ip_address: ipAddress ?? '',
-      device_category: "web",
     };
     try {
       const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info`,
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-request-info-new`,
         data
       );
       return resp.data?.request_id;
@@ -415,7 +442,7 @@ export default function LandingPage() {
         );
 
         // Call logRequestInfo without awaiting
-        const requestIdPromise = logRequestInfo();
+        const requestIdPromise = logNetworkInfo(null,true);
         const speciality_value =
           formik.values.specialty === "Prescription / Refill"
             ? "Primary Care Physician"

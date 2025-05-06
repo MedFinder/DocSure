@@ -219,6 +219,33 @@ export default function QuickDetailsModal({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+  const logPatientData = async (updatedValues) => {
+    // console.log(updatedValues)
+    const data = {
+      patient_name: updatedValues.patientName,
+      phone_number: updatedValues.phoneNumber,
+      dob: updatedValues.dob,
+      insurer: updatedValues.insurer ??'',
+      new_patient: true,
+      preferred_time_of_appointment: updatedValues.timeOfAppointment,
+      patient_availability: updatedValues.availability,
+      medical_concerns: updatedValues.objective,
+      member_id: updatedValues?.subscriberId ?? "",
+      insurance_type: updatedValues?.insuranceType ?? "",
+      group_number: updatedValues.subscriberId ?? "",
+      has_insurance: !!updatedValues.insurer,
+    };
+    // console.log(data);
+    try {
+      const resp = await axios.put(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata/${formData.request_id}`,
+        data
+      );
+      return;
+    } catch (error) {
+      return null;
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -287,6 +314,7 @@ export default function QuickDetailsModal({
 
             // Merge existing data with new values (new values take precedence)
             mergedValues = { ...parsedExistingData, ...updatedValues };
+            logPatientData(mergedValues);
 
             // If address or specialty changed, refetch doctor lists
             if (addressChanged || specialtyChanged) {

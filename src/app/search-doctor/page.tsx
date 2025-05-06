@@ -142,6 +142,24 @@ export default function SearchDoctorPage() {
       return null;
     }
   };
+  const logCallPriority = async (updatedValues) => {
+    const drsData = await JSON.parse(localStorage.getItem("statusData"));
+    const data = {
+      request_id: updatedValues.request_id,
+      doctor_phone_numbers: drsData.results.map(doctor => doctor.phone_number),
+      //call_priorities: drsData.results.map((_, index) => index)
+    };
+    console.log(data);
+    try {
+      const resp = await axios.post(
+        "https://callai-backend-243277014955.us-central1.run.app/api/update-doctor-call-priority",
+        data
+      );
+      return;
+    } catch (error) {
+      return null;
+    }
+  };
 
   const logDrLists = async (data) => {
     try {
@@ -290,7 +308,7 @@ export default function SearchDoctorPage() {
       connectWebSocket();
     }
 
-    fetchAndLogData();
+    connectWebSocket();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
@@ -323,7 +341,7 @@ export default function SearchDoctorPage() {
         console.error("Error parsing localStorage data:", error);
         setDoctors([]);
       }
-      getTotalDoctorsList();
+     //  getTotalDoctorsList();
     };
 
     // Initial load
@@ -427,7 +445,7 @@ export default function SearchDoctorPage() {
         specialty: savedSpecialty,
         request_id: formData?.request_id,
       };
-      logPatientData(updatedValues);
+      // logPatientData(updatedValues);
 
       // Get existing form data if it exists
       const existingFormData = localStorage.getItem("formData");
@@ -438,6 +456,7 @@ export default function SearchDoctorPage() {
           const parsedExistingData = JSON.parse(existingFormData);
           // Merge existing data with new values (new values take precedence)
           mergedValues = { ...parsedExistingData, ...updatedValues };
+          logCallPriority(updatedValues);
         } catch (error) {
           console.error("Error parsing existing form data:", error);
         }
