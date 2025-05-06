@@ -240,6 +240,7 @@ export default function SearchDoctorPage() {
           results: [...(currentData.results || []), ...newDoctors],
           next_page_token: response.data.next_page_token || null,
         };
+        fetchAndLogDrLists(updatedData)
 
         localStorage.setItem(storageKey, JSON.stringify(updatedData));
       } else {
@@ -292,21 +293,19 @@ export default function SearchDoctorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextPageToken, isLoadingMore]);
 
-  useEffect(() => {
-    async function fetchAndLogData() {
-      const drsData = localStorage.getItem("statusData");
-      const formData = JSON.parse(localStorage.getItem("formData"));
-      console.log(formData);
-      if (drsData) {
-        const parsedDrsData = JSON.parse(drsData);
-        const payload = {
-          request_id: formData?.request_id,
-          ...parsedDrsData,
-        };
-        await logDrLists(payload);
-      }
-      connectWebSocket();
+  const fetchAndLogDrLists = async (drsData) => {
+    // console.log(drsData)
+    const formData = JSON.parse(localStorage.getItem("formData"));
+    if (drsData) {
+      const payload = {
+        request_id: formData?.request_id,
+        ...drsData,
+      };
+      await logDrLists(payload);
     }
+  }
+
+  useEffect(() => {
 
     connectWebSocket();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -456,7 +455,6 @@ export default function SearchDoctorPage() {
           const parsedExistingData = JSON.parse(existingFormData);
           // Merge existing data with new values (new values take precedence)
           mergedValues = { ...parsedExistingData, ...updatedValues };
-          logCallPriority(updatedValues);
         } catch (error) {
           console.error("Error parsing existing form data:", error);
         }
@@ -464,10 +462,8 @@ export default function SearchDoctorPage() {
 
       // Save the updated form data to localStorage
       localStorage.setItem("formData", JSON.stringify(mergedValues));
-
-      setTimeout(() => {
-        router.push("/appointment");
-      }, 1500);
+      await logCallPriority(updatedValues);
+      router.push("/appointment");
     },
   });
 
@@ -519,7 +515,7 @@ export default function SearchDoctorPage() {
     formik.handleSubmit();
 
     // Simulate form submission delay
-    return new Promise((resolve) => setTimeout(resolve, 3000));
+    return new Promise((resolve) => setTimeout(resolve, 8000));
   };
   const getTopDrsWithReviews = async () => { 
     const storedData = localStorage.getItem("statusData");
