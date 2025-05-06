@@ -240,7 +240,12 @@ export default function SearchDoctorPage() {
           results: [...(currentData.results || []), ...newDoctors],
           next_page_token: response.data.next_page_token || null,
         };
-        fetchAndLogDrLists(updatedData)
+        const currData = {
+          ...currentData,
+          results: [...newDoctors],
+          next_page_token: response.data.next_page_token || null,
+        };
+        fetchAndLogDrLists(currData)
 
         localStorage.setItem(storageKey, JSON.stringify(updatedData));
       } else {
@@ -515,7 +520,7 @@ export default function SearchDoctorPage() {
     formik.handleSubmit();
 
     // Simulate form submission delay
-    return new Promise((resolve) => setTimeout(resolve, 8000));
+    return new Promise((resolve) => setTimeout(resolve, 20000));
   };
   const getTopDrsWithReviews = async () => { 
     const storedData = localStorage.getItem("statusData");
