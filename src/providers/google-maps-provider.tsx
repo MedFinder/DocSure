@@ -12,14 +12,15 @@ const GoogleMapsContext = createContext<GoogleMapsContextType | undefined>(
 export const GoogleMapsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const googleMapsApiKey = "AIzaSyDCPbnPb43gQZDPT5dpq10a3dOP3EMHw-0";
+  
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || "";
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
     <GoogleMapsContext.Provider value={{ isLoaded }}>
       <LoadScript
         libraries={["places"]}
-        googleMapsApiKey={googleMapsApiKey}
+        googleMapsApiKey={googleMapsApiKey || ""}
         onLoad={() => setIsLoaded(true)} // Set isLoaded to true when the API is ready
       >
         {isLoaded ? children : <div>Loading Google Maps...</div>}
