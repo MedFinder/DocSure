@@ -8,7 +8,7 @@ import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import axios from "axios";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import "react-datepicker/dist/react-datepicker.css";
@@ -51,7 +51,7 @@ export default function AppointmentPage() {
   const [isNewPatient, setIsNewPatient] = useState(false);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
+    googleMapsApiKey: "AIzaSyDCPbnPb43gQZDPT5dpq10a3dOP3EMHw-0",
     libraries: ["places"],
   });
 
@@ -61,7 +61,7 @@ export default function AppointmentPage() {
       const storedSpeciality = localStorage.getItem("selectedSpecialty");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
-        console.log(parsedFormData);
+        // console.log(parsedFormData);
         setFormData(parsedFormData);
 
         // Prefill formik values
@@ -122,7 +122,7 @@ export default function AppointmentPage() {
     async function fetchAndLogData() {
       const drsData = localStorage.getItem("statusData");
       const formData = JSON.parse(localStorage.getItem("formData"));
-      console.log(formData);
+      // console.log(formData);
       if (drsData) {
         const parsedDrsData = JSON.parse(drsData);
         const payload = {
@@ -132,7 +132,7 @@ export default function AppointmentPage() {
         await logDrLists(payload);
       }
     }
-    fetchAndLogData();
+   // fetchAndLogData();
   }, []);
 
   const formatDateToYYYYMMDD = (date) => {
@@ -176,6 +176,96 @@ export default function AppointmentPage() {
       return null;
     }
   };
+  const sendSMS = async (phoneNumber) => {
+    const data = {
+      to_number: phoneNumber,
+      message_body: "",
+      type: "static",
+    };
+    // console.log(data);
+    try {
+      const resp = await axios.post(
+        "https://callai-backend-243277014955.us-central1.run.app/api/send-sms",
+        data
+      );
+      return;
+    } catch (error) {
+      return null;
+    }
+  };
+  
+  const initiateCall = useCallback(
+    async (
+      request_id?: string,
+      customformdata?: any
+    ) => {
+      const currentFormData = customformdata;
+      const savedSpecialty = localStorage.getItem("selectedSpecialty");
+
+      const {
+        availability,
+        email,
+        phoneNumber,
+        patientName,
+        objective,
+        subscriberId,
+        groupId,
+        selectedOption = "no",
+        dob = "",
+        address,
+        selectedAvailability,
+        timeOfAppointment,
+        insuranceType,
+        isnewPatient,
+        gender,
+        // zipcode,
+        insurer,
+        maxWait,
+      } = currentFormData;
+
+      let context =
+        "Clinical concerns:" +
+        (objective ? objective : `${savedSpecialty} consultation`) +
+        "; " +
+        "Patient has insurance:" +
+        (!insurer ? "no" : selectedOption);
+
+      if (insurer) context += `; Insurance Provider:${insurer}`;
+      if (subscriberId) context += `; Member Id:"${subscriberId}"`;
+      if (gender) context += `; Patient Gender:${gender}`;
+      if (groupId) context += `; Group Number:${groupId}`;
+      if (insuranceType) context += `; Insurance type:${insuranceType}`;
+      if (dob) context += `; Date of birth:${dob}`;
+      if (address) context += `; Address of the patient:${address}`;
+      if (maxWait)
+        context += `; Maximum wait time for the appointment:${maxWait} days. If an appointment is not available within ${maxWait} days , then do not take an appointment `;
+      if (availability)
+        context += `; Availability of the patient:${availability}`;
+      if (isnewPatient) context += `; Is New Patient:${isnewPatient}`;
+      // if (zipcode) context += `; Zipcode:${zipcode}`;
+
+      const data = {
+        request_id,
+        context: context,
+        patient_number: phoneNumber || "510-902-8776",
+        patient_name: patientName,
+        patient_email: email || "Not Available",
+      };
+      //localStorage.setItem("context", context);
+      console.log(data);
+      try {
+        const callResponse = await axios.post(
+          "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call-backend",
+          data
+        );
+        console.log(callResponse, "callResponse");
+      } catch (error) {
+        track("Initiated_new_call_failed");
+        console.log(error, "error initiating bland AI");
+      }
+    },
+    []
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -204,12 +294,14 @@ export default function AppointmentPage() {
       // console.log(updatedFormData);
       logPatientData(updatedFormData);
       setIsLoading(true);
-      // Simulate a 1-second delay
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
       window.localStorage.setItem("formData", JSON.stringify(updatedFormData));
+      // call send-sms API
+      await sendSMS(updatedFormData.phoneNumber);
 
-      // router.push("/transcript?confirmed=true");
+      // call initiate-call-BE API
+      await initiateCall(formData?.request_id,updatedFormData)
+
+      router.push("/appointment-pending");
     },
     validateOnChange: true,
     validateOnBlur: true,

@@ -157,7 +157,7 @@ export default function LandingPage() {
     formik.handleSubmit(); // Trigger formik's onSubmit function
   };
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
+    googleMapsApiKey: "AIzaSyDCPbnPb43gQZDPT5dpq10a3dOP3EMHw-0",
     libraries: ["places"],
   });
   const insuranceFirstLogos = [
@@ -474,6 +474,7 @@ export default function LandingPage() {
               }
             }
             localStorage.setItem("formData", JSON.stringify(mergedValues));
+            fetchAndLogDrLists(response.data, request_id);
           }
         });
 
@@ -488,6 +489,27 @@ export default function LandingPage() {
       }
     },
   });
+  const logDrLists = async (data) => {
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/log-doctor-list`,
+        data
+      );
+      return;
+    } catch (error) {
+      console.error("Error dr details:", error);
+      return null;
+    }
+  };
+  const fetchAndLogDrLists = async (drsData, request_id) => {
+    if (drsData) {
+      const payload = {
+        request_id: request_id,
+        ...drsData,
+      };
+      await logDrLists(payload);
+    }
+  }
   const handleOnAddressChanged = (index) => {
     if (addressRefs.current[index]) {
       const places = addressRefs.current[index].getPlaces();

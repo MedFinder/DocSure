@@ -12,7 +12,7 @@ const GoogleMapsContext = createContext<GoogleMapsContextType | undefined>(
 export const GoogleMapsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const googleMapsApiKey = "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A";
+  const googleMapsApiKey = "AIzaSyDCPbnPb43gQZDPT5dpq10a3dOP3EMHw-0";
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (

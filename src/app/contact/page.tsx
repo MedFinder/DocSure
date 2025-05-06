@@ -75,7 +75,7 @@ export default function Contact() {
     activeCallIndexRef.current = activeCallIndex;
   }, [activeCallIndex]);
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
+    googleMapsApiKey: "AIzaSyDCPbnPb43gQZDPT5dpq10a3dOP3EMHw-0",
     libraries: ["places"],
   });
   useEffect(() => {

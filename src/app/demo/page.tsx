@@ -156,7 +156,7 @@ export default function LandingPage() {
     formik.handleSubmit(); // Trigger formik's onSubmit function
   };
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A",
+    googleMapsApiKey: "AIzaSyDCPbnPb43gQZDPT5dpq10a3dOP3EMHw-0",
     libraries: ["places"],
   });
   const insuranceFirstLogos = [
@@ -312,7 +312,7 @@ export default function LandingPage() {
         try {
           // Fetch the address using Google Maps Geocoding API
           const geocodeResponse = await axios.get(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyDd1e56OQkVXAJRUchOqHNJTGkCyrA2e3A`
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyDCPbnPb43gQZDPT5dpq10a3dOP3EMHw-0`
           );
 
           const address =
