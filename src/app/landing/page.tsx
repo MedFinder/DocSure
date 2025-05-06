@@ -371,12 +371,12 @@ export default function LandingPage() {
         localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
         logNetworkInfo(ip_address);
 
-        const popularDoctors = await getPopularDrs(lat, lng);
-        if (popularDoctors?.results?.length > 0) {
-          const doctorlists = popularDoctors?.results?.slice(0, 20);
-          setpopulardoctors(doctorlists);
-          localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
-        }
+        // const popularDoctors = await getPopularDrs(lat, lng);
+        // if (popularDoctors?.results?.length > 0) {
+        //   const doctorlists = popularDoctors?.results?.slice(0, 20);
+        //   setpopulardoctors(doctorlists);
+        //   localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+        // }
       } else {
         // IP geolocation failed, use default location
         toast.error(
@@ -1002,7 +1002,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section
+        {/* <section
           id="doctors"
           className="flex flex-col items-center justify-center gap-10 bg-[#FCF8F2] border-b md:pt-16 md:pb-16 py-8 pb-16 px-0"
         >
@@ -1014,7 +1014,7 @@ export default function LandingPage() {
             doctors={populardoctors}
             checkPrefillAvailability={checkPrefillAvailability}
           />
-        </section>
+        </section> */}
 
         <section className="flex flex-col items-center justify-center gap-10 bg-[#E5573F] text-white border-b md:pt-16 md:pb-16 py-8 px-0   ">
           <h2 className="text-3xl md:px-44 mb-4 text-white ">
