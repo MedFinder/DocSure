@@ -223,8 +223,8 @@ export default function QuickDetailsModal({
     // console.log(updatedValues)
     const data = {
       patient_name: updatedValues.patientName,
-      phone_number: updatedValues.phoneNumber,
-      dob: updatedValues.dob,
+      patient_number: updatedValues.phoneNumber,
+      patient_date_of_birth: updatedValues.dob,
       insurer: updatedValues.insurer ??'',
       new_patient: true,
       preferred_time_of_appointment: updatedValues.timeOfAppointment,

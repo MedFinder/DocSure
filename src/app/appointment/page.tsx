@@ -161,8 +161,8 @@ export default function AppointmentPage() {
   const logPatientData = async (updatedValues) => {
     const data = {
       patient_name: updatedValues.patientName,
-      phone_number: updatedValues.phoneNumber,
-      dob: updatedValues.dob,
+      patient_number: updatedValues.phoneNumber,
+      patient_date_of_birth: updatedValues.dob,
       insurer: updatedValues.insurer ?? '',
     };
     // console.log(data);
