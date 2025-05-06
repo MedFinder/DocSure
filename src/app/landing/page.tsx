@@ -280,6 +280,7 @@ export default function LandingPage() {
     document.body.appendChild(script);
   }, []);
   const getPopularDrs = async (lat, lng) => {
+    //
     try {
       const data = {
         location: `${lat},${lng}`,
