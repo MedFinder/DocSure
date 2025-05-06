@@ -148,7 +148,7 @@ export default function LandingPage() {
 
   const handleDoctorTypeClick = (value: any) => {
     formik.setFieldValue("specialty", value);
-    setSelectedSpecialty(value); // Update specialty when button is clicked
+    setSelectedSpecialty(value); 
   };
   const checkPrefillAvailability = (value: string) => {
     scrollToSection("home", 40); // Scroll to the "home" section
