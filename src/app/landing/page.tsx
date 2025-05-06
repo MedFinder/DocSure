@@ -382,12 +382,12 @@ export default function LandingPage() {
         toast.error(
           "Could not determine your location. Using default location."
         );
-        getDefaultLocation();
+        // getDefaultLocation();
       }
     } catch (error) {
       console.error("Error with IP geolocation:", error);
       toast.error("Could not determine your location. Using default location.");
-      getDefaultLocation();
+     //  getDefaultLocation();
     }
   };
   const logRequestInfo = async (request_id) => {
