@@ -412,7 +412,7 @@ export default function AppointmentPage() {
       <NavbarSection />
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col justify-center items-center md:px-6 sm:px-10 mt-40 md:mt-16"
+        className="flex flex-col justify-center items-center md:px-6 sm:px-10 mt-16"
       >
         <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg ">
           <p className="text-2xl sm:text-4xl mt-10 font-semibold text-[#333333]">

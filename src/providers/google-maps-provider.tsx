@@ -19,7 +19,7 @@ export const GoogleMapsProvider: React.FC<{ children: ReactNode }> = ({
     <GoogleMapsContext.Provider value={{ isLoaded }}>
       <LoadScript
         libraries={["places"]}
-        googleMapsApiKey={googleMapsApiKey}
+        googleMapsApiKey={googleMapsApiKey || ""}
         onLoad={() => setIsLoaded(true)} // Set isLoaded to true when the API is ready
       >
         {isLoaded ? children : <div>Loading Google Maps...</div>}

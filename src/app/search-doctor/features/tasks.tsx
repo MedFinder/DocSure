@@ -193,7 +193,7 @@ export const Task: React.FC<TaskProps> = ({
       const handleStorageChange = (e: StorageEvent) => {
         const lastSearchSource = localStorage.getItem("lastSearchSource");
         const storedInsurer = localStorage.getItem("selectedInsurer");
-        if (lastSearchSource === "insurance" && storedInsurer ) {
+        if (lastSearchSource === "insurance" && storedInsurer) {
           setSelectedInsurer(storedInsurer);
         }
       };
@@ -356,9 +356,10 @@ export const Task: React.FC<TaskProps> = ({
                   </div>
                 )}
                 {!fromTranscript && showAcceptsInsurerBadge && (
-                  <div className="hidden md:flex  absolute top-28 right-2 md:right-6 z-10">
-                    <span className="flex text-xs gap-1 justify-center items-center md:font-normal">
-                      <CircleCheck className="text-[#00BA85]" /> Accepts{" "}
+                  <div className=" flex  absolute md:top-28 top-44 right-2 md:right-6 z-10">
+                    <span className="flex md:text-xs text-[11px] gap-1 justify-center items-center md:font-normal font-normal">
+                      <CircleCheck className="text-[#00BA85] w-5 h-5 md:w-6 md:h-6" />
+                      <span>Accepts</span>
                       {selectedInsurer}
                     </span>
                   </div>
@@ -427,8 +428,8 @@ export const Task: React.FC<TaskProps> = ({
                       {title}
                     </p>
 
-                    <div className="flex flex-wrap justify-between items-start pr-[120px] relative gap-y-2">
-                      <div className="flex gap-4 flex-wrap">
+                    <div className="flex flex-wrap justify-between items-start pr-[120px] relative gap-y-2  ">
+                      <div className="flex gap-4 flex-nowrap overflow-x-auto">
                         <div
                           className="md:flex gap-1 font-normal text-[#333333] text-sm items-center hidden"
                           onClick={handleExpand}
@@ -559,12 +560,12 @@ export const Task: React.FC<TaskProps> = ({
                             </Button>
                           </div>
 
-                          <div className="flex flex-col items-center justify-center gap-0">
+                          {/* <div className="flex flex-col items-center justify-center gap-0">
                             <p className="text-[10px]">
                               We’ll collect your info
                             </p>
                             <p className="text-[10px]">and call the clinic</p>
-                          </div>
+                          </div> */}
                         </div>
                         //       <Tooltip>
                         //         <TooltipTrigger asChild>
