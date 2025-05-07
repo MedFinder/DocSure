@@ -146,10 +146,14 @@ export default function LandingPage() {
       window.scrollTo({ top: topPosition, behavior: "smooth" });
     }
   };
-  const checkPrefillAvailability = (value: string) => {
+  const checkPrefillAvailability = (value: string, insurance:string) => {
     setGlobalLoading(true); // Set global loading to true when starting the process
     // scrollToSection("home", 40); // Scroll to the "home" section
     handleDoctorTypeClick(value ?? "Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
+    if(insurance){
+      setSelectedInsurer(insurance);
+      formik.setFieldValue("insurance_carrier", insurance);
+    }
     localStorage.setItem(
       "selectedSpecialty",
       value ?? "Primary Care Physician"
@@ -207,31 +211,37 @@ export default function LandingPage() {
       src: "/image 6.svg",
       alt: "Insurance Network 1",
       carrier: "https://healthy.kaiserpermanente.org/front-door",
+      insurance:'Kaiser Permanente'
     },
     {
       src: "/image 7.svg",
       alt: "Insurance Network 2",
       carrier: "https://www.anthem.com/",
+      insurance: "Anthem Blue Cross"
     },
     {
       src: "/image 8.svg",
       alt: "Insurance Network 6",
       carrier: "https://www.blueshieldca.com/",
+      insurance: "Anthem Blue Cross Blue Shield"
     },
     {
       src: "/image 9.svg",
       alt: "Insurance Network 4",
       carrier: "https://www.healthnet.com/content/healthnet/en_us.html",
+      insurance:"BMC HealthNet Plan"
     },
     {
       src: "/image 17 (1).svg",
       alt: "Insurance Network 5",
       carrier: "https://www.aetna.com/",
+      insurance: "Aetna"
     },
     {
       src: "/image 18.svg",
       alt: "Insurance Network 1",
       carrier: "https://example7.com",
+      insurance: "UnitedHealthcare"
     },
   ];
   const insuranceRightLogos = [
@@ -239,21 +249,25 @@ export default function LandingPage() {
       src: "/image 6.svg",
       alt: "Insurance Network 1",
       carrier: "https://healthy.kaiserpermanente.org/front-door",
+      insurance:'Kaiser Permanente'
     },
     {
       src: "/image 11.svg",
       alt: "Insurance Network 1",
       carrier: "https://example7.com",
+      insurance: "Sutter Health Plus"
     },
     {
       src: "/image 12.svg",
       alt: "Insurance Network 2",
       carrier: "https://example8.com",
+      insurance: 'Stanford Health Care Advantage',
     },
     {
       src: "/image 13.svg",
       alt: "Insurance Network 3",
       carrier: "https://example9.com",
+      insurance: 'UCHP (University of Chicago Health Plan)'
     },
   ];
   useEffect(() => {

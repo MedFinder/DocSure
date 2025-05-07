@@ -689,8 +689,8 @@ export const Task: React.FC<TaskProps> = ({
                       >
                         {openingStatus}
                       </span>
-                      <span>•</span>
-                      <span>{openingTimeInfo}</span>
+                      {/* <span>•</span>
+                      <span>{openingTimeInfo}</span> */}
                     </div>
                   </div>
                   <div
@@ -707,8 +707,8 @@ export const Task: React.FC<TaskProps> = ({
                     >
                       {openingStatus}
                     </span>
-                    <span>•</span>
-                    <span className="">{openingTimeInfo}</span>
+                    {/* <span>•</span>
+                    <span className="">{openingTimeInfo}</span> */}
                   </div>
                   <div
                     className="flex justify-between items-center w-full"

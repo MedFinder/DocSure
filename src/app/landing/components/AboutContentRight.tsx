@@ -57,10 +57,11 @@ interface ContentRightProps {
       carrier: string;
       width?: number;
       height?: number;
+      insurance?: string;
     }
   ];
   scrollToSection: (a: string, b: number) => void;
-  updateprefillAvailability: () => void;
+  updateprefillAvailability: (specialty?: string, insurance?: string) => void;
   title: string;
   subtitle?: string;
   Component?: React.ComponentType<any>;
@@ -139,7 +140,8 @@ const AboutContentLeft: React.FC<ContentRightProps> = ({
                     alt={logo.alt}
                     width={logo?.width ?? 0}
                     height={logo?.height ?? 0}
-                    className="w-auto h-auto md:flex"
+                    onClick={()=>updateprefillAvailability && updateprefillAvailability("", logo.insurance )}
+                    className="w-auto h-auto md:flex hover:cursor-pointer"
                   />
                 ))}
               </div>
