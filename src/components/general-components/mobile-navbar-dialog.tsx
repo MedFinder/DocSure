@@ -5,8 +5,8 @@ import { BookText, Loader2, MapPin, Search, X } from "lucide-react";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Autocomplete } from "../../../components/ui/autocomplete";
 import ReactModal from "react-modal";
+import Select from "react-select";
 import {
   insuranceCarrierOptions,
   medicalSpecialtiesOptions,
@@ -215,15 +215,19 @@ export default function MobileNavbarDialog({
           <div className="flex items-center w-full">
             <Search className="w-5 h-5 text-gray-500 mx-2" />
             <div className="flex-1 border-gray-400 md:border-none">
-              <Autocomplete
+              <Select
                 id="specialty"
                 name="specialty"
                 className="w-full"
                 options={medicalSpecialtiesOptions}
                 placeholder="Medical specialty"
-                selected={formik.values.specialty}
-                onChange={handleSpecialtyChange}
-                clearable={false}
+                value={medicalSpecialtiesOptions.find(
+                  (option) => option.value === formik.values.specialty
+                )}
+                onChange={(selectedOption) => {
+                  formik.setFieldValue("specialty", selectedOption.value);
+                }}
+                isClearable={false}
               />
             </div>
           </div>
@@ -231,7 +235,7 @@ export default function MobileNavbarDialog({
           <div className="flex items-center w-full">
             <BookText className="w-5 h-5 text-gray-500 mx-2" />
             <div className="flex-1">
-              <Autocomplete
+              <Select
                 id="insurer"
                 name="insurer"
                 className={cn(
@@ -241,14 +245,16 @@ export default function MobileNavbarDialog({
                     : ""
                 )}
                 options={insuranceCarrierOptions}
-                value={formik.values.insurer}
-                selected={formik.values.insurer}
-                onChange={(value) => {
-                  formik.setFieldValue("insurer", value);
+                placeholder="Insurance carrier (optional)"
+                value={insuranceCarrierOptions.find(
+                  (option) => option.value === formik.values.insurer
+                )}
+                onChange={(selectedOption) => {
+                  formik.setFieldValue("insurer", selectedOption.value);
                   formik.setFieldTouched("insurer", true);
-                  localStorage.setItem("selectedInsurer", value);
+                  localStorage.setItem("selectedInsurer", selectedOption.value);
                 }}
-                clearable={false}
+                isClearable={false}
               />
               {formik.touched.insurer && formik.errors.insurer && (
                 <div className="text-red-500 text-sm">

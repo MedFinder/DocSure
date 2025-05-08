@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Autocomplete } from "../../../components/ui/autocomplete";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,6 +42,7 @@ import AboutContentRight from "../landing/components/AboutContentRight";
 import AboutContentLeft from "../landing/components/AboutContentLeft";
 import { Footer } from "react-day-picker";
 import FooterSection from "../landing/components/FooterSection";
+import Select from "@/components/ui/client-only-select";
 
 // Add global spinner component
 const GlobalSpinner = ({ isVisible }) => {
@@ -55,6 +55,57 @@ const GlobalSpinner = ({ isVisible }) => {
       </div>
     </div>
   );
+};
+export const customStyles = {
+  control: (provided) => ({
+    ...provided,
+    backgroundColor: "#fff",
+    border: "none",
+    boxShadow: "none",
+    borderRadius: "0.5rem",
+    minHeight: "40px",
+    fontSize: "14px",
+    padding: "2px 4px",
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#9ca3af",
+    textAlign: "left",
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+  }),
+  input: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+    margin: 0,
+    padding: 0,
+  }),
+  menu: (provided) => ({
+    ...provided,
+    marginTop: 0, // no space between input and dropdown
+    borderRadius: "0 0 0.5rem 0.5rem",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    width: "100%", // match input width
+  }),
+  menuList: (provided) => ({
+    ...provided,
+    padding: 0,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+    color: "#111827",
+    padding: "10px 12px",
+    cursor: "pointer",
+    textAlign: "left",
+  }),
+  indicatorsContainer: () => ({
+    display: "none", // removes the dropdown arrow
+  }),
 };
 
 const doctorTypes = [
@@ -146,11 +197,11 @@ export default function LandingPage() {
       window.scrollTo({ top: topPosition, behavior: "smooth" });
     }
   };
-  const checkPrefillAvailability = (value: string, insurance:string) => {
+  const checkPrefillAvailability = (value: string, insurance: string) => {
     setGlobalLoading(true); // Set global loading to true when starting the process
     // scrollToSection("home", 40); // Scroll to the "home" section
     handleDoctorTypeClick(value ?? "Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
-    if(insurance){
+    if (insurance) {
       setSelectedInsurer(insurance);
       formik.setFieldValue("insurance_carrier", insurance);
     }
@@ -211,37 +262,37 @@ export default function LandingPage() {
       src: "/image 6.svg",
       alt: "Insurance Network 1",
       carrier: "https://healthy.kaiserpermanente.org/front-door",
-      insurance:'Kaiser Permanente'
+      insurance: "Kaiser Permanente",
     },
     {
       src: "/image 7.svg",
       alt: "Insurance Network 2",
       carrier: "https://www.anthem.com/",
-      insurance: "Anthem Blue Cross"
+      insurance: "Anthem Blue Cross",
     },
     {
       src: "/image 8.svg",
       alt: "Insurance Network 6",
       carrier: "https://www.blueshieldca.com/",
-      insurance: "Anthem Blue Cross Blue Shield"
+      insurance: "Anthem Blue Cross Blue Shield",
     },
     {
       src: "/image 9.svg",
       alt: "Insurance Network 4",
       carrier: "https://www.healthnet.com/content/healthnet/en_us.html",
-      insurance:"BMC HealthNet Plan"
+      insurance: "BMC HealthNet Plan",
     },
     {
       src: "/image 17 (1).svg",
       alt: "Insurance Network 5",
       carrier: "https://www.aetna.com/",
-      insurance: "Aetna"
+      insurance: "Aetna",
     },
     {
       src: "/image 18.svg",
       alt: "Insurance Network 1",
       carrier: "https://example7.com",
-      insurance: "UnitedHealthcare"
+      insurance: "UnitedHealthcare",
     },
   ];
   const insuranceRightLogos = [
@@ -249,25 +300,25 @@ export default function LandingPage() {
       src: "/image 6.svg",
       alt: "Insurance Network 1",
       carrier: "https://healthy.kaiserpermanente.org/front-door",
-      insurance:'Kaiser Permanente'
+      insurance: "Kaiser Permanente",
     },
     {
       src: "/image 11.svg",
       alt: "Insurance Network 1",
       carrier: "https://example7.com",
-      insurance: "Sutter Health Plus"
+      insurance: "Sutter Health Plus",
     },
     {
       src: "/image 12.svg",
       alt: "Insurance Network 2",
       carrier: "https://example8.com",
-      insurance: 'Stanford Health Care Advantage',
+      insurance: "Stanford Health Care Advantage",
     },
     {
       src: "/image 13.svg",
       alt: "Insurance Network 3",
       carrier: "https://example9.com",
-      insurance: 'UCHP (University of Chicago Health Plan)'
+      insurance: "UCHP (University of Chicago Health Plan)",
     },
   ];
   useEffect(() => {
@@ -311,11 +362,11 @@ export default function LandingPage() {
       return [];
     }
   };
-  const logNetworkInfo = async (ipaddress: string, logrequest:boolean) => {
+  const logNetworkInfo = async (ipaddress: string, logrequest: boolean) => {
     const default_ip = localStorage.getItem("ipAddress");
     try {
       const data = {
-        device_category: 'web',
+        device_category: "web",
         device_ip_address: ipaddress ?? default_ip,
       };
       const response = await axios.post(
@@ -326,9 +377,12 @@ export default function LandingPage() {
       const existingFormData = localStorage.getItem("formData");
       const parsedExistingData = JSON.parse(existingFormData);
       // Merge existing data with new values (new values take precedence)
-      const mergedValues = { ...parsedExistingData, request_id: response.data.request_id };
+      const mergedValues = {
+        ...parsedExistingData,
+        request_id: response.data.request_id,
+      };
       localStorage.setItem("formData", JSON.stringify(mergedValues));
-      if(logrequest){
+      if (logrequest) {
         logRequestInfo(response.data?.request_id);
       }
       return response.data?.request_id;
@@ -402,7 +456,7 @@ export default function LandingPage() {
     } catch (error) {
       console.error("Error with IP geolocation:", error);
       toast.error("Could not determine your location. Using default location.");
-     //  getDefaultLocation();
+      //  getDefaultLocation();
     }
   };
   const logRequestInfo = async (request_id) => {
@@ -457,7 +511,7 @@ export default function LandingPage() {
         );
 
         // Call logRequestInfo without awaiting
-        const requestIdPromise = logNetworkInfo(null,true);
+        const requestIdPromise = logNetworkInfo(null, true);
         const speciality_value =
           formik.values.specialty === "Prescription / Refill"
             ? "Primary Care Physician"
@@ -524,7 +578,7 @@ export default function LandingPage() {
       };
       await logDrLists(payload);
     }
-  }
+  };
   const handleOnAddressChanged = (index) => {
     if (addressRefs.current[index]) {
       const places = addressRefs.current[index].getPlaces();
@@ -657,7 +711,7 @@ export default function LandingPage() {
             }}
             className="text-white bg-[#0074BA] rounded-md"
           >
-              <GiftIcon className="h-5 w-5" /> Get $100
+            <GiftIcon className="h-5 w-5" /> Get $100
           </Button>
         </div>
 
@@ -771,19 +825,24 @@ export default function LandingPage() {
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
                     <div className="flex-1  border-gray-400 md:border-none">
-                      <Autocomplete
+                      <Select
                         id="specialty"
                         name="specialty"
-                        className="w-full"
+                        styles={customStyles}
+                        className="w-full outline-none border-none"
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        value={selectedSpecialty}
-                        selected={formik.values.specialty}
-                        onChange={(value) => {
-                          formik.setFieldValue("specialty", value);
-                          setSelectedSpecialty(value);
+                        value={medicalSpecialtiesOptions.find(
+                          (option) => option.value === selectedSpecialty
+                        )}
+                        onChange={(selectedOption) => {
+                          formik.setFieldValue(
+                            "specialty",
+                            selectedOption.value
+                          );
+                          setSelectedSpecialty(selectedOption.value);
                         }}
-                        clearable={false}
+                        isClearable={false}
                       />
                     </div>
                   </div>
@@ -793,19 +852,23 @@ export default function LandingPage() {
                       <BookText className="w-5 h-5 text-gray-500" />
                     </div>
                     <div className="flex-1  border-gray-400 md:border-none">
-                      <Autocomplete
+                      <Select
                         id="insurer"
                         name="insurer"
-                        className="w-full"
+                        styles={customStyles}
                         options={insuranceCarrierOptions}
                         placeholder="Insurance carrier (optional)"
-                        value={selectedInsurer}
-                        selected={formik.values.insurance_carrier}
-                        onChange={(value) => {
-                          formik.setFieldValue("insurance_carrier", value);
-                          setSelectedInsurer(value);
+                        value={insuranceCarrierOptions.find(
+                          (option) => option.value === selectedInsurer
+                        )}
+                        onChange={(selectedOption) => {
+                          formik.setFieldValue(
+                            "insurance_carrier",
+                            selectedOption.value
+                          );
+                          setSelectedInsurer(selectedOption.value);
                         }}
-                        clearable={false}
+                        isClearable={false}
                       />
                     </div>
                   </div>

@@ -25,10 +25,11 @@ import {
   insuranceCarrierOptions,
   medicalSpecialtiesOptions,
 } from "@/constants/store-constants";
-import { Autocomplete } from "../../../components/ui/autocomplete";
 import { track } from "@vercel/analytics";
 import QuickDetailsModal from "@/app/landing/components/QuickDetailsModal";
 import MobileNavbarDialog from "./mobile-navbar-dialog";
+import Select from "../ui/client-only-select";
+import { customStyles } from "@/app/landing/page";
 
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
@@ -294,21 +295,20 @@ export default function NavbarSection({
                       onClick={handleFieldClick}
                       className="flex-1 border-b border-gray-400 md:border-none"
                     >
-                      <Autocomplete
+                      <Select
                         id="specialty"
                         name="specialty"
                         className="w-full"
+                         styles={customStyles}
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        selected={specialty}
-                        onChange={(value) => {
-                          setSpecialty(value);
-                          formik.setFieldValue("specialty", value);
-                          localStorage.setItem("selectedSpecialty", value);
+                        value={medicalSpecialtiesOptions.find(
+                          (option) => option.value === formik.values.specialty
+                        )}
+                        onChange={(selectedOption) => {
+                          formik.setFieldValue("specialty", selectedOption.value);
                         }}
-                        clearable={false}
-                        navbar
-                        enabled={updatePreferences ? false : true}
+                        isClearable={false}
                       />
                     </div>
                   </div>
@@ -321,7 +321,7 @@ export default function NavbarSection({
                       onClick={handleFieldClick}
                       className="flex-1 border-b border-gray-400 md:border-none"
                     >
-                      <Autocomplete
+                      <Select
                         id="insurer"
                         name="insurer"
                         className="w-full"

@@ -781,7 +781,11 @@ export const Task: React.FC<TaskProps> = ({
                         colSpan={5}
                         className=" p-4 transition-all bg-[#F2F6F9]"
                       >
-                        <div className="text-sm text-gray-600 animate-fadeIn md:w-2/3">
+                        <div
+                          className="text-sm text-gray-600 animate-fadeIn md:w-2/3"
+                          onClick={handleExpand}
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
                           {transcriptLoading &&
                           transcriptSummary?.place_id === id ? (
                             <div className="flex items-center justify-center py-4 bg-[#F2F6F9] ">

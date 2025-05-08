@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Autocomplete } from "../../../components/ui/autocomplete";
+import Select from "react-select";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import { Input } from "@/components/ui/input";
 import {
@@ -256,11 +256,11 @@ export default function LandingPage() {
     },
   ];
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = '//js-na2.hs-scripts.com/242621305.js';
+    const script = document.createElement("script");
+    script.src = "//js-na2.hs-scripts.com/242621305.js";
     script.async = true;
     script.defer = true;
-    script.id = 'hs-script-loader';
+    script.id = "hs-script-loader";
     document.body.appendChild(script);
   }, []);
   useEffect(() => {
@@ -429,7 +429,7 @@ export default function LandingPage() {
     const data = {
       doctor_speciality: formik.values.specialty,
       preferred_location: savedAddress,
-      device_ip_address: ipAddress ?? '',
+      device_ip_address: ipAddress ?? "",
       device_category: "web",
     };
     try {
@@ -772,19 +772,22 @@ export default function LandingPage() {
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
                     <div className="flex-1  border-gray-400 md:border-none">
-                      <Autocomplete
+                      <Select
                         id="specialty"
                         name="specialty"
                         className="w-full"
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        value={selectedSpecialty}
-                        selected={formik.values.specialty}
-                        onChange={(value) => {
-                          formik.setFieldValue("specialty", value);
-                          setSelectedSpecialty(value);
+                        value={medicalSpecialtiesOptions.find(
+                          (option) => option.value === formik.values.specialty
+                        )}
+                        onChange={(selectedOption) => {
+                          formik.setFieldValue(
+                            "specialty",
+                            selectedOption.value
+                          );
                         }}
-                        clearable={false}
+                        isClearable={false}
                       />
                     </div>
                   </div>

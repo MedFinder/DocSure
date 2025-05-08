@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Autocomplete } from "../../../../components/ui/autocomplete";
 import { Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +24,7 @@ import {
 import { track } from "@vercel/analytics";
 import { toast } from "sonner";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
+import Select from "@/components/ui/client-only-select";
 
 // Set the app element for accessibility - moved out of component to avoid React hooks rules issues
 if (typeof window !== "undefined") {
@@ -225,7 +225,7 @@ export default function QuickDetailsModal({
       patient_name: updatedValues.patientName,
       patient_number: updatedValues.phoneNumber,
       patient_date_of_birth: updatedValues.dob,
-      insurer: updatedValues.insurer ??'',
+      insurer: updatedValues.insurer ?? "",
       new_patient: true,
       preferred_time_of_appointment: updatedValues.timeOfAppointment,
       patient_availability: updatedValues.availability,
@@ -572,21 +572,20 @@ export default function QuickDetailsModal({
                     <Label className="text-[#333333BF] text-sm">
                       Medical Specialty
                     </Label>
-                    <Autocomplete
+                    <Select
+                      styles={customStyles}
                       id="specialty"
                       name="specialty"
-                      className={cn(
-                        "w-full border border-[#333333] rounded-md",
-                        formik.touched.specialty && formik.errors.specialty
-                          ? "border-red-500"
-                          : ""
-                      )}
+                      className="w-full"
                       options={medicalSpecialtiesOptions}
-                      value={formik.values.specialty}
-                      selected={formik.values.specialty}
-                      onChange={handleSpecialtyChange}
-                      clearable={false}
-                      placeholder="Select a medical specialty"
+                      placeholder="Medical specialty"
+                      value={medicalSpecialtiesOptions.find(
+                        (option) => option.value === formik.values.specialty
+                      )}
+                      onChange={(selectedOption) => {
+                        formik.setFieldValue("specialty", selectedOption.value);
+                      }}
+                      isClearable={false}
                     />
                     {formik.touched.specialty && formik.errors.specialty && (
                       <div className="text-red-500 text-sm">
@@ -736,7 +735,8 @@ export default function QuickDetailsModal({
                   <>
                     <Label className="text-[#333333BF] text-sm">Insurer</Label>
                     <div className="flex-1">
-                      <Autocomplete
+                      <Select
+                        styles={customStyles}
                         id="insurer"
                         name="insurer"
                         className={cn(
