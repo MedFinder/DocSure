@@ -776,7 +776,11 @@ export const Task: React.FC<TaskProps> = ({
                     )}
                   </div>
                   {isExpanded && (
-                    <div className="md:!table-row w-full bg-[#F2F6F9]  pr-16 md:pr-0 ">
+                    <div
+                      className="md:!table-row w-full bg-[#F2F6F9]  pr-16 md:pr-0 "
+                      onClick={handleExpand}
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
                       <div
                         colSpan={5}
                         className=" p-4 transition-all bg-[#F2F6F9]"
