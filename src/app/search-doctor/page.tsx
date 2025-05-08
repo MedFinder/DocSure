@@ -71,6 +71,8 @@ export default function SearchDoctorPage() {
   const [activeDoctor, setActiveDoctor] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
   const [checkedDoctors, setCheckedDoctors] = useState({});
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRY_ATTEMPTS = 5;
 
   const distanceOptions = [
     "< 2 miles",
@@ -762,6 +764,8 @@ export default function SearchDoctorPage() {
 
     wsRef.current.onopen = () => {
       console.log("WebSocket connected successfully and opened.");
+      // Reset retry count on successful connection
+      setRetryCount(0);
     };
 
     wsRef.current.onmessage = async (event) => {
@@ -777,8 +781,15 @@ export default function SearchDoctorPage() {
     };
 
     wsRef.current.onerror = (error) => {
-      console.log("Retrying WebSocket connection in 5 seconds...");
-      setTimeout(connectWebSocket, 5000);
+      const currentRetries = retryCount + 1;
+      setRetryCount(currentRetries);
+      
+      if (currentRetries < MAX_RETRY_ATTEMPTS) {
+        console.log(`WebSocket connection error. Retry attempt ${currentRetries}/${MAX_RETRY_ATTEMPTS} in 5 seconds...`);
+        setTimeout(connectWebSocket, 5000);
+      } else {
+        console.log(`Maximum retry attempts (${MAX_RETRY_ATTEMPTS}) reached. Giving up on WebSocket connection.`);
+      }
     };
   };
   const DrCount = useMemo(() => {
