@@ -776,16 +776,16 @@ export const Task: React.FC<TaskProps> = ({
                     )}
                   </div>
                   {isExpanded && (
-                    <div
-                      className="md:!table-row w-full bg-[#F2F6F9]  pr-16 md:pr-0 "
-                      onClick={handleExpand}
-                      onPointerDown={(e) => e.stopPropagation()}
-                    >
+                    <div className="md:!table-row w-full bg-[#F2F6F9]  pr-16 md:pr-0 ">
                       <div
                         colSpan={5}
                         className=" p-4 transition-all bg-[#F2F6F9]"
                       >
-                        <div className="text-sm text-gray-600 animate-fadeIn md:w-2/3">
+                        <div
+                          className="text-sm text-gray-600 animate-fadeIn md:w-2/3"
+                          onClick={handleExpand}
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
                           {transcriptLoading &&
                           transcriptSummary?.place_id === id ? (
                             <div className="flex items-center justify-center py-4 bg-[#F2F6F9] ">
@@ -908,7 +908,7 @@ export const Task: React.FC<TaskProps> = ({
                   )}
                   {!fromTranscript && (
                     <div className="flex justify-between items-center w-full">
-                      {isExpanded || transcriptLoading ? (
+                      {isExpanded ? (
                         <button
                           type="button"
                           onClick={handleExpand}
