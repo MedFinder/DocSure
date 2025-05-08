@@ -52,7 +52,7 @@ export default function AppointmentPendingPage() {
             </Link>
           </div>
 
-          <div className="flex md:mt-12 my-6 w-full">
+          {/* <div className="flex md:mt-12 my-6 w-full">
             <div className="w-full flex flex-col space-y-2 mb-3">
               <ul className="list-disc pl-4 space-y-1">
                 <li className="text-xs text-gray-600 text-left">
@@ -63,7 +63,7 @@ export default function AppointmentPendingPage() {
                 </li>
               </ul>
             </div>
-          </div>
+          </div> */}
           
           <div className="mt-8">
             <Link href="/" className="text-[#0074BA] underline hover:text-[#00619e]" onClick={() => track("Back_To_Home_Clicked")}>
