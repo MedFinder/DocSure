@@ -8,6 +8,7 @@ import {
   BookText,
   GiftIcon,
   Loader2,
+  LucideStethoscope,
   MapPin,
   Menu,
   Search,
@@ -768,7 +769,7 @@ export default function LandingPage() {
                   {/* Specialty section */}
                   <div className="flex items-center w-full sm:w-auto sm:flex-1">
                     <div className="flex items-center justify-center px-3">
-                      <Search className="w-5 h-5 text-gray-500" />
+                      <LucideStethoscope className="w-5 h-5 text-gray-500" />
                     </div>
                     <div className="flex-1  border-gray-400 md:border-none">
                       <Autocomplete
@@ -782,6 +783,8 @@ export default function LandingPage() {
                         onChange={(value) => {
                           formik.setFieldValue("specialty", value);
                           setSelectedSpecialty(value);
+                          localStorage.removeItem('topReviewDoctors');
+                          localStorage.removeItem('topRatedDoctors');
                         }}
                         clearable={false}
                       />

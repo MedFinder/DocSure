@@ -198,3 +198,15 @@ body {
   font-weight: 600;
   font-size: 0.75rem;
 }
+.flag-rated-badge {
+  background-color: #4CAF50; /* Green color for "Highly Rated" */
+  position: relative;
+  display: inline-block;
+  clip-path: polygon(10px 0%, 100% 0%, 100% 100%, 10px 100%, 0% 50%);
+  border-radius: 0 0 0 4px;
+  padding: 4px 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.75rem;
+
+}

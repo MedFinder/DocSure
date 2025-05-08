@@ -94,6 +94,7 @@ interface TaskProps {
   handleFormSubmit: any;
   isLoading?: boolean;
   topReviewDoctors?: string[];
+  topRatedDoctors?: string[]; // Add new prop
 }
 
 const getAlternateColor = (index: number) => {
@@ -161,7 +162,7 @@ export const Task: React.FC<TaskProps> = ({
   handleFormSubmit,
   isLoading,
   topReviewDoctors,
-  //description = "No additional information available for this provider.", // Default description
+  topRatedDoctors, // Add to function params
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
@@ -273,7 +274,13 @@ export const Task: React.FC<TaskProps> = ({
   // Determine badge display logic
   const isTopPick = index === 0;
   const hasHighReviews = topReviewDoctors?.includes(id);
+  const hasHighRating = topRatedDoctors?.includes(id);
+
+  // Show "Filling fast" badge if it has high reviews but is not the top pick
   const showFillingFastBadge = hasHighReviews && !isTopPick;
+
+  // Show "Highly Rated" badge if it has high rating, high reviews, and is not the top pick
+  const showHighlyRatedBadge = hasHighRating && !isTopPick && !hasHighReviews;
 
   // Determine if we should show the insurer acceptance badge
   const showAcceptsInsurerBadge = selectedInsurer && index < 8;
@@ -352,6 +359,13 @@ export const Task: React.FC<TaskProps> = ({
                   <div className="absolute top-0 right-0 z-10">
                     <span className=" flag-fast-badge text-white text-xs font-normal py-[2px] px-3 md:font-normal">
                       Filling fast
+                    </span>
+                  </div>
+                )}
+                {!fromTranscript && showHighlyRatedBadge && (
+                  <div className="absolute top-0 right-0 z-10">
+                    <span className="flag-rated-badge text-white text-xs font-normal py-[2px] px-3 md:font-normal">
+                     Patient favorite
                     </span>
                   </div>
                 )}
