@@ -681,13 +681,15 @@ export const Task: React.FC<TaskProps> = ({
                         )}
                       </div>
 
-                      {!fromTranscript && showAcceptsInsurerBadge && (
-                        <div className="flex  items-center text-[11px] md:text-xs gap-1 font-normal">
-                          <CircleCheck className="text-[#00BA85] w-5 h-5 md:w-6 md:h-6" />
-                          <span>Accepts</span>
-                          {selectedInsurer}
-                        </div>
-                      )}
+                      {!fromTranscript &&
+                        showAcceptsInsurerBadge &&
+                        !isExpanded && (
+                          <div className="flex  items-center text-[11px] md:text-xs gap-1 font-normal">
+                            <CircleCheck className="text-[#00BA85] w-5 h-5 md:w-6 md:h-6" />
+                            <span>Accepts</span>
+                            {selectedInsurer}
+                          </div>
+                        )}
                     </div>
 
                     {!isExpanded && fromTranscript && (
@@ -860,18 +862,26 @@ export const Task: React.FC<TaskProps> = ({
                   )}
                   {!fromTranscript && (
                     <div className="flex justify-between items-center w-full">
-                      {isExpanded ? (
+                      {isExpanded && (
                         <button
                           type="button"
                           onClick={handleExpand}
-                          className="hover:text-gray-700 transition-colors cursor-pointer block"
                           onPointerDown={(e) => e.stopPropagation()}
+                          className="hover:text-gray-700 transition-colors cursor-pointer block"
                         >
                           <span className="mx-auto text-sm underline">
                             view less
                           </span>
                         </button>
-                      ) : null}
+                      )}
+
+                      {showAcceptsInsurerBadge && isExpanded && (
+                        <div className="flex items-center text-[11px] md:text-xs gap-1 font-normal">
+                          <CircleCheck className="text-[#00BA85] w-5 h-5 md:w-6 md:h-6" />
+                          <span>Accepts</span>
+                          <span>{selectedInsurer}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
