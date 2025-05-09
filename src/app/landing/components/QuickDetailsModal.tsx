@@ -161,7 +161,6 @@ export default function QuickDetailsModal({
       const temp_sepciality = localStorage.getItem("selectedSpecialty");
       const storedLocation = localStorage.getItem("selectedLocation");
       const selectedInsurer = localStorage.getItem("selectedInsurer");
-
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
         setFormData(parsedFormData);
