@@ -226,7 +226,7 @@ export default function QuickDetailsModal({
       patient_name: updatedValues.patientName,
       patient_number: updatedValues.phoneNumber,
       patient_date_of_birth: updatedValues.dob,
-      insurer: updatedValues.insurer ??'',
+      insurer: updatedValues.insurer ?? "",
       new_patient: true,
       preferred_time_of_appointment: updatedValues.timeOfAppointment,
       patient_availability: updatedValues.availability,
