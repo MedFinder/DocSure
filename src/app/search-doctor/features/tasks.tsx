@@ -346,7 +346,7 @@ export const Task: React.FC<TaskProps> = ({
                 } relative`}
               >
                 {!fromTranscript && (
-                  <div className="hidden md:flex absolute right-4 top-[40%] -translate-y-1/2 z-10">
+                  <div className="hidden md:flex absolute right-4 top-10  z-10">
                     <Button
                       className="bg-[#E5573F] text-white rounded-md w-20"
                       type="button"
