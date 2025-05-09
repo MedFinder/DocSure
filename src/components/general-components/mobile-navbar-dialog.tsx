@@ -6,7 +6,6 @@ import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import ReactModal from "react-modal";
-import Select from "react-select";
 import {
   insuranceCarrierOptions,
   medicalSpecialtiesOptions,
@@ -18,13 +17,65 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { track } from "@vercel/analytics";
 import axios from "axios";
+import Select from "../ui/client-only-select";
 
 // Set the app element for accessibility - moved out of component to avoid React hooks rules issues
 if (typeof window !== "undefined") {
   // In Next.js, we use document.body as a reliable app element
   ReactModal.setAppElement(document.body);
 }
-
+export const customSelectStyles = {
+  control: (provided) => ({
+    ...provided,
+    backgroundColor: "#fff",
+    border: "none",
+    boxShadow: "none",
+    borderRadius: "0.5rem",
+    minHeight: "40px",
+    fontSize: "16px",
+    padding: "2px 4px",
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#9ca3af",
+    textAlign: "left",
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+  }),
+  input: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+    margin: 0,
+    padding: 0,
+  }),
+  menu: (provided) => ({
+    ...provided,
+    marginTop: 0, // no space between input and dropdown
+    borderRadius: "0 0 0.5rem 0.5rem",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    width: "100%", // match input width
+  }),
+  menuList: (provided) => ({
+    ...provided,
+    padding: 0,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+    color: "#111827",
+    padding: "8px 12px",
+    cursor: "pointer",
+    textAlign: "left",
+    fontSize: "14px", // Reduced font size for options
+  }),
+  indicatorsContainer: () => ({
+    display: "none", // removes the dropdown arrow
+  }),
+};
 interface MobileNavbarDialogProps {
   isOpen: boolean;
   onClose: any;
@@ -218,6 +269,7 @@ export default function MobileNavbarDialog({
               <Select
                 id="specialty"
                 name="specialty"
+                styles={customSelectStyles}
                 className="w-full"
                 options={medicalSpecialtiesOptions}
                 placeholder="Medical specialty"
@@ -238,6 +290,7 @@ export default function MobileNavbarDialog({
               <Select
                 id="insurer"
                 name="insurer"
+                styles={customSelectStyles}
                 className={cn(
                   "w-full   border-gray-400 md:border-none",
                   formik.touched.insurer && formik.errors.insurer

@@ -26,6 +26,62 @@ import { toast } from "sonner";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import Select from "@/components/ui/client-only-select";
 
+export const customSelectStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    backgroundColor: "#fff",
+    boxShadow: "none",
+    borderRadius: "0.5rem",
+    border: "1px solid black",
+    borderColor: "black",
+    minHeight: "40px",
+    fontSize: "14px",
+    padding: "2px 4px",
+    '&:hover': {
+      borderColor: "black"
+    }
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#9ca3af",
+    textAlign: "left",
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+  }),
+  input: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+    margin: 0,
+    padding: 0,
+  }),
+  menu: (provided) => ({
+    ...provided,
+    marginTop: 0, // no space between input and dropdown
+    borderRadius: "0 0 0.5rem 0.5rem",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    width: "100%", // match input width
+  }),
+  menuList: (provided) => ({
+    ...provided,
+    padding: 0,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+    color: "#111827",
+    padding: "8px 12px",
+    cursor: "pointer",
+    textAlign: "left",
+    fontSize: "14px", // Reduced font size for options
+  }),
+  indicatorsContainer: () => ({
+    display: "none", // removes the dropdown arrow
+  }),
+};
 // Set the app element for accessibility - moved out of component to avoid React hooks rules issues
 if (typeof window !== "undefined") {
   // In Next.js, we use document.body as a reliable app element
@@ -573,7 +629,7 @@ export default function QuickDetailsModal({
                       Medical Specialty
                     </Label>
                     <Select
-                      styles={customStyles}
+                      styles={customSelectStyles}
                       id="specialty"
                       name="specialty"
                       className="w-full"
@@ -736,11 +792,12 @@ export default function QuickDetailsModal({
                     <Label className="text-[#333333BF] text-sm">Insurer</Label>
                     <div className="flex-1">
                       <Select
-                        styles={customStyles}
+                        styles={customSelectStyles}
                         id="insurer"
+                        placeholder="Search..."
                         name="insurer"
                         className={cn(
-                          "w-full border border-[#333333] rounded-md",
+                          "w-full ",
                           formik.touched.insurer && formik.errors.insurer
                             ? "border-red-500"
                             : ""

@@ -829,20 +829,22 @@ export default function LandingPage() {
                         id="specialty"
                         name="specialty"
                         styles={customStyles}
-                        className="w-full outline-none border-none"
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
                         value={medicalSpecialtiesOptions.find(
                           (option) => option.value === selectedSpecialty
                         )}
                         onChange={(selectedOption) => {
-                          formik.setFieldValue(
-                            "specialty",
-                            selectedOption.value
-                          );
-                          setSelectedSpecialty(selectedOption.value);
+                          if (selectedOption) {
+                            formik.setFieldValue(
+                              "specialty",
+                              selectedOption.value
+                            );
+                            setSelectedSpecialty(selectedOption.value);
+                          }
                         }}
-                        isClearable={false}
+                        isClearable={true}
+                        isSearchable={true}
                       />
                     </div>
                   </div>
@@ -851,7 +853,7 @@ export default function LandingPage() {
                     <div className="flex items-center justify-center px-3">
                       <BookText className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1  border-gray-400 md:border-none">
+                    <div className="flex-1 border-gray-400 md:border-none">
                       <Select
                         id="insurer"
                         name="insurer"
@@ -862,13 +864,20 @@ export default function LandingPage() {
                           (option) => option.value === selectedInsurer
                         )}
                         onChange={(selectedOption) => {
-                          formik.setFieldValue(
-                            "insurance_carrier",
-                            selectedOption.value
-                          );
-                          setSelectedInsurer(selectedOption.value);
+                          if (selectedOption) {
+                            setSelectedInsurer(selectedOption.value);
+                            formik.setFieldValue(
+                              "insurance_carrier",
+                              selectedOption.value
+                            );
+                            localStorage.setItem(
+                              "selectedInsurer",
+                              selectedOption.value
+                            );
+                          }
                         }}
-                        isClearable={false}
+                        isClearable={true}
+                        isSearchable={true}
                       />
                     </div>
                   </div>
