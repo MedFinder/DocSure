@@ -44,6 +44,7 @@ export default function SearchDoctorPage() {
   const [doctors, setDoctors] = useState([]);
   const [phoneNumbers, setPhoneNumbers] = useState<(string | null)[]>([]);
   const [topReviewDoctors, setTopReviewDoctors] = useState<string[]>([]);
+  const [topRatedDoctors, setTopRatedDoctors] = useState<string[]>([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isAppointmentBooked, setIsAppointmentBooked] = useState(false);
   const [transcriptSummary, setTranscriptSummary] = useState({
@@ -70,6 +71,8 @@ export default function SearchDoctorPage() {
   const [activeDoctor, setActiveDoctor] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
   const [checkedDoctors, setCheckedDoctors] = useState({});
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRY_ATTEMPTS = 5;
 
   const distanceOptions = [
     "< 2 miles",
@@ -174,6 +177,150 @@ export default function SearchDoctorPage() {
     }
   };
 
+  const getTopDrsWithReviews = async (newDoctorData = null) => { 
+    // Use either the passed data or get from localStorage
+    let doctorsToProcess = newDoctorData;
+    const TOP_DOCTORS_STORAGE_KEY = "topReviewDoctors";
+    
+    if (!doctorsToProcess) {
+      const storedData = localStorage.getItem("statusData");
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          if (parsedData?.results?.length) {
+            doctorsToProcess = parsedData.results;
+          }
+        } catch (error) {
+          console.error("Error parsing doctors data for review badges:", error);
+          return;
+        }
+      }
+    }
+
+    if (!doctorsToProcess || !doctorsToProcess.length) return;
+
+    // Get the first 10 doctors or all if less than 10
+    const doctorsToConsider = doctorsToProcess.slice(0, 10);
+
+    // Sort doctors by review count in descending order
+    const sortedByReviews = [...doctorsToConsider].sort((a, b) => {
+      const reviewsA = a.user_ratings_total || a.review || 0;
+      const reviewsB = b.user_ratings_total || b.review || 0;
+      return reviewsB - reviewsA;
+    });
+
+    // Get the IDs of the top 2 doctors with most reviews
+    const top2DoctorIds = sortedByReviews
+      .slice(0, 2)
+      .map((doctor) => doctor.place_id || doctor.id);
+    
+    // If we're processing new data (from pagination), add to existing list
+    // Otherwise replace the state
+    if (newDoctorData) {
+      setTopReviewDoctors(prevTopDoctors => {
+        // Create a Set to avoid duplicates
+        const uniqueTopDoctors = new Set([...prevTopDoctors, ...top2DoctorIds]);
+        const updatedTopDoctors = Array.from(uniqueTopDoctors);
+        
+        // Save to localStorage for persistence
+        localStorage.setItem(TOP_DOCTORS_STORAGE_KEY, JSON.stringify(updatedTopDoctors));
+        
+        return updatedTopDoctors;
+      });
+    } else {
+      // Try to get existing top doctors from localStorage
+      const storedTopDoctors = localStorage.getItem(TOP_DOCTORS_STORAGE_KEY);
+      
+      if (storedTopDoctors && !newDoctorData) {
+        try {
+          // If we have stored data and this is an initial load, use the stored data
+          const parsedTopDoctors = JSON.parse(storedTopDoctors);
+          setTopReviewDoctors(parsedTopDoctors);
+        } catch (error) {
+          console.error("Error parsing stored top doctors:", error);
+          setTopReviewDoctors(top2DoctorIds);
+          localStorage.setItem(TOP_DOCTORS_STORAGE_KEY, JSON.stringify(top2DoctorIds));
+        }
+      } else {
+        // Initial set with no stored data
+        setTopReviewDoctors(top2DoctorIds);
+        localStorage.setItem(TOP_DOCTORS_STORAGE_KEY, JSON.stringify(top2DoctorIds));
+      }
+    }
+  }
+
+  const getTopDrsWithRatings = async (newDoctorData = null) => {
+    // Use either the passed data or get from localStorage
+    let doctorsToProcess = newDoctorData;
+    const TOP_RATED_STORAGE_KEY = "topRatedDoctors";
+    
+    if (!doctorsToProcess) {
+      const storedData = localStorage.getItem("statusData");
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          if (parsedData?.results?.length) {
+            doctorsToProcess = parsedData.results;
+          }
+        } catch (error) {
+          console.error("Error parsing doctors data for rating badges:", error);
+          return;
+        }
+      }
+    }
+
+    if (!doctorsToProcess || !doctorsToProcess.length) return;
+
+    // Get the first 10 doctors or all if less than 10
+    const doctorsToConsider = doctorsToProcess.slice(0, 10);
+
+    // Sort doctors by rating in descending order
+    const sortedByRatings = [...doctorsToConsider].sort((a, b) => {
+      const ratingA = a.rating || 0;
+      const ratingB = b.rating || 0;
+      return ratingB - ratingA;
+    });
+
+    // Get the IDs of the top 2 doctors with highest ratings
+    const top2RatedDoctorIds = sortedByRatings
+      .slice(0, 2)
+      .map((doctor) => doctor.place_id || doctor.id);
+    
+    // If we're processing new data (from pagination), add to existing list
+    // Otherwise replace the state
+    if (newDoctorData) {
+      setTopRatedDoctors(prevTopDoctors => {
+        // Create a Set to avoid duplicates
+        const uniqueTopDoctors = new Set([...prevTopDoctors, ...top2RatedDoctorIds]);
+        const updatedTopDoctors = Array.from(uniqueTopDoctors);
+        
+        // Save to localStorage for persistence
+        localStorage.setItem(TOP_RATED_STORAGE_KEY, JSON.stringify(updatedTopDoctors));
+        
+        return updatedTopDoctors;
+      });
+    } else {
+      // Try to get existing top doctors from localStorage
+      const storedTopDoctors = localStorage.getItem(TOP_RATED_STORAGE_KEY);
+      
+      if (storedTopDoctors && !newDoctorData) {
+        try {
+          // If we have stored data and this is an initial load, use the stored data
+          const parsedTopDoctors = JSON.parse(storedTopDoctors);
+          setTopRatedDoctors(parsedTopDoctors);
+        } catch (error) {
+          console.error("Error parsing stored top rated doctors:", error);
+          setTopRatedDoctors(top2RatedDoctorIds);
+          localStorage.setItem(TOP_RATED_STORAGE_KEY, JSON.stringify(top2RatedDoctorIds));
+        }
+      } else {
+        // Initial set with no stored data
+        setTopRatedDoctors(top2RatedDoctorIds);
+        localStorage.setItem(TOP_RATED_STORAGE_KEY, JSON.stringify(top2RatedDoctorIds));
+      }
+    }
+  }
+
   const loadMoreDoctors = async () => {
     console.log("loading more doctors...");
     if (!nextPageToken || isLoadingMore) return;
@@ -221,6 +368,10 @@ export default function SearchDoctorPage() {
             lng: item.location?.lng || item.lng,
           },
         }));
+
+        // Process the new doctors to find top reviewed ones AND top rated ones
+        getTopDrsWithReviews(newDoctors);
+        getTopDrsWithRatings(newDoctors);
 
         // Create a combined array with existing and new doctors
         const updatedDoctors = [...doctors, ...newDoctors];
@@ -311,11 +462,6 @@ export default function SearchDoctorPage() {
   }
 
   useEffect(() => {
-
-    connectWebSocket();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  useEffect(() => {
     const updateDoctorsList = () => {
       try {
         let rawData = localStorage.getItem("statusData");
@@ -334,7 +480,6 @@ export default function SearchDoctorPage() {
               lng: item.location?.lng || item.lng,
             },
           }));
-
           setDoctors(sortedData);
           setNextPageToken(parsedData.next_page_token || null);
         } else {
@@ -504,7 +649,7 @@ export default function SearchDoctorPage() {
     newDoctors.unshift(selectedDoctor); // Add the selected doctor to the top
 
     // Update the state with the new order
-    setDoctors(newDoctors);
+    // setDoctors(newDoctors);
 
     // Update localStorage with the new order
     const storageKey = "statusData";
@@ -522,63 +667,74 @@ export default function SearchDoctorPage() {
     // Simulate form submission delay
     return new Promise((resolve) => setTimeout(resolve, 20000));
   };
-  const getTopDrsWithReviews = async () => { 
-    const storedData = localStorage.getItem("statusData");
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        if (parsedData?.results?.length) {
-          // Get the first 10 doctors from the results
-          const first10Doctors = parsedData.results.slice(0, 10);
 
-          // Sort doctors by review count in descending order
-          const sortedByReviews = [...first10Doctors].sort((a, b) => {
-            const reviewsA = a.user_ratings_total || a.review || 0;
-            const reviewsB = b.user_ratings_total || b.review || 0;
-            return reviewsB - reviewsA;
-          });
-
-          // Get the IDs of the top 2 doctors with most reviews
-          const top2DoctorIds = sortedByReviews
-            .slice(0, 2)
-            .map((doctor) => doctor.place_id || doctor.id);
-          //console.log('top2DoctorIds', top2DoctorIds);
-          setTopReviewDoctors(top2DoctorIds);
-        }
-      } catch (error) {
-        console.error("Error parsing doctors data for review badges:", error);
-      }
-    }
-  }
   useEffect(() => {
-    // Fetch the doctors list from localStorage to find the top 2 by reviews
-    getTopDrsWithReviews()
+    // Load top doctors from localStorage on initial component mount
+    const TOP_DOCTORS_STORAGE_KEY = "topReviewDoctors";
+    const TOP_RATED_STORAGE_KEY = "topRatedDoctors";
+    
+    const storedTopDoctors = localStorage.getItem(TOP_DOCTORS_STORAGE_KEY);
+    const storedTopRatedDoctors = localStorage.getItem(TOP_RATED_STORAGE_KEY);
+    
+    if (storedTopDoctors) {
+      try {
+        const parsedTopDoctors = JSON.parse(storedTopDoctors);
+        setTopReviewDoctors(parsedTopDoctors);
+      } catch (error) {
+        console.error("Error loading top doctors from localStorage:", error);
+        // Fall back to calculating from scratch
+        getTopDrsWithReviews();
+      }
+    } else {
+      // If no stored data, calculate from scratch
+      getTopDrsWithReviews();
+    }
+    
+    if (storedTopRatedDoctors) {
+      try {
+        const parsedTopRatedDoctors = JSON.parse(storedTopRatedDoctors);
+        setTopRatedDoctors(parsedTopRatedDoctors);
+      } catch (error) {
+        console.error("Error loading top rated doctors from localStorage:", error);
+        // Fall back to calculating from scratch
+        getTopDrsWithRatings();
+      }
+    } else {
+      // If no stored data, calculate from scratch
+      getTopDrsWithRatings();
+    }
+    
+    // Connect to WebSocket
+    connectWebSocket();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-    useEffect(() => {
-      const updateDoctorsList = () => {
-        try {
-          const lastSearchSource = localStorage.getItem("lastSearchSource");
-          let rawData;
+
+  useEffect(() => {
+    const getDrsReviewNavChange = () => {
+      try {
+        const lastSearchSource = localStorage.getItem("lastSearchSource");
+        let rawData;
   
-          if (lastSearchSource === "navbar") {
-            getTopDrsWithReviews()
-          }
-  
-        } catch (error) {
-          console.error("Error parsing localStorage data:", error);
+        if (lastSearchSource === "navbar") {
+          getTopDrsWithReviews();
+          getTopDrsWithRatings();
         }
-      };
-      updateDoctorsList();
-      // getTotalDoctorsList();
   
-      // Listen for storage changes (detect when a new search is performed)
-      const handleStorageChange = () => updateDoctorsList();
-      window.addEventListener("storage", handleStorageChange);
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
+      }
+    };
+    getDrsReviewNavChange();
+    // getTotalDoctorsList();
   
-      return () => {
-        window.removeEventListener("storage", handleStorageChange);
-      };
-    }, [router]);
+    // Listen for storage changes (detect when a new search is performed)
+    const handleStorageChange = () => getDrsReviewNavChange();
+    window.addEventListener("storage", handleStorageChange);
+  
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [router]);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDCPbnPb43gQZDPT5dpq10a3dOP3EMHw-0",
@@ -608,6 +764,8 @@ export default function SearchDoctorPage() {
 
     wsRef.current.onopen = () => {
       console.log("WebSocket connected successfully and opened.");
+      // Reset retry count on successful connection
+      setRetryCount(0);
     };
 
     wsRef.current.onmessage = async (event) => {
@@ -623,8 +781,15 @@ export default function SearchDoctorPage() {
     };
 
     wsRef.current.onerror = (error) => {
-      console.log("Retrying WebSocket connection in 5 seconds...");
-      setTimeout(connectWebSocket, 5000);
+      const currentRetries = retryCount + 1;
+      setRetryCount(currentRetries);
+      
+      if (currentRetries < MAX_RETRY_ATTEMPTS) {
+        console.log(`WebSocket connection error. Retry attempt ${currentRetries}/${MAX_RETRY_ATTEMPTS} in 5 seconds...`);
+        setTimeout(connectWebSocket, 5000);
+      } else {
+        console.log(`Maximum retry attempts (${MAX_RETRY_ATTEMPTS}) reached. Giving up on WebSocket connection.`);
+      }
     };
   };
   const DrCount = useMemo(() => {
@@ -861,6 +1026,7 @@ export default function SearchDoctorPage() {
                       handleFormSubmit={handleFormSubmit}
                       isLoading={isLoading}
                       topReviewDoctors={topReviewDoctors}
+                      topRatedDoctors={topRatedDoctors}
                     />
                   </div>
                   {/* Loading indicator for infinite scrolling */}
@@ -940,7 +1106,7 @@ export default function SearchDoctorPage() {
 
                     return (
                       <Marker
-                        key={doctor.id || index}
+                        key={index}
                         position={position}
                         icon={{
                           url: "/LocationPin.svg", // Path relative to public/

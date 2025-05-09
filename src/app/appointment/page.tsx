@@ -69,21 +69,6 @@ export default function AppointmentPage() {
           patientName: parsedFormData?.patientName || "",
           dob: parsedFormData.dob ? new Date(parsedFormData.dob) : null,
           phoneNumber: parsedFormData.phoneNumber || "",
-          objective: parsedFormData?.objective || "",
-          insurer: parsedFormData?.insurer || "",
-          selectedOption: parsedFormData?.selectedOption || "yes",
-          insuranceType: parsedFormData?.insuranceType || "ppo",
-          availability: parsedFormData?.availability || "anytime",
-          subscriberId: parsedFormData?.subscriberId || "",
-          maxWait: parsedFormData?.maxWait
-            ? parsedFormData?.maxWait
-            : parsedFormData?.specialty === "Primary Care Physician"
-            ? 3
-            : 10,
-          availabilityOption: parsedFormData?.availabilityOption || "anytime",
-          timeOfAppointment: parsedFormData?.timeOfAppointment
-            ? new Date(parsedFormData.timeOfAppointment)
-            : new Date(),
         });
         setSelectedSpecialty(storedSpeciality);
         setInputValue(parsedFormData?.objective);
@@ -271,35 +256,41 @@ export default function AppointmentPage() {
     initialValues: {
       patientName: formData.patientName || "",
       phoneNumber: formData.phoneNumber || "",
-      email: formData.email || "",
-      address: formData.address || "",
       dob: formData.dob ? new Date(formData.dob) : null,
-      gender: formData.gender || "",
     },
     validationSchema,
     onSubmit: async (values) => {
       track("AppointmentDetail_Btn_Clicked");
       const savedSpecialty = localStorage.getItem("selectedSpecialty");
-      const formData = JSON.parse(localStorage.getItem("formData"));
+      const existingFormData = localStorage.getItem("formData");
 
       if (!formik.isValid) {
         toast.error("Please fill up all the required information");
         return;
       }
-      const updatedFormData = {
-        ...formData,
-        ...values,
-        dob: formatDateToYYYYMMDD(values.dob),
-      };
-      // console.log(updatedFormData);
-      logPatientData(updatedFormData);
+      const updatedValues = { ...values, dob: formatDateToYYYYMMDD(values.dob) };
+      let mergedValues = updatedValues;
+
+      if (existingFormData) {
+        const parsedExistingData = JSON.parse(existingFormData);
+
+        try {
+          // Merge existing data with new values (new values take precedence)
+          mergedValues = { ...parsedExistingData, ...updatedValues };
+        } catch (error) {
+          console.error("Error parsing existing form data:", error);
+        }
+      }
+      // console.log(mergedValues, "mergedValues");
+      logPatientData(mergedValues);
       setIsLoading(true);
-      window.localStorage.setItem("formData", JSON.stringify(updatedFormData));
+      localStorage.setItem("formData", JSON.stringify(mergedValues));
+
       // call send-sms API
-      await sendSMS(updatedFormData.phoneNumber);
+      await sendSMS(mergedValues.phoneNumber);
 
       // call initiate-call-BE API
-      await initiateCall(formData?.request_id,updatedFormData)
+      await initiateCall(formData?.request_id,mergedValues)
 
       router.push("/appointment-pending");
     },
@@ -347,10 +338,6 @@ export default function AppointmentPage() {
   const handleInsuranceTypeChange = (value) => {
     formik.setFieldValue("insuranceType", value);
   };
-  useEffect(() => {
-    formik.setFieldValue("objective", inputValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputValue]);
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && inputValue.trim() !== "") {
       e.preventDefault();
@@ -559,10 +546,10 @@ export default function AppointmentPage() {
               )}
             </Button>
           </div>
-          <span className="text-[#333333BF] text-sm">
+          {/* <span className="text-[#333333BF] text-sm">
             By continuing, you authorize us to book an appointment on your
             behalf.
-          </span>
+          </span> */}
         </div>
       </form>
       {/* Quick Details Modal */}

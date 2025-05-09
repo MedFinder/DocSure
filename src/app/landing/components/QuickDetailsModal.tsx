@@ -216,6 +216,7 @@ export default function QuickDetailsModal({
       const savedAddress = localStorage.getItem("selectedAddress");
       const temp_sepciality = localStorage.getItem("selectedSpecialty");
       const storedLocation = localStorage.getItem("selectedLocation");
+      const selectedInsurer = localStorage.getItem("selectedInsurer");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
         setFormData(parsedFormData);
@@ -229,7 +230,7 @@ export default function QuickDetailsModal({
           dob: parsedFormData.dob ? new Date(parsedFormData.dob) : null,
           gender: parsedFormData.gender || "",
           specialty: parsedFormData.specialty || "",
-          insurer: parsedFormData?.insurer || "",
+          insurer: parsedFormData?.insurer || selectedInsurer || "",
           selectedOption: parsedFormData?.selectedOption || "yes",
           insuranceType: parsedFormData?.insuranceType || "",
           availability: parsedFormData?.availability || "anytime",

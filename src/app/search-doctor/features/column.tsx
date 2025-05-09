@@ -37,6 +37,7 @@ interface ColumnProps {
   topReviewDoctors?: string[];
   handleRemoveDoctor?: (index: string) => void; // Added for "Remove" functionality
   onCallNext?: (index: number) => void; // Added for "Call next" functionality
+  topRatedDoctors?: string[]; // Add this new prop
 }
 const Column: React.FC<ColumnProps> = ({
   tasks,
@@ -57,53 +58,8 @@ const Column: React.FC<ColumnProps> = ({
   handleFormSubmit,
   isLoading,
   topReviewDoctors,
+  topRatedDoctors, // Add to function params
 }) => {
-  // Function to delete a task by ID
-
-  // return (
-  //   <div className="column">
-  //     <table className="task-table">
-  //       {/* <thead>
-  //         <tr>
-  //           <th>#</th>
-  //           <th>Hospital / Doctor Name</th>
-  //           <th>Rating</th>
-  //           <th>Call Status</th>
-  //           <th>Distance</th>
-  //         </tr>
-  //       </thead> */}
-  //       <tbody>
-  //         <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
-  //           {tasks.map((task, index) => {
-  //             const doctorType = task.types?.[0]
-  //               ? task.types[0].charAt(0).toUpperCase() + task.types[0].slice(1)
-  //               : "";
-
-  //               return (
-  //               <Task
-  //                 key={task.id}
-  //                 id={task.id.toString()}
-  //                 index={index}
-  //                 website={task.website === 'NA' ? null : task.website}
-  //                 title={task.name}
-  //                 rating={task.rating}
-  //                 distance={task.distance}
-  //                 activeCallIndex={activeCallIndex}
-  //                 isAppointmentBooked={isAppointmentBooked}
-  //                 callStatus={callStatus}
-  //                 review={task.user_ratings_total}
-  //                 vicinity={task.vicinity}
-  //                 address={task.address}
-  //                 doctorType={doctorType}
-  //                 onDelete={onDelete}
-  //               />
-  //               );
-  //           })}
-  //         </SortableContext>
-  //       </tbody>
-  //     </table>
-  //   </div>
-  // );
   return (
     <div className="w-full">
       <table className="task-table w-full border-collapse md:table ">
@@ -117,7 +73,7 @@ const Column: React.FC<ColumnProps> = ({
                   : "";
                 return (
                   <Task
-                    key={task.id}
+                    key={index}
                     id={task.id.toString()}
                     index={index}
                     website={task.website === "NA" ? null : task.website}
@@ -146,6 +102,7 @@ const Column: React.FC<ColumnProps> = ({
                     handleRemoveDoctor={handleRemoveDoctor}
                     handleFormSubmit={handleFormSubmit}
                     topReviewDoctors={topReviewDoctors}
+                    topRatedDoctors={topRatedDoctors} // Pass the new prop
                     isLoading={isLoading}
                   />
                 );
