@@ -173,7 +173,7 @@ export default function QuickDetailsModal({
           dob: parsedFormData.dob ? new Date(parsedFormData.dob) : null,
           gender: parsedFormData.gender || "",
           specialty: parsedFormData.specialty || "",
-          insurer: parsedFormData?.insurer || "",
+          insurer: parsedFormData?.insurer || selectedInsurer || "",
           selectedOption: parsedFormData?.selectedOption || "yes",
           insuranceType: parsedFormData?.insuranceType || "",
           availability: parsedFormData?.availability || "anytime",

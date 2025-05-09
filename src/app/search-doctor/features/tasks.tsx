@@ -121,7 +121,7 @@ const getDrSummary = async (
     );
     // console.log(resp?.data)
     return (
-      resp.data?.result?.summary || "No summary available for this provider."
+      resp.data?.result?.summary || null
     );
   } catch (error) {
     console.error("Error fetching doctor summary:", error);
@@ -234,12 +234,14 @@ export const Task: React.FC<TaskProps> = ({
           place_id || id,
           request_id
         );
-        //console.log(resp);
-        setTimeout(() => {
-          console.log("defaulting to dr summary..after socket time out");
-          setTranscriptLoading(false);
-          setTranscriptSummary({ place_id: id, summary: resp });
-        }, 5000);
+        // console.log(resp);
+        if(resp){
+          setTimeout(() => {
+            console.log("defaulting to dr summary..after socket time out");
+            setTranscriptLoading(false);
+            setTranscriptSummary({ place_id: id, summary: resp });
+          }, 3000);
+        }
         if (wsRef.current?.readyState === 1) {
           // setTranscriptLoading(false);
           // setTranscriptSummary({place_id: id, summary: resp})
@@ -370,7 +372,7 @@ export const Task: React.FC<TaskProps> = ({
                   </div>
                 )}
                 {!fromTranscript && showAcceptsInsurerBadge && (
-                  <div className=" hidden md:flex  absolute md:top-28 top-44 right-2 md:right-6 z-10">
+                  <div className=" hidden md:flex  absolute md:top-24 top-44 right-2 md:right-6 z-10">
                     <span className="flex md:text-xs text-[11px] gap-1 justify-center items-center md:font-normal font-normal">
                       <CircleCheck className="text-[#00BA85] w-5 h-5 md:w-6 md:h-6" />
                       <span>Accepts</span>
@@ -462,17 +464,19 @@ export const Task: React.FC<TaskProps> = ({
                             {review || 0} reviews
                           </span>
                         </div>
-
-                        <div
-                          className="md:flex hidden items-center gap-1"
-                          onClick={handleExpand}
-                          onPointerDown={(e) => e.stopPropagation()}
-                        >
-                          <MapPin size={13} />
-                          <span className="whitespace-nowrap text-[#333333] text-sm">
-                            {distance || "-"}
-                          </span>
-                        </div>
+                        {distance &&        
+                          <div
+                            className="md:flex hidden items-center gap-1"
+                            onClick={handleExpand}
+                            onPointerDown={(e) => e.stopPropagation()}
+                          >
+                            <MapPin size={13} />
+                            <span className="whitespace-nowrap text-[#333333] text-sm">
+                              {distance || "-"}
+                            </span>
+                          </div>
+                        }
+         
                       </div>
 
                       {!fromTranscript && (
@@ -664,16 +668,19 @@ export const Task: React.FC<TaskProps> = ({
                       {review || 0} reviews
                     </span>
                     {/* <span className="px-1">|</span> */}
-                    <div
-                      className="flex items-center gap-1"
-                      onClick={handleExpand}
-                      onPointerDown={(e) => e.stopPropagation()}
-                    >
-                      <MapPin size={13} />
-                      <span className="whitespace-nowrap text-[#333333] text-sm">
-                        {distance || "-"}
-                      </span>
-                    </div>
+                    {distance && 
+                      <div
+                        className="flex items-center gap-1"
+                        onClick={handleExpand}
+                        onPointerDown={(e) => e.stopPropagation()}
+                      >
+                        <MapPin size={13} />
+                        <span className="whitespace-nowrap text-[#333333] text-sm">
+                          {distance || "-"}
+                        </span>
+                      </div> 
+                    }
+              
                     {/* <div className="md:hidden gap-1 text-sm text-[#333333] flex items-center  ">
                       <span
                         className={
@@ -694,7 +701,7 @@ export const Task: React.FC<TaskProps> = ({
                     onPointerDown={(e) => e.stopPropagation()}
                   >
                     <div className="md:hidden gap-1 text-sm text-[#333333] flex items-center  ">
-                      <span
+                      {/* <span
                         className={
                           openingStatus === "Open"
                             ? "text-[#00BA85]"
@@ -702,7 +709,7 @@ export const Task: React.FC<TaskProps> = ({
                         }
                       >
                         {openingStatus}
-                      </span>
+                      </span> */}
                       {/* <span>•</span>
                       <span>{openingTimeInfo}</span> */}
                     </div>
@@ -712,7 +719,7 @@ export const Task: React.FC<TaskProps> = ({
                     onClick={handleExpand}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
-                    <span
+                    {/* <span
                       className={
                         openingStatus === "Open"
                           ? "text-[#00BA85]"
@@ -720,7 +727,7 @@ export const Task: React.FC<TaskProps> = ({
                       }
                     >
                       {openingStatus}
-                    </span>
+                    </span> */}
                     {/* <span>•</span>
                     <span className="">{openingTimeInfo}</span> */}
                   </div>

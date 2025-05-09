@@ -559,10 +559,10 @@ export default function AppointmentPage() {
               )}
             </Button>
           </div>
-          <span className="text-[#333333BF] text-sm">
+          {/* <span className="text-[#333333BF] text-sm">
             By continuing, you authorize us to book an appointment on your
             behalf.
-          </span>
+          </span> */}
         </div>
       </form>
       {/* Quick Details Modal */}

@@ -120,6 +120,20 @@ export default function NavbarSection({
       track("Navbar_Search_Btn_Clicked");
       const updatedValues = { ...values };
 
+      const existingFormData = localStorage.getItem("formData");
+      let mergedValues = updatedValues;
+
+      if (existingFormData) {
+        try {
+          const parsedExistingData = JSON.parse(existingFormData);
+          // Merge existing data with new values (new values take precedence)
+          mergedValues = { ...parsedExistingData, ...updatedValues };
+        } catch (error) {
+          console.error("Error parsing existing form data:", error);
+        }
+      }
+      localStorage.setItem("formData", JSON.stringify(mergedValues));
+
       // If updatePreferences is true, open the modal instead of searching
       if (updatePreferences) {
         setIsPreferencesUpdated(false);

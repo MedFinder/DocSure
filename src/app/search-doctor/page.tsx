@@ -1106,7 +1106,7 @@ export default function SearchDoctorPage() {
 
                     return (
                       <Marker
-                        key={doctor.id || index}
+                        key={index}
                         position={position}
                         icon={{
                           url: "/LocationPin.svg", // Path relative to public/

@@ -73,7 +73,7 @@ const Column: React.FC<ColumnProps> = ({
                   : "";
                 return (
                   <Task
-                    key={task.id}
+                    key={index}
                     id={task.id.toString()}
                     index={index}
                     website={task.website === "NA" ? null : task.website}
