@@ -12,6 +12,7 @@ import { Combobox } from "../ui/combo-box";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
+import Select from "react-select";
 
 import {
   GoogleMap,
@@ -22,7 +23,6 @@ import { toast } from "sonner";
 import axios from "axios";
 import { ComboboxNav } from "../ui/combo-box-nav";
 import { medicalSpecialtiesOptions } from "@/constants/store-constants";
-import { Autocomplete } from "../../../components/ui/autocomplete";
 import { track } from "@vercel/analytics";
 
 const validationSchema = Yup.object().shape({
@@ -210,19 +210,22 @@ export default function Navbar() {
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
                     <div className="flex-1 min-w-[180px]">
-                      <Autocomplete
+                      <Select
                         id="specialty"
                         name="specialty"
                         className="w-full"
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        selected={specialty}
-                        onChange={(value) => {
-                          setSpecialty(value);
-                          formik.setFieldValue("specialty", value);
+                        value={medicalSpecialtiesOptions.find(
+                          (option) => option.value === formik.values.specialty
+                        )}
+                        onChange={(selectedOption) => {
+                          formik.setFieldValue(
+                            "specialty",
+                            selectedOption.value
+                          );
                         }}
-                        clearable={false}
-                        navbar
+                        isClearable={false}
                       />
                     </div>
                   </div>

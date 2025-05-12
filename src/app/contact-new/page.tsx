@@ -21,6 +21,7 @@ import { request } from "http";
 import NavbarSection from "@/components/general-components/navbar-section";
 import FooterSection from "../landing/components/FooterSection";
 import Link from "next/link";
+import Select from "react-select";
 
 // Custom styles for DatePicker
 const customDatePickerStyles = `
@@ -44,6 +45,12 @@ const genderOptions = [
   { value: "Male", label: "Male" },
   { value: "Female", label: "Female" },
   { value: "Non-binary", label: "Non-binary" },
+];
+const medicalSpecialtiesOptions = [
+  { value: "Cardiology", label: "Cardiology" },
+  { value: "Dermatology", label: "Dermatology" },
+  { value: "Neurology", label: "Neurology" },
+  // Add more specialties as needed
 ];
 export default function ContactNew() {
   const [formData, setFormData] = useState({});
@@ -147,6 +154,7 @@ export default function ContactNew() {
       address: formData.address || "",
       dob: formData.dob ? new Date(formData.dob) : null, // Initialize with null or parsed date
       gender: formData.gender || "", // Add gender to formik values
+      specialty: "", // Add specialty to formik values
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -404,6 +412,23 @@ export default function ContactNew() {
                   {formik.errors.phoneNumber}
                 </div>
               )}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[#333333]">Specialty</Label>
+              <Select
+                id="specialty"
+                name="specialty"
+                className="w-full"
+                options={medicalSpecialtiesOptions}
+                placeholder="Medical specialty"
+                value={medicalSpecialtiesOptions.find(
+                  (option) => option.value === formik.values.specialty
+                )}
+                onChange={(selectedOption) => {
+                  formik.setFieldValue("specialty", selectedOption.value);
+                }}
+                isClearable={false}
+              />
             </div>
           </div>
 

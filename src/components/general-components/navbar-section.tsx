@@ -25,15 +25,67 @@ import {
   insuranceCarrierOptions,
   medicalSpecialtiesOptions,
 } from "@/constants/store-constants";
-import { Autocomplete } from "../../../components/ui/autocomplete";
 import { track } from "@vercel/analytics";
 import QuickDetailsModal from "@/app/landing/components/QuickDetailsModal";
 import MobileNavbarDialog from "./mobile-navbar-dialog";
+import Select from "../ui/client-only-select";
 
 const validationSchema = Yup.object().shape({
   specialty: Yup.string().required("Specialty is required"), // Ensure specialty is required
 });
-
+export const customStyles = {
+  control: (provided) => ({
+    ...provided,
+    backgroundColor: "#FCF8F1",
+    border: "none",
+    boxShadow: "none",
+    borderRadius: "0.5rem",
+    minHeight: "40px",
+    fontSize: "14px",
+    padding: "2px 4px",
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#9ca3af",
+    textAlign: "left",
+    
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+  }),
+  input: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+    margin: 0,
+    padding: 0,
+  }),
+  menu: (provided) => ({
+    ...provided,
+    marginTop: 0, // no space between input and dropdown
+    borderRadius: "0 0 0.5rem 0.5rem",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    width: "100%", // match input width
+  }),
+  menuList: (provided) => ({
+    ...provided,
+    padding: 0,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+    color: "#111827",
+    padding: "8px 12px",
+    cursor: "pointer",
+    textAlign: "left",
+    fontSize: "14px", // Reduced font size for options
+  }),
+  indicatorsContainer: () => ({
+    display: "none", // removes the dropdown arrow
+  }),
+};
 interface NavbarSectionProps {
   updatePreferences?: boolean; // Flag to show "Update Preferences" text
   openModal?: boolean; // Flag to open QuickDetailsModal
@@ -191,31 +243,30 @@ export default function NavbarSection({
         let rawData;
 
         if (lastSearchSource === "navbar") {
-         // console.log("Navbar search triggered");
-         const savedSpecialty = localStorage.getItem("selectedSpecialty");
-         const selectedInsurer = localStorage.getItem("selectedInsurer");
-         // console.log(savedSpecialty, selectedInsurer);
-         if (savedSpecialty) {
-           setSpecialty(savedSpecialty);
-           formik.setFieldValue("specialty", savedSpecialty);
-         }
-         if (selectedInsurer) {
-           formik.setFieldValue("insurance_carrier", selectedInsurer);
-         }
-         const savedAddress = localStorage.getItem("selectedAddress");
-         const savedAddressLocation = localStorage.getItem("selectedLocation");
-         const AddressLocation = JSON.parse(savedAddressLocation);
-         if (savedAddress) {
-           setAddressLocation(savedAddress);
-         }
-         if (AddressLocation) {
-           setSelectedLocation({
-             lat: AddressLocation.lat,
-             lng: AddressLocation.lng,
-           });
-         }
+          // console.log("Navbar search triggered");
+          const savedSpecialty = localStorage.getItem("selectedSpecialty");
+          const selectedInsurer = localStorage.getItem("selectedInsurer");
+          // console.log(savedSpecialty, selectedInsurer);
+          if (savedSpecialty) {
+            setSpecialty(savedSpecialty);
+            formik.setFieldValue("specialty", savedSpecialty);
+          }
+          if (selectedInsurer) {
+            formik.setFieldValue("insurance_carrier", selectedInsurer);
+          }
+          const savedAddress = localStorage.getItem("selectedAddress");
+          const savedAddressLocation = localStorage.getItem("selectedLocation");
+          const AddressLocation = JSON.parse(savedAddressLocation);
+          if (savedAddress) {
+            setAddressLocation(savedAddress);
+          }
+          if (AddressLocation) {
+            setSelectedLocation({
+              lat: AddressLocation.lat,
+              lng: AddressLocation.lng,
+            });
+          }
         }
-
       } catch (error) {
         console.error("Error parsing localStorage data:", error);
       }
@@ -228,8 +279,8 @@ export default function NavbarSection({
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
@@ -272,7 +323,7 @@ export default function NavbarSection({
               <div className="flex items-center space-x-2 max-w-[300px]">
                 <p className="text-lg truncate">{specialty}</p>
               </div>
-              <div className="flex items-center space-x-2 max-w-[300px]">
+              <div className="flex items-center space-x-2 max-w-[250px]">
                 <p className="text-gray-500 truncate">{addressLocation}</p>
               </div>
             </span>
@@ -308,36 +359,52 @@ export default function NavbarSection({
                       onClick={handleFieldClick}
                       className="flex-1 border-b border-gray-400 md:border-none"
                     >
-                      <Autocomplete
+                      <Select
                         id="specialty"
                         name="specialty"
                         className="w-full"
+                        styles={customStyles}
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        selected={specialty}
-                        onChange={(value) => {
-                          setSpecialty(value);
-                          formik.setFieldValue("specialty", value);
-                          localStorage.setItem("selectedSpecialty", value);
+                        value={medicalSpecialtiesOptions.find(
+                          (option) => option.value === formik.values.specialty
+                        )}
+                        onChange={(selectedOption) => {
+                          if (selectedOption) {
+                            formik.setFieldValue(
+                              "specialty",
+                              selectedOption.value
+                            );
+                            setSpecialty(selectedOption.value);
+                            localStorage.setItem(
+                              "selectedSpecialty",
+                              selectedOption.value
+                            );
+                          } else {
+                            formik.setFieldValue("specialty", "");
+                            setSpecialty("");
+                            localStorage.removeItem("selectedSpecialty");
+                          }
                         }}
-                        clearable={false}
-                        navbar
-                        enabled={updatePreferences ? false : true}
+                        isClearable={true}
+                        isSearchable={true}
                       />
                     </div>
                   </div>
                   {/* Insurer section */}
                   <div className="flex items-center w-full sm:w-auto sm:flex-1">
-                    <div className="flex items-center justify-center px-3">
+                    <div className="flex items-center justify-center px-2">
                       <BookText className="w-5 h-5 text-gray-500" />
                     </div>
                     <div
                       onClick={handleFieldClick}
                       className="flex-1 border-b border-gray-400 md:border-none"
                     >
-                      <Autocomplete
+                      <Select
                         id="insurer"
                         name="insurer"
+                        className="w-full"
+                        styles={customStyles}
                         className="w-full"
                         options={insuranceCarrierOptions}
                         placeholder="Insurance carrier (optional)"
