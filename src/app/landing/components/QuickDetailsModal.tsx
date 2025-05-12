@@ -189,6 +189,9 @@ export default function QuickDetailsModal({
             ? new Date(parsedFormData.timeOfAppointment)
             : new Date(),
         });
+        if(parsedFormData?.selectedOption === "no"){
+          formik.setFieldValue("insurer", "");
+        }
 
         setInputValue(parsedFormData?.objective || "");
         setSelectedInsurance(parsedFormData?.selectedOption === "no");
