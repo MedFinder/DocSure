@@ -299,7 +299,7 @@ export const Task: React.FC<TaskProps> = ({
       >
         <td className={`flex md:table-cell ${fromTranscript ? "!px-0" : ""}`}>
           <TooltipProvider>
-            <div className="flex  md:gap-2 gap-2   ">
+            <div className="flex  md:gap-2   ">
               <div className="flex md:gap-2 gap-0 ">
                 {/* <div className="flex  md:gap-2 gap-0 items-center ">
                   {index < 10 ? (
@@ -341,7 +341,7 @@ export const Task: React.FC<TaskProps> = ({
               </div>
 
               <div
-                className={`bg-[#F2F6F9]  py-4 md:px-4 px-3 rounded-md flex gap-4 w-full min-w-[90vw] md:min-w-0   ${
+                className={`bg-[#F2F6F9]  py-4 md:px-4 px-3 rounded-md flex gap-4 w-full min-w-[95vw] md:min-w-0    ${
                   fromTranscript ? "md:px-6 min-w-[85vw] " : ""
                 } relative`}
               >
@@ -573,7 +573,7 @@ export const Task: React.FC<TaskProps> = ({
                   </div>
                   <div className="flex justify-between items-center">
                     <span
-                      className=" text-sm text-[#636465]  pr-16 md:pr-0 md:w-[60%] w-[80%] md:flex "
+                      className=" text-sm text-[#636465]  pr-16 md:pr-0 md:w-[60%] w-[72%] md:flex "
                       onClick={handleExpand}
                       onPointerDown={(e) => e.stopPropagation()}
                     >
