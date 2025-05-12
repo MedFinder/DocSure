@@ -48,7 +48,6 @@ export const customStyles = {
     ...provided,
     color: "#9ca3af",
     textAlign: "left",
-    
   }),
   singleValue: (provided) => ({
     ...provided,
@@ -407,7 +406,11 @@ export default function NavbarSection({
                         styles={customStyles}
                         className="w-full"
                         options={insuranceCarrierOptions}
-                        placeholder="Insurance carrier (optional)"
+                        placeholder={"Insurer carrier (optional)"}
+                        classNames={{
+                          placeholder: () =>
+                            "truncate text-ellipsis whitespace-nowrap overflow-hidden max-w-full",
+                        }}
                         selected={formik.values.insurance_carrier}
                         onChange={(value) => {
                           setInsurer(value);
