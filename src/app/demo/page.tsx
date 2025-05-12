@@ -771,6 +771,7 @@ export default function LandingPage() {
                     <div className="flex items-center justify-center px-3">
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
+
                     <div className="flex-1  border-gray-400 md:border-none">
                       <Select
                         id="specialty"
