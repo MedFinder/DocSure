@@ -33,7 +33,7 @@ const ExitIntentPopup: React.FC = () => {
   };
 
   return (
-    <div style={{  display: popupShown ? 'none' : 'none', width: '50%', height: '50%', margin: '0 auto', position: "fixed", top: '2%', left: '22%', zIndex: 9999 }}>
+    <div style={{  display: popupShown ? 'block' : 'none', width: '50%', height: '50%', margin: '0 auto', position: "fixed", top: '2%', left: '22%', zIndex: 9999 }}>
       <button 
         onClick={handleClose}
         style={{
