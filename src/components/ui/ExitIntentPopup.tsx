@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from 'react';
-import { Popover } from '@typeform/embed-react';
+import {  Widget } from '@typeform/embed-react';
 
 const ExitIntentPopup: React.FC = () => {
   const [popupShown, setPopupShown] = useState(false);
@@ -11,11 +11,12 @@ const ExitIntentPopup: React.FC = () => {
     const handleMouseOut = (event: MouseEvent) => {
       // console.log(event.clientY)
       // Check if mouse is leaving towards the top (within 50px) and popup hasn't been shown
-      if (event.clientY < 50 && !popupShown && event.relatedTarget === null) {
+      console.log(event.clientY, popupShown)
+      if (event.clientY < 0 && !popupShown && event.relatedTarget === null) {
         setPopupShown(true);
-        setTimeout(() => {
-          popupRef.current?.open();
-        }, 500);
+        // setTimeout(() => {
+        //   popupRef.current?.open();
+        // }, 500);
       }
     };
 
@@ -28,15 +29,25 @@ const ExitIntentPopup: React.FC = () => {
   }, [popupShown]);
 
   return (
-    !popupShown ? null : (
-    <Popover
-      embedRef={popupRef}
-      fullScreen={true} // Set to true for full-screen popup
-      id="eOmYMh2B" // Replace with your actual Typeform form ID
-      size={80} // Popup size as a percentage of the screen
-      hidden={{ foo: 'bar' }} // Optional: hidden fields to pass to Typeform
-    />
-  ));
+    <>
+    <Widget
+        //onHeightChanged={height => console.log(height)}
+        //fullScreen
+        style={{display:popupShown?'block': "none",width: "50%", height: "50%", position: "fixed", top: '2%', left: '22%', zIndex: 9999}}
+        id="eOmYMh2B" // Replace with your actual Typeform form ID
+      />
+    </>
+
+    );
 };
 
 export default ExitIntentPopup;
+
+
+{/* <Popover
+embedRef={popupRef}
+fullScreen={true} // Set to true for full-screen popup
+id="eOmYMh2B" // Replace with your actual Typeform form ID
+size={80} // Popup size as a percentage of the screen
+hidden={{ foo: 'bar' }} // Optional: hidden fields to pass to Typeform
+/> */}
