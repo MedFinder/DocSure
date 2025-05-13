@@ -1,13 +1,46 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import NavbarSection from "@/components/general-components/navbar-section";
 import FooterSection from "@/app/landing/components/FooterSection";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { track } from "@vercel/analytics";
 
+const APPOINTMENT_API_URL =
+  "https://callai-backend-243277014955.us-central1.run.app/api/update-auto-calling";
 export default function AppointmentPendingPage() {
+  const [autoBook, setAutoBook] = useState(true);
+
+  const updateAutoCalling = async () => {
+    setAutoBook(!autoBook);
+    // Add any additional logic for handling the auto booking state
+    // console.log("Auto booking set to:", !autoBook);
+    try {
+      const formData = JSON.parse(localStorage.getItem("formData") || "{}");
+      // Using formData API endpoint instead of Next.js API route
+      const response = await fetch(APPOINTMENT_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          request_id: formData?.request_id,
+          auto_calling: !autoBook,
+          // Add any additional fields required by your API
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Response data:", data);
+
+    } catch (error: unknown) {
+      console.log("Submission error:", error);
+    } finally {
+     // setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <NavbarSection />
@@ -19,6 +52,19 @@ export default function AppointmentPendingPage() {
           <p className="text-gray-600 mt-4 mb-8">
             Your Doctor has 1 hour to confirm. You will receive an SMS and email with appointment details.
           </p>
+          
+          <div className="flex items-center mb-6 justify-center">
+            <input 
+              type="checkbox" 
+              id="autoBookCheckbox" 
+              checked={autoBook} 
+              onChange={updateAutoCalling}
+              className="w-4 h-4 text-[#0074BA] bg-gray-100 border-gray-300 rounded focus:ring-[#0074BA]" 
+            />
+            <label htmlFor="autoBookCheckbox" className="ml-2 text-sm font-medium text-gray-700">
+              Auto book another top rated doctor around me if this doctor is unavailable
+            </label>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
             <a 
@@ -51,19 +97,6 @@ export default function AppointmentPendingPage() {
               </Button>
             </Link>
           </div>
-
-          {/* <div className="flex md:mt-12 my-6 w-full">
-            <div className="w-full flex flex-col space-y-2 mb-3">
-              <ul className="list-disc pl-4 space-y-1">
-                <li className="text-xs text-gray-600 text-left">
-                  We will contact you as soon as your doctor confirms your appointment.
-                </li>
-                <li className="text-xs text-gray-600 text-left">
-                  If you don't receive a confirmation within 1 hour, please check your spam folder or contact us.
-                </li>
-              </ul>
-            </div>
-          </div> */}
           
           <div className="mt-8">
             <Link href="/" className="text-[#0074BA] underline hover:text-[#00619e]" onClick={() => track("Back_To_Home_Clicked")}>

@@ -13,10 +13,13 @@ const ExitIntentPopup: React.FC = () => {
       // Check if mouse is leaving towards the top (within 50px) and popup hasn't been shown
       // console.log(event.clientY, popupShown)
       if (event.clientY < 0 && !popupShown && event.relatedTarget === null) {
-        setPopupShown(true);
-        // setTimeout(() => {
-        //   popupRef.current?.open();
-        // }, 500);
+        const storedSubmission = localStorage.getItem('typeform_submitted');
+        if(!storedSubmission){
+          setPopupShown(true);
+          // setTimeout(() => {
+          //   popupRef.current?.open();
+          // }, 500);
+        }
       }
     };
 
@@ -31,9 +34,13 @@ const ExitIntentPopup: React.FC = () => {
   const handleClose = () => {
     setPopupShown(false);
   };
+  // Handle form submission
+  const handleSubmit = () => {
+    localStorage.setItem('typeform_submitted', 'true');
+  };
 
   return (
-    <div style={{  display: popupShown ? 'none' : 'none', width: '50%', height: '50%', margin: '0 auto', position: "fixed", top: '2%', left: '22%', zIndex: 9999 }}>
+    <div style={{  display: popupShown ? 'block' : 'none', width: '50%', height: '50%', margin: '0 auto', position: "fixed", top: '2%', left: '22%', zIndex: 9999 }}>
       <button 
         onClick={handleClose}
         style={{
@@ -61,6 +68,7 @@ const ExitIntentPopup: React.FC = () => {
       </button>
       <Widget
         style={{ width: '100%', height: '100%' }}
+        onSubmit={handleSubmit}
         id="eOmYMh2B" // Replace with your actual Typeform form ID
       />
     </div>
