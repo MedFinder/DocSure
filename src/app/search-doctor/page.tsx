@@ -149,7 +149,7 @@ export default function SearchDoctorPage() {
     const drsData = await JSON.parse(localStorage.getItem("statusData"));
     const data = {
       request_id: updatedValues.request_id,
-      doctor_phone_numbers: drsData.results.map(doctor => doctor.phone_number),
+      doctor_place_ids: drsData.results.map(doctor => doctor.place_id),
       //call_priorities: drsData.results.map((_, index) => index)
     };
     console.log(data);

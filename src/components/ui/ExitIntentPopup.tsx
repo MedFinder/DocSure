@@ -11,7 +11,7 @@ const ExitIntentPopup: React.FC = () => {
     const handleMouseOut = (event: MouseEvent) => {
       // console.log(event.clientY)
       // Check if mouse is leaving towards the top (within 50px) and popup hasn't been shown
-      console.log(event.clientY, popupShown)
+      // console.log(event.clientY, popupShown)
       if (event.clientY < 0 && !popupShown && event.relatedTarget === null) {
         setPopupShown(true);
         // setTimeout(() => {
@@ -33,7 +33,7 @@ const ExitIntentPopup: React.FC = () => {
   };
 
   return (
-    <div style={{  display: popupShown ? 'block' : 'none', width: '50%', height: '50%', margin: '0 auto', position: "fixed", top: '2%', left: '22%', zIndex: 9999 }}>
+    <div style={{  display: popupShown ? 'none' : 'none', width: '50%', height: '50%', margin: '0 auto', position: "fixed", top: '2%', left: '22%', zIndex: 9999 }}>
       <button 
         onClick={handleClose}
         style={{
