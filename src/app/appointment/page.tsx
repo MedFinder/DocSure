@@ -33,7 +33,8 @@ const validationSchema = Yup.object().shape({
     .required("Date of birth is required")
     .max(new Date(), "Date of birth cannot be in the future"),
 });
-
+const CONTACT_API_URL =
+  "https://callai-backend-243277014955.us-central1.run.app/api/contact-us";
 export default function AppointmentPage() {
   const [inputValue, setInputValue] = useState("");
   const [pills, setPills] = useState<string[]>([]);
@@ -243,6 +244,7 @@ export default function AppointmentPage() {
           "https://callai-backend-243277014955.us-central1.run.app/api/assistant-initiate-call-backend",
           data
         );
+        submitContact(context, currentFormData);
         console.log(callResponse, "callResponse");
       } catch (error) {
         track("Initiated_new_call_failed");
@@ -251,6 +253,31 @@ export default function AppointmentPage() {
     },
     []
   );
+  const submitContact = async (context:string, formData:any) => {
+    try {
+      // Using external API endpoint instead of Next.js API route
+      const response = await fetch(CONTACT_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.patientName,
+          email: formData.email ?? 'Not Available',
+          message: context,
+          // Add any additional fields required by your API
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Response data:", data);
+
+    } catch (error: unknown) {
+      console.log("Submission error:", error);
+    } finally {
+     // setIsSubmitting(false);
+    }
+  }
 
   const formik = useFormik({
     initialValues: {
