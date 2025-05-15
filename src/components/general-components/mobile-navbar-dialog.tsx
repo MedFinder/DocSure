@@ -87,10 +87,11 @@ export default function MobileNavbarDialog({
   });
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedAddress = localStorage.getItem("selectedAddress");
-      const temp_sepciality = localStorage.getItem("selectedSpecialty");
+      const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+      const savedAddress = parsedFormData?.address;
+      const temp_sepciality = parsedFormData?.specialty;
       const storedLocation = localStorage.getItem("selectedLocation");
-      const selectedInsurer = localStorage.getItem("selectedInsurer");
+      const selectedInsurer = parsedFormData?.insurer;
       if (temp_sepciality) {
         formik.setFieldValue("specialty", temp_sepciality);
       }
@@ -107,6 +108,29 @@ export default function MobileNavbarDialog({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+  const updateInsuranceInStorage = (value) => {
+    // Update insurer in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.insurer = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+    localStorage.setItem("lastSearchSource", "insurance"); // Track last search source
+    window.dispatchEvent(new Event("storage"));
+  };
+  const updateSpecialtyInStorage = (value) => {
+    // Update specialty in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.specialty = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+  };
+  const updateAddressInStorage = (value) => {
+    // Update address in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.address = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+  };
   const formik = useFormik({
     initialValues: {
       address: "",
@@ -176,7 +200,7 @@ export default function MobileNavbarDialog({
   const handleSpecialtyChange = (value) => {
     formik.setFieldValue("specialty", value);
     formik.setFieldTouched("specialty", true);
-    localStorage.setItem("selectedSpecialty", value);
+    updateSpecialtyInStorage(value);
   };
 
   const handleOnAddressChanged = (index) => {
@@ -189,7 +213,7 @@ export default function MobileNavbarDialog({
           lat: address.geometry.location.lat(),
           lng: address.geometry.location.lng(),
         });
-        localStorage.setItem("selectedAddress", address?.formatted_address);
+        updateAddressInStorage(address?.formatted_address);
         localStorage.setItem(
           "selectedLocation",
           JSON.stringify({
@@ -259,7 +283,7 @@ export default function MobileNavbarDialog({
                 onChange={(value) => {
                   formik.setFieldValue("insurer", value);
                   formik.setFieldTouched("insurer", true);
-                  localStorage.setItem("selectedInsurer", value);
+                  updateInsuranceInStorage(value);
                 }}
                 clearable={false}
               />

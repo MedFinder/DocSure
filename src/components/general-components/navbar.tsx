@@ -56,13 +56,13 @@ export default function Navbar() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedSpecialty = localStorage.getItem("selectedSpecialty");
-      if (savedSpecialty) {
-        setSpecialty(savedSpecialty);
-        formik.setFieldValue("specialty", savedSpecialty);
+      const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+      if (parsedFormData?.specialty) {
+        setSpecialty(parsedFormData?.specialty);
+        formik.setFieldValue("specialty", parsedFormData?.specialty);
       }
 
-      const savedAddress = localStorage.getItem("selectedAddress");
+      const savedAddress = parsedFormData?.address;
       const savedAddressLocation = localStorage.getItem("selectedLocation");
       const AddressLocation = JSON.parse(savedAddressLocation);
       if (savedAddress) {
@@ -135,7 +135,13 @@ export default function Navbar() {
       }
     },
   });
-
+  const updateAddressInStorage = (value) => {
+    // Update address in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.address = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+  };
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
       const places = inputRefs.current[index].getPlaces();
@@ -147,7 +153,7 @@ export default function Navbar() {
 
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
-        localStorage.setItem("selectedAddress", formattedAddress);
+        updateAddressInStorage(formattedAddress); // Update address in local storage
         localStorage.setItem(
           "selectedLocation",
           JSON.stringify({ lat, lng })

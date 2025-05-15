@@ -40,38 +40,55 @@ const ExitIntentPopup: React.FC = () => {
   };
 
   return (
-    <div style={{  display: popupShown ? 'block' : 'none', width: '50%', height: '50%', margin: '0 auto', position: "fixed", top: '2%', left: '22%', zIndex: 9999 }}>
-      <button 
-        onClick={handleClose}
-        style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          zIndex: 1000,
-          background: 'white',
-          border: 'none',
-          borderRadius: '50%',
-          width: '30px',
-          height: '30px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
-        }}
-        aria-label="Close"
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 4L4 12" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M4 4L12 12" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-      <Widget
-        style={{ width: '100%', height: '100%' }}
-        onSubmit={handleSubmit}
-        id="eOmYMh2B" // Replace with your actual Typeform form ID
-      />
-    </div>
+    <>
+      {/* Overlay backdrop that covers the entire screen with semi-transparent background */}
+      {popupShown && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)', 
+            zIndex: 9998,
+          }}
+          onClick={handleClose}
+        />
+      )}
+      <div style={{  display: popupShown ? 'block' : 'none', width: '50%', height: '70%', margin: '0 auto', position: "fixed", top: '20%', left: '25%', zIndex: 9999 }}>
+        <button 
+          onClick={handleClose}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            zIndex: 1000,
+            background: 'white',
+            border: 'none',
+            borderRadius: '50%',
+            width: '30px',
+            height: '30px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+          }}
+          aria-label="Close"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4L4 12" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M4 4L12 12" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <Widget
+          style={{ width: '100%', height: '100%' }}
+          onSubmit={handleSubmit}
+          id="eOmYMh2B" // Replace with your actual Typeform form ID
+        />
+      </div>
+    </>
   );
 };
 

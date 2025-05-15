@@ -147,18 +147,38 @@ export default function LandingPage() {
       window.scrollTo({ top: topPosition, behavior: "smooth" });
     }
   };
+  const updateInsuranceInStorage = (value) => {
+    // Update insurer in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.insurer = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+    localStorage.setItem("lastSearchSource", "insurance"); // Track last search source
+    window.dispatchEvent(new Event("storage"));
+  };
+  const updateSpecialtyInStorage = (value) => {
+    // Update specialty in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.specialty = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+  };
+  const updateAddressInStorage = (value) => {
+    // Update address in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.address = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+  };
   const checkPrefillAvailability = (value: string, insurance:string) => {
     setGlobalLoading(true); // Set global loading to true when starting the process
     // scrollToSection("home", 40); // Scroll to the "home" section
     handleDoctorTypeClick(value ?? "Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
     if(insurance){
       setSelectedInsurer(insurance);
-      formik.setFieldValue("insurance_carrier", insurance);
+      formik.setFieldValue("insurer", insurance);
     }
-    localStorage.setItem(
-      "selectedSpecialty",
-      value ?? "Primary Care Physician"
-    );
+    updateSpecialtyInStorage(value ?? "Primary Care Physician");
     formik.handleSubmit(); // Trigger formik's onSubmit function
   };
   const { isLoaded } = useJsApiLoader({
@@ -272,8 +292,9 @@ export default function LandingPage() {
     },
   ];
   useEffect(() => {
-    const storedSpeciality = localStorage.getItem("selectedSpecialty");
-    const selectedInsurer = localStorage.getItem("selectedInsurer");
+    const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+    const storedSpeciality = parsedFormData?.specialty;
+    const selectedInsurer = parsedFormData?.insurer;
     if (storedSpeciality) {
       setPrefilledSpecialty(storedSpeciality);
       formik.setFieldValue("specialty", storedSpeciality);
@@ -281,7 +302,7 @@ export default function LandingPage() {
     }
     if (selectedInsurer) {
       setSelectedInsurer(selectedInsurer);
-      formik.setFieldValue("insurance_carrier", selectedInsurer);
+      formik.setFieldValue("insurer", selectedInsurer);
     }
     fetchUserLocationAndPopularDrs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -341,8 +362,9 @@ export default function LandingPage() {
   };
 
   const fetchUserLocationAndPopularDrs = async () => {
+    const parsedFormData = JSON.parse(localStorage.getItem("formData"));
     const storedDoctors = localStorage.getItem("popularDoctors");
-    const storedAddress = localStorage.getItem("selectedAddress");
+    const storedAddress = parsedFormData?.address || '';
     const storedLocation = localStorage.getItem("selectedLocation");
     if (storedAddress) {
       setAddressLocation(storedAddress);
@@ -384,7 +406,7 @@ export default function LandingPage() {
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress);
         localStorage.setItem("ipAddress", ip_address);
-        localStorage.setItem("selectedAddress", formattedAddress);
+        updateAddressInStorage(formattedAddress)
         localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
         logNetworkInfo(ip_address);
 
@@ -408,12 +430,13 @@ export default function LandingPage() {
     }
   };
   const logRequestInfo = async (request_id) => {
-    const savedAddress = localStorage.getItem("selectedAddress");
+    const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+    const savedAddress = parsedFormData?.address;
     const ipAddress = localStorage.getItem("ipAddress");
     const data = {
       request_id,
       doctor_speciality: formik.values.specialty,
-      insurer: formik.values.insurance_carrier,
+      insurer: formik.values.insurer,
       preferred_location: savedAddress,
     };
     try {
@@ -429,10 +452,12 @@ export default function LandingPage() {
   const formik = useFormik({
     initialValues: {
       specialty: prefilledSpecialty || "",
-      insurance_carrier: "",
+      insurer: "",
     },
     validationSchema,
     onSubmit: async (values) => {
+      localStorage.removeItem('topReviewDoctors');
+      localStorage.removeItem('topRatedDoctors');
       track("Homepage_Search_Btn_Clicked");
       if (values.specialty === "unsure" || values.specialty === "Other") {
         router.push("/coming-soon");
@@ -451,8 +476,8 @@ export default function LandingPage() {
       }
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-        localStorage.setItem("selectedSpecialty", values.specialty);
-        localStorage.setItem("selectedInsurer", values.insurance_carrier);
+        updateSpecialtyInStorage(values.specialty);
+        updateInsuranceInStorage(values.insurer)
         localStorage.setItem(
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
@@ -539,7 +564,7 @@ export default function LandingPage() {
   const handleOnPlacesChanged = (index) => {
     if (inputRefs.current[index]) {
       const places = inputRefs.current[index].getPlaces();
-      if (places.length > 0) {
+      if (places?.length > 0) {
         const place = places[0];
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
@@ -549,7 +574,7 @@ export default function LandingPage() {
         setAddressLocation(formattedAddress); // Update input field state
 
         // Store in localStorage
-        localStorage.setItem("selectedAddress", formattedAddress);
+        updateAddressInStorage(formattedAddress)
         localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
       }
     }
@@ -761,8 +786,13 @@ export default function LandingPage() {
             </div>
 
             <form
-              onSubmit={formik.handleSubmit}
+              // onSubmit={formik.handleSubmit}
               className="flex gap-2 w-full pt-4"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                }
+              }}
             >
               <div className="flex flex-col md:flex-row w-full bg-white rounded-md border border-black">
                 {/* Specialty and location inputs */}
@@ -784,8 +814,6 @@ export default function LandingPage() {
                         onChange={(value) => {
                           formik.setFieldValue("specialty", value);
                           setSelectedSpecialty(value);
-                          localStorage.removeItem('topReviewDoctors');
-                          localStorage.removeItem('topRatedDoctors');
                         }}
                         clearable={false}
                       />
@@ -804,9 +832,9 @@ export default function LandingPage() {
                         options={insuranceCarrierOptions}
                         placeholder="Insurance carrier (optional)"
                         value={selectedInsurer}
-                        selected={formik.values.insurance_carrier}
+                        selected={formik.values.insurer}
                         onChange={(value) => {
-                          formik.setFieldValue("insurance_carrier", value);
+                          formik.setFieldValue("insurer", value);
                           setSelectedInsurer(value);
                         }}
                         clearable={false}
@@ -1117,7 +1145,7 @@ export default function LandingPage() {
                     height={logo?.height ?? 0}
                     onClick={() => {
                       scrollToSection("home", 40);
-                      formik.setFieldValue("insurance_carrier", logo?.carrier);
+                      formik.setFieldValue("insurer", logo?.carrier);
                     }}
                     className="w-auto h-auto  md:flex cursor-pointer"
                   />
@@ -1135,7 +1163,7 @@ export default function LandingPage() {
                     height={logo?.height ?? 0}
                     onClick={() => {
                       scrollToSection("home", 40);
-                      formik.setFieldValue("insurance_carrier", logo?.carrier);
+                      formik.setFieldValue("insurer", logo?.carrier);
                     }}
                     className="w-auto h-auto hidden md:flex cursor-pointer"
                   />
