@@ -48,7 +48,6 @@ export default function AppointmentPage() {
   const [customAvailability, setCustomAvailability] = useState("");
   const [availabilityOption, setAvailabilityOption] = useState("anytime");
   const [timeOfAppointment, setTimeOfAppointment] = useState(new Date());
-  const [selectedInsurance, setSelectedInsurance] = useState(false);
   const [isNewPatient, setIsNewPatient] = useState(false);
 
   const { isLoaded } = useJsApiLoader({
@@ -59,7 +58,6 @@ export default function AppointmentPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedFormData = localStorage.getItem("formData");
-      const storedSpeciality = localStorage.getItem("selectedSpecialty");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
         // console.log(parsedFormData);
@@ -71,9 +69,8 @@ export default function AppointmentPage() {
           dob: parsedFormData.dob ? new Date(parsedFormData.dob) : null,
           phoneNumber: parsedFormData.phoneNumber || "",
         });
-        setSelectedSpecialty(storedSpeciality);
+        setSelectedSpecialty(parsedFormData?.specialty || "");
         setInputValue(parsedFormData?.objective);
-        setSelectedInsurance(parsedFormData?.selectedOption === "no");
         setAvailabilityOption(parsedFormData?.availabilityOption || "anytime");
         setCustomAvailability(parsedFormData?.availability || "anytime");
         if (parsedFormData?.timeOfAppointment) {
@@ -149,7 +146,6 @@ export default function AppointmentPage() {
       patient_name: updatedValues.patientName,
       patient_number: updatedValues.phoneNumber,
       patient_date_of_birth: updatedValues.dob,
-      insurer: updatedValues.insurer ?? '',
     };
     // console.log(data);
     try {
@@ -186,7 +182,8 @@ export default function AppointmentPage() {
       customformdata?: any
     ) => {
       const currentFormData = customformdata;
-      const savedSpecialty = localStorage.getItem("selectedSpecialty");
+      const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+      const savedSpecialty = parsedFormData?.specialty;
 
       const {
         availability,
@@ -288,7 +285,6 @@ export default function AppointmentPage() {
     validationSchema,
     onSubmit: async (values) => {
       track("AppointmentDetail_Btn_Clicked");
-      const savedSpecialty = localStorage.getItem("selectedSpecialty");
       const existingFormData = localStorage.getItem("formData");
 
       if (!formik.isValid) {
@@ -308,7 +304,7 @@ export default function AppointmentPage() {
           console.error("Error parsing existing form data:", error);
         }
       }
-      // console.log(mergedValues, "mergedValues");
+      console.log(mergedValues, "mergedValues");
       logPatientData(mergedValues);
       setIsLoading(true);
       localStorage.setItem("formData", JSON.stringify(mergedValues));
@@ -324,7 +320,13 @@ export default function AppointmentPage() {
     validateOnChange: true,
     validateOnBlur: true,
   });
-
+  const updateSpecialtyInStorage = (value) => {
+    // Update specialty in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.specialty = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+  };
   const handleAvailabilityChange = (value) => {
     setCustomAvailability("");
     setTimeOfAppointment(new Date());
@@ -341,26 +343,6 @@ export default function AppointmentPage() {
       formik.validateField("timeOfAppointment");
     }
   };
-
-  const handleInsuranceCheckboxChange = (checked) => {
-    setSelectedInsurance(checked);
-    formik.setFieldValue("selectedOption", checked ? "no" : "yes");
-  };
-
-  useEffect(() => {
-    if (formik.values.selectedOption === "no") {
-      formik.setFieldValue("insurer", "");
-      formik.setFieldValue("subscriberId", "");
-      formik.setFieldValue("insuranceType", "ppo");
-
-      const newErrors = { ...formik.errors };
-      delete newErrors.insurer;
-      delete newErrors.subscriberId;
-      delete newErrors.insuranceType;
-      formik.setErrors(newErrors);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values.selectedOption]);
 
   const handleInsuranceTypeChange = (value) => {
     formik.setFieldValue("insuranceType", value);
@@ -414,12 +396,6 @@ export default function AppointmentPage() {
       }
     });
   };
-  useEffect(() => {
-    const savedInsurer = localStorage.getItem("selectedInsurer");
-    if (savedInsurer) {
-      formik.setFieldValue("insurer", savedInsurer);
-    }
-  }, []);
 
   return (
     <>
@@ -535,7 +511,8 @@ export default function AppointmentPage() {
             onClick={() => {
               // Save selected specialty before opening modal
               if (selectedSpecialty) {
-                localStorage.setItem("selectedSpecialty", selectedSpecialty);
+                updateSpecialtyInStorage(selectedSpecialty);
+
               }
               setIsModalOpen(true);
             }}

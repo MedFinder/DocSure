@@ -157,10 +157,7 @@ export default function QuickDetailsModal({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedFormData = localStorage.getItem("formData");
-      const savedAddress = localStorage.getItem("selectedAddress");
-      const temp_sepciality = localStorage.getItem("selectedSpecialty");
       const storedLocation = localStorage.getItem("selectedLocation");
-      const selectedInsurer = localStorage.getItem("selectedInsurer");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
         setFormData(parsedFormData);
@@ -174,8 +171,9 @@ export default function QuickDetailsModal({
           dob: parsedFormData.dob ? new Date(parsedFormData.dob) : null,
           gender: parsedFormData.gender || "",
           specialty: parsedFormData.specialty || "",
-          insurer: parsedFormData?.insurer || selectedInsurer || "",
-          selectedOption: parsedFormData?.selectedOption || "yes",
+          address: parsedFormData.address || "",
+          insurer: parsedFormData?.insurer || "",
+          selectedOption: parsedFormData?.insurer?'no': parsedFormData?.selectedOption,
           insuranceType: parsedFormData?.insuranceType || "",
           availability: parsedFormData?.availability || "anytime",
           subscriberId: parsedFormData?.subscriberId || "",
@@ -189,12 +187,9 @@ export default function QuickDetailsModal({
             ? new Date(parsedFormData.timeOfAppointment)
             : new Date(),
         });
-        if(parsedFormData?.selectedOption === "no"){
-          formik.setFieldValue("insurer", "");
-        }
 
         setInputValue(parsedFormData?.objective || "");
-        setSelectedInsurance(parsedFormData?.selectedOption === "no");
+        setSelectedInsurance(parsedFormData?.insurer ?false:true);
         setAvailabilityOption(parsedFormData?.availabilityOption || "anytime");
         setCustomAvailability(parsedFormData?.availability || "anytime");
         setGender(parsedFormData.gender || "");
@@ -210,12 +205,6 @@ export default function QuickDetailsModal({
         // Revalidate the form
         formik.validateForm();
       }
-      if (savedAddress) {
-        formik.setFieldValue("address", savedAddress);
-      }
-      if (temp_sepciality) {
-        formik.setFieldValue("specialty", temp_sepciality);
-      }
       if (storedLocation) {
         const { lat, lng } = JSON.parse(storedLocation);
         setSelectedLocation({ lat, lng });
@@ -230,6 +219,7 @@ export default function QuickDetailsModal({
       patient_number: updatedValues.phoneNumber,
       patient_date_of_birth: updatedValues.dob,
       insurer: updatedValues.insurer ?? "",
+      address: updatedValues.address ?? "",
       new_patient: true,
       preferred_time_of_appointment: updatedValues.timeOfAppointment,
       patient_availability: updatedValues.availability,
@@ -249,6 +239,15 @@ export default function QuickDetailsModal({
     } catch (error) {
       return null;
     }
+  };
+  const updateInsuranceInStorage = (value) => {
+    // Update insurer in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.insurer = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+    localStorage.setItem("lastSearchSource", "insurance"); // Track last search source
+    window.dispatchEvent(new Event("storage"));
   };
 
   const formik = useFormik({
@@ -297,6 +296,7 @@ export default function QuickDetailsModal({
           : availabilityOption,
         maxWait: values.maxWait,
       };
+      // console.log(updatedValues)
 
       try {
         // Get existing form data if it exists
@@ -407,25 +407,32 @@ export default function QuickDetailsModal({
   const handleInsuranceCheckboxChange = (checked) => {
     setSelectedInsurance(checked);
     formik.setFieldValue("selectedOption", checked ? "no" : "yes");
-  };
-
-  // Reset insurance fields when selectedOption changes to 'no'
-  useEffect(() => {
-    if (formik.values.selectedOption === "no") {
-      // Reset insurance-related fields when user selects "no insurance"
+    if(checked){
       formik.setFieldValue("insurer", "");
       formik.setFieldValue("subscriberId", "");
       formik.setFieldValue("insuranceType", "");
-
-      // Clear any validation errors for these fields
-      const newErrors = { ...formik.errors };
-      delete newErrors.insurer;
-      delete newErrors.subscriberId;
-      delete newErrors.insuranceType;
-      formik.setErrors(newErrors);
+      updateInsuranceInStorage('')
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values.selectedOption]);
+  };
+
+  // Reset insurance fields when selectedOption changes to 'no'
+  // useEffect(() => {
+  //   if (formik.values.selectedOption === "no") {
+  //     console.log('lagooooo', console.log(formik.values.selectedOption))
+  //     // Reset insurance-related fields when user selects "no insurance"
+  //     formik.setFieldValue("insurer", "");
+  //     formik.setFieldValue("subscriberId", "");
+  //     formik.setFieldValue("insuranceType", "");
+
+  //     // Clear any validation errors for these fields
+  //     const newErrors = { ...formik.errors };
+  //     delete newErrors.insurer;
+  //     delete newErrors.subscriberId;
+  //     delete newErrors.insuranceType;
+  //     formik.setErrors(newErrors);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [formik.values]);
 
   // Handle insurance type change
   const handleInsuranceTypeChange = (value) => {
@@ -442,7 +449,6 @@ export default function QuickDetailsModal({
           lat: address.geometry.location.lat(),
           lng: address.geometry.location.lng(),
         });
-        localStorage.setItem("selectedAddress", address?.formatted_address);
         localStorage.setItem(
           "selectedLocation",
           JSON.stringify({
@@ -506,7 +512,6 @@ export default function QuickDetailsModal({
   const handleSpecialtyChange = (value) => {
     formik.setFieldValue("specialty", value);
     formik.setFieldTouched("specialty", true);
-    localStorage.setItem("selectedSpecialty", value);
   };
 
   // Update gender
@@ -565,7 +570,7 @@ export default function QuickDetailsModal({
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <section className="space-y-6">
           {/* Two-column layout for larger screens */}
           <div className="grid md:grid-cols-2 gap-6">
             {/* Left column - Appointment details */}
@@ -754,7 +759,8 @@ export default function QuickDetailsModal({
                         selected={formik.values.insurer}
                         onChange={(value) => {
                           formik.setFieldValue("insurer", value);
-                          formik.setFieldTouched("insurer", true);
+                          formik.setFieldTouched("insurer", true); //
+                          updateInsuranceInStorage(value);
                         }}
                         clearable={false}
                       />
@@ -1009,6 +1015,7 @@ export default function QuickDetailsModal({
           <div className="mt-8">
             <div className="flex md:mt-12 my-2 md:w-[80%] w-full mx-auto">
               <Button
+                onClick={handleSubmit}
                 type="submit"
                 className="bg-[#E5573F] text-white px-6 py-5 w-full flex rounded-md"
                 disabled={isLoading || formik.isSubmitting}
@@ -1033,7 +1040,7 @@ export default function QuickDetailsModal({
               </span>
             </div>
           )}
-        </form>
+        </section>
       </div>
     </ReactModal>
   );
