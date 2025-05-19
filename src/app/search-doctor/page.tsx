@@ -143,7 +143,11 @@ export default function SearchDoctorPage() {
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
-  localStorage.setItem("resetFiltersTrigger", Date.now().toString());
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("resetFiltersTrigger", Date.now().toString());
+    }
+  }, []);
 
   useEffect(() => {
     if (!hasUserFiltered) {
