@@ -99,8 +99,9 @@ export default function SearchDoctorPage() {
 
   const getTotalDoctorsList = async () => {
     setIsCountLoading(true);
-    const savedSpecialty = localStorage.getItem("selectedSpecialty");
-    const savedAddress = localStorage.getItem("selectedAddress");
+    const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+    const savedSpecialty = parsedFormData?.specialty || "";
+    const savedAddress = parsedFormData?.address || "";
     const addressParts = savedAddress?.split(",") || [];
     const cityName = addressParts
       .slice(-2)
@@ -129,7 +130,8 @@ export default function SearchDoctorPage() {
   };
 
   const logPatientData = async (updatedValues) => {
-    const savedAddress = localStorage.getItem("selectedAddress");
+    const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+    const savedAddress = parsedFormData?.address || "";
     const data = {
       request_id: updatedValues.request_id,
       preferred_location: savedAddress,
@@ -149,7 +151,7 @@ export default function SearchDoctorPage() {
     const drsData = await JSON.parse(localStorage.getItem("statusData"));
     const data = {
       request_id: updatedValues.request_id,
-      doctor_phone_numbers: drsData.results.map(doctor => doctor.phone_number),
+      doctor_place_ids: drsData.results.map(doctor => doctor.place_id),
       //call_priorities: drsData.results.map((_, index) => index)
     };
     console.log(data);
@@ -327,7 +329,8 @@ export default function SearchDoctorPage() {
 
     setIsLoadingMore(true);
     try {
-      const savedSpecialty = localStorage.getItem("selectedSpecialty");
+      const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+      const savedSpecialty = parsedFormData?.specialty || "";
       const searchData = await JSON.parse(localStorage.getItem("searchData"));
       const lat = searchData?.lat || 0;
       const lng = searchData?.lng || 0;
@@ -580,7 +583,8 @@ export default function SearchDoctorPage() {
     onSubmit: async (values) => {
       setIsLoading(true);
       track("Searchpage_Continue_Btn_Clicked");
-      const savedSpecialty = localStorage.getItem("selectedSpecialty");
+      const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+      const savedSpecialty = parsedFormData?.specialty || "";
       const formData = JSON.parse(localStorage.getItem("formData"));
 
       // if (!values.objective || !values.objective.trim()) {

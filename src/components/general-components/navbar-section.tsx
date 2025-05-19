@@ -128,24 +128,18 @@ export default function NavbarSection({
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedSpecialty = localStorage.getItem("selectedSpecialty");
-      const selectedInsurer = localStorage.getItem("selectedInsurer");
-      const formData = localStorage.getItem("formData");
-      if (formData) {
-        const parsedFormData = JSON.parse(formData);
+      const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+      if (parsedFormData?.insurer) {
         if (parsedFormData?.insurer) {
           setInsurer(parsedFormData?.insurer);
-          formik.setFieldValue("insurance_carrier", parsedFormData?.insurer); // ✅ correct field
+          formik.setFieldValue("insurer", parsedFormData?.insurer); // ✅ correct field
         }
       }
-      if (savedSpecialty) {
-        setSpecialty(savedSpecialty);
-        formik.setFieldValue("specialty", savedSpecialty);
+      if (parsedFormData?.specialty) {
+        setSpecialty(parsedFormData?.specialty);
+        formik.setFieldValue("specialty", parsedFormData?.specialty);
       }
-      if (selectedInsurer) {
-        formik.setFieldValue("insurance_carrier", selectedInsurer);
-      }
-      const savedAddress = localStorage.getItem("selectedAddress");
+      const savedAddress = parsedFormData?.address;
       const savedAddressLocation = localStorage.getItem("selectedLocation");
       const AddressLocation = JSON.parse(savedAddressLocation);
       if (savedAddress) {
@@ -235,6 +229,29 @@ export default function NavbarSection({
       return;
     }
   };
+  const updateInsuranceInStorage = (value) => {
+    // Update insurer in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.insurer = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+    localStorage.setItem("lastSearchSource", "insurance"); // Track last search source
+    window.dispatchEvent(new Event("storage"));
+  };
+  const updateSpecialtyInStorage = (value) => {
+    // Update specialty in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.specialty = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+  };
+  const updateAddressInStorage = (value) => {
+    // Update address in formData
+    const existingFormData = localStorage.getItem("formData");
+    let formDataObj = existingFormData ? JSON.parse(existingFormData) : {};
+    formDataObj.address = value;
+    localStorage.setItem("formData", JSON.stringify(formDataObj));
+  };
   useEffect(() => {
     const updateStateValues = () => {
       try {
@@ -242,30 +259,34 @@ export default function NavbarSection({
         let rawData;
 
         if (lastSearchSource === "navbar") {
-          // console.log("Navbar search triggered");
-          const savedSpecialty = localStorage.getItem("selectedSpecialty");
-          const selectedInsurer = localStorage.getItem("selectedInsurer");
-          // console.log(savedSpecialty, selectedInsurer);
-          if (savedSpecialty) {
-            setSpecialty(savedSpecialty);
-            formik.setFieldValue("specialty", savedSpecialty);
-          }
-          if (selectedInsurer) {
-            formik.setFieldValue("insurance_carrier", selectedInsurer);
-          }
-          const savedAddress = localStorage.getItem("selectedAddress");
-          const savedAddressLocation = localStorage.getItem("selectedLocation");
-          const AddressLocation = JSON.parse(savedAddressLocation);
-          if (savedAddress) {
-            setAddressLocation(savedAddress);
-          }
-          if (AddressLocation) {
-            setSelectedLocation({
-              lat: AddressLocation.lat,
-              lng: AddressLocation.lng,
-            });
-          }
+         // console.log("Navbar search triggered");
+         const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+         // console.log(savedSpecialty, selectedInsurer);
+         if (parsedFormData?.specialty) {
+           setSpecialty(parsedFormData?.specialty);
+           formik.setFieldValue("specialty", parsedFormData?.specialty);
+         }
+         const savedAddress = parsedFormData?.address;
+         const savedAddressLocation = localStorage.getItem("selectedLocation");
+         const AddressLocation = JSON.parse(savedAddressLocation);
+         if (savedAddress) {
+           setAddressLocation(savedAddress);
+         }
+         if (AddressLocation) {
+           setSelectedLocation({
+             lat: AddressLocation.lat,
+             lng: AddressLocation.lng,
+           });
+         }
         }
+        if(lastSearchSource === "insurance") {
+          const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+          // if (parsedFormData?.insurer) {
+            formik.setFieldValue("insurer", parsedFormData?.insurer ??'');
+            setInsurer(parsedFormData?.insurer ?? '');
+          // }
+        }
+
       } catch (error) {
         console.error("Error parsing localStorage data:", error);
       }
@@ -292,7 +313,7 @@ export default function NavbarSection({
 
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
-        localStorage.setItem("selectedAddress", formattedAddress);
+        updateAddressInStorage(formattedAddress);
         localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
       }
     }
@@ -365,28 +386,15 @@ export default function NavbarSection({
                         styles={customStyles}
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        value={medicalSpecialtiesOptions.find(
-                          (option) => option.value === formik.values.specialty
-                        )}
-                        onChange={(selectedOption) => {
-                          if (selectedOption) {
-                            formik.setFieldValue(
-                              "specialty",
-                              selectedOption.value
-                            );
-                            setSpecialty(selectedOption.value);
-                            localStorage.setItem(
-                              "selectedSpecialty",
-                              selectedOption.value
-                            );
-                          } else {
-                            formik.setFieldValue("specialty", "");
-                            setSpecialty("");
-                            localStorage.removeItem("selectedSpecialty");
-                          }
+                        selected={specialty}
+                        onChange={(value) => {
+                          setSpecialty(value);
+                          formik.setFieldValue("specialty", value);
+                          updateSpecialtyInStorage(value);
                         }}
-                        isClearable={true}
-                        isSearchable={true}
+                        clearable={false}
+                        navbar
+                        enabled={updatePreferences ? false : true}
                       />
                     </div>
                   </div>
@@ -406,18 +414,12 @@ export default function NavbarSection({
                         styles={customStyles}
                         className="w-full"
                         options={insuranceCarrierOptions}
-                        placeholder={"Insurer carrier (optional)"}
-                        classNames={{
-                          placeholder: () =>
-                            "truncate text-ellipsis whitespace-nowrap overflow-hidden max-w-full",
-                        }}
-                        selected={formik.values.insurance_carrier}
+                        placeholder="Insurance carrier (optional)"
+                        selected={formik.values.insurer}
                         onChange={(value) => {
                           setInsurer(value);
-                          formik.setFieldValue("insurance_carrier", value);
-                          localStorage.setItem("selectedInsurer", value);
-                          localStorage.setItem("lastSearchSource", "insurance"); // Track last search source
-                          window.dispatchEvent(new Event("storage"));
+                          formik.setFieldValue("insurer", value);
+                          updateInsuranceInStorage(value);
                         }}
                         clearable={false}
                         enabled={updatePreferences ? false : true}
