@@ -211,7 +211,7 @@ export default function SearchDoctorPage() {
 
   const handleSelectReviews = (option) => {
     const newValue = option === reviews ? "" : option;
-    setReviews(newValue); // Toggle selection
+    setReviews(newValue);
     setIsReviewOpen(false);
     track("Filter_Reviews_Changed", {
       value: newValue,
