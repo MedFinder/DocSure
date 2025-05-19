@@ -905,7 +905,7 @@ export default function LandingPage() {
                   </>
                 ) : (
                   <>
-                    <Search className="w-5 h-5 text-white" /> Searchxo
+                    <Search className="w-5 h-5 text-white" /> Search
                   </>
                 )}
               </Button>
