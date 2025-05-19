@@ -128,6 +128,27 @@ export default function SearchDoctorPage() {
     activeCallIndexRef.current = activeCallIndex;
   }, [activeCallIndex]);
   console.log(doctors);
+  const resetFilters = () => {
+    setReviews("");
+    setMaxDistance("");
+    setMaxRatings("");
+    setSymptoms("");
+  };
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      if (event.key === "resetFiltersTrigger") {
+        resetFilters();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+  localStorage.setItem("resetFiltersTrigger", Date.now().toString());
+
   useEffect(() => {
     // Apply filters when any filter criteria changes
     if (doctors.length > 0) {
@@ -209,20 +230,20 @@ export default function SearchDoctorPage() {
     }
   }, [doctors, reviews, maxDistance, maxRatings, symptoms]);
 
-  const handleSelectReviews = (option) => {
+  const handleSelectReviews = (option, setOpen) => {
     const newValue = option === reviews ? "" : option;
     setReviews(newValue);
-    setIsReviewOpen(false);
+    setOpen(false); // Close the dropdown
     track("Filter_Reviews_Changed", {
       value: newValue,
       action: newValue ? "selected" : "unselected",
     });
   };
 
-  const handleSelectDistance = (option) => {
+  const handleSelectDistance = (option, setOpen) => {
     const newValue = option === maxDistance ? "" : option;
     setMaxDistance(newValue); // Toggle selection
-    setIsDistanceOpen(false);
+    setOpen(false); // Close the dropdown
     track("Filter_Distance_Changed", {
       value: newValue,
       action: newValue ? "selected" : "unselected",
@@ -238,10 +259,10 @@ export default function SearchDoctorPage() {
     }
   };
 
-  const handleSelectRating = (option) => {
+  const handleSelectRating = (option, setOpen) => {
     const newValue = option === maxRatings ? "" : option;
     setMaxRatings(newValue); // Toggle selection
-    setIsRatingsOpen(false);
+    setOpen(false); // Close the dropdown
     track("Filter_Ratings_Changed", {
       value: newValue,
       action: newValue ? "selected" : "unselected",
@@ -919,6 +940,29 @@ export default function SearchDoctorPage() {
     };
   }, [router]);
 
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      // Check if the change is from statusData or lastSearchSource
+      if (
+        e.key === "statusData" ||
+        (e.key === "lastSearchSource" && e.newValue === "navbar")
+      ) {
+        // Reset all filter states
+        setReviews("");
+        setMaxDistance("");
+        setMaxRatings("");
+        setSymptoms("");
+        setIsNewPatient(true);
+        setIsDistanceOpen(false);
+        setIsReviewOpen(false);
+        setIsRatingsOpen(false);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDCPbnPb43gQZDPT5dpq10a3dOP3EMHw-0",
     libraries: ["places"],
@@ -1089,7 +1133,8 @@ export default function SearchDoctorPage() {
                       Accepting new patients
                     </Label>
                   </div>
-                  <DropdownMenu>
+
+                  <DropdownMenu open={isDistanceOpen} onOpenChange={setIsDistanceOpen}>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1118,13 +1163,14 @@ export default function SearchDoctorPage() {
                             maxDistance === option && "bg-black text-white"
                           )}
                           onSelect={(e) => {
-                            e.preventDefault();
-                            handleSelectDistance(option);
+                            handleSelectDistance(option, setIsDistanceOpen);
                           }}
                         >
                           <Checkbox
                             checked={maxDistance === option}
-                            onCheckedChange={() => handleSelectDistance(option)}
+                            onCheckedChange={() =>
+                              handleSelectDistance(option, setIsDistanceOpen)
+                            }
                             className="pointer-events-none rounded-sm"
                           />
                           <span className="text-sm">{option}</span>
@@ -1132,7 +1178,7 @@ export default function SearchDoctorPage() {
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <DropdownMenu>
+                  <DropdownMenu open={isReviewOpen} onOpenChange={setIsReviewOpen}>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1161,13 +1207,14 @@ export default function SearchDoctorPage() {
                             reviews === option && "bg-black text-white"
                           )}
                           onSelect={(e) => {
-                            e.preventDefault();
-                            handleSelectReviews(option);
+                            handleSelectReviews(option, setIsReviewOpen);
                           }}
                         >
                           <Checkbox
                             checked={reviews === option}
-                            onCheckedChange={() => handleSelectReviews(option)}
+                            onCheckedChange={() =>
+                              handleSelectReviews(option, setIsReviewOpen)
+                            }
                             className="pointer-events-none rounded-sm"
                           />
                           <span className="text-sm">{option}</span>
@@ -1206,7 +1253,7 @@ export default function SearchDoctorPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  <DropdownMenu>
+                  <DropdownMenu open={isRatingsOpen} onOpenChange={setIsRatingsOpen}>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1235,13 +1282,14 @@ export default function SearchDoctorPage() {
                             maxRatings === option && "bg-black text-white"
                           )}
                           onSelect={(e) => {
-                            e.preventDefault();
-                            handleSelectRating(option);
+                            handleSelectRating(option, setIsRatingsOpen);
                           }}
                         >
                           <Checkbox
                             checked={maxRatings === option}
-                            onCheckedChange={() => handleSelectRating(option)}
+                            onCheckedChange={() =>
+                              handleSelectRating(option, setIsRatingsOpen)
+                            }
                             className="pointer-events-none rounded-sm"
                           />
                           <span className="text-sm">{option}</span>
@@ -1249,249 +1297,234 @@ export default function SearchDoctorPage() {
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  {/* <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
+                          isDistanceOpen
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedDistance || "Availability"}</span>
+                        <ChevronDown
+                          size={16}
+                          className={cn(
+                            isDistanceOpen && "rotate-180 transition-transform"
+                          )}
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
+                      {availabilityOptions.map((option) => (
+                        <DropdownMenuItem
+                          key={option}
+                          id="distance"
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                            selectedDistance === option && "bg-black text-white"
+                          )}
+                          // onSelect={(e) => {
+                      
+                          //   handleSelectDistance(option);
+                          // }}
+                        >
+                          <Checkbox
+                            // checked={selectedDistance === option}
+                            // onCheckedChange={() =>
+                            //   handleSelectDistance(option)
+                            // }
+                            className="pointer-events-none rounded-sm"
+                          />
+                          <span className="text-sm">{option}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu> */}
+                  {/* <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
+                          isDistanceOpen
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedDistance || "Gender"}</span>
+                        <ChevronDown
+                          size={16}
+                          className={cn(
+                            isDistanceOpen && "rotate-180 transition-transform"
+                          )}
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
+                      {genderOptions.map((option) => (
+                        <DropdownMenuItem
+                          key={option}
+                          id="distance"
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                            selectedDistance === option && "bg-black text-white"
+                          )}
+                          // onSelect={(e) => {
+                        
+                          //   handleSelectDistance(option);
+                          // }}
+                        >
+                          <Checkbox
+                            // checked={selectedDistance === option}
+                            // onCheckedChange={() =>
+                            //   handleSelectDistance(option)
+                            // }
+                            className="pointer-events-none rounded-sm"
+                          />
+                          <span className="text-sm">{option}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
+                          isDistanceOpen
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedDistance || "Visit type"}</span>
+                        <ChevronDown
+                          size={16}
+                          className={cn(
+                            isDistanceOpen && "rotate-180 transition-transform"
+                          )}
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
+                      {visitOptions.map((option) => (
+                        <DropdownMenuItem
+                          key={option}
+                          id="distance"
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                            selectedDistance === option && "bg-black text-white"
+                          )}
+                          // onSelect={(e) => {
+                          //   handleSelectDistance(option);
+                          // }}
+                        >
+                          <Checkbox
+                            // checked={selectedDistance === option}
+                            // onCheckedChange={() =>
+                            //   handleSelectDistance(option)
+                            // }
+                            className="pointer-events-none rounded-sm"
+                          />
+                          <span className="text-sm">{option}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-44 px-4 py-2 rounded-full border",
+                          isDistanceOpen
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedDistance || "Years of experience"}</span>
+                        <ChevronDown
+                          size={16}
+                          className={cn(
+                            isDistanceOpen && "rotate-180 transition-transform"
+                          )}
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
+                      {experienceOptions.map((option) => (
+                        <DropdownMenuItem
+                          key={option}
+                          id="distance"
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                            selectedDistance === option && "bg-black text-white"
+                          )}
+                          // onSelect={(e) => {
+                          //   handleSelectDistance(option);
+                          // }}
+                        >
+                          <Checkbox
+                            // checked={selectedDistance === option}
+                            // onCheckedChange={() =>
+                            //   handleSelectDistance(option)
+                            // }
+                            className="pointer-events-none rounded-sm"
+                          />
+                          <span className="text-sm">{option}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu> */}
                   {/* <DropdownMenu onOpenChange={setIsDistanceOpen}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-40 px-4 py-2 rounded-full border",
+                          isDistanceOpen
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedDistance || "Education"}</span>
+                        <ChevronDown
+                          size={16}
                           className={cn(
-                            "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
-                            isDistanceOpen
-                              ? "bg-black text-white"
-                              : "bg-white text-black"
+                            isDistanceOpen && "rotate-180 transition-transform"
                           )}
-                        >
-                          <span>{selectedDistance || "Availability"}</span>
-                          <ChevronDown
-                            size={16}
-                            className={cn(
-                              isDistanceOpen &&
-                                "rotate-180 transition-transform"
-                            )}
-                          />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
-                        {availabilityOptions.map((option) => (
-                          <DropdownMenuItem
-                            key={option}
-                            id="distance"
-                            className={cn(
-                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                              selectedDistance === option &&
-                                "bg-black text-white"
-                            )}
-                            // onSelect={(e) => {
-                            //   e.preventDefault();
-                            //   handleSelectDistance(option);
-                            // }}
-                          >
-                            <Checkbox
-                              // checked={selectedDistance === option}
-                              // onCheckedChange={() =>
-                              //   handleSelectDistance(option)
-                              // }
-                              className="pointer-events-none rounded-sm"
-                            />
-                            <span className="text-sm">{option}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <DropdownMenu onOpenChange={setIsDistanceOpen}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
+                      {educationOptions.map((option) => (
+                        <DropdownMenuItem
+                          key={option}
+                          id="distance"
                           className={cn(
-                            "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
-                            isDistanceOpen
-                              ? "bg-black text-white"
-                              : "bg-white text-black"
+                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                            selectedDistance === option && "bg-black text-white"
                           )}
+                          // onSelect={(e) => {
+                          z //   handleSelectDistance(option);
+                          // }}
                         >
-                          <span>{selectedDistance || "Gender"}</span>
-                          <ChevronDown
-                            size={16}
-                            className={cn(
-                              isDistanceOpen &&
-                                "rotate-180 transition-transform"
-                            )}
+                          <Checkbox
+                            // checked={selectedDistance === option}
+                            // onCheckedChange={() =>
+                            //   handleSelectDistance(option)
+                            // }
+                            className="pointer-events-none rounded-sm"
                           />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
-                        {genderOptions.map((option) => (
-                          <DropdownMenuItem
-                            key={option}
-                            id="distance"
-                            className={cn(
-                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                              selectedDistance === option &&
-                                "bg-black text-white"
-                            )}
-                            // onSelect={(e) => {
-                            //   e.preventDefault();
-                            //   handleSelectDistance(option);
-                            // }}
-                          >
-                            <Checkbox
-                              // checked={selectedDistance === option}
-                              // onCheckedChange={() =>
-                              //   handleSelectDistance(option)
-                              // }
-                              className="pointer-events-none rounded-sm"
-                            />
-                            <span className="text-sm">{option}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <DropdownMenu onOpenChange={setIsDistanceOpen}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
-                            isDistanceOpen
-                              ? "bg-black text-white"
-                              : "bg-white text-black"
-                          )}
-                        >
-                          <span>{selectedDistance || "Visit type"}</span>
-                          <ChevronDown
-                            size={16}
-                            className={cn(
-                              isDistanceOpen &&
-                                "rotate-180 transition-transform"
-                            )}
-                          />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
-                        {visitOptions.map((option) => (
-                          <DropdownMenuItem
-                            key={option}
-                            id="distance"
-                            className={cn(
-                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                              selectedDistance === option &&
-                                "bg-black text-white"
-                            )}
-                            // onSelect={(e) => {
-                            //   e.preventDefault();
-                            //   handleSelectDistance(option);
-                            // }}
-                          >
-                            <Checkbox
-                              // checked={selectedDistance === option}
-                              // onCheckedChange={() =>
-                              //   handleSelectDistance(option)
-                              // }
-                              className="pointer-events-none rounded-sm"
-                            />
-                            <span className="text-sm">{option}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <DropdownMenu onOpenChange={setIsDistanceOpen}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "flex items-center justify-between gap-2 w-44 px-4 py-2 rounded-full border",
-                            isDistanceOpen
-                              ? "bg-black text-white"
-                              : "bg-white text-black"
-                          )}
-                        >
-                          <span>
-                            {selectedDistance || "Years of experience"}
-                          </span>
-                          <ChevronDown
-                            size={16}
-                            className={cn(
-                              isDistanceOpen &&
-                                "rotate-180 transition-transform"
-                            )}
-                          />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
-                        {experienceOptions.map((option) => (
-                          <DropdownMenuItem
-                            key={option}
-                            id="distance"
-                            className={cn(
-                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                              selectedDistance === option &&
-                                "bg-black text-white"
-                            )}
-                            // onSelect={(e) => {
-                            //   e.preventDefault();
-                            //   handleSelectDistance(option);
-                            // }}
-                          >
-                            <Checkbox
-                              // checked={selectedDistance === option}
-                              // onCheckedChange={() =>
-                              //   handleSelectDistance(option)
-                              // }
-                              className="pointer-events-none rounded-sm"
-                            />
-                            <span className="text-sm">{option}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <DropdownMenu onOpenChange={setIsDistanceOpen}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "flex items-center justify-between gap-2 w-40 px-4 py-2 rounded-full border",
-                            isDistanceOpen
-                              ? "bg-black text-white"
-                              : "bg-white text-black"
-                          )}
-                        >
-                          <span>{selectedDistance || "Education"}</span>
-                          <ChevronDown
-                            size={16}
-                            className={cn(
-                              isDistanceOpen &&
-                                "rotate-180 transition-transform"
-                            )}
-                          />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
-                        {educationOptions.map((option) => (
-                          <DropdownMenuItem
-                            key={option}
-                            id="distance"
-                            className={cn(
-                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                              selectedDistance === option &&
-                                "bg-black text-white"
-                            )}
-                            // onSelect={(e) => {
-                            //   e.preventDefault();
-                            //   handleSelectDistance(option);
-                            // }}
-                          >
-                            <Checkbox
-                              // checked={selectedDistance === option}
-                              // onCheckedChange={() =>
-                              //   handleSelectDistance(option)
-                              // }
-                              className="pointer-events-none rounded-sm"
-                            />
-                            <span className="text-sm">{option}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    
+                          <span className="text-sm">{option}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu> */}
+
                   {/* </div> */}
                 </div>
                 <ScrollBar
