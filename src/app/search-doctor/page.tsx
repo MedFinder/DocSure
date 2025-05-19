@@ -83,6 +83,7 @@ export default function SearchDoctorPage() {
   const [reviews, setReviews] = useState("");
   const [maxDistance, setMaxDistance] = useState("");
   const [maxRatings, setMaxRatings] = useState("");
+  const [hasUserFiltered, setHasUserFiltered] = useState(false);
 
   const distanceOptions = [
     "0-5 miles",
@@ -128,12 +129,7 @@ export default function SearchDoctorPage() {
     activeCallIndexRef.current = activeCallIndex;
   }, [activeCallIndex]);
   console.log(doctors);
-  const resetFilters = () => {
-    setReviews("");
-    setMaxDistance("");
-    setMaxRatings("");
-    setSymptoms("");
-  };
+
   useEffect(() => {
     const handleStorageChange = (event) => {
       if (event.key === "resetFiltersTrigger") {
@@ -150,11 +146,15 @@ export default function SearchDoctorPage() {
   localStorage.setItem("resetFiltersTrigger", Date.now().toString());
 
   useEffect(() => {
-    // Apply filters when any filter criteria changes
+    if (!hasUserFiltered) {
+      setFilteredDoctors(doctors || []);
+      return;
+    }
+
     if (doctors.length > 0) {
       let filtered = [...doctors];
 
-      // Filter by reviews
+      // Reviews
       if (reviews) {
         filtered = filtered.filter((doctor) => {
           const reviewCount = doctor.user_ratings_total || 0;
@@ -173,7 +173,7 @@ export default function SearchDoctorPage() {
         });
       }
 
-      // Filter by distance
+      // Distance
       if (maxDistance) {
         filtered = filtered.filter((doctor) => {
           const distance = parseFloat(doctor.distance?.split(" ")[0]) || 0;
@@ -191,11 +191,12 @@ export default function SearchDoctorPage() {
           }
         });
       }
+
+      // Ratings
       if (maxRatings) {
         filtered = filtered.filter((doctor) => {
           const rating =
             parseFloat((doctor.rating || "").toString().split(" ")[0]) || 0;
-
           switch (maxRatings) {
             case "5.0 stars":
               return rating === 5;
@@ -208,32 +209,29 @@ export default function SearchDoctorPage() {
             default:
               return true;
           }
-          // Add logging to debug the filtering
-          console.log(
-            `Filtering doctor with rating ${rating} for maxRatings ${maxRatings}`
-          );
         });
       }
 
-      // Filter by symptoms (if implemented in the backend)
-      // if (symptoms) {
-      //   filtered = filtered.filter((doctor) => {
-      //     return doctor.specialties?.some((specialty) =>
-      //       specialty.toLowerCase().includes(symptoms.toLowerCase())
-      //     );
-      //   });
-      // }
+      // Symptoms
+      if (symptoms) {
+        filtered = filtered.filter((doctor) =>
+          doctor.specialties?.some((specialty) =>
+            specialty.toLowerCase().includes(symptoms.toLowerCase())
+          )
+        );
+      }
 
       setFilteredDoctors(filtered);
     } else {
       setFilteredDoctors([]);
     }
-  }, [doctors, reviews, maxDistance, maxRatings, symptoms]);
+  }, [doctors, reviews, maxDistance, maxRatings, symptoms, hasUserFiltered]);
 
   const handleSelectReviews = (option, setOpen) => {
+    setHasUserFiltered(true);
     const newValue = option === reviews ? "" : option;
     setReviews(newValue);
-    setOpen(false); // Close the dropdown
+    setOpen(false);
     track("Filter_Reviews_Changed", {
       value: newValue,
       action: newValue ? "selected" : "unselected",
@@ -241,6 +239,8 @@ export default function SearchDoctorPage() {
   };
 
   const handleSelectDistance = (option, setOpen) => {
+    setHasUserFiltered(true);
+
     const newValue = option === maxDistance ? "" : option;
     setMaxDistance(newValue); // Toggle selection
     setOpen(false); // Close the dropdown
@@ -251,6 +251,8 @@ export default function SearchDoctorPage() {
   };
 
   const handleSymptomsChange = (value) => {
+    setHasUserFiltered(true);
+
     setSymptoms(value);
     if (value) {
       track("Filter_Symptoms_Changed", {
@@ -260,6 +262,8 @@ export default function SearchDoctorPage() {
   };
 
   const handleSelectRating = (option, setOpen) => {
+    setHasUserFiltered(true);
+
     const newValue = option === maxRatings ? "" : option;
     setMaxRatings(newValue); // Toggle selection
     setOpen(false); // Close the dropdown
@@ -268,6 +272,18 @@ export default function SearchDoctorPage() {
       action: newValue ? "selected" : "unselected",
     });
   };
+  const resetFilters = () => {
+    setReviews("");
+    setMaxDistance("");
+    setMaxRatings("");
+    setSymptoms("");
+    setIsNewPatient(true);
+    setIsDistanceOpen(false);
+    setIsReviewOpen(false);
+    setIsRatingsOpen(false);
+    setHasUserFiltered(false);
+  };
+
   const getPhoneNumbers = () => {
     const numbers = doctors.map((doctor) => doctor.phone_number || null);
     setPhoneNumbers(numbers);
@@ -697,8 +713,11 @@ export default function SearchDoctorPage() {
     // Initial load
     updateDoctorsList();
 
-    // Listen for storage changes (detect when a new search is performed)
-    const handleStorageChange = () => updateDoctorsList();
+    const handleStorageChange = () => {
+      updateDoctorsList();
+      resetFilters();
+    };
+
     window.addEventListener("storage", handleStorageChange);
 
     // Also detect route changes (e.g., navigating from home to search)
@@ -1064,8 +1083,8 @@ export default function SearchDoctorPage() {
           className="flex flex-col flex-grow md:overflow-hidden "
           onSubmit={formik.handleSubmit}
         >
-          <div className="flex justify-between  border-t-0 text-sm pt-[100px] shrink-0 px-4">
-            <div className="flex gap-2 items-center pt-2 py-3 ">
+          <div className="flex justify-between md:mt-24 mt-[86px] px-4 md:py-2 py-3  border-t-0 text-sm h-[60px] shrink-0">
+            <div className="flex gap-2 items-center">
               <Image
                 src="/Group 198.svg"
                 alt="Verified Logo"
@@ -1134,7 +1153,10 @@ export default function SearchDoctorPage() {
                     </Label>
                   </div>
 
-                  <DropdownMenu open={isDistanceOpen} onOpenChange={setIsDistanceOpen}>
+                  <DropdownMenu
+                    open={isDistanceOpen}
+                    onOpenChange={setIsDistanceOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1178,7 +1200,10 @@ export default function SearchDoctorPage() {
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <DropdownMenu open={isReviewOpen} onOpenChange={setIsReviewOpen}>
+                  <DropdownMenu
+                    open={isReviewOpen}
+                    onOpenChange={setIsReviewOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1253,7 +1278,10 @@ export default function SearchDoctorPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  <DropdownMenu open={isRatingsOpen} onOpenChange={setIsRatingsOpen}>
+                  <DropdownMenu
+                    open={isRatingsOpen}
+                    onOpenChange={setIsRatingsOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1536,7 +1564,7 @@ export default function SearchDoctorPage() {
                 onDragEnd={handleDragEnd}
                 collisionDetection={closestCenter}
               >
-                <ScrollArea className="h-[100%] w-full md:w-auto pb-14 md:pb-0  md:pt-0 overflow-y-auto">
+                <ScrollArea className="md:h-[90%] h-[100%] w-full md:w-auto pb-14 md:pb-0  md:pt-0 overflow-y-auto">
                   <div className="flex flex-col md:flex-row w-full">
                     <Column
                       activeCallIndex={activeCallIndex}
