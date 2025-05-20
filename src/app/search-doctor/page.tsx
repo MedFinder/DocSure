@@ -131,25 +131,6 @@ export default function SearchDoctorPage() {
   console.log(doctors);
 
   useEffect(() => {
-    const handleStorageChange = (event) => {
-      if (event.key === "resetFiltersTrigger") {
-        resetFilters();
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("resetFiltersTrigger", Date.now().toString());
-    }
-  }, []);
-
-  useEffect(() => {
     if (!hasUserFiltered) {
       setFilteredDoctors(doctors || []);
       return;
@@ -962,29 +943,6 @@ export default function SearchDoctorPage() {
       window.removeEventListener("storage", handleStorageChange);
     };
   }, [router]);
-
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      // Check if the change is from statusData or lastSearchSource
-      if (
-        e.key === "statusData" ||
-        (e.key === "lastSearchSource" && e.newValue === "navbar")
-      ) {
-        // Reset all filter states
-        setReviews("");
-        setMaxDistance("");
-        setMaxRatings("");
-        setSymptoms("");
-        setIsNewPatient(true);
-        setIsDistanceOpen(false);
-        setIsReviewOpen(false);
-        setIsRatingsOpen(false);
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDCPbnPb43gQZDPT5dpq10a3dOP3EMHw-0",
