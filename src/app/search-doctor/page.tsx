@@ -128,7 +128,7 @@ export default function SearchDoctorPage() {
   useEffect(() => {
     activeCallIndexRef.current = activeCallIndex;
   }, [activeCallIndex]);
-  console.log(doctors);
+  // console.log(doctors);
 
   useEffect(() => {
     if (!hasUserFiltered) {
@@ -313,7 +313,7 @@ export default function SearchDoctorPage() {
       request_id: updatedValues.request_id,
       preferred_location: savedAddress,
     };
-    console.log(data);
+    // console.log(data);
     try {
       const resp = await axios.put(
         `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata/${updatedValues.request_id}`,
@@ -331,7 +331,7 @@ export default function SearchDoctorPage() {
       doctor_place_ids: drsData.results.map((doctor) => doctor.place_id),
       //call_priorities: drsData.results.map((_, index) => index)
     };
-    console.log(data);
+    // console.log(data);
     try {
       const resp = await axios.post(
         "https://callai-backend-243277014955.us-central1.run.app/api/update-doctor-call-priority",
