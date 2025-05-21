@@ -32,6 +32,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { StatusBadge } from "@/app/transcript-new/StatusBadge";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const LoadingSumamry = dynamic(
   () => import("../../../components/Loading/LoadingSummary"),
@@ -101,6 +102,7 @@ const getAlternateColor = (index: number) => {
   const colors = ["#F7D07D", "#A0F1C2"]; // Gold & Light Green
   return colors[index % 2]; // Alternate based on index
 };
+
 const getDrSummary = async (
   name: string,
   formatted_address: string,
@@ -113,13 +115,14 @@ const getDrSummary = async (
     place_id,
     request_id: formData?.request_id,
   };
+  console.log(name, formatted_address, place_id, formData);
 
   try {
     const resp = await axios.post(
       `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_summary`,
       data
     );
-    // console.log(resp?.data)
+    console.log(resp?.data);
     return resp.data?.result?.summary || null;
   } catch (error) {
     console.error("Error fetching doctor summary:", error);
@@ -171,7 +174,35 @@ export const Task: React.FC<TaskProps> = ({
     // Only check items that are both open and within the first 10
     return index < 10 && openingStatus === "Open";
   });
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const getDrDeets = async (
+    name: string,
+    formatted_address: string,
+    place_id: string
+  ) => {
+    const formData = await JSON.parse(localStorage.getItem("formData"));
+    const data = {
+      name,
+      formatted_address,
+      place_id,
+      request_id: formData?.request_id,
+    };
+    console.log(name, formatted_address, place_id, formData);
 
+    try {
+      const resp = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_profile`,
+        data
+      );
+      // console.log(resp);
+      localStorage.setItem("doctorDetail", JSON.stringify(resp?.data?.result));
+      router.push(`/search-doctor/${place_id}`);
+    } catch (error) {
+      console.error("Error fetching doctor summary:", error);
+      return "Unable to fetch summary information.";
+    }
+  };
   const { expandedId, setExpandedId } = useExpand();
   const isExpanded = expandedId === id;
 
@@ -207,7 +238,6 @@ export const Task: React.FC<TaskProps> = ({
     }
   }, []);
 
-  // Function to handle expanding and fetching summary
   const handleExpand = async (e) => {
     e.stopPropagation();
 
@@ -232,7 +262,7 @@ export const Task: React.FC<TaskProps> = ({
           place_id || id,
           request_id
         );
-        // console.log(resp);
+        console.log(resp);
         if (resp) {
           setTimeout(() => {
             console.log("defaulting to dr summary..after socket time out");
@@ -403,7 +433,7 @@ export const Task: React.FC<TaskProps> = ({
                         //   track("Dr_Website_Clicked");
                         // }}
                         type="button"
-                        onClick={handleExpand}
+                        onClick={() => getDrDeets(title, address, place_id)}
                         onPointerDown={(e) => e.stopPropagation()}
                       >
                         <span>{title}</span>
@@ -435,7 +465,8 @@ export const Task: React.FC<TaskProps> = ({
                       //   track("Dr_Website_Clicked");
                       // }}
                       type="button"
-                      onClick={handleExpand}
+                      // onClick={handleExpand}
+                      onClick={() => getDrDeets(title, address, place_id)}
                       onPointerDown={(e) => e.stopPropagation()}
                     >
                       <span className="">{title}</span>

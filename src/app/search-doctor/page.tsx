@@ -53,6 +53,7 @@ export default function SearchDoctorPage() {
     place_id: "",
     summary: "",
   });
+
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [selectedInsurance, setSelectedInsurance] = useState(true);
   const [insuranceType, setinsuranceType] = useState("");
@@ -562,7 +563,6 @@ export default function SearchDoctorPage() {
           fetch_open_now: fetch_open_now, // Include the fetch_open_now parameter
         }
       );
-
       if (response.data?.results) {
         const newDoctors = response.data.results.map((item) => ({
           ...item,
@@ -650,7 +650,6 @@ export default function SearchDoctorPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextPageToken, isLoadingMore]);
-
   const fetchAndLogDrLists = async (drsData) => {
     // console.log(drsData)
     const formData = JSON.parse(localStorage.getItem("formData"));
@@ -1022,7 +1021,6 @@ export default function SearchDoctorPage() {
 
     setCheckedDoctors(newChecked);
   }, [doctors]);
-
   return (
     <section className="h-screen flex flex-col md:overflow-hidden ">
       <NavbarSection />
