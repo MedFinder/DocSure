@@ -176,33 +176,23 @@ export const Task: React.FC<TaskProps> = ({
   });
   const router = useRouter();
   const searchParams = useSearchParams();
-  const getDrDeets = async (
+  const getDrDeets = (
     name: string,
     formatted_address: string,
     place_id: string
   ) => {
-    const formData = await JSON.parse(localStorage.getItem("formData"));
+    const formData = JSON.parse(localStorage.getItem("formData"));
     const data = {
       name,
       formatted_address,
       place_id,
       request_id: formData?.request_id,
     };
-    console.log(name, formatted_address, place_id, formData);
 
-    try {
-      const resp = await axios.post(
-        `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_profile`,
-        data
-      );
-      // console.log(resp);
-      localStorage.setItem("doctorDetail", JSON.stringify(resp?.data?.result));
-      router.push(`/search-doctor/${place_id}`);
-    } catch (error) {
-      console.error("Error fetching doctor summary:", error);
-      return "Unable to fetch summary information.";
-    }
+    localStorage.setItem("doctorCallPayload", JSON.stringify(data));
+    router.push(`/search-doctor/${place_id}`);
   };
+
   const { expandedId, setExpandedId } = useExpand();
   const isExpanded = expandedId === id;
 
@@ -489,7 +479,7 @@ export const Task: React.FC<TaskProps> = ({
                     <div className=" hidden md:flex justify-between overflow-x-auto gap-4 items-start min-w-[60%] md:min-w-[40%] lg:min-w-[25%]">
                       <div
                         className="md:flex gap-1 font-normal text-[#333333] text-sm items-center hidden"
-                        onClick={handleExpand}
+                        onClick={() => getDrDeets(title, address, place_id)}
                         onPointerDown={(e) => e.stopPropagation()}
                       >
                         <img
@@ -508,7 +498,7 @@ export const Task: React.FC<TaskProps> = ({
                       {distance && (
                         <div
                           className="md:flex hidden items-center gap-1"
-                          onClick={handleExpand}
+                          onClick={() => getDrDeets(title, address, place_id)}
                           onPointerDown={(e) => e.stopPropagation()}
                         >
                           <MapPin size={13} />
@@ -605,7 +595,7 @@ export const Task: React.FC<TaskProps> = ({
                   <div className="flex justify-between items-center">
                     <span
                       className=" text-sm text-[#636465]  pr-16 md:pr-0 md:w-[60%] w-[72%] md:flex "
-                      onClick={handleExpand}
+                      onClick={() => getDrDeets(title, address, place_id)}
                       onPointerDown={(e) => e.stopPropagation()}
                     >
                       {vicinity}
@@ -614,7 +604,7 @@ export const Task: React.FC<TaskProps> = ({
 
                   <div
                     className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden  flex-grow break-words pr-16 md:pr-0"
-                    onClick={handleExpand}
+                    onClick={() => getDrDeets(title, address, place_id)}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
                     <img
@@ -633,7 +623,7 @@ export const Task: React.FC<TaskProps> = ({
                     {distance && (
                       <div
                         className="flex items-center gap-1"
-                        onClick={handleExpand}
+                        onClick={() => getDrDeets(title, address, place_id)}
                         onPointerDown={(e) => e.stopPropagation()}
                       >
                         <MapPin size={13} />
@@ -659,7 +649,7 @@ export const Task: React.FC<TaskProps> = ({
                   </div>
                   <div
                     className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words pr-16 md:pr-0"
-                    onClick={handleExpand}
+                    onClick={() => getDrDeets(title, address, place_id)}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
                     <div className="md:hidden gap-1 text-sm text-[#333333] flex items-center  ">
@@ -678,7 +668,7 @@ export const Task: React.FC<TaskProps> = ({
                   </div>
                   <div
                     className="md:flex gap-1 text-sm text-[#333333]  hidden "
-                    onClick={handleExpand}
+                    onClick={() => getDrDeets(title, address, place_id)}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
                     {/* <span
