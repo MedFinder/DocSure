@@ -8,6 +8,7 @@ import "./column.css";
 import { Task, TaskList } from "./tasks";
 interface TaskType {
   id: number;
+  place_id: number;
   name: string;
   rating?: number;
   website: string;
@@ -45,10 +46,12 @@ const Column: React.FC<ColumnProps> = ({
   callStatus,
   isAppointmentBooked,
   transcriptSummary,
+  detailsSummary,
   transcriptLoading,
   wsRef,
   reconnectWebSocket,
   setTranscriptSummary,
+  setDetailsSummary,
   setTranscriptLoading,
   onDelete,
   fromTranscript,
@@ -75,6 +78,7 @@ const Column: React.FC<ColumnProps> = ({
                   <Task
                     key={index}
                     id={task.id.toString()}
+                    place_id={task.place_id}
                     index={index}
                     website={task.website === "NA" ? null : task.website}
                     title={task.name}

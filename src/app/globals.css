@@ -199,7 +199,7 @@ body {
   font-size: 0.75rem;
 }
 .flag-rated-badge {
-  background-color: #4CAF50; /* Green color for "Highly Rated" */
+  background-color: #4caf50; /* Green color for "Highly Rated" */
   position: relative;
   display: inline-block;
   clip-path: polygon(10px 0%, 100% 0%, 100% 100%, 10px 100%, 0% 50%);
@@ -208,5 +208,29 @@ body {
   color: white;
   font-weight: 600;
   font-size: 0.75rem;
-
+}
+/* global.css */
+.prose table {
+  @apply w-full text-sm text-left border mt-2;
+}
+.prose thead {
+  @apply bg-gray-100 text-gray-600;
+}
+.prose th {
+  @apply border px-2 py-1 font-medium;
+}
+.prose td {
+  @apply border px-2 py-1;
+}
+.prose h2 {
+  @apply text-lg font-semibold border-b pb-1;
+}
+.prose ul {
+  @apply list-disc list-inside space-y-1 text-sm text-gray-700;
+}
+.prose li {
+  @apply text-sm;
+}
+.prose p {
+  @apply text-sm text-gray-700 pb-4 pt-2;
 }
