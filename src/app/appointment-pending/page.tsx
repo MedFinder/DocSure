@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import NavbarSection from "@/components/general-components/navbar-section";
 import FooterSection from "@/app/landing/components/FooterSection";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,8 @@ export default function AppointmentPendingPage() {
 
   return (
     <>
-      <NavbarSection />
+    <Suspense>
+    <NavbarSection />
       <div className="min-h-screen flex flex-col justify-center items-center px-6 sm:px-10">
         <div className="w-full max-w-2xl p-6 sm:p-10 rounded-lg text-center">
           <h1 className="text-2xl sm:text-4xl mt-10 font-semibold text-[#333333]">
@@ -117,6 +118,7 @@ export default function AppointmentPendingPage() {
         </div>
       </div>
       <FooterSection />
+    </Suspense>
     </>
   );
 }
