@@ -115,14 +115,14 @@ const getDrSummary = async (
     place_id,
     request_id: formData?.request_id,
   };
-  console.log(name, formatted_address, place_id, formData);
+  // console.log(name, formatted_address, place_id, formData);
 
   try {
     const resp = await axios.post(
       `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_summary`,
       data
     );
-    console.log(resp?.data);
+    // console.log(resp?.data);
     return resp.data?.result?.summary || null;
   } catch (error) {
     console.error("Error fetching doctor summary:", error);
@@ -169,6 +169,7 @@ export const Task: React.FC<TaskProps> = ({
     useSortable({ id });
   const [isSelected, setIsSelected] = useState(true);
   const [isCardLoading, setIsCardLoading] = useState(false);
+  const [globalLoading, setGlobalLoading] = useState(false); // Add state for global spinner
   const [open, setOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(() => {
     // Only check items that are both open and within the first 10
@@ -176,11 +177,39 @@ export const Task: React.FC<TaskProps> = ({
   });
   const router = useRouter();
   const searchParams = useSearchParams();
-  const getDrDeets = (
+  const fetchDoctorDetails = async (data) => {
+    try {
+
+      // Construct the full payload for the API
+      const payload = {
+        place_id: data?.place_id,
+        name: data?.name,
+        formatted_address:data?.formatted_address,
+        request_id: data?.request_id,
+      };
+
+      // Log the ACTUAL payload that will be sent
+     // console.log("API Payload being sent:", payload);
+
+      const response = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_profile`,
+        payload // This is the 'payload' object
+      );
+
+      const result = response?.data?.result;
+      localStorage.setItem("doctorProfilePayload", JSON.stringify(result));
+      router.push(`/search-doctor/${place_id}`);
+    } catch (error) {
+      console.error("Failed to fetch doctor details:", error); // More specific error message
+      setGlobalLoading(false)
+    }
+  };
+  const getDrDeets = async (
     name: string,
     formatted_address: string,
     place_id: string
   ) => {
+    setGlobalLoading(true)
     const formData = JSON.parse(localStorage.getItem("formData"));
     const data = {
       name,
@@ -188,9 +217,7 @@ export const Task: React.FC<TaskProps> = ({
       place_id,
       request_id: formData?.request_id,
     };
-
-    localStorage.setItem("doctorCallPayload", JSON.stringify(data));
-    router.push(`/search-doctor/${place_id}`);
+    await fetchDoctorDetails(data);
   };
 
   const { expandedId, setExpandedId } = useExpand();
@@ -227,6 +254,18 @@ export const Task: React.FC<TaskProps> = ({
       };
     }
   }, []);
+  // Add global spinner component
+const GlobalSpinner = ({ isVisible }) => {
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+      <div className="bg-white p-5 rounded-full">
+        <Loader2 className="w-10 h-10 text-[#E5573F] animate-spin" />
+      </div>
+    </div>
+  );
+};
 
   const handleExpand = async (e) => {
     e.stopPropagation();
@@ -252,7 +291,7 @@ export const Task: React.FC<TaskProps> = ({
           place_id || id,
           request_id
         );
-        console.log(resp);
+        // console.log(resp);
         if (resp) {
           setTimeout(() => {
             console.log("defaulting to dr summary..after socket time out");
@@ -307,6 +346,7 @@ export const Task: React.FC<TaskProps> = ({
 
   return (
     <>
+    <GlobalSpinner isVisible={globalLoading} />
       <tr
         ref={setNodeRef}
         style={style}

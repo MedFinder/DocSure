@@ -20,64 +20,27 @@ const DoctorDetailPage = () => {
   const { id } = params;
   const router = useRouter();
 
-  const [summaryMarkdown, setSummaryMarkdown] = useState("");
   const [imageMarkdown, setImageMarkdown] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [summaryMarkdown, setSummaryMarkdown] = useState("");
+  const [loading, setLoading] = useState(false);
   const parsedHTML = DOMPurify.sanitize(marked.parse(summaryMarkdown || ""));
   useEffect(() => {
-    const fetchDoctorDetails = async () => {
-      if (!id) {
-        console.error(
-          "No place_id (id from params) found in URL parameters. Aborting API call."
-        );
-        setLoading(false);
-        return;
-      }
-
+    // On mount, get doctorProfilePayload from localStorage
+    const doctorProfilePayload = localStorage.getItem("doctorProfilePayload");
+    if (doctorProfilePayload) {
       try {
-        // Retrieve and parse data from localStorage
-        // Using 'doctorCallPayload' as per your code.
-        // It's crucial that this 'doctorCallPayload' actually contains 'name', 'formatted_address', 'request_id'
-        const doctorCallPayloadFromLocalStorage = JSON.parse(
-          localStorage.getItem("doctorCallPayload") || "{}"
-        );
-
-        // Construct the full payload for the API
-        const payload = {
-          place_id: id, // This 'id' is coming from useParams()
-          name: doctorCallPayloadFromLocalStorage?.name,
-          formatted_address:
-            doctorCallPayloadFromLocalStorage?.formatted_address,
-          request_id: doctorCallPayloadFromLocalStorage?.request_id,
-        };
-
-        // Log the ACTUAL payload that will be sent
-        console.log("API Payload being sent:", payload);
-
-        const response = await axios.post(
-          `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_profile`,
-          payload // This is the 'payload' object
-        );
-
-        const result = response?.data?.result;
-
-        if (result?.images && Array.isArray(result.images)) {
-          setImageMarkdown(result.images);
+        const parsed = JSON.parse(doctorProfilePayload);
+        if (parsed.images && Array.isArray(parsed.images)) {
+          setImageMarkdown(parsed.images);
         }
-
-        if (result?.profile) {
-          setSummaryMarkdown(result.profile);
+        if (parsed.profile) {
+          setSummaryMarkdown(parsed.profile);
         }
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch doctor details:", error); // More specific error message
-        setLoading(false);
+      } catch (e) {
+        // handle error
       }
-    };
-
-    fetchDoctorDetails();
-  }, [id]);
+    }
+  }, []);
 
   const handleImageError = (e: any) => {
     e.target.onerror = null;
@@ -131,27 +94,28 @@ const DoctorDetailPage = () => {
         {imageMarkdown?.length > 0 && (
           <div className="w-full">
             <Swiper
-              modules={[Pagination, Autoplay]}
+              // modules={[Pagination, Autoplay]}
               spaceBetween={20}
               slidesPerView={1}
-              autoplay={{
-                delay: 3000,
-                disableOnInteraction: false,
-              }}
-              pagination={{ clickable: true }}
+              // autoplay={{
+              //   delay: 3000,
+              //   disableOnInteraction: false,
+              // }}
+              // pagination={{ clickable: true }}
               className="rounded-md overflow-hidden"
             >
-              {chunkArray(imageMarkdown, 4).map((group, slideIdx) => (
+              {chunkArray(imageMarkdown, 5).map((group, slideIdx) => (
                 <SwiperSlide key={slideIdx}>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-5 gap-2">
                     {" "}
                     {group.map((src: any, idx: any) => (
                       <img
                         key={idx}
-                        src={src}
+                        src={src.original}
+                        width={src.original.width}
                         alt={`Doctor Image ${slideIdx * 4 + idx + 1}`}
                         onError={handleImageError}
-                        className="w-full object-cover h-[90px] sm:h-[100px] md:h-[130px] rounded-md" // Reduced heights
+                        className="w-full object-cover h-[70px] sm:h-[100px] md:h-[130px] rounded-md" // Reduced heights
                       />
                     ))}
                   </div>
