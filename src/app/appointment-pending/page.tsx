@@ -6,11 +6,14 @@ import FooterSection from "@/app/landing/components/FooterSection";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { track } from "@vercel/analytics";
+import { useSearchParams } from "next/navigation";
 
 const APPOINTMENT_API_URL =
   "https://callai-backend-243277014955.us-central1.run.app/api/update-auto-calling";
 export default function AppointmentPendingPage() {
   const [autoBook, setAutoBook] = useState(true);
+  const searchParams = useSearchParams();
+  const message = searchParams?.get("message");
 
   const updateAutoCalling = async () => {
     setAutoBook(!autoBook);
@@ -50,30 +53,34 @@ export default function AppointmentPendingPage() {
             Your appointment is pending
           </h1>
           <p className="text-gray-600 mt-4 mb-8">
-            Your Doctor has 1 hour to confirm. You will receive an SMS and email with appointment details.
+            {message ?? "Your Doctor has 1 hour to confirm. You will receive an SMS and email with appointment details." }
           </p>
-          
+
           <div className="flex items-center mb-6 justify-center">
-            <input 
-              type="checkbox" 
-              id="autoBookCheckbox" 
-              checked={autoBook} 
+            <input
+              type="checkbox"
+              id="autoBookCheckbox"
+              checked={autoBook}
               onChange={updateAutoCalling}
-              className="w-4 h-4 text-[#0074BA] bg-gray-100 border-gray-300 rounded focus:ring-[#0074BA]" 
+              className="w-4 h-4 text-[#0074BA] bg-gray-100 border-gray-300 rounded focus:ring-[#0074BA]"
             />
-            <label htmlFor="autoBookCheckbox" className="ml-2 text-sm font-medium text-gray-700">
-              Auto book another top rated doctor around me if this doctor is unavailable
+            <label
+              htmlFor="autoBookCheckbox"
+              className="ml-2 text-sm font-medium text-gray-700"
+            >
+              Auto book another top rated doctor around me if this doctor is
+              unavailable
             </label>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            <a 
-              href="https://form.typeform.com/to/VPJ0OhpE" 
-              target="_blank" 
+            <a
+              href="https://form.typeform.com/to/VPJ0OhpE"
+              target="_blank"
               rel="noopener noreferrer"
               className="w-full"
             >
-              <Button 
+              <Button
                 className="w-full bg-[#E5573F] text-white hover:bg-[#d64c36] md:px-4"
                 onClick={() => track("Feedback_Form_Clicked")}
               >
@@ -81,7 +88,7 @@ export default function AppointmentPendingPage() {
               </Button>
             </a>
             <Link href="/get-gift" className="w-full">
-              <Button 
+              <Button
                 className="w-full bg-[#0074BA] text-white hover:bg-[#00619e] md:px-4"
                 onClick={() => track("Refer_Friends_Clicked")}
               >
@@ -89,7 +96,7 @@ export default function AppointmentPendingPage() {
               </Button>
             </Link>
             <Link href="/contact-us" className="w-full">
-              <Button 
+              <Button
                 className="w-full bg-gray-200 text-[#333333] hover:bg-gray-300 md:px-4"
                 onClick={() => track("Contact_Us_Clicked")}
               >
@@ -97,9 +104,13 @@ export default function AppointmentPendingPage() {
               </Button>
             </Link>
           </div>
-          
+
           <div className="mt-8">
-            <Link href="/" className="text-[#0074BA] underline hover:text-[#00619e]" onClick={() => track("Back_To_Home_Clicked")}>
+            <Link
+              href="/"
+              className="text-[#0074BA] underline hover:text-[#00619e]"
+              onClick={() => track("Back_To_Home_Clicked")}
+            >
               Back to Home
             </Link>
           </div>
