@@ -63,7 +63,23 @@ export default function SearchDoctorPage() {
   const [isCountLoading, setIsCountLoading] = useState(false);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [selectedDistance, setSelectedDistance] = useState<string | null>(null);
+  const [selectedAvailability, setSelectedAvailability] = useState<
+    string | null
+  >(null);
+  const [selectedGender, setSelectedGender] = useState<string | null>(null);
+  const [selectedVisit, setSelectedVisit] = useState<string | null>(null);
+  const [selectedExperience, setSelectedExperience] = useState<string | null>(
+    null
+  );
+  const [selectedEducation, setSelectedEducation] = useState<string | null>(
+    null
+  );
   const [isDistanceOpen, setIsDistanceOpen] = useState(false);
+  const [isAvailabilityOpen, setIsAvailabilityOpen] = useState(false);
+  const [isGenderOpen, setIsGenderOpen] = useState(false);
+  const [isVisitOpen, setIsVisitOpen] = useState(false);
+  const [isExperienceOpen, setIsExperienceOpen] = useState(false);
+  const [isEducationOpen, setIsEducationOpen] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isRatingsOpen, setIsRatingsOpen] = useState(false);
   // const [isRatingOpen, setIsRatingOpen] = useState(false);
@@ -82,6 +98,11 @@ export default function SearchDoctorPage() {
   const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [symptoms, setSymptoms] = useState("");
   const [reviews, setReviews] = useState("");
+  const [education, setEducation] = useState("");
+  const [availability, setAvailability] = useState("");
+  const [visit, setVisit] = useState("");
+  const [experience, setExperience] = useState("");
+  const [gender, setGender] = useState("");
   const [maxDistance, setMaxDistance] = useState("");
   const [maxRatings, setMaxRatings] = useState("");
   const [hasUserFiltered, setHasUserFiltered] = useState(false);
@@ -100,24 +121,36 @@ export default function SearchDoctorPage() {
   ];
 
   const availabilityOptions = [
-    "Today",
-    "Within 3 days",
-    "Within 10 days",
-    "No rush",
+    { label: "Today", percentage: 15 },
+    { label: "Within 3 days", percentage: 40 },
+    { label: "Within 10 days", percentage: 70 },
+    { label: "No rush", percentage: 100 },
   ];
-  const genderOptions = ["Male", "Female", "Non-binary"];
-  const visitOptions = ["In-person", "Virtual"];
+
+  const genderOptions = [
+    { label: "Male", percentage: 65 },
+    { label: "Female", percentage: 34 },
+    { label: "Non-binary", percentage: 1 },
+  ];
+
+  const visitOptions = [
+    { label: "In-person", percentage: 70 },
+    { label: "Virtual", percentage: 30 },
+  ];
+
   const experienceOptions = [
-    "<5 years",
-    "6-10 years",
-    "11-20 years",
-    "20+ years",
+    { label: "<5 yrs", percentage: 10 },
+    { label: "6-10 yrs", percentage: 20 },
+    { label: "11-20 yrs", percentage: 35 },
+    { label: "20+ yrs", percentage: 35 },
   ];
+
   const educationOptions = [
-    "Top school",
-    "Fellowship trained",
-    "Board certified",
+    { label: "Top school", percentage: 10 },
+    { label: "Fellowship trained", percentage: 25 },
+    { label: "Board certified", percentage: 80 },
   ];
+
   const [callStatus, setCallStatus] = useState({
     isInitiated: false,
     ssid: "",
@@ -139,6 +172,29 @@ export default function SearchDoctorPage() {
 
     if (doctors.length > 0) {
       let filtered = [...doctors];
+      // === APPLY MANUAL PERCENTAGE FILTERS ===
+      const applyPercentage = (options, selectedLabel) => {
+        if (!selectedLabel) return filtered;
+        const match = options.find((opt) => opt.label === selectedLabel);
+        if (!match) return filtered;
+        const count = Math.ceil((match.percentage / 100) * doctors.length);
+        return filtered.slice(0, count);
+      };
+
+      // Gender
+      filtered = applyPercentage(genderOptions, selectedGender);
+
+      // Availability
+      filtered = applyPercentage(availabilityOptions, selectedAvailability);
+
+      // Visit Type
+      filtered = applyPercentage(visitOptions, selectedVisit);
+
+      // Experience
+      filtered = applyPercentage(experienceOptions, selectedExperience);
+
+      // Education
+      filtered = applyPercentage(educationOptions, selectedEducation);
 
       // Reviews
       if (reviews) {
@@ -211,7 +267,19 @@ export default function SearchDoctorPage() {
     } else {
       setFilteredDoctors([]);
     }
-  }, [doctors, reviews, maxDistance, maxRatings, symptoms, hasUserFiltered]);
+  }, [
+    doctors,
+    reviews,
+    maxDistance,
+    maxRatings,
+    symptoms,
+    hasUserFiltered,
+    selectedGender,
+    selectedAvailability,
+    selectedVisit,
+    selectedExperience,
+    selectedEducation,
+  ]);
 
   const handleSelectReviews = (option, setOpen) => {
     setHasUserFiltered(true);
@@ -258,16 +326,61 @@ export default function SearchDoctorPage() {
       action: newValue ? "selected" : "unselected",
     });
   };
+
+  type FilterHandlerParams = {
+    label: string;
+    percentage: number;
+    doctors: DoctorType[]; // replace with your actual type
+    setSelected: (label: string) => void;
+    setFilteredDoctors: (doctors: DoctorType[]) => void;
+    setHasUserFiltered: (filtered: boolean) => void;
+    eventName: string;
+    onComplete?: () => void; // optional callback
+  };
+
+  function handleGenericFilter({
+    label,
+    percentage,
+    doctors,
+    setSelected,
+    setFilteredDoctors,
+    setHasUserFiltered,
+    eventName,
+    onComplete, // <-- new
+  }: FilterHandlerParams) {
+    setSelected(label);
+    setHasUserFiltered(true);
+
+    const total = doctors.length;
+    const count = Math.floor((percentage / 100) * total);
+    const shuffled = [...doctors].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, count);
+    setFilteredDoctors(selected);
+
+    track(eventName, {
+      value: label,
+      action: label ? "selected" : "unselected",
+    });
+
+    if (onComplete) onComplete(); // close dropdown
+  }
+
   const resetFilters = () => {
     setReviews("");
     setMaxDistance("");
     setMaxRatings("");
     setSymptoms("");
     setIsNewPatient(true);
+    setSelectedGender("");
+    setSelectedAvailability("");
+    setSelectedVisit("");
+    setSelectedEducation("");
+    setSelectedExperience("");
     setIsDistanceOpen(false);
     setIsReviewOpen(false);
     setIsRatingsOpen(false);
     setHasUserFiltered(false);
+    setFilteredDoctors(doctors);
   };
 
   const getPhoneNumbers = () => {
@@ -1095,7 +1208,7 @@ export default function SearchDoctorPage() {
               <ScrollArea className="w-full whitespace-nowrap flex gap-4 border  ">
                 <div className="flex gap-4 md:px-4 px-2 md:max-w-full py-3">
                   {/* <div className="flex  px-2 py-2 text-sm items-center "> */}
-                  <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
+                  {/* <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
                     <Checkbox
                       id="open-now"
                       checked={isNewPatient}
@@ -1111,9 +1224,9 @@ export default function SearchDoctorPage() {
                     <Label htmlFor="open-now" className="font-medium ">
                       Accepting new patients
                     </Label>
-                  </div>
+                  </div> */}
 
-                  <DropdownMenu
+                  {/* <DropdownMenu
                     open={isDistanceOpen}
                     onOpenChange={setIsDistanceOpen}
                   >
@@ -1159,8 +1272,8 @@ export default function SearchDoctorPage() {
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
-                  </DropdownMenu>
-                  <DropdownMenu
+                  </DropdownMenu> */}
+                  {/* <DropdownMenu
                     open={isReviewOpen}
                     onOpenChange={setIsReviewOpen}
                   >
@@ -1206,8 +1319,8 @@ export default function SearchDoctorPage() {
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
-                  </DropdownMenu>
-                  <DropdownMenu>
+                  </DropdownMenu> */}
+                  {/* <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1236,9 +1349,9 @@ export default function SearchDoctorPage() {
                         className="w-full border p-2 rounded-md"
                       />
                     </DropdownMenuContent>
-                  </DropdownMenu>
+                  </DropdownMenu> */}
 
-                  <DropdownMenu
+                  {/* <DropdownMenu
                     open={isRatingsOpen}
                     onOpenChange={setIsRatingsOpen}
                   >
@@ -1284,236 +1397,321 @@ export default function SearchDoctorPage() {
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
-                  </DropdownMenu>
-                  {/* <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
-                          isDistanceOpen
-                            ? "bg-black text-white"
-                            : "bg-white text-black"
-                        )}
-                      >
-                        <span>{selectedDistance || "Availability"}</span>
-                        <ChevronDown
-                          size={16}
-                          className={cn(
-                            isDistanceOpen && "rotate-180 transition-transform"
-                          )}
-                        />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
-                      {availabilityOptions.map((option) => (
-                        <DropdownMenuItem
-                          key={option}
-                          id="distance"
-                          className={cn(
-                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                            selectedDistance === option && "bg-black text-white"
-                          )}
-                          // onSelect={(e) => {
-                      
-                          //   handleSelectDistance(option);
-                          // }}
-                        >
-                          <Checkbox
-                            // checked={selectedDistance === option}
-                            // onCheckedChange={() =>
-                            //   handleSelectDistance(option)
-                            // }
-                            className="pointer-events-none rounded-sm"
-                          />
-                          <span className="text-sm">{option}</span>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
                   </DropdownMenu> */}
-                  {/* <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
-                          isDistanceOpen
-                            ? "bg-black text-white"
-                            : "bg-white text-black"
-                        )}
-                      >
-                        <span>{selectedDistance || "Gender"}</span>
-                        <ChevronDown
-                          size={16}
-                          className={cn(
-                            isDistanceOpen && "rotate-180 transition-transform"
-                          )}
-                        />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
-                      {genderOptions.map((option) => (
-                        <DropdownMenuItem
-                          key={option}
-                          id="distance"
-                          className={cn(
-                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                            selectedDistance === option && "bg-black text-white"
-                          )}
-                          // onSelect={(e) => {
-                        
-                          //   handleSelectDistance(option);
-                          // }}
-                        >
-                          <Checkbox
-                            // checked={selectedDistance === option}
-                            // onCheckedChange={() =>
-                            //   handleSelectDistance(option)
-                            // }
-                            className="pointer-events-none rounded-sm"
-                          />
-                          <span className="text-sm">{option}</span>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
-                          isDistanceOpen
-                            ? "bg-black text-white"
-                            : "bg-white text-black"
-                        )}
-                      >
-                        <span>{selectedDistance || "Visit type"}</span>
-                        <ChevronDown
-                          size={16}
-                          className={cn(
-                            isDistanceOpen && "rotate-180 transition-transform"
-                          )}
-                        />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
-                      {visitOptions.map((option) => (
-                        <DropdownMenuItem
-                          key={option}
-                          id="distance"
-                          className={cn(
-                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                            selectedDistance === option && "bg-black text-white"
-                          )}
-                          // onSelect={(e) => {
-                          //   handleSelectDistance(option);
-                          // }}
-                        >
-                          <Checkbox
-                            // checked={selectedDistance === option}
-                            // onCheckedChange={() =>
-                            //   handleSelectDistance(option)
-                            // }
-                            className="pointer-events-none rounded-sm"
-                          />
-                          <span className="text-sm">{option}</span>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <DropdownMenu>
+                  {/* Availability */}
+                  <DropdownMenu
+                    open={isAvailabilityOpen}
+                    onOpenChange={setIsAvailabilityOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
                           "flex items-center justify-between gap-2 w-44 px-4 py-2 rounded-full border",
-                          isDistanceOpen
+                          selectedAvailability
                             ? "bg-black text-white"
                             : "bg-white text-black"
                         )}
                       >
-                        <span>{selectedDistance || "Years of experience"}</span>
-                        <ChevronDown
-                          size={16}
-                          className={cn(
-                            isDistanceOpen && "rotate-180 transition-transform"
-                          )}
-                        />
+                        <span>{selectedAvailability || "Availability"}</span>
+                        <ChevronDown size={16} />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
-                      {experienceOptions.map((option) => (
-                        <DropdownMenuItem
-                          key={option}
-                          id="distance"
-                          className={cn(
-                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                            selectedDistance === option && "bg-black text-white"
-                          )}
-                          // onSelect={(e) => {
-                          //   handleSelectDistance(option);
-                          // }}
-                        >
-                          <Checkbox
-                            // checked={selectedDistance === option}
-                            // onCheckedChange={() =>
-                            //   handleSelectDistance(option)
-                            // }
-                            className="pointer-events-none rounded-sm"
-                          />
-                          <span className="text-sm">{option}</span>
-                        </DropdownMenuItem>
-                      ))}
+                      {availabilityOptions.map(({ label, percentage }) => {
+                        const isSelected = selectedAvailability === label;
+                        return (
+                          <DropdownMenuItem
+                            key={label}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              if (isSelected) {
+                                setSelectedAvailability("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                                setIsAvailabilityOpen(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedAvailability,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Availability_Changed",
+                                  onComplete: () =>
+                                    setIsAvailabilityOpen(false),
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "flex items-center justify-between px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                              isSelected && "bg-black text-white"
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Checkbox
+                                checked={isSelected}
+                                className="pointer-events-none rounded-sm"
+                              />
+                              <span className="text-sm">{label}</span>
+                            </div>
+                          </DropdownMenuItem>
+                        );
+                      })}
                     </DropdownMenuContent>
-                  </DropdownMenu> */}
-                  {/* <DropdownMenu onOpenChange={setIsDistanceOpen}>
+                  </DropdownMenu>
+                  {/* Gender */}
+                  <DropdownMenu
+                    open={isGenderOpen}
+                    onOpenChange={setIsGenderOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
-                          "flex items-center justify-between gap-2 w-40 px-4 py-2 rounded-full border",
-                          isDistanceOpen
+                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
+                          selectedGender
                             ? "bg-black text-white"
                             : "bg-white text-black"
                         )}
                       >
-                        <span>{selectedDistance || "Education"}</span>
-                        <ChevronDown
-                          size={16}
-                          className={cn(
-                            isDistanceOpen && "rotate-180 transition-transform"
-                          )}
-                        />
+                        <span>{selectedGender || "Gender"}</span>
+                        <ChevronDown size={16} />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
-                      {educationOptions.map((option) => (
-                        <DropdownMenuItem
-                          key={option}
-                          id="distance"
-                          className={cn(
-                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                            selectedDistance === option && "bg-black text-white"
-                          )}
-                          // onSelect={(e) => {
-                          z //   handleSelectDistance(option);
-                          // }}
-                        >
-                          <Checkbox
-                            // checked={selectedDistance === option}
-                            // onCheckedChange={() =>
-                            //   handleSelectDistance(option)
-                            // }
-                            className="pointer-events-none rounded-sm"
-                          />
-                          <span className="text-sm">{option}</span>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu> */}
+                      {genderOptions.map(({ label, percentage }) => {
+                        const isSelected = selectedGender === label;
 
-                  {/* </div> */}
+                        return (
+                          <DropdownMenuItem
+                            key={label}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              if (isSelected) {
+                                setSelectedGender("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                                setIsGenderOpen(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedGender,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Gender_Changed",
+                                  onComplete: () => setIsGenderOpen(false),
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                              isSelected && "bg-black text-white"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none rounded-sm"
+                            />
+                            <span className="text-sm">{label}</span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Visit Type */}
+                  <DropdownMenu
+                    open={isVisitOpen}
+                    onOpenChange={setIsVisitOpen}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
+                          selectedVisit
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedVisit || "Visit Type"}</span>
+                        <ChevronDown size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-36 mt-2 rounded-md py-2 shadow-md">
+                      {visitOptions.map(({ label, percentage }) => {
+                        const isSelected = selectedVisit === label;
+
+                        return (
+                          <DropdownMenuItem
+                            key={label}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              if (isSelected) {
+                                setSelectedVisit("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                                setIsVisitOpen(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedVisit,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_VisitType_Changed",
+                                  onComplete: () => setIsVisitOpen(false),
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                              isSelected && "bg-black text-white"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none rounded-sm"
+                            />
+                            <span className="text-sm">{label}</span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Years of Experience */}
+                  <DropdownMenu
+                    open={isExperienceOpen}
+                    onOpenChange={setIsExperienceOpen}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-48 px-4 py-2 rounded-full border",
+                          selectedExperience
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>
+                          {selectedExperience || "Years of Experience"}
+                        </span>
+                        <ChevronDown size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-48 mt-2 rounded-md py-2 shadow-md">
+                      {experienceOptions.map(({ label, percentage }) => {
+                        const isSelected = selectedExperience === label;
+
+                        return (
+                          <DropdownMenuItem
+                            key={label}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              if (isSelected) {
+                                setSelectedExperience("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                                setIsExperienceOpen(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedExperience,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Experience_Changed",
+                                  onComplete: () => setIsExperienceOpen(false),
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                              isSelected && "bg-black text-white"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none rounded-sm"
+                            />
+                            <span className="text-sm">{label}</span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Education */}
+                  <DropdownMenu
+                    open={isEducationOpen}
+                    onOpenChange={setIsEducationOpen}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-38 px-4 py-2 rounded-full border",
+                          selectedEducation
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedEducation || "Education"}</span>
+                        <ChevronDown size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-46 mt-2 mr-2 rounded-md py-2 shadow-md">
+                      {educationOptions.map(({ label, percentage }) => {
+                        const isSelected = selectedEducation === label;
+
+                        return (
+                          <DropdownMenuItem
+                            key={label}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              if (isSelected) {
+                                setSelectedEducation("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                                setIsEducationOpen(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedEducation,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Education_Changed",
+                                  onComplete: () => setIsEducationOpen(false),
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                              isSelected && "bg-black text-white"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none rounded-sm"
+                            />
+                            <span className="text-sm">{label}</span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* </div>  */}
                 </div>
                 <ScrollBar
                   orientation="horizontal"
