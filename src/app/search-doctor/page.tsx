@@ -330,11 +330,12 @@ export default function SearchDoctorPage() {
   type FilterHandlerParams = {
     label: string;
     percentage: number;
-    doctors: any[];
-    setSelected: (value: string) => void;
-    setFilteredDoctors: (docs: any[]) => void;
-    setHasUserFiltered: (value: boolean) => void;
-    eventName: string; // e.g., "Filter_Gender_Changed"
+    doctors: DoctorType[]; // replace with your actual type
+    setSelected: (label: string) => void;
+    setFilteredDoctors: (doctors: DoctorType[]) => void;
+    setHasUserFiltered: (filtered: boolean) => void;
+    eventName: string;
+    onComplete?: () => void; // optional callback
   };
 
   function handleGenericFilter({
@@ -345,6 +346,7 @@ export default function SearchDoctorPage() {
     setFilteredDoctors,
     setHasUserFiltered,
     eventName,
+    onComplete, // <-- new
   }: FilterHandlerParams) {
     setSelected(label);
     setHasUserFiltered(true);
@@ -359,7 +361,10 @@ export default function SearchDoctorPage() {
       value: label,
       action: label ? "selected" : "unselected",
     });
+
+    if (onComplete) onComplete(); // close dropdown
   }
+
   const resetFilters = () => {
     setReviews("");
     setMaxDistance("");
@@ -1394,7 +1399,10 @@ export default function SearchDoctorPage() {
                     </DropdownMenuContent>
                   </DropdownMenu> */}
                   {/* Availability */}
-                  <DropdownMenu>
+                  <DropdownMenu
+                    open={isAvailabilityOpen}
+                    onOpenChange={setIsAvailabilityOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1421,6 +1429,7 @@ export default function SearchDoctorPage() {
                                 setSelectedAvailability("");
                                 setFilteredDoctors(doctors);
                                 setHasUserFiltered(false);
+                                setIsAvailabilityOpen(false);
                               } else {
                                 handleGenericFilter({
                                   label,
@@ -1430,6 +1439,8 @@ export default function SearchDoctorPage() {
                                   setFilteredDoctors,
                                   setHasUserFiltered,
                                   eventName: "Filter_Availability_Changed",
+                                  onComplete: () =>
+                                    setIsAvailabilityOpen(false),
                                 });
                               }
                             }}
@@ -1451,7 +1462,10 @@ export default function SearchDoctorPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                   {/* Gender */}
-                  <DropdownMenu>
+                  <DropdownMenu
+                    open={isGenderOpen}
+                    onOpenChange={setIsGenderOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1475,11 +1489,11 @@ export default function SearchDoctorPage() {
                             key={label}
                             onSelect={(e) => {
                               e.preventDefault();
-
                               if (isSelected) {
                                 setSelectedGender("");
                                 setFilteredDoctors(doctors);
                                 setHasUserFiltered(false);
+                                setIsGenderOpen(false);
                               } else {
                                 handleGenericFilter({
                                   label,
@@ -1489,6 +1503,7 @@ export default function SearchDoctorPage() {
                                   setFilteredDoctors,
                                   setHasUserFiltered,
                                   eventName: "Filter_Gender_Changed",
+                                  onComplete: () => setIsGenderOpen(false),
                                 });
                               }
                             }}
@@ -1509,7 +1524,10 @@ export default function SearchDoctorPage() {
                   </DropdownMenu>
 
                   {/* Visit Type */}
-                  <DropdownMenu>
+                  <DropdownMenu
+                    open={isVisitOpen}
+                    onOpenChange={setIsVisitOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1527,6 +1545,7 @@ export default function SearchDoctorPage() {
                     <DropdownMenuContent className="w-36 mt-2 rounded-md py-2 shadow-md">
                       {visitOptions.map(({ label, percentage }) => {
                         const isSelected = selectedVisit === label;
+
                         return (
                           <DropdownMenuItem
                             key={label}
@@ -1536,6 +1555,7 @@ export default function SearchDoctorPage() {
                                 setSelectedVisit("");
                                 setFilteredDoctors(doctors);
                                 setHasUserFiltered(false);
+                                setIsVisitOpen(false);
                               } else {
                                 handleGenericFilter({
                                   label,
@@ -1545,6 +1565,7 @@ export default function SearchDoctorPage() {
                                   setFilteredDoctors,
                                   setHasUserFiltered,
                                   eventName: "Filter_VisitType_Changed",
+                                  onComplete: () => setIsVisitOpen(false),
                                 });
                               }
                             }}
@@ -1565,7 +1586,10 @@ export default function SearchDoctorPage() {
                   </DropdownMenu>
 
                   {/* Years of Experience */}
-                  <DropdownMenu>
+                  <DropdownMenu
+                    open={isExperienceOpen}
+                    onOpenChange={setIsExperienceOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1585,6 +1609,7 @@ export default function SearchDoctorPage() {
                     <DropdownMenuContent className="w-48 mt-2 rounded-md py-2 shadow-md">
                       {experienceOptions.map(({ label, percentage }) => {
                         const isSelected = selectedExperience === label;
+
                         return (
                           <DropdownMenuItem
                             key={label}
@@ -1594,6 +1619,7 @@ export default function SearchDoctorPage() {
                                 setSelectedExperience("");
                                 setFilteredDoctors(doctors);
                                 setHasUserFiltered(false);
+                                setIsExperienceOpen(false);
                               } else {
                                 handleGenericFilter({
                                   label,
@@ -1603,6 +1629,7 @@ export default function SearchDoctorPage() {
                                   setFilteredDoctors,
                                   setHasUserFiltered,
                                   eventName: "Filter_Experience_Changed",
+                                  onComplete: () => setIsExperienceOpen(false),
                                 });
                               }
                             }}
@@ -1623,7 +1650,10 @@ export default function SearchDoctorPage() {
                   </DropdownMenu>
 
                   {/* Education */}
-                  <DropdownMenu>
+                  <DropdownMenu
+                    open={isEducationOpen}
+                    onOpenChange={setIsEducationOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -1641,6 +1671,7 @@ export default function SearchDoctorPage() {
                     <DropdownMenuContent className="w-46 mt-2 mr-2 rounded-md py-2 shadow-md">
                       {educationOptions.map(({ label, percentage }) => {
                         const isSelected = selectedEducation === label;
+
                         return (
                           <DropdownMenuItem
                             key={label}
@@ -1650,6 +1681,7 @@ export default function SearchDoctorPage() {
                                 setSelectedEducation("");
                                 setFilteredDoctors(doctors);
                                 setHasUserFiltered(false);
+                                setIsEducationOpen(false);
                               } else {
                                 handleGenericFilter({
                                   label,
@@ -1659,6 +1691,7 @@ export default function SearchDoctorPage() {
                                   setFilteredDoctors,
                                   setHasUserFiltered,
                                   eventName: "Filter_Education_Changed",
+                                  onComplete: () => setIsEducationOpen(false),
                                 });
                               }
                             }}
