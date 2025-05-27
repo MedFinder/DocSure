@@ -1413,34 +1413,42 @@ export default function SearchDoctorPage() {
                       {availabilityOptions.map(({ label, percentage }) => (
                         <DropdownMenuItem
                           key={label}
-                          onSelect={() =>
-                            handleGenericFilter({
-                              label,
-                              percentage,
-                              doctors,
-                              setSelected: setSelectedAvailability,
-                              setFilteredDoctors,
-                              setHasUserFiltered,
-                              eventName: "Filter_Availability_Changed",
-                            })
-                          }
-                          className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white"
+                          className={cn(
+                            "flex items-center justify-between px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                            selectedAvailability === label &&
+                              "bg-black text-white"
+                          )}
+                          onSelect={(e) => e.preventDefault()} // prevent default select behavior
                         >
                           <div className="flex items-center gap-2">
                             <Checkbox
                               checked={selectedAvailability === label}
-                              className="pointer-events-none rounded-sm"
+                              onCheckedChange={(checked) => {
+                                if (!checked) {
+                                  setSelectedAvailability("");
+                                  setFilteredDoctors(doctors); // Reset to full list
+                                  setHasUserFiltered(false);
+                                } else {
+                                  handleGenericFilter({
+                                    label,
+                                    percentage,
+                                    doctors,
+                                    setSelected: setSelectedAvailability,
+                                    setFilteredDoctors,
+                                    setHasUserFiltered,
+                                    eventName: "Filter_Availability_Changed",
+                                  });
+                                }
+                              }}
+                              className="rounded-sm"
                             />
                             <span className="text-sm">{label}</span>
                           </div>
-                          {/* <span className="text-xs text-muted-foreground">
-                            {percentage}%
-                          </span> */}
+                          {/* <span className="text-xs text-muted-foreground">{percentage}%</span> */}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-
                   {/* Gender */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -1461,17 +1469,7 @@ export default function SearchDoctorPage() {
                       {genderOptions.map(({ label, percentage }) => (
                         <DropdownMenuItem
                           key={label}
-                          onSelect={() =>
-                            handleGenericFilter({
-                              label,
-                              percentage,
-                              doctors,
-                              setSelected: setSelectedGender,
-                              setFilteredDoctors,
-                              setHasUserFiltered,
-                              eventName: "Filter_Gender_Changed",
-                            })
-                          }
+                          onSelect={(e) => e.preventDefault()}
                           className={cn(
                             "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
                             selectedGender === label && "bg-black text-white"
@@ -1479,7 +1477,24 @@ export default function SearchDoctorPage() {
                         >
                           <Checkbox
                             checked={selectedGender === label}
-                            className="pointer-events-none rounded-sm"
+                            onCheckedChange={(checked) => {
+                              if (!checked) {
+                                setSelectedGender("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedGender,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Gender_Changed",
+                                });
+                              }
+                            }}
+                            className="rounded-sm"
                           />
                           <span className="text-sm">{label}</span>
                         </DropdownMenuItem>
@@ -1507,17 +1522,7 @@ export default function SearchDoctorPage() {
                       {visitOptions.map(({ label, percentage }) => (
                         <DropdownMenuItem
                           key={label}
-                          onSelect={() =>
-                            handleGenericFilter({
-                              label,
-                              percentage,
-                              doctors,
-                              setSelected: setSelectedVisit,
-                              setFilteredDoctors,
-                              setHasUserFiltered,
-                              eventName: "Filter_VisitType_Changed",
-                            })
-                          }
+                          onSelect={(e) => e.preventDefault()}
                           className={cn(
                             "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
                             selectedVisit === label && "bg-black text-white"
@@ -1525,7 +1530,24 @@ export default function SearchDoctorPage() {
                         >
                           <Checkbox
                             checked={selectedVisit === label}
-                            className="pointer-events-none rounded-sm"
+                            onCheckedChange={(checked) => {
+                              if (!checked) {
+                                setSelectedVisit("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedVisit,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_VisitType_Changed",
+                                });
+                              }
+                            }}
+                            className="rounded-sm"
                           />
                           <span className="text-sm">{label}</span>
                         </DropdownMenuItem>
@@ -1555,17 +1577,7 @@ export default function SearchDoctorPage() {
                       {experienceOptions.map(({ label, percentage }) => (
                         <DropdownMenuItem
                           key={label}
-                          onSelect={() =>
-                            handleGenericFilter({
-                              label,
-                              percentage,
-                              doctors,
-                              setSelected: setSelectedExperience,
-                              setFilteredDoctors,
-                              setHasUserFiltered,
-                              eventName: "Filter_Experience_Changed",
-                            })
-                          }
+                          onSelect={(e) => e.preventDefault()}
                           className={cn(
                             "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
                             selectedExperience === label &&
@@ -1574,7 +1586,24 @@ export default function SearchDoctorPage() {
                         >
                           <Checkbox
                             checked={selectedExperience === label}
-                            className="pointer-events-none rounded-sm"
+                            onCheckedChange={(checked) => {
+                              if (!checked) {
+                                setSelectedExperience("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedExperience,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Experience_Changed",
+                                });
+                              }
+                            }}
+                            className="rounded-sm"
                           />
                           <span className="text-sm">{label}</span>
                         </DropdownMenuItem>
@@ -1602,17 +1631,7 @@ export default function SearchDoctorPage() {
                       {educationOptions.map(({ label, percentage }) => (
                         <DropdownMenuItem
                           key={label}
-                          onSelect={() =>
-                            handleGenericFilter({
-                              label,
-                              percentage,
-                              doctors,
-                              setSelected: setSelectedEducation,
-                              setFilteredDoctors,
-                              setHasUserFiltered,
-                              eventName: "Filter_Education_Changed",
-                            })
-                          }
+                          onSelect={(e) => e.preventDefault()}
                           className={cn(
                             "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
                             selectedEducation === label && "bg-black text-white"
@@ -1620,7 +1639,24 @@ export default function SearchDoctorPage() {
                         >
                           <Checkbox
                             checked={selectedEducation === label}
-                            className="pointer-events-none rounded-sm"
+                            onCheckedChange={(checked) => {
+                              if (!checked) {
+                                setSelectedEducation("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedEducation,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Education_Changed",
+                                });
+                              }
+                            }}
+                            className="rounded-sm"
                           />
                           <span className="text-sm">{label}</span>
                         </DropdownMenuItem>
