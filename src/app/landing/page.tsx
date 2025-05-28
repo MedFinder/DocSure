@@ -189,7 +189,7 @@ export default function LandingPage() {
   const [populardoctors, setpopulardoctors] = useState([]);
   const inputRefs = useRef([]);
   const addressRefs = useRef([]);
-
+console.log(selectedSpecialty,selectedInsurer)
   const handleDoctorTypeClick = (value: any) => {
     formik.setFieldValue("specialty", value);
     setSelectedSpecialty(value); // Update specialty when button is clicked
@@ -356,7 +356,7 @@ export default function LandingPage() {
     }
     if (selectedInsurer) {
       setSelectedInsurer(selectedInsurer);
-      formik.setFieldValue("insurer", selectedInsurer);
+      formik.setFieldValue("insurer", selectedInsurer.value);
     }
     fetchUserLocationAndPopularDrs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -895,7 +895,9 @@ export default function LandingPage() {
                           formik.setFieldValue("insurer", value);
                           setSelectedInsurer(value);
                         }}
-                        clearable={false}
+                         isClearable={true}
+                        isSearchable={true}
+
                       />
                     </div>
                   </div>
