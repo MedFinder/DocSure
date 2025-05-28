@@ -72,6 +72,9 @@ export const customStyles = {
     ...provided,
     color: "#9ca3af",
     textAlign: "left",
+    whiteSpace: "nowrap", // prevent line breaks
+    overflow: "hidden", // hide overflowed text
+    textOverflow: "ellipsis", // add "..." when text is too long
   }),
   singleValue: (provided) => ({
     ...provided,
