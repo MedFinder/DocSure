@@ -32,6 +32,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { StatusBadge } from "@/app/transcript-new/StatusBadge";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const LoadingSumamry = dynamic(
   () => import("../../../components/Loading/LoadingSummary"),
@@ -101,6 +102,7 @@ const getAlternateColor = (index: number) => {
   const colors = ["#F7D07D", "#A0F1C2"]; // Gold & Light Green
   return colors[index % 2]; // Alternate based on index
 };
+
 const getDrSummary = async (
   name: string,
   formatted_address: string,
@@ -113,13 +115,14 @@ const getDrSummary = async (
     place_id,
     request_id: formData?.request_id,
   };
+  // console.log(name, formatted_address, place_id, formData);
 
   try {
     const resp = await axios.post(
       `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_summary`,
       data
     );
-    // console.log(resp?.data)
+    // console.log(resp?.data);
     return resp.data?.result?.summary || null;
   } catch (error) {
     console.error("Error fetching doctor summary:", error);
@@ -166,11 +169,56 @@ export const Task: React.FC<TaskProps> = ({
     useSortable({ id });
   const [isSelected, setIsSelected] = useState(true);
   const [isCardLoading, setIsCardLoading] = useState(false);
+  const [globalLoading, setGlobalLoading] = useState(false); // Add state for global spinner
   const [open, setOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(() => {
     // Only check items that are both open and within the first 10
     return index < 10 && openingStatus === "Open";
   });
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const fetchDoctorDetails = async (data) => {
+    try {
+
+      // Construct the full payload for the API
+      const payload = {
+        place_id: data?.place_id,
+        name: data?.name,
+        formatted_address:data?.formatted_address,
+        request_id: data?.request_id,
+      };
+
+      // Log the ACTUAL payload that will be sent
+     // console.log("API Payload being sent:", payload);
+
+      const response = await axios.post(
+        `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_profile`,
+        payload // This is the 'payload' object
+      );
+
+      const result = response?.data?.result;
+      localStorage.setItem("doctorProfilePayload", JSON.stringify(result));
+      router.push(`/search-doctor/${place_id}`);
+    } catch (error) {
+      console.error("Failed to fetch doctor details:", error); // More specific error message
+      setGlobalLoading(false)
+    }
+  };
+  const getDrDeets = async (
+    name: string,
+    formatted_address: string,
+    place_id: string
+  ) => {
+    setGlobalLoading(true)
+    const formData = JSON.parse(localStorage.getItem("formData"));
+    const data = {
+      name,
+      formatted_address,
+      place_id,
+      request_id: formData?.request_id,
+    };
+    await fetchDoctorDetails(data);
+  };
 
   const { expandedId, setExpandedId } = useExpand();
   const isExpanded = expandedId === id;
@@ -206,8 +254,19 @@ export const Task: React.FC<TaskProps> = ({
       };
     }
   }, []);
+  // Add global spinner component
+const GlobalSpinner = ({ isVisible }) => {
+  if (!isVisible) return null;
 
-  // Function to handle expanding and fetching summary
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+      <div className="bg-white p-5 rounded-full">
+        <Loader2 className="w-10 h-10 text-[#E5573F] animate-spin" />
+      </div>
+    </div>
+  );
+};
+
   const handleExpand = async (e) => {
     e.stopPropagation();
 
@@ -287,6 +346,7 @@ export const Task: React.FC<TaskProps> = ({
 
   return (
     <>
+    <GlobalSpinner isVisible={globalLoading} />
       <tr
         ref={setNodeRef}
         style={style}
@@ -403,7 +463,7 @@ export const Task: React.FC<TaskProps> = ({
                         //   track("Dr_Website_Clicked");
                         // }}
                         type="button"
-                        onClick={handleExpand}
+                        onClick={() => getDrDeets(title, address, place_id)}
                         onPointerDown={(e) => e.stopPropagation()}
                       >
                         <span>{title}</span>
@@ -435,7 +495,8 @@ export const Task: React.FC<TaskProps> = ({
                       //   track("Dr_Website_Clicked");
                       // }}
                       type="button"
-                      onClick={handleExpand}
+                      // onClick={handleExpand}
+                      onClick={() => getDrDeets(title, address, place_id)}
                       onPointerDown={(e) => e.stopPropagation()}
                     >
                       <span className="">{title}</span>
@@ -458,7 +519,7 @@ export const Task: React.FC<TaskProps> = ({
                     <div className=" hidden md:flex justify-between overflow-x-auto gap-4 items-start min-w-[60%] md:min-w-[40%] lg:min-w-[25%]">
                       <div
                         className="md:flex gap-1 font-normal text-[#333333] text-sm items-center hidden"
-                        onClick={handleExpand}
+                        onClick={() => getDrDeets(title, address, place_id)}
                         onPointerDown={(e) => e.stopPropagation()}
                       >
                         <img
@@ -477,7 +538,7 @@ export const Task: React.FC<TaskProps> = ({
                       {distance && (
                         <div
                           className="md:flex hidden items-center gap-1"
-                          onClick={handleExpand}
+                          onClick={() => getDrDeets(title, address, place_id)}
                           onPointerDown={(e) => e.stopPropagation()}
                         >
                           <MapPin size={13} />
@@ -574,7 +635,7 @@ export const Task: React.FC<TaskProps> = ({
                   <div className="flex justify-between items-center">
                     <span
                       className=" text-sm text-[#636465]  pr-16 md:pr-0 md:w-[60%] w-[72%] md:flex "
-                      onClick={handleExpand}
+                      onClick={() => getDrDeets(title, address, place_id)}
                       onPointerDown={(e) => e.stopPropagation()}
                     >
                       {vicinity}
@@ -583,7 +644,7 @@ export const Task: React.FC<TaskProps> = ({
 
                   <div
                     className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden  flex-grow break-words pr-16 md:pr-0"
-                    onClick={handleExpand}
+                    onClick={() => getDrDeets(title, address, place_id)}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
                     <img
@@ -602,7 +663,7 @@ export const Task: React.FC<TaskProps> = ({
                     {distance && (
                       <div
                         className="flex items-center gap-1"
-                        onClick={handleExpand}
+                        onClick={() => getDrDeets(title, address, place_id)}
                         onPointerDown={(e) => e.stopPropagation()}
                       >
                         <MapPin size={13} />
@@ -628,7 +689,7 @@ export const Task: React.FC<TaskProps> = ({
                   </div>
                   <div
                     className="flex gap-1 font-normal text-[#333333] text-sm items-center md:hidden flex-grow break-words pr-16 md:pr-0"
-                    onClick={handleExpand}
+                    onClick={() => getDrDeets(title, address, place_id)}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
                     <div className="md:hidden gap-1 text-sm text-[#333333] flex items-center  ">
@@ -647,7 +708,7 @@ export const Task: React.FC<TaskProps> = ({
                   </div>
                   <div
                     className="md:flex gap-1 text-sm text-[#333333]  hidden "
-                    onClick={handleExpand}
+                    onClick={() => getDrDeets(title, address, place_id)}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
                     {/* <span

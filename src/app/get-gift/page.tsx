@@ -59,7 +59,20 @@ export default function GetGift() {
               </div>
               <div>
                 <p className="text-lg font-medium">
-                  Get a $20 Amazon Gift Card. <Link href="/" className="text-[#0074BA] hover:underline">Book your doctor appointment</Link> and complete a <a href="https://form.typeform.com/to/VPJ0OhpE" target="_blank" rel="noopener noreferrer" className="text-[#0074BA] hover:underline">quick feedback survey</a>.
+                  Get a $20 Amazon Gift Card.{" "}
+                  <Link href="/" className="text-[#0074BA] hover:underline">
+                    Book your doctor appointment
+                  </Link>{" "}
+                  and complete a{" "}
+                  <a
+                    href="https://form.typeform.com/to/VPJ0OhpE"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#0074BA] hover:underline"
+                  >
+                    quick feedback survey
+                  </a>
+                  .
                 </p>
               </div>
             </div>
@@ -70,7 +83,9 @@ export default function GetGift() {
               </div>
               <div>
                 <p className="text-lg font-medium">
-                  Plus, earn $20 for every friend you refer who books an appointment — up to $80 total. Your email address is your referral code. Share it with others!
+                  Plus, earn $20 for every friend you refer who books an
+                  appointment — up to $80 total. Your email address is your
+                  referral code. Share it with others!
                 </p>
               </div>
             </div>
@@ -90,8 +105,9 @@ export default function GetGift() {
             </Link>
           </div> */}
         </div>
-          <FooterSection />
+        <FooterSection />
       </main>
     </div>
   );
 }
+

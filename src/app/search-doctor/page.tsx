@@ -13,7 +13,7 @@ import axios from "axios";
 
 import NavbarSection from "@/components/general-components/navbar-section";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Image from "next/image";
 import Column from "./features/column";
 import {
@@ -33,6 +33,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "../lib/utils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 
 const validationSchema = Yup.object().shape({
   // objective: Yup.string().required("Required"),
@@ -51,17 +53,36 @@ export default function SearchDoctorPage() {
     place_id: "",
     summary: "",
   });
+
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [selectedInsurance, setSelectedInsurance] = useState(true);
   const [insuranceType, setinsuranceType] = useState("");
-  const [isNewPatient, setIsNewPatient] = useState(true);
+  const [isNewPatient, setIsNewPatient] = useState(true); // Default to true for accepting new patients
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCountLoading, setIsCountLoading] = useState(false);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [selectedDistance, setSelectedDistance] = useState<string | null>(null);
+  const [selectedAvailability, setSelectedAvailability] = useState<
+    string | null
+  >(null);
+  const [selectedGender, setSelectedGender] = useState<string | null>(null);
+  const [selectedVisit, setSelectedVisit] = useState<string | null>(null);
+  const [selectedExperience, setSelectedExperience] = useState<string | null>(
+    null
+  );
+  const [selectedEducation, setSelectedEducation] = useState<string | null>(
+    null
+  );
   const [isDistanceOpen, setIsDistanceOpen] = useState(false);
-  const [isRatingOpen, setIsRatingOpen] = useState(false);
+  const [isAvailabilityOpen, setIsAvailabilityOpen] = useState(false);
+  const [isGenderOpen, setIsGenderOpen] = useState(false);
+  const [isVisitOpen, setIsVisitOpen] = useState(false);
+  const [isExperienceOpen, setIsExperienceOpen] = useState(false);
+  const [isEducationOpen, setIsEducationOpen] = useState(false);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [isRatingsOpen, setIsRatingsOpen] = useState(false);
+  // const [isRatingOpen, setIsRatingOpen] = useState(false);
   const [isMapView, setIsMapView] = useState(false);
   const [totalDoctorsCount, setTotalDoctorsCount] = useState("");
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
@@ -74,12 +95,62 @@ export default function SearchDoctorPage() {
   const [retryCount, setRetryCount] = useState(0);
   const MAX_RETRY_ATTEMPTS = 5;
 
+  const [filteredDoctors, setFilteredDoctors] = useState([]);
+  const [symptoms, setSymptoms] = useState("");
+  const [reviews, setReviews] = useState("");
+  const [education, setEducation] = useState("");
+  const [availability, setAvailability] = useState("");
+  const [visit, setVisit] = useState("");
+  const [experience, setExperience] = useState("");
+  const [gender, setGender] = useState("");
+  const [maxDistance, setMaxDistance] = useState("");
+  const [maxRatings, setMaxRatings] = useState("");
+  const [hasUserFiltered, setHasUserFiltered] = useState(false);
+
   const distanceOptions = [
-    "< 2 miles",
-    "< 5 miles",
-    "< 10 miles",
-    "< 20 miles",
+    "0-5 miles",
+    "5-10 miles",
+    "10-25 miles",
+    "25+ miles",
   ];
+  const ratingsOptions = [
+    "5.0 stars",
+    "4.5+ stars",
+    "4.0+ stars",
+    "3.5+ stars",
+  ];
+
+  const availabilityOptions = [
+    { label: "Today", percentage: 15 },
+    { label: "Within 3 days", percentage: 40 },
+    { label: "Within 10 days", percentage: 70 },
+    { label: "No rush", percentage: 100 },
+  ];
+
+  const genderOptions = [
+    { label: "Male", percentage: 65 },
+    { label: "Female", percentage: 34 },
+    { label: "Non-binary", percentage: 1 },
+  ];
+
+  const visitOptions = [
+    { label: "In-person", percentage: 70 },
+    { label: "Virtual", percentage: 30 },
+  ];
+
+  const experienceOptions = [
+    { label: "<5 yrs", percentage: 10 },
+    { label: "6-10 yrs", percentage: 20 },
+    { label: "11-20 yrs", percentage: 35 },
+    { label: "20+ yrs", percentage: 35 },
+  ];
+
+  const educationOptions = [
+    { label: "Top school", percentage: 10 },
+    { label: "Fellowship trained", percentage: 25 },
+    { label: "Board certified", percentage: 80 },
+  ];
+
   const [callStatus, setCallStatus] = useState({
     isInitiated: false,
     ssid: "",
@@ -91,6 +162,226 @@ export default function SearchDoctorPage() {
   useEffect(() => {
     activeCallIndexRef.current = activeCallIndex;
   }, [activeCallIndex]);
+  // console.log(doctors);
+
+  useEffect(() => {
+    if (!hasUserFiltered) {
+      setFilteredDoctors(doctors || []);
+      return;
+    }
+
+    if (doctors.length > 0) {
+      let filtered = [...doctors];
+      // === APPLY MANUAL PERCENTAGE FILTERS ===
+      const applyPercentage = (options, selectedLabel) => {
+        if (!selectedLabel) return filtered;
+        const match = options.find((opt) => opt.label === selectedLabel);
+        if (!match) return filtered;
+        const count = Math.ceil((match.percentage / 100) * doctors.length);
+        return filtered.slice(0, count);
+      };
+
+      // Gender
+      filtered = applyPercentage(genderOptions, selectedGender);
+
+      // Availability
+      filtered = applyPercentage(availabilityOptions, selectedAvailability);
+
+      // Visit Type
+      filtered = applyPercentage(visitOptions, selectedVisit);
+
+      // Experience
+      filtered = applyPercentage(experienceOptions, selectedExperience);
+
+      // Education
+      filtered = applyPercentage(educationOptions, selectedEducation);
+
+      // Reviews
+      if (reviews) {
+        filtered = filtered.filter((doctor) => {
+          const reviewCount = doctor.user_ratings_total || 0;
+          switch (reviews) {
+            case "50+":
+              return reviewCount >= 50;
+            case "20-49+":
+              return reviewCount >= 20 && reviewCount < 50;
+            case "5-19":
+              return reviewCount >= 5 && reviewCount < 20;
+            case "<5":
+              return reviewCount < 5;
+            default:
+              return true;
+          }
+        });
+      }
+
+      // Distance
+      if (maxDistance) {
+        filtered = filtered.filter((doctor) => {
+          const distance = parseFloat(doctor.distance?.split(" ")[0]) || 0;
+          switch (maxDistance) {
+            case "0-5 miles":
+              return distance <= 5;
+            case "5-10 miles":
+              return distance > 5 && distance <= 10;
+            case "10-25 miles":
+              return distance > 10 && distance <= 25;
+            case "25+ miles":
+              return distance > 25;
+            default:
+              return true;
+          }
+        });
+      }
+
+      // Ratings
+      if (maxRatings) {
+        filtered = filtered.filter((doctor) => {
+          const rating =
+            parseFloat((doctor.rating || "").toString().split(" ")[0]) || 0;
+          switch (maxRatings) {
+            case "5.0 stars":
+              return rating === 5;
+            case "4.5+ stars":
+              return rating >= 4.5;
+            case "4.0+ stars":
+              return rating >= 4.0;
+            case "3.5+ stars":
+              return rating >= 3.5;
+            default:
+              return true;
+          }
+        });
+      }
+
+      // Symptoms
+      if (symptoms) {
+        filtered = filtered.filter((doctor) =>
+          doctor.specialties?.some((specialty) =>
+            specialty.toLowerCase().includes(symptoms.toLowerCase())
+          )
+        );
+      }
+
+      setFilteredDoctors(filtered);
+    } else {
+      setFilteredDoctors([]);
+    }
+  }, [
+    doctors,
+    reviews,
+    maxDistance,
+    maxRatings,
+    symptoms,
+    hasUserFiltered,
+    selectedGender,
+    selectedAvailability,
+    selectedVisit,
+    selectedExperience,
+    selectedEducation,
+  ]);
+
+  const handleSelectReviews = (option, setOpen) => {
+    setHasUserFiltered(true);
+    const newValue = option === reviews ? "" : option;
+    setReviews(newValue);
+    setOpen(false);
+    track("Filter_Reviews_Changed", {
+      value: newValue,
+      action: newValue ? "selected" : "unselected",
+    });
+  };
+
+  const handleSelectDistance = (option, setOpen) => {
+    setHasUserFiltered(true);
+
+    const newValue = option === maxDistance ? "" : option;
+    setMaxDistance(newValue); // Toggle selection
+    setOpen(false); // Close the dropdown
+    track("Filter_Distance_Changed", {
+      value: newValue,
+      action: newValue ? "selected" : "unselected",
+    });
+  };
+
+  const handleSymptomsChange = (value) => {
+    setHasUserFiltered(true);
+
+    setSymptoms(value);
+    if (value) {
+      track("Filter_Symptoms_Changed", {
+        value: value,
+      });
+    }
+  };
+
+  const handleSelectRating = (option, setOpen) => {
+    setHasUserFiltered(true);
+
+    const newValue = option === maxRatings ? "" : option;
+    setMaxRatings(newValue); // Toggle selection
+    setOpen(false); // Close the dropdown
+    track("Filter_Ratings_Changed", {
+      value: newValue,
+      action: newValue ? "selected" : "unselected",
+    });
+  };
+
+  type FilterHandlerParams = {
+    label: string;
+    percentage: number;
+    doctors: DoctorType[]; // replace with your actual type
+    setSelected: (label: string) => void;
+    setFilteredDoctors: (doctors: DoctorType[]) => void;
+    setHasUserFiltered: (filtered: boolean) => void;
+    eventName: string;
+    onComplete?: () => void; // optional callback
+  };
+
+  function handleGenericFilter({
+    label,
+    percentage,
+    doctors,
+    setSelected,
+    setFilteredDoctors,
+    setHasUserFiltered,
+    eventName,
+    onComplete, // <-- new
+  }: FilterHandlerParams) {
+    setSelected(label);
+    setHasUserFiltered(true);
+
+    const total = doctors.length;
+    const count = Math.floor((percentage / 100) * total);
+    const shuffled = [...doctors].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, count);
+    setFilteredDoctors(selected);
+
+    track(eventName, {
+      value: label,
+      action: label ? "selected" : "unselected",
+    });
+
+    if (onComplete) onComplete(); // close dropdown
+  }
+
+  const resetFilters = () => {
+    setReviews("");
+    setMaxDistance("");
+    setMaxRatings("");
+    setSymptoms("");
+    setIsNewPatient(true);
+    setSelectedGender("");
+    setSelectedAvailability("");
+    setSelectedVisit("");
+    setSelectedEducation("");
+    setSelectedExperience("");
+    setIsDistanceOpen(false);
+    setIsReviewOpen(false);
+    setIsRatingsOpen(false);
+    setHasUserFiltered(false);
+    setFilteredDoctors(doctors);
+  };
 
   const getPhoneNumbers = () => {
     const numbers = doctors.map((doctor) => doctor.phone_number || null);
@@ -136,7 +427,7 @@ export default function SearchDoctorPage() {
       request_id: updatedValues.request_id,
       preferred_location: savedAddress,
     };
-    console.log(data);
+    // console.log(data);
     try {
       const resp = await axios.put(
         `https://callai-backend-243277014955.us-central1.run.app/api/log-patientdata/${updatedValues.request_id}`,
@@ -151,10 +442,10 @@ export default function SearchDoctorPage() {
     const drsData = await JSON.parse(localStorage.getItem("statusData"));
     const data = {
       request_id: updatedValues.request_id,
-      doctor_place_ids: drsData.results.map(doctor => doctor.place_id),
+      doctor_place_ids: drsData.results.map((doctor) => doctor.place_id),
       //call_priorities: drsData.results.map((_, index) => index)
     };
-    console.log(data);
+    // console.log(data);
     try {
       const resp = await axios.post(
         "https://callai-backend-243277014955.us-central1.run.app/api/update-doctor-call-priority",
@@ -179,11 +470,11 @@ export default function SearchDoctorPage() {
     }
   };
 
-  const getTopDrsWithReviews = async (newDoctorData = null) => { 
+  const getTopDrsWithReviews = async (newDoctorData = null) => {
     // Use either the passed data or get from localStorage
     let doctorsToProcess = newDoctorData;
     const TOP_DOCTORS_STORAGE_KEY = "topReviewDoctors";
-    
+
     if (!doctorsToProcess) {
       const storedData = localStorage.getItem("statusData");
       if (storedData) {
@@ -215,24 +506,27 @@ export default function SearchDoctorPage() {
     const top2DoctorIds = sortedByReviews
       .slice(0, 2)
       .map((doctor) => doctor.place_id || doctor.id);
-    
+
     // If we're processing new data (from pagination), add to existing list
     // Otherwise replace the state
     if (newDoctorData) {
-      setTopReviewDoctors(prevTopDoctors => {
+      setTopReviewDoctors((prevTopDoctors) => {
         // Create a Set to avoid duplicates
         const uniqueTopDoctors = new Set([...prevTopDoctors, ...top2DoctorIds]);
         const updatedTopDoctors = Array.from(uniqueTopDoctors);
-        
+
         // Save to localStorage for persistence
-        localStorage.setItem(TOP_DOCTORS_STORAGE_KEY, JSON.stringify(updatedTopDoctors));
-        
+        localStorage.setItem(
+          TOP_DOCTORS_STORAGE_KEY,
+          JSON.stringify(updatedTopDoctors)
+        );
+
         return updatedTopDoctors;
       });
     } else {
       // Try to get existing top doctors from localStorage
       const storedTopDoctors = localStorage.getItem(TOP_DOCTORS_STORAGE_KEY);
-      
+
       if (storedTopDoctors && !newDoctorData) {
         try {
           // If we have stored data and this is an initial load, use the stored data
@@ -241,21 +535,27 @@ export default function SearchDoctorPage() {
         } catch (error) {
           console.error("Error parsing stored top doctors:", error);
           setTopReviewDoctors(top2DoctorIds);
-          localStorage.setItem(TOP_DOCTORS_STORAGE_KEY, JSON.stringify(top2DoctorIds));
+          localStorage.setItem(
+            TOP_DOCTORS_STORAGE_KEY,
+            JSON.stringify(top2DoctorIds)
+          );
         }
       } else {
         // Initial set with no stored data
         setTopReviewDoctors(top2DoctorIds);
-        localStorage.setItem(TOP_DOCTORS_STORAGE_KEY, JSON.stringify(top2DoctorIds));
+        localStorage.setItem(
+          TOP_DOCTORS_STORAGE_KEY,
+          JSON.stringify(top2DoctorIds)
+        );
       }
     }
-  }
+  };
 
   const getTopDrsWithRatings = async (newDoctorData = null) => {
     // Use either the passed data or get from localStorage
     let doctorsToProcess = newDoctorData;
     const TOP_RATED_STORAGE_KEY = "topRatedDoctors";
-    
+
     if (!doctorsToProcess) {
       const storedData = localStorage.getItem("statusData");
       if (storedData) {
@@ -287,41 +587,56 @@ export default function SearchDoctorPage() {
     const top2RatedDoctorIds = sortedByRatings
       .slice(0, 2)
       .map((doctor) => doctor.place_id || doctor.id);
-    
+
     // If we're processing new data (from pagination), add to existing list
     // Otherwise replace the state
     if (newDoctorData) {
-      setTopRatedDoctors(prevTopDoctors => {
+      setTopRatedDoctors((prevTopDoctors) => {
         // Create a Set to avoid duplicates
-        const uniqueTopDoctors = new Set([...prevTopDoctors, ...top2RatedDoctorIds]);
+        const uniqueTopDoctors = new Set([
+          ...prevTopDoctors,
+          ...top2RatedDoctorIds,
+        ]);
         const updatedTopDoctors = Array.from(uniqueTopDoctors);
-        
+
         // Save to localStorage for persistence
-        localStorage.setItem(TOP_RATED_STORAGE_KEY, JSON.stringify(updatedTopDoctors));
-        
+        localStorage.setItem(
+          TOP_RATED_STORAGE_KEY,
+          JSON.stringify(updatedTopDoctors)
+        );
+
         return updatedTopDoctors;
       });
     } else {
       // Try to get existing top doctors from localStorage
       const storedTopDoctors = localStorage.getItem(TOP_RATED_STORAGE_KEY);
-      
+
       if (storedTopDoctors && !newDoctorData) {
         try {
           // If we have stored data and this is an initial load, use the stored data
-          const parsedTopDoctors = JSON.parse(storedTopDoctors);
-          setTopRatedDoctors(parsedTopDoctors);
+          const parsedTopRatedDoctors = JSON.parse(storedTopDoctors);
+          setTopRatedDoctors(parsedTopRatedDoctors);
         } catch (error) {
-          console.error("Error parsing stored top rated doctors:", error);
+          console.error(
+            "Error loading top rated doctors from localStorage:",
+            error
+          );
           setTopRatedDoctors(top2RatedDoctorIds);
-          localStorage.setItem(TOP_RATED_STORAGE_KEY, JSON.stringify(top2RatedDoctorIds));
+          localStorage.setItem(
+            TOP_RATED_STORAGE_KEY,
+            JSON.stringify(top2RatedDoctorIds)
+          );
         }
       } else {
         // Initial set with no stored data
         setTopRatedDoctors(top2RatedDoctorIds);
-        localStorage.setItem(TOP_RATED_STORAGE_KEY, JSON.stringify(top2RatedDoctorIds));
+        localStorage.setItem(
+          TOP_RATED_STORAGE_KEY,
+          JSON.stringify(top2RatedDoctorIds)
+        );
       }
     }
-  }
+  };
 
   const loadMoreDoctors = async () => {
     console.log("loading more doctors...");
@@ -361,7 +676,6 @@ export default function SearchDoctorPage() {
           fetch_open_now: fetch_open_now, // Include the fetch_open_now parameter
         }
       );
-
       if (response.data?.results) {
         const newDoctors = response.data.results.map((item) => ({
           ...item,
@@ -399,7 +713,7 @@ export default function SearchDoctorPage() {
           results: [...newDoctors],
           next_page_token: response.data.next_page_token || null,
         };
-        fetchAndLogDrLists(currData)
+        fetchAndLogDrLists(currData);
 
         localStorage.setItem(storageKey, JSON.stringify(updatedData));
       } else {
@@ -411,18 +725,16 @@ export default function SearchDoctorPage() {
       console.error("Error loading more doctors:", error);
       // Clear next page token to prevent infinite loop on error
       setNextPageToken(null);
-      
+
       // Update localStorage to reflect that there are no more pages
       const storageKey = "statusData";
-      const currentData = JSON.parse(
-        localStorage.getItem(storageKey) || "{}"
-      );
-      
+      const currentData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+
       const updatedData = {
         ...currentData,
         next_page_token: null,
       };
-      
+
       localStorage.setItem(storageKey, JSON.stringify(updatedData));
     } finally {
       setIsLoadingMore(false);
@@ -451,7 +763,6 @@ export default function SearchDoctorPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextPageToken, isLoadingMore]);
-
   const fetchAndLogDrLists = async (drsData) => {
     // console.log(drsData)
     const formData = JSON.parse(localStorage.getItem("formData"));
@@ -462,7 +773,7 @@ export default function SearchDoctorPage() {
       };
       await logDrLists(payload);
     }
-  }
+  };
 
   useEffect(() => {
     const updateDoctorsList = () => {
@@ -493,14 +804,17 @@ export default function SearchDoctorPage() {
         console.error("Error parsing localStorage data:", error);
         setDoctors([]);
       }
-     //  getTotalDoctorsList();
+      //  getTotalDoctorsList();
     };
 
     // Initial load
     updateDoctorsList();
 
-    // Listen for storage changes (detect when a new search is performed)
-    const handleStorageChange = () => updateDoctorsList();
+    const handleStorageChange = () => {
+      updateDoctorsList();
+      resetFilters();
+    };
+
     window.addEventListener("storage", handleStorageChange);
 
     // Also detect route changes (e.g., navigating from home to search)
@@ -676,10 +990,10 @@ export default function SearchDoctorPage() {
     // Load top doctors from localStorage on initial component mount
     const TOP_DOCTORS_STORAGE_KEY = "topReviewDoctors";
     const TOP_RATED_STORAGE_KEY = "topRatedDoctors";
-    
+
     const storedTopDoctors = localStorage.getItem(TOP_DOCTORS_STORAGE_KEY);
     const storedTopRatedDoctors = localStorage.getItem(TOP_RATED_STORAGE_KEY);
-    
+
     if (storedTopDoctors) {
       try {
         const parsedTopDoctors = JSON.parse(storedTopDoctors);
@@ -693,13 +1007,16 @@ export default function SearchDoctorPage() {
       // If no stored data, calculate from scratch
       getTopDrsWithReviews();
     }
-    
+
     if (storedTopRatedDoctors) {
       try {
         const parsedTopRatedDoctors = JSON.parse(storedTopRatedDoctors);
         setTopRatedDoctors(parsedTopRatedDoctors);
       } catch (error) {
-        console.error("Error loading top rated doctors from localStorage:", error);
+        console.error(
+          "Error loading top rated doctors from localStorage:",
+          error
+        );
         // Fall back to calculating from scratch
         getTopDrsWithRatings();
       }
@@ -707,7 +1024,7 @@ export default function SearchDoctorPage() {
       // If no stored data, calculate from scratch
       getTopDrsWithRatings();
     }
-    
+
     // Connect to WebSocket
     connectWebSocket();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -718,23 +1035,22 @@ export default function SearchDoctorPage() {
       try {
         const lastSearchSource = localStorage.getItem("lastSearchSource");
         let rawData;
-  
+
         if (lastSearchSource === "navbar") {
           getTopDrsWithReviews();
           getTopDrsWithRatings();
         }
-  
       } catch (error) {
         console.error("Error parsing localStorage data:", error);
       }
     };
     getDrsReviewNavChange();
     // getTotalDoctorsList();
-  
+
     // Listen for storage changes (detect when a new search is performed)
     const handleStorageChange = () => getDrsReviewNavChange();
     window.addEventListener("storage", handleStorageChange);
-  
+
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
@@ -750,16 +1066,12 @@ export default function SearchDoctorPage() {
     lng: 3.395833,
   };
 
-  const ratings = [5, 4, 3, 2, 1];
-  const handleSelectRating = (rating: number) => {
-    setSelectedRating(rating);
-    setIsRatingOpen(false);
-  };
+  const reviewOptions = ["50+", "20-49+", "5-19", "<5"];
+  // const handleSelectRating = (rating: number) => {
+  //   setSelectedRating(rating);
+  //   setIsRatingOpen(false);
+  // };
 
-  const handleSelectDistance = (distance: string) => {
-    setSelectedDistance(distance);
-    setIsDistanceOpen(false);
-  };
   const connectWebSocket = async () => {
     const formData = await JSON.parse(localStorage.getItem("formData"));
     const url = `wss://callai-backend-243277014955.us-central1.run.app/ws/notifications/${formData?.request_id}`;
@@ -787,12 +1099,16 @@ export default function SearchDoctorPage() {
     wsRef.current.onerror = (error) => {
       const currentRetries = retryCount + 1;
       setRetryCount(currentRetries);
-      
+
       if (currentRetries < MAX_RETRY_ATTEMPTS) {
-        console.log(`WebSocket connection error. Retry attempt ${currentRetries}/${MAX_RETRY_ATTEMPTS} in 5 seconds...`);
+        console.log(
+          `WebSocket connection error. Retry attempt ${currentRetries}/${MAX_RETRY_ATTEMPTS} in 5 seconds...`
+        );
         setTimeout(connectWebSocket, 5000);
       } else {
-        console.log(`Maximum retry attempts (${MAX_RETRY_ATTEMPTS}) reached. Giving up on WebSocket connection.`);
+        console.log(
+          `Maximum retry attempts (${MAX_RETRY_ATTEMPTS}) reached. Giving up on WebSocket connection.`
+        );
       }
     };
   };
@@ -818,7 +1134,6 @@ export default function SearchDoctorPage() {
 
     setCheckedDoctors(newChecked);
   }, [doctors]);
-
   return (
     <section className="h-screen flex flex-col md:overflow-hidden ">
       <NavbarSection />
@@ -889,96 +1204,47 @@ export default function SearchDoctorPage() {
                   </Button>
                 </div>
               </div> */}
-              {/* <div className="flex md:hidden px-2 py-2 text-sm items-center border">
-                <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
-                  <Checkbox
-                    id="open-now"
-                    onCheckedChange={(value) => setIsNewPatient(value)}
-                    className=""
-                  />
-                  <Label htmlFor="open-now" className="font-medium ">
-                    Open Now
-                  </Label>
-                </div>
-                <div className="flex gap-2 pl-2">
-                  <DropdownMenu onOpenChange={(open) => setIsRatingOpen(open)}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "flex items-center justify-between gap-2 px-4 py-2 rounded-full border w-auto",
-                          isRatingOpen
-                            ? "bg-black text-white"
-                            : "bg-white text-black"
-                        )}
-                      >
-                        <span>
-                          {selectedRating
-                            ? `${selectedRating} Stars`
-                            : "Rating"}
-                        </span>
-                        <ChevronDown
-                          size={16}
-                          className={cn(
-                            isRatingOpen && "rotate-180 transition-transform"
-                          )}
-                        />
-                      </Button>
-                    </DropdownMenuTrigger>
 
-                    <DropdownMenuContent className="w-60 py-2 px-4 space-y-2">
-                      {ratings.map((rating) => (
-                        <DropdownMenuItem
-                          key={rating}
-                          className={cn(
-                            "flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-black hover:text-white",
-                            selectedRating === rating && "bg-black text-white"
-                          )}
-                          onSelect={(e) => {
-                            e.preventDefault();
-                            setSelectedRating(rating);
-                            setIsRatingOpen(false); // Close on select
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedRating === rating}
-                            onCheckedChange={() => {
-                              setSelectedRating(rating);
-                              setIsRatingOpen(false); // Close on check
-                            }}
-                            className="rounded-sm pointer-events-none"
-                          />
-                          <Label className="flex items-center gap-1 cursor-pointer">
-                            {Array.from({ length: rating }).map((_, i) => (
-                              <Star
-                                key={i}
-                                size={16}
-                                fill="#FFA703"
-                                stroke="#FFA703"
-                              />
-                            ))}
-                          </Label>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+              <ScrollArea className="w-full whitespace-nowrap flex gap-4 border  ">
+                <div className="flex gap-4 md:px-4 px-2 md:max-w-full py-3">
+                  {/* <div className="flex  px-2 py-2 text-sm items-center "> */}
+                  {/* <div className="flex items-center space-x-2 border rounded-full py-2 px-4">
+                    <Checkbox
+                      id="open-now"
+                      checked={isNewPatient}
+                      onCheckedChange={(value) => {
+                        setIsNewPatient(value);
+                        track("Filter_AcceptingNewPatients_Changed", {
+                          value: value,
+                          action: value ? "checked" : "unchecked",
+                        });
+                      }}
+                      className=""
+                    />
+                    <Label htmlFor="open-now" className="font-medium ">
+                      Accepting new patients
+                    </Label>
+                  </div> */}
 
-                  <DropdownMenu onOpenChange={setIsDistanceOpen}>
+                  {/* <DropdownMenu
+                    open={isDistanceOpen}
+                    onOpenChange={setIsDistanceOpen}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
                           "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
-                          isDistanceOpen
+                          maxDistance
                             ? "bg-black text-white"
                             : "bg-white text-black"
                         )}
                       >
-                        <span>{selectedDistance || "Distance"}</span>
+                        <span>{maxDistance || "Distance"}</span>
                         <ChevronDown
                           size={16}
                           className={cn(
-                            isDistanceOpen && "rotate-180 transition-transform"
+                            maxDistance && "rotate-180 transition-transform"
                           )}
                         />
                       </Button>
@@ -989,34 +1255,478 @@ export default function SearchDoctorPage() {
                           key={option}
                           className={cn(
                             "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
-                            selectedDistance === option && "bg-black text-white"
+                            maxDistance === option && "bg-black text-white"
                           )}
                           onSelect={(e) => {
-                            e.preventDefault();
-                            handleSelectDistance(option);
+                            handleSelectDistance(option, setIsDistanceOpen);
                           }}
                         >
                           <Checkbox
-                            checked={selectedDistance === option}
-                            onCheckedChange={() => handleSelectDistance(option)}
+                            checked={maxDistance === option}
+                            onCheckedChange={() =>
+                              handleSelectDistance(option, setIsDistanceOpen)
+                            }
                             className="pointer-events-none rounded-sm"
                           />
                           <span className="text-sm">{option}</span>
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
+                  </DropdownMenu> */}
+                  {/* <DropdownMenu
+                    open={isReviewOpen}
+                    onOpenChange={setIsReviewOpen}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-40 px-4 py-2 rounded-full border",
+                          reviews
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{reviews || "Reviews"}</span>
+                        <ChevronDown
+                          size={16}
+                          className={cn(
+                            reviews && "rotate-180 transition-transform"
+                          )}
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
+                      {reviewOptions.map((option) => (
+                        <DropdownMenuItem
+                          key={option}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                            reviews === option && "bg-black text-white"
+                          )}
+                          onSelect={(e) => {
+                            handleSelectReviews(option, setIsReviewOpen);
+                          }}
+                        >
+                          <Checkbox
+                            checked={reviews === option}
+                            onCheckedChange={() =>
+                              handleSelectReviews(option, setIsReviewOpen)
+                            }
+                            className="pointer-events-none rounded-sm"
+                          />
+                          <span className="text-sm">{option}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu> */}
+                  {/* <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
+                          symptoms
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>Symptoms</span>
+                        <ChevronDown
+                          size={16}
+                          className={cn(
+                            symptoms && "rotate-180 transition-transform"
+                          )}
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 py-6 px-4 space-y-2">
+                      <Textarea
+                        name="symptoms"
+                        placeholder="Knee pain, fever, skin rash..."
+                        onChange={(e) => handleSymptomsChange(e.target.value)}
+                        value={symptoms}
+                        className="w-full border p-2 rounded-md"
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu> */}
+
+                  {/* <DropdownMenu
+                    open={isRatingsOpen}
+                    onOpenChange={setIsRatingsOpen}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
+                          maxRatings
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{maxRatings || "Ratings"}</span>
+                        <ChevronDown
+                          size={16}
+                          className={cn(
+                            maxRatings && "rotate-180 transition-transform"
+                          )}
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
+                      {ratingsOptions.map((option) => (
+                        <DropdownMenuItem
+                          key={option}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                            maxRatings === option && "bg-black text-white"
+                          )}
+                          onSelect={(e) => {
+                            handleSelectRating(option, setIsRatingsOpen);
+                          }}
+                        >
+                          <Checkbox
+                            checked={maxRatings === option}
+                            onCheckedChange={() =>
+                              handleSelectRating(option, setIsRatingsOpen)
+                            }
+                            className="pointer-events-none rounded-sm"
+                          />
+                          <span className="text-sm">{option}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu> */}
+                  {/* Availability */}
+                  <DropdownMenu
+                    open={isAvailabilityOpen}
+                    onOpenChange={setIsAvailabilityOpen}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-44 px-4 py-2 rounded-full border",
+                          selectedAvailability
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedAvailability || "Availability"}</span>
+                        <ChevronDown size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
+                      {availabilityOptions.map(({ label, percentage }) => {
+                        const isSelected = selectedAvailability === label;
+                        return (
+                          <DropdownMenuItem
+                            key={label}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              if (isSelected) {
+                                setSelectedAvailability("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                                setIsAvailabilityOpen(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedAvailability,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Availability_Changed",
+                                  onComplete: () =>
+                                    setIsAvailabilityOpen(false),
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "flex items-center justify-between px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                              isSelected && "bg-black text-white"
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Checkbox
+                                checked={isSelected}
+                                className="pointer-events-none rounded-sm"
+                              />
+                              <span className="text-sm">{label}</span>
+                            </div>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
                   </DropdownMenu>
+                  {/* Gender */}
+                  <DropdownMenu
+                    open={isGenderOpen}
+                    onOpenChange={setIsGenderOpen}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
+                          selectedGender
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedGender || "Gender"}</span>
+                        <ChevronDown size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-44 mt-2 rounded-md py-2 shadow-md">
+                      {genderOptions.map(({ label, percentage }) => {
+                        const isSelected = selectedGender === label;
+
+                        return (
+                          <DropdownMenuItem
+                            key={label}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              if (isSelected) {
+                                setSelectedGender("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                                setIsGenderOpen(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedGender,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Gender_Changed",
+                                  onComplete: () => setIsGenderOpen(false),
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                              isSelected && "bg-black text-white"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none rounded-sm"
+                            />
+                            <span className="text-sm">{label}</span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Visit Type */}
+                  <DropdownMenu
+                    open={isVisitOpen}
+                    onOpenChange={setIsVisitOpen}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-32 px-4 py-2 rounded-full border",
+                          selectedVisit
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedVisit || "Visit Type"}</span>
+                        <ChevronDown size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-36 mt-2 rounded-md py-2 shadow-md">
+                      {visitOptions.map(({ label, percentage }) => {
+                        const isSelected = selectedVisit === label;
+
+                        return (
+                          <DropdownMenuItem
+                            key={label}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              if (isSelected) {
+                                setSelectedVisit("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                                setIsVisitOpen(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedVisit,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_VisitType_Changed",
+                                  onComplete: () => setIsVisitOpen(false),
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                              isSelected && "bg-black text-white"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none rounded-sm"
+                            />
+                            <span className="text-sm">{label}</span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Years of Experience */}
+                  <DropdownMenu
+                    open={isExperienceOpen}
+                    onOpenChange={setIsExperienceOpen}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-48 px-4 py-2 rounded-full border",
+                          selectedExperience
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>
+                          {selectedExperience || "Years of Experience"}
+                        </span>
+                        <ChevronDown size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-48 mt-2 rounded-md py-2 shadow-md">
+                      {experienceOptions.map(({ label, percentage }) => {
+                        const isSelected = selectedExperience === label;
+
+                        return (
+                          <DropdownMenuItem
+                            key={label}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              if (isSelected) {
+                                setSelectedExperience("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                                setIsExperienceOpen(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedExperience,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Experience_Changed",
+                                  onComplete: () => setIsExperienceOpen(false),
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                              isSelected && "bg-black text-white"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none rounded-sm"
+                            />
+                            <span className="text-sm">{label}</span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Education */}
+                  <DropdownMenu
+                    open={isEducationOpen}
+                    onOpenChange={setIsEducationOpen}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "flex items-center justify-between gap-2 w-38 px-4 py-2 rounded-full border",
+                          selectedEducation
+                            ? "bg-black text-white"
+                            : "bg-white text-black"
+                        )}
+                      >
+                        <span>{selectedEducation || "Education"}</span>
+                        <ChevronDown size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-46 mt-2 mr-2 rounded-md py-2 shadow-md">
+                      {educationOptions.map(({ label, percentage }) => {
+                        const isSelected = selectedEducation === label;
+
+                        return (
+                          <DropdownMenuItem
+                            key={label}
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              if (isSelected) {
+                                setSelectedEducation("");
+                                setFilteredDoctors(doctors);
+                                setHasUserFiltered(false);
+                                setIsEducationOpen(false);
+                              } else {
+                                handleGenericFilter({
+                                  label,
+                                  percentage,
+                                  doctors,
+                                  setSelected: setSelectedEducation,
+                                  setFilteredDoctors,
+                                  setHasUserFiltered,
+                                  eventName: "Filter_Education_Changed",
+                                  onComplete: () => setIsEducationOpen(false),
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-md hover:bg-black hover:text-white",
+                              isSelected && "bg-black text-white"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none rounded-sm"
+                            />
+                            <span className="text-sm">{label}</span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* </div>  */}
                 </div>
-              </div> */}
+                <ScrollBar
+                  orientation="horizontal"
+                  className="block md:block lg:hidden"
+                />
+              </ScrollArea>
               <DndContext
                 onDragEnd={handleDragEnd}
                 collisionDetection={closestCenter}
               >
-                <ScrollArea className="h-[100%] w-full md:w-auto pb-14 md:pb-0  md:pt-0 overflow-y-auto">
+                <ScrollArea className="md:h-[90%] h-[100%] w-full md:w-auto pb-14 md:pb-0  md:pt-0 overflow-y-auto">
                   <div className="flex flex-col md:flex-row w-full">
                     <Column
                       activeCallIndex={activeCallIndex}
-                      tasks={doctors}
+                      tasks={filteredDoctors}
                       onDelete={handleDelete}
                       isDraggable={!isConfirmed}
                       callStatus={callStatus}
@@ -1198,7 +1908,7 @@ export default function SearchDoctorPage() {
                       </div>
                     </InfoWindow>
                   )}
-
+                  {/* 
                   <DistanceMatrixService
                     options={{
                       origins: [
@@ -1213,7 +1923,7 @@ export default function SearchDoctorPage() {
                     callback={(response) => {
                       // You can use this data for showing distance etc.
                     }}
-                  />
+                  /> */}
                 </GoogleMap>
               )}
             </div>

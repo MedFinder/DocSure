@@ -26,12 +26,12 @@ export default function RootLayout({
       <GoogleTagManager gtmId="GTM-TLWLQGKV" />
       <GoogleTagManager gtmId="GTM-TK9TF844" />
       <Providers>
-        <body className={`${lexendFont.className} font-sans`}>
+        <body className={lexendFont.className}>
           {/* <Suspense fallback={<div>Loading...</div>}> */}
           <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
           {/* </Suspense> */}
           <Analytics />
-          <ExitIntentPopup/>
+          <ExitIntentPopup />
           {/* <GTMAnalytics /> */}
           <Toaster richColors={true} position="top-right" />
         </body>

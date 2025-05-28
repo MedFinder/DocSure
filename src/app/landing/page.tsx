@@ -221,7 +221,7 @@ export default function LandingPage() {
     formDataObj.address = value;
     localStorage.setItem("formData", JSON.stringify(formDataObj));
   };
-  const checkPrefillAvailability = (value: string, insurance:string) => {
+  const checkPrefillAvailability = (value: string, insurance: string) => {
     setGlobalLoading(true); // Set global loading to true when starting the process
     // scrollToSection("home", 40); // Scroll to the "home" section
     handleDoctorTypeClick(value ?? "Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
@@ -373,7 +373,7 @@ export default function LandingPage() {
         location: `${lat},${lng}`,
         radius: 20000,
         keyword: "Primary Care Physician",
-        dont_fetch_distance: true
+        dont_fetch_distance: true,
       };
       const response = await axios.post(
         "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
@@ -418,7 +418,7 @@ export default function LandingPage() {
   const fetchUserLocationAndPopularDrs = async () => {
     const parsedFormData = JSON.parse(localStorage.getItem("formData"));
     const storedDoctors = localStorage.getItem("popularDoctors");
-    const storedAddress = parsedFormData?.address || '';
+    const storedAddress = parsedFormData?.address || "";
     const storedLocation = localStorage.getItem("selectedLocation");
     if (storedAddress) {
       setAddressLocation(storedAddress);
@@ -460,7 +460,7 @@ export default function LandingPage() {
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress);
         localStorage.setItem("ipAddress", ip_address);
-        updateAddressInStorage(formattedAddress)
+        updateAddressInStorage(formattedAddress);
         localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
         logNetworkInfo(ip_address);
 
@@ -510,8 +510,8 @@ export default function LandingPage() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      localStorage.removeItem('topReviewDoctors');
-      localStorage.removeItem('topRatedDoctors');
+      localStorage.removeItem("topReviewDoctors");
+      localStorage.removeItem("topRatedDoctors");
       track("Homepage_Search_Btn_Clicked");
       if (values.specialty === "unsure" || values.specialty === "Other") {
         router.push("/coming-soon");
@@ -531,7 +531,7 @@ export default function LandingPage() {
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
         updateSpecialtyInStorage(values.specialty);
-        updateInsuranceInStorage(values.insurer)
+        updateInsuranceInStorage(values.insurer);
         localStorage.setItem(
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
@@ -628,7 +628,7 @@ export default function LandingPage() {
         setAddressLocation(formattedAddress); // Update input field state
 
         // Store in localStorage
-        updateAddressInStorage(formattedAddress)
+        updateAddressInStorage(formattedAddress);
         localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
       }
     }
@@ -843,7 +843,7 @@ export default function LandingPage() {
               // onSubmit={formik.handleSubmit}
               className="flex gap-2 w-full pt-4"
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
                 }
               }}
@@ -921,7 +921,11 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="mx-3">
-                    <Button className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 my-4 h-12 items-center justify-center w-full md:w-auto md:hidden">
+                    <Button
+                      className="bg-[#E5573F] rounded-md text-white space-x-2 px-6 my-4 h-12 items-center justify-center w-full md:w-auto md:hidden"
+                      onClick={formik.handleSubmit} // Explicitly trigger form submission
+                      type="submit"
+                    >
                       {/* <Search className="w-5 h-5 text-white" /> Search */}
                       {isLoading && !globalLoading ? (
                         <>

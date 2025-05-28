@@ -242,7 +242,8 @@ export default function AppointmentPage() {
           data
         );
         submitContact(context, currentFormData);
-        console.log(callResponse, "callResponse");
+        // console.log(callResponse, "callResponse");
+        return callResponse
       } catch (error) {
         track("Initiated_new_call_failed");
         console.log(error, "error initiating bland AI");
@@ -313,9 +314,11 @@ export default function AppointmentPage() {
       await sendSMS(mergedValues.phoneNumber);
 
       // call initiate-call-BE API
-      await initiateCall(formData?.request_id,mergedValues)
+      const result = await initiateCall(formData?.request_id,mergedValues)
 
-      router.push("/appointment-pending");
+      // Pass the result.data.message_body as a query param to the pending page
+      const messageBody = result?.data?.message || '';
+      router.push(`/appointment-pending?message=${encodeURIComponent(messageBody)}`);
     },
     validateOnChange: true,
     validateOnBlur: true,
