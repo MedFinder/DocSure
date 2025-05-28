@@ -413,12 +413,12 @@ export default function LandingPage() {
         localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
         logNetworkInfo(ip_address);
 
-        const popularDoctors = await getPopularDrs(lat, lng);
-        if (popularDoctors?.results?.length > 0) {
-          const doctorlists = popularDoctors?.results?.slice(0, 20);
-          setpopulardoctors(doctorlists);
-          localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
-        }
+        // const popularDoctors = await getPopularDrs(lat, lng);
+        // if (popularDoctors?.results?.length > 0) {
+        //   const doctorlists = popularDoctors?.results?.slice(0, 20);
+        //   setpopulardoctors(doctorlists);
+        //   localStorage.setItem("popularDoctors", JSON.stringify(doctorlists));
+        // }
       } else {
         // IP geolocation failed, use default location
         toast.error(
