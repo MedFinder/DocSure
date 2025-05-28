@@ -1115,11 +1115,11 @@ export default function LandingPage() {
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
             Top-rated doctors near me
           </h2>
-
+          {/* 
           <DoctorCardCarousel
             doctors={populardoctors}
             checkPrefillAvailability={checkPrefillAvailability}
-          />
+          /> */}
         </section>
 
         <section className="flex flex-col items-center justify-center gap-10 bg-[#E5573F] text-white border-b md:pt-16 md:pb-16 py-8 px-0   ">
