@@ -139,8 +139,10 @@ export default function NavbarSection({
         }
       }
       if (parsedFormData?.specialty) {
-        setSpecialty(parsedFormData?.specialty);
-        formik.setFieldValue("specialty", parsedFormData?.specialty);
+        if (parsedFormData?.specialty) {
+          setSpecialty(parsedFormData?.specialty);
+          formik.setFieldValue("specialty", parsedFormData?.specialty);
+        }
       }
       const savedAddress = parsedFormData?.address;
       const savedAddressLocation = localStorage.getItem("selectedLocation");
@@ -267,6 +269,7 @@ export default function NavbarSection({
           // console.log(savedSpecialty, selectedInsurer);
           if (parsedFormData?.specialty) {
             setSpecialty(parsedFormData?.specialty);
+
             formik.setFieldValue("specialty", parsedFormData?.specialty);
           }
           const savedAddress = parsedFormData?.address;
@@ -324,6 +327,8 @@ export default function NavbarSection({
   function handleCreateOptions() {
     return null;
   }
+  const getOptionFromLabel = (options, label) =>
+    options.find((opt) => opt.label === label);
 
   return (
     <div className="fixed top-0 left-0 w-full  border-gray-200 bg-[#FCF8F1] z-50 ">
@@ -388,11 +393,15 @@ export default function NavbarSection({
                         styles={customStyles}
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        selected={specialty}
-                        onChange={(value) => {
-                          setSpecialty(value);
-                          formik.setFieldValue("specialty", value);
-                          updateSpecialtyInStorage(value);
+                        value={getOptionFromLabel(
+                          medicalSpecialtiesOptions,
+                          formik.values.specialty
+                        )}
+                        onChange={(selected) => {
+                          const specialtyString = selected?.label || "";
+                          setSpecialty(specialtyString);
+                          formik.setFieldValue("specialty", specialtyString);
+                          updateSpecialtyInStorage(specialtyString);
                         }}
                         clearable={false}
                         navbar
@@ -417,13 +426,17 @@ export default function NavbarSection({
                         className="w-full"
                         options={insuranceCarrierOptions}
                         placeholder="Insurance carrier (optional)"
-                        selected={formik.values.insurer}
-                        onChange={(value) => {
-                          setInsurer(value);
-                          formik.setFieldValue("insurer", value);
-                          updateInsuranceInStorage(value);
+                        value={getOptionFromLabel(
+                          insuranceCarrierOptions,
+                          formik.values.insurer
+                        )}
+                        onChange={(selected) => {
+                          const insurerString = selected?.label || "";
+                          setInsurer(insurerString);
+                          formik.setFieldValue("insurer", insurerString);
+                          updateInsuranceInStorage(insurerString);
                         }}
-                        clearable={false}
+                        rable={false}
                         enabled={updatePreferences ? false : true}
                       />
                     </div>

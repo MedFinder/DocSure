@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import FooterSection from "../landing/components/FooterSection";
+import NavbarSection from "@/components/general-components/navbar-section";
 
 // External API URL - replace with your actual endpoint
 const CONTACT_API_URL =
@@ -121,7 +122,7 @@ export default function Contact() {
 
   return (
     <>
-      <Navbar />
+      <NavbarSection />
       {/* Centered Full Page Form */}
       <div className="h-screen flex flex-col justify-center items-center px-6 sm:px-10">
         <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg">
@@ -192,7 +193,7 @@ export default function Contact() {
             <div className="flex justify-center mt-12">
               <Button
                 type="submit"
-                className="bg-[#FF6723] text-white px-6 py-5 w-full sm:w-auto"
+                className="bg-[#E5573F] text-white px-6 py-5 w-full sm:w-auto"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Sending..." : "Continue"}

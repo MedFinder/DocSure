@@ -342,7 +342,7 @@ export default function MobileNavbarDialog({
                 onChange={(selectedOption) => {
                   formik.setFieldValue("insurer", selectedOption.value);
                   formik.setFieldTouched("insurer", true);
-                  updateInsuranceInStorage(value);
+                  updateInsuranceInStorage(selectedOption.value);
                 }}
                 isClearable={false}
               />
