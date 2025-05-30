@@ -48,6 +48,9 @@ export const customStyles = {
     ...provided,
     color: "#9ca3af",
     textAlign: "left",
+    whiteSpace: "nowrap",
+    overflow: "hidden", // hide overflowed text
+    textOverflow: "ellipsis",
   }),
   singleValue: (provided) => ({
     ...provided,
@@ -259,34 +262,33 @@ export default function NavbarSection({
         let rawData;
 
         if (lastSearchSource === "navbar") {
-         // console.log("Navbar search triggered");
-         const parsedFormData = JSON.parse(localStorage.getItem("formData"));
-         // console.log(savedSpecialty, selectedInsurer);
-         if (parsedFormData?.specialty) {
-           setSpecialty(parsedFormData?.specialty);
-           formik.setFieldValue("specialty", parsedFormData?.specialty);
-         }
-         const savedAddress = parsedFormData?.address;
-         const savedAddressLocation = localStorage.getItem("selectedLocation");
-         const AddressLocation = JSON.parse(savedAddressLocation);
-         if (savedAddress) {
-           setAddressLocation(savedAddress);
-         }
-         if (AddressLocation) {
-           setSelectedLocation({
-             lat: AddressLocation.lat,
-             lng: AddressLocation.lng,
-           });
-         }
+          // console.log("Navbar search triggered");
+          const parsedFormData = JSON.parse(localStorage.getItem("formData"));
+          // console.log(savedSpecialty, selectedInsurer);
+          if (parsedFormData?.specialty) {
+            setSpecialty(parsedFormData?.specialty);
+            formik.setFieldValue("specialty", parsedFormData?.specialty);
+          }
+          const savedAddress = parsedFormData?.address;
+          const savedAddressLocation = localStorage.getItem("selectedLocation");
+          const AddressLocation = JSON.parse(savedAddressLocation);
+          if (savedAddress) {
+            setAddressLocation(savedAddress);
+          }
+          if (AddressLocation) {
+            setSelectedLocation({
+              lat: AddressLocation.lat,
+              lng: AddressLocation.lng,
+            });
+          }
         }
-        if(lastSearchSource === "insurance") {
+        if (lastSearchSource === "insurance") {
           const parsedFormData = JSON.parse(localStorage.getItem("formData"));
           // if (parsedFormData?.insurer) {
-            formik.setFieldValue("insurer", parsedFormData?.insurer ??'');
-            setInsurer(parsedFormData?.insurer ?? '');
+          formik.setFieldValue("insurer", parsedFormData?.insurer ?? "");
+          setInsurer(parsedFormData?.insurer ?? "");
           // }
         }
-
       } catch (error) {
         console.error("Error parsing localStorage data:", error);
       }

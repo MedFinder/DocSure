@@ -178,7 +178,7 @@ const validationSchema = Yup.object().shape({
 export default function LandingPage() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedSpecialty, setSelectedSpecialty] = useState("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState(null); // ✅
   const [selectedInsurer, setSelectedInsurer] = useState("");
   const [isLoading, setisLoading] = useState(false);
   const [globalLoading, setGlobalLoading] = useState(false); // Add state for global spinner
@@ -189,7 +189,7 @@ export default function LandingPage() {
   const [populardoctors, setpopulardoctors] = useState([]);
   const inputRefs = useRef([]);
   const addressRefs = useRef([]);
-console.log(selectedSpecialty,selectedInsurer)
+  console.log(selectedSpecialty, selectedInsurer);
   const handleDoctorTypeClick = (value: any) => {
     formik.setFieldValue("specialty", value);
     setSelectedSpecialty(value); // Update specialty when button is clicked
@@ -225,6 +225,7 @@ console.log(selectedSpecialty,selectedInsurer)
     localStorage.setItem("formData", JSON.stringify(formDataObj));
   };
   const checkPrefillAvailability = (value: string, insurance: string) => {
+    console.log(value, "value");
     setGlobalLoading(true); // Set global loading to true when starting the process
     // scrollToSection("home", 40); // Scroll to the "home" section
     handleDoctorTypeClick(value ?? "Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
@@ -867,10 +868,9 @@ console.log(selectedSpecialty,selectedInsurer)
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
                         value={selectedSpecialty}
-                        selected={formik.values.specialty}
-                        onChange={(value) => {
-                          formik.setFieldValue("specialty", value);
-                          setSelectedSpecialty(value);
+                        onChange={(option) => {
+                          formik.setFieldValue("specialty", option);
+                          setSelectedSpecialty(option); // ✅ set full object
                         }}
                         isClearable={true}
                         isSearchable={true}
@@ -895,9 +895,8 @@ console.log(selectedSpecialty,selectedInsurer)
                           formik.setFieldValue("insurer", value);
                           setSelectedInsurer(value);
                         }}
-                         isClearable={true}
+                        isClearable={true}
                         isSearchable={true}
-
                       />
                     </div>
                   </div>
@@ -975,16 +974,26 @@ console.log(selectedSpecialty,selectedInsurer)
                   <Button
                     key={index}
                     className={`rounded-full text-xs px-3 py-2 w-auto flex-shrink-0 ${
-                      selectedSpecialty === value.value
-                        ? "bg-slate-800 text-white" // Selected state
-                        : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800" // Normal state
+                      selectedSpecialty?.value === value.value
+                        ? "bg-slate-800 text-white"
+                        : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800"
                     }`}
-                    onClick={() => checkPrefillAvailability(value.value)} // get s
+                    onClick={() => {
+                      const selected = medicalSpecialtiesOptions.find(
+                        (opt) => opt.value === value.value
+                      );
+                      checkPrefillAvailability(selected?.value ?? "");
+                      if (selected) {
+                        setSelectedSpecialty(selected);
+                        formik.setFieldValue("specialty", selected);
+                      }
+                    }}
                   >
                     {value.label}
                   </Button>
                 ))}
               </div>
+
               <ScrollBar
                 orientation="horizontal"
                 className="block md:block lg:hidden"
@@ -1149,13 +1158,19 @@ console.log(selectedSpecialty,selectedInsurer)
               <Button
                 key={index}
                 className={`rounded-full text-xs px-3 py-2 w-auto flex-shrink-0 ${
-                  selectedSpecialty === value.value
-                    ? "bg-slate-800 text-white" // Selected state
-                    : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800" // Normal state
+                  selectedSpecialty?.value === value.value
+                    ? "bg-slate-800 text-white"
+                    : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800"
                 }`}
                 onClick={() => {
-                  // scrollToSection("home", 40);
-                  checkPrefillAvailability(value.value);
+                  const selected = medicalSpecialtiesOptions.find(
+                    (opt) => opt.value === value.value
+                  );
+                  checkPrefillAvailability(selected?.value ?? "");
+                  if (selected) {
+                    setSelectedSpecialty(selected);
+                    formik.setFieldValue("specialty", selected);
+                  }
                 }}
               >
                 {value.label}
