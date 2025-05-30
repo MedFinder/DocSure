@@ -178,7 +178,7 @@ const validationSchema = Yup.object().shape({
 export default function LandingPage() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedSpecialty, setSelectedSpecialty] = useState(null); // ✅
+  const [selectedSpecialty, setSelectedSpecialty] = useState(""); // ✅
   const [selectedInsurer, setSelectedInsurer] = useState("");
   const [isLoading, setisLoading] = useState(false);
   const [globalLoading, setGlobalLoading] = useState(false); // Add state for global spinner
@@ -351,12 +351,12 @@ export default function LandingPage() {
     const storedSpeciality = parsedFormData?.specialty;
     const selectedInsurer = parsedFormData?.insurer;
     if (storedSpeciality) {
-      setPrefilledSpecialty(storedSpeciality);
-      formik.setFieldValue("specialty", storedSpeciality);
+      setPrefilledSpecialty(storedSpeciality.value);
+      formik.setFieldValue("specialty", storedSpeciality.value);
       setSelectedSpecialty(storedSpeciality); // Update specialty when button is clicked
     }
     if (selectedInsurer) {
-      setSelectedInsurer(selectedInsurer);
+      setSelectedInsurer(selectedInsurer.value);
       formik.setFieldValue("insurer", selectedInsurer.value);
     }
     fetchUserLocationAndPopularDrs();
@@ -493,8 +493,8 @@ export default function LandingPage() {
     const ipAddress = localStorage.getItem("ipAddress");
     const data = {
       request_id,
-      doctor_speciality: formik.values.specialty,
-      insurer: formik.values.insurer,
+      doctor_speciality: formik.values.specialty?.value,
+      insurer: formik.values.insurer?.value,
       preferred_location: savedAddress,
     };
     try {
@@ -509,7 +509,7 @@ export default function LandingPage() {
   };
   const formik = useFormik({
     initialValues: {
-      specialty: prefilledSpecialty || "",
+      specialty: prefilledSpecialty || { label: "", value: "" },
       insurer: "",
     },
     validationSchema,
@@ -517,7 +517,10 @@ export default function LandingPage() {
       localStorage.removeItem("topReviewDoctors");
       localStorage.removeItem("topRatedDoctors");
       track("Homepage_Search_Btn_Clicked");
-      if (values.specialty === "unsure" || values.specialty === "Other") {
+      if (
+        values.specialty?.value === "unsure" ||
+        values.specialty?.value === "Other"
+      ) {
         router.push("/coming-soon");
         setGlobalLoading(false); // Turn off global loading if redirecting
         return;
@@ -534,19 +537,19 @@ export default function LandingPage() {
       }
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-        updateSpecialtyInStorage(values.specialty);
-        updateInsuranceInStorage(values.insurer);
+        updateSpecialtyInStorage(values.specialty?.value);
+        updateInsuranceInStorage(values.insurer?.value);
         localStorage.setItem(
           "searchData",
-          JSON.stringify({ lat, lng, specialty: values.specialty })
+          JSON.stringify({ lat, lng, specialty: values.specialty?.value })
         );
 
         // Call logRequestInfo without awaiting
         const requestIdPromise = logNetworkInfo(null, true);
         const speciality_value =
-          formik.values.specialty === "Prescription / Refill"
+          formik.values.specialty?.value === "Prescription / Refill"
             ? "Primary Care Physician"
-            : formik.values.specialty;
+            : formik.values.specialty?.value;
         const data = {
           location: `${lat},${lng}`,
           radius: 20000,
@@ -556,7 +559,7 @@ export default function LandingPage() {
           "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
           data
         );
-
+        console.log(data);
         // Handle request_id when the promise resolves
         requestIdPromise.then((request_id) => {
           if (request_id) {
@@ -642,6 +645,8 @@ export default function LandingPage() {
     scrollToSection("home", 40);
     setAddressLocation(location);
   };
+  console.log(selectedSpecialty);
+  console.log(formik.values);
 
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">
@@ -868,9 +873,10 @@ export default function LandingPage() {
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
                         value={selectedSpecialty}
-                        onChange={(option) => {
-                          formik.setFieldValue("specialty", option);
-                          setSelectedSpecialty(option); // ✅ set full object
+                        selected={formik.values.specialty}
+                        onChange={(value) => {
+                          formik.setFieldValue("specialty", value);
+                          setSelectedSpecialty(value); // ✅ set full object
                         }}
                         isClearable={true}
                         isSearchable={true}
@@ -985,7 +991,7 @@ export default function LandingPage() {
                       checkPrefillAvailability(selected?.value ?? "");
                       if (selected) {
                         setSelectedSpecialty(selected);
-                        formik.setFieldValue("specialty", selected);
+                        formik.setFieldValue("specialty", selected?.value);
                       }
                     }}
                   >
