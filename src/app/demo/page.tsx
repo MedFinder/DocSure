@@ -256,11 +256,11 @@ export default function LandingPage() {
     },
   ];
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = '//js-na2.hs-scripts.com/242621305.js';
+    const script = document.createElement("script");
+    script.src = "//js-na2.hs-scripts.com/242621305.js";
     script.async = true;
     script.defer = true;
-    script.id = 'hs-script-loader';
+    script.id = "hs-script-loader";
     document.body.appendChild(script);
   }, []);
   useEffect(() => {
@@ -429,7 +429,7 @@ export default function LandingPage() {
     const data = {
       doctor_speciality: formik.values.specialty,
       preferred_location: savedAddress,
-      device_ip_address: ipAddress ?? '',
+      device_ip_address: ipAddress ?? "",
       device_category: "web",
     };
     try {
@@ -469,7 +469,6 @@ export default function LandingPage() {
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
-
         // Call logRequestInfo and get the promise
         const requestIdPromise = logRequestInfo();
 
