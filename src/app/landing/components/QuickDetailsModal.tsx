@@ -217,6 +217,7 @@ export default function QuickDetailsModal({
     const data = {
       patient_name: updatedValues.patientName,
       patient_number: updatedValues.phoneNumber,
+      patient_email: updatedValues.email,
       patient_date_of_birth: updatedValues.dob,
       insurer: updatedValues.insurer ?? "",
       address: updatedValues.address ?? "",
@@ -295,6 +296,7 @@ export default function QuickDetailsModal({
           ? customAvailability
           : availabilityOption,
         maxWait: values.maxWait,
+        email:values.email || "",
       };
       // console.log(updatedValues)
 
