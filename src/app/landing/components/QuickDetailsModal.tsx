@@ -213,7 +213,6 @@ export default function QuickDetailsModal({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedFormData = localStorage.getItem("formData");
-      console.log(storedFormData);
       const storedLocation = localStorage.getItem("selectedLocation");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
@@ -337,7 +336,6 @@ export default function QuickDetailsModal({
           ? "Primary Care Physician"
           : formik.values.specialty;
       track("QuickDetails_Btn_Clicked");
-      console.log(formik.values.specialty);
       if (!formik.isValid) {
         toast.error("Please fill up all the required information");
         return;
@@ -570,12 +568,6 @@ export default function QuickDetailsModal({
     formik.setFieldTouched("dob", true); // Mark as touched when changed
   };
 
-  // Handle medical specialty change
-  const handleSpecialtyChange = (value) => {
-    formik.setFieldValue("specialty", value);
-    formik.setFieldTouched("specialty", true);
-  };
-
   // Update gender
   const handleGenderChange = (value) => {
     setGender(value);
@@ -651,26 +643,25 @@ export default function QuickDetailsModal({
                       styles={customSelectStyles}
                       id="specialty"
                       name="specialty"
-                      className="w-full"
+                      className={cn(
+                        "w-full ",
+                        formik.touched.specialty && formik.errors.specialty
+                          ? "border-red-500"
+                          : ""
+                      )}
                       options={medicalSpecialtiesOptions}
                       placeholder="Medical specialty"
                       value={getOptionFromLabel(
                         medicalSpecialtiesOptions,
                         formik.values.specialty
                       )}
-                      onChange={(selectedOption) => {
-                        formik.setFieldValue("specialty", selectedOption.value);
-                      }}
                       onChange={(selected) => {
                         const specialtyString = selected?.label || "";
-
                         formik.setFieldValue("specialty", specialtyString);
                         formik.setFieldTouched("specialty", true); //
-                        updateSpecialtyInStorage(specialtyString);
                       }}
                       clearable={false}
                       navbar
-                      // enabled={updatePreferences ? false : true}
                     />
                     {formik.touched.specialty && formik.errors.specialty && (
                       <div className="text-red-500 text-sm">
@@ -823,7 +814,7 @@ export default function QuickDetailsModal({
                       <Select
                         styles={customSelectStyles}
                         id="insurer"
-                        placeholder="Search..."
+                        placeholder="Search insurer"
                         name="insurer"
                         className={cn(
                           "w-full ",
@@ -832,14 +823,16 @@ export default function QuickDetailsModal({
                             : ""
                         )}
                         options={insuranceCarrierOptions}
-                        value={formik.values.insurer}
-                        selected={formik.values.insurer}
-                        onChange={(value) => {
-                          formik.setFieldValue("insurer", value);
+                        value={getOptionFromLabel(
+                          insuranceCarrierOptions,
+                          formik.values.insurer
+                        )}
+                        onChange={(selected) => {
+                          const insurerString = selected?.label || "";
+                          formik.setFieldValue("insurer", insurerString);
                           formik.setFieldTouched("insurer", true); //
-                          updateInsuranceInStorage(value);
                         }}
-                        clearable={false}
+                        navbar
                       />
                       {formik.touched.insurer && formik.errors.insurer && (
                         <div className="text-red-500 text-sm">

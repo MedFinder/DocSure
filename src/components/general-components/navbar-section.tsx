@@ -403,7 +403,8 @@ export default function NavbarSection({
                           formik.setFieldValue("specialty", specialtyString);
                           updateSpecialtyInStorage(specialtyString);
                         }}
-                        clearable={false}
+                        isClearable={true}
+                        isSearchable={true}
                         navbar
                         enabled={updatePreferences ? false : true}
                       />
@@ -436,7 +437,9 @@ export default function NavbarSection({
                           formik.setFieldValue("insurer", insurerString);
                           updateInsuranceInStorage(insurerString);
                         }}
-                        rable={false}
+                        isClearable={true}
+                        isSearchable={true}
+                        navbar
                         enabled={updatePreferences ? false : true}
                       />
                     </div>
