@@ -524,7 +524,6 @@ export default function LandingPage() {
           "searchData",
           JSON.stringify({ lat, lng, specialty: values.specialty })
         );
-
         // Call logRequestInfo and get the promise
         const requestIdPromise = logRequestInfo();
 

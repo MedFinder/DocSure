@@ -179,17 +179,16 @@ export const Task: React.FC<TaskProps> = ({
   const searchParams = useSearchParams();
   const fetchDoctorDetails = async (data) => {
     try {
-
       // Construct the full payload for the API
       const payload = {
         place_id: data?.place_id,
         name: data?.name,
-        formatted_address:data?.formatted_address,
+        formatted_address: data?.formatted_address,
         request_id: data?.request_id,
       };
 
       // Log the ACTUAL payload that will be sent
-     // console.log("API Payload being sent:", payload);
+      // console.log("API Payload being sent:", payload);
 
       const response = await axios.post(
         `https://callai-backend-243277014955.us-central1.run.app/api/get_doctor_profile`,
@@ -201,7 +200,7 @@ export const Task: React.FC<TaskProps> = ({
       router.push(`/search-doctor/${place_id}`);
     } catch (error) {
       console.error("Failed to fetch doctor details:", error); // More specific error message
-      setGlobalLoading(false)
+      setGlobalLoading(false);
     }
   };
   const getDrDeets = async (
@@ -209,7 +208,7 @@ export const Task: React.FC<TaskProps> = ({
     formatted_address: string,
     place_id: string
   ) => {
-    setGlobalLoading(true)
+    setGlobalLoading(true);
     const formData = JSON.parse(localStorage.getItem("formData"));
     const data = {
       name,
@@ -231,7 +230,8 @@ export const Task: React.FC<TaskProps> = ({
   useEffect(() => {
     // Get selected insurer from localStorage
     if (typeof window !== "undefined") {
-      const storedInsurer = localStorage.getItem("selectedInsurer");
+      const formData = JSON.parse(localStorage.getItem("formData") || "{}");
+      const storedInsurer = formData.insurer;
       if (storedInsurer) {
         setSelectedInsurer(storedInsurer);
       }
@@ -255,17 +255,17 @@ export const Task: React.FC<TaskProps> = ({
     }
   }, []);
   // Add global spinner component
-const GlobalSpinner = ({ isVisible }) => {
-  if (!isVisible) return null;
+  const GlobalSpinner = ({ isVisible }) => {
+    if (!isVisible) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
-      <div className="bg-white p-5 rounded-full">
-        <Loader2 className="w-10 h-10 text-[#E5573F] animate-spin" />
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+        <div className="bg-white p-5 rounded-full">
+          <Loader2 className="w-10 h-10 text-[#E5573F] animate-spin" />
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
   const handleExpand = async (e) => {
     e.stopPropagation();
@@ -343,10 +343,11 @@ const GlobalSpinner = ({ isVisible }) => {
 
   // Determine if we should show the insurer acceptance badge
   const showAcceptsInsurerBadge = selectedInsurer && index < 8;
+  // console.log(storedInsurer, "selectedInsurer");
 
   return (
     <>
-    <GlobalSpinner isVisible={globalLoading} />
+      <GlobalSpinner isVisible={globalLoading} />
       <tr
         ref={setNodeRef}
         style={style}
@@ -937,7 +938,7 @@ const GlobalSpinner = ({ isVisible }) => {
                       )}
 
                       {showAcceptsInsurerBadge && isExpanded && (
-                        <div className="flex items-center text-[11px] md:text-xs gap-1 font-normal">
+                        <div className="flex items-center text-[11px] md:text-xs gap-1 font-normal ">
                           <CircleCheck className="text-[#00BA85] w-5 h-5 md:w-6 md:h-6" />
                           <span>Accepts</span>
                           <span>{selectedInsurer}</span>

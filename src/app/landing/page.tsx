@@ -189,7 +189,6 @@ export default function LandingPage() {
   const [populardoctors, setpopulardoctors] = useState([]);
   const inputRefs = useRef([]);
   const addressRefs = useRef([]);
-  console.log(selectedSpecialty, selectedInsurer);
   const handleDoctorTypeClick = (value: any) => {
     formik.setFieldValue("specialty", value);
     setSelectedSpecialty(value); // Update specialty when button is clicked
@@ -225,7 +224,6 @@ export default function LandingPage() {
     localStorage.setItem("formData", JSON.stringify(formDataObj));
   };
   const checkPrefillAvailability = (value: string, insurance: string) => {
-    console.log(value, "value");
     setGlobalLoading(true); // Set global loading to true when starting the process
     // scrollToSection("home", 40); // Scroll to the "home" section
     handleDoctorTypeClick(value ?? "Primary Care Physician"); // Call handleDoctorTypeClick with the provided value
@@ -410,7 +408,6 @@ export default function LandingPage() {
         "https://callai-backend-243277014955.us-central1.run.app/api/patient-network-info",
         data
       );
-      // console.log(response.data)
       const existingFormData = localStorage.getItem("formData");
       const parsedExistingData = JSON.parse(existingFormData);
       // Merge existing data with new values (new values take precedence)
@@ -569,7 +566,6 @@ export default function LandingPage() {
           "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
           data
         );
-        console.log(data);
         // Handle request_id when the promise resolves
         requestIdPromise.then((request_id) => {
           if (request_id) {
@@ -623,8 +619,6 @@ export default function LandingPage() {
       await logDrLists(payload);
     }
   };
-  console.log(selectedSpecialty);
-  console.log(formik.values);
 
   const handleOnAddressChanged = (index) => {
     if (addressRefs.current[index]) {
