@@ -620,6 +620,7 @@ export default function LandingPage() {
     }
   };
 
+
   const handleOnAddressChanged = (index) => {
     if (addressRefs.current[index]) {
       const places = addressRefs.current[index].getPlaces();
@@ -652,8 +653,7 @@ export default function LandingPage() {
     scrollToSection("home", 40);
     setAddressLocation(location);
   };
-  console.log(selectedSpecialty);
-  console.log(formik.values);
+
 
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">

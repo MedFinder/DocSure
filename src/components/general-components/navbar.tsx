@@ -154,10 +154,7 @@ export default function Navbar() {
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
         updateAddressInStorage(formattedAddress); // Update address in local storage
-        localStorage.setItem(
-          "selectedLocation",
-          JSON.stringify({ lat, lng })
-        );
+        localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
       }
     }
   };
@@ -165,7 +162,8 @@ export default function Navbar() {
   function handleCreateOptions() {
     return null;
   }
-
+  const getOptionFromLabel = (options, label) =>
+    options.find((opt) => opt.label === label);
   return (
     <div className="fixed top-0 left-0 w-full  border-gray-200 bg-white z-50">
       <div className="flex justify-between py-5 md:px-8 px-5 relative md:border-none   border border-b-2 items-center">
@@ -222,10 +220,12 @@ export default function Navbar() {
                         className="w-full"
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        value={medicalSpecialtiesOptions.find(
-                          (option) => option.value === formik.values.specialty
+                        value={getOptionFromLabel(
+                          medicalSpecialtiesOptions,
+                          formik.values.specialty
                         )}
                         onChange={(selectedOption) => {
+                          setSpecialty(selectedOption.value);
                           formik.setFieldValue(
                             "specialty",
                             selectedOption.value

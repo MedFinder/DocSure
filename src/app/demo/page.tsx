@@ -617,7 +617,8 @@ export default function LandingPage() {
     scrollToSection("home", 40);
     setAddressLocation(location);
   };
-
+  const getOptionFromLabel = (options, label) =>
+    options.find((opt) => opt.label === label);
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">
       {/* Navbar */}
@@ -834,10 +835,12 @@ export default function LandingPage() {
                         styles={customStyles}
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        value={medicalSpecialtiesOptions.find(
-                          (option) => option.value === formik.values.specialty
+                        value={getOptionFromLabel(
+                          medicalSpecialtiesOptions,
+                          formik.values.specialty
                         )}
                         onChange={(selectedOption) => {
+                          setSpecialty(selectedOption.value);
                           formik.setFieldValue(
                             "specialty",
                             selectedOption.value
