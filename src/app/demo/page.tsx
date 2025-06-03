@@ -48,6 +48,61 @@ import { Footer } from "react-day-picker";
 import FooterSection from "../landing/components/FooterSection";
 import QuickDetailsModal from "../landing/components/QuickDetailsModal";
 
+export const customStyles = {
+  control: (provided) => ({
+    ...provided,
+    backgroundColor: "#fff",
+    border: "none",
+    boxShadow: "none",
+    borderRadius: "0.5rem",
+    minHeight: "40px",
+    fontSize: "14px",
+    padding: "2px 4px",
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#9ca3af",
+    textAlign: "left",
+    whiteSpace: "nowrap", // prevent line breaks
+    overflow: "hidden", // hide overflowed text
+    textOverflow: "ellipsis", // add "..." when text is too long
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+  }),
+  input: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+    margin: 0,
+    padding: 0,
+  }),
+  menu: (provided) => ({
+    ...provided,
+    marginTop: 0, // no space between input and dropdown
+    borderRadius: "0 0 0.5rem 0.5rem",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    width: "100%", // match input width
+  }),
+  menuList: (provided) => ({
+    ...provided,
+    padding: 0,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+    color: "#111827",
+    padding: "10px 12px",
+    cursor: "pointer",
+    textAlign: "left",
+  }),
+  indicatorsContainer: () => ({
+    display: "none", // removes the dropdown arrow
+  }),
+};
+
 const doctorTypes = [
   { value: "Primary care doctor", label: "Primary care doctor" },
   {
@@ -777,6 +832,7 @@ export default function LandingPage() {
                         id="specialty"
                         name="specialty"
                         className="w-full"
+                        styles={customStyles}
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
                         value={medicalSpecialtiesOptions.find(

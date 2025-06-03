@@ -10,6 +10,9 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import FooterSection from "../landing/components/FooterSection";
 import NavbarSection from "@/components/general-components/navbar-section";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 
 // External API URL - replace with your actual endpoint
 const CONTACT_API_URL =
@@ -122,9 +125,31 @@ export default function Contact() {
 
   return (
     <>
-      <NavbarSection />
+      <nav className="fixed top-0 w-full bg-[#FCF8F1] shadow-sm p-4 flex justify-between items-center z-50 text-sm">
+        <div className="flex items-center gap-6">
+          <Link href="/">
+            <Image
+              src="/web-new-logo.svg"
+              alt="DocSure Logo"
+              width={0}
+              height={0}
+              className="w-28 h-auto md:flex cursor-pointer"
+            />
+          </Link>
+        </div>
+        <div className="flex space-x-4">
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft size={16} />
+            Go Back
+          </Button>
+        </div>
+      </nav>
       {/* Centered Full Page Form */}
-      <div className="h-screen flex flex-col justify-center items-center px-6 sm:px-10">
+      <div className=" mt-14 flex flex-col justify-center items-center px-6 sm:px-10">
         <div className="w-full max-w-lg p-6 sm:p-10 rounded-lg">
           {/* Title */}
           <p className="text-2xl sm:text-4xl my-6 font-semibold text-[#333333]">

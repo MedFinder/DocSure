@@ -22,6 +22,7 @@ import NavbarSection from "@/components/general-components/navbar-section";
 import FooterSection from "../landing/components/FooterSection";
 import Link from "next/link";
 import Select from "react-select";
+import { medicalSpecialtiesOptions } from "@/constants/store-constants";
 
 // Custom styles for DatePicker
 const customDatePickerStyles = `
@@ -29,7 +30,59 @@ const customDatePickerStyles = `
     border-color: #ef4444 !important; /* red-500 */
   }
 `;
+export const customStyles = {
+  control: (provided) => ({
+    ...provided,
+    backgroundColor: "#fff",
 
+    boxShadow: "none",
+    minHeight: "40px",
+    fontSize: "14px",
+    padding: "2px 4px",
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#9ca3af",
+    textAlign: "left",
+    whiteSpace: "nowrap", // prevent line breaks
+    overflow: "hidden", // hide overflowed text
+    textOverflow: "ellipsis", // add "..." when text is too long
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+  }),
+  input: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+    margin: 0,
+    padding: 0,
+  }),
+  menu: (provided) => ({
+    ...provided,
+    marginTop: 0, // no space between input and dropdown
+    borderRadius: "0 0 0.5rem 0.5rem",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    width: "100%", // match input width
+  }),
+  menuList: (provided) => ({
+    ...provided,
+    padding: 0,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+    color: "#111827",
+    padding: "10px 12px",
+    cursor: "pointer",
+    textAlign: "left",
+  }),
+  indicatorsContainer: () => ({
+    display: "none", // removes the dropdown arrow
+  }),
+};
 // Updated validation schema to include gender
 const validationSchema = Yup.object().shape({
   patientName: Yup.string().required("Patient name is required"),
@@ -45,12 +98,6 @@ const genderOptions = [
   { value: "Male", label: "Male" },
   { value: "Female", label: "Female" },
   { value: "Non-binary", label: "Non-binary" },
-];
-const medicalSpecialtiesOptions = [
-  { value: "Cardiology", label: "Cardiology" },
-  { value: "Dermatology", label: "Dermatology" },
-  { value: "Neurology", label: "Neurology" },
-  // Add more specialties as needed
 ];
 export default function ContactNew() {
   const [formData, setFormData] = useState({});
@@ -421,6 +468,7 @@ export default function ContactNew() {
                 className="w-full"
                 options={medicalSpecialtiesOptions}
                 placeholder="Medical specialty"
+                styles={customStyles}
                 value={medicalSpecialtiesOptions.find(
                   (option) => option.value === formik.values.specialty
                 )}

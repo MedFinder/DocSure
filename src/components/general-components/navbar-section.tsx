@@ -399,7 +399,7 @@ export default function NavbarSection({
                         )}
                         onChange={(selected) => {
                           const specialtyString = selected?.label || "";
-                          setSpecialty(specialtyString);
+                          setSpecialty(selected?.value || "");
                           formik.setFieldValue("specialty", specialtyString);
                           updateSpecialtyInStorage(specialtyString);
                         }}
