@@ -30,7 +30,7 @@ const customDatePickerStyles = `
     border-color: #ef4444 !important; /* red-500 */
   }
 `;
-export const customStyles = {
+const customStyles = {
   control: (provided) => ({
     ...provided,
     backgroundColor: "#fff",
