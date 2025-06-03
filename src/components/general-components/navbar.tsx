@@ -12,6 +12,7 @@ import { Combobox } from "../ui/combo-box";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
+import Select from "react-select";
 
 import {
   GoogleMap,
@@ -22,7 +23,6 @@ import { toast } from "sonner";
 import axios from "axios";
 import { ComboboxNav } from "../ui/combo-box-nav";
 import { medicalSpecialtiesOptions } from "@/constants/store-constants";
-import { Autocomplete } from "../../../components/ui/autocomplete";
 import { track } from "@vercel/analytics";
 
 const validationSchema = Yup.object().shape({
@@ -154,10 +154,7 @@ export default function Navbar() {
         setSelectedLocation({ lat, lng });
         setAddressLocation(formattedAddress); // Update input field state
         updateAddressInStorage(formattedAddress); // Update address in local storage
-        localStorage.setItem(
-          "selectedLocation",
-          JSON.stringify({ lat, lng })
-        );
+        localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
       }
     }
   };
@@ -165,7 +162,8 @@ export default function Navbar() {
   function handleCreateOptions() {
     return null;
   }
-
+  const getOptionFromLabel = (options, label) =>
+    options.find((opt) => opt.label === label);
   return (
     <div className="fixed top-0 left-0 w-full  border-gray-200 bg-white z-50">
       <div className="flex justify-between py-5 md:px-8 px-5 relative md:border-none   border border-b-2 items-center">
@@ -216,19 +214,24 @@ export default function Navbar() {
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
                     <div className="flex-1 min-w-[180px]">
-                      <Autocomplete
+                      <Select
                         id="specialty"
                         name="specialty"
                         className="w-full"
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        selected={specialty}
-                        onChange={(value) => {
-                          setSpecialty(value);
-                          formik.setFieldValue("specialty", value);
+                        value={getOptionFromLabel(
+                          medicalSpecialtiesOptions,
+                          formik.values.specialty
+                        )}
+                        onChange={(selectedOption) => {
+                          setSpecialty(selectedOption.value);
+                          formik.setFieldValue(
+                            "specialty",
+                            selectedOption.value
+                          );
                         }}
-                        clearable={false}
-                        navbar
+                        isClearable={false}
                       />
                     </div>
                   </div>

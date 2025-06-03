@@ -158,5 +158,5 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     }
   };
 
-  return <div className="flex items-center justify-end w-full">{getStatusContent()}</div>;
+  return <div className="flex items-center justify-end w-full whitespace-nowrap">{getStatusContent()}</div>;
 };

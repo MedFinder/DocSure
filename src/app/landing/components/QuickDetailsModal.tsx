@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Autocomplete } from "../../../../components/ui/autocomplete";
 import { Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +24,64 @@ import {
 import { track } from "@vercel/analytics";
 import { toast } from "sonner";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
+import Select from "@/components/ui/client-only-select";
 
+export const customSelectStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    backgroundColor: "#fff",
+    boxShadow: "none",
+    borderRadius: "0.5rem",
+    border: "1px solid black",
+    borderColor: "black",
+    minHeight: "40px",
+    fontSize: "14px",
+    padding: "2px 4px",
+    "&:hover": {
+      borderColor: "black",
+    },
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#9ca3af",
+    textAlign: "left",
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+  }),
+  input: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+    margin: 0,
+    padding: 0,
+  }),
+  menu: (provided) => ({
+    ...provided,
+    marginTop: 0, // no space between input and dropdown
+    borderRadius: "0 0 0.5rem 0.5rem",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    width: "100%", // match input width
+  }),
+  menuList: (provided) => ({
+    ...provided,
+    padding: 0,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+    color: "#111827",
+    padding: "8px 12px",
+    cursor: "pointer",
+    textAlign: "left",
+    fontSize: "14px", // Reduced font size for options
+  }),
+  indicatorsContainer: () => ({
+    display: "none", // removes the dropdown arrow
+  }),
+};
 // Set the app element for accessibility - moved out of component to avoid React hooks rules issues
 if (typeof window !== "undefined") {
   // In Next.js, we use document.body as a reliable app element
@@ -173,7 +229,9 @@ export default function QuickDetailsModal({
           specialty: parsedFormData.specialty || "",
           address: parsedFormData.address || "",
           insurer: parsedFormData?.insurer || "",
-          selectedOption: parsedFormData?.insurer?'no': parsedFormData?.selectedOption,
+          selectedOption: parsedFormData?.insurer
+            ? "no"
+            : parsedFormData?.selectedOption,
           insuranceType: parsedFormData?.insuranceType || "",
           availability: parsedFormData?.availability || "anytime",
           subscriberId: parsedFormData?.subscriberId || "",
@@ -189,7 +247,7 @@ export default function QuickDetailsModal({
         });
 
         setInputValue(parsedFormData?.objective || "");
-        setSelectedInsurance(parsedFormData?.insurer ?false:true);
+        setSelectedInsurance(parsedFormData?.insurer ? false : true);
         setAvailabilityOption(parsedFormData?.availabilityOption || "anytime");
         setCustomAvailability(parsedFormData?.availability || "anytime");
         setGender(parsedFormData.gender || "");
@@ -278,7 +336,6 @@ export default function QuickDetailsModal({
           ? "Primary Care Physician"
           : formik.values.specialty;
       track("QuickDetails_Btn_Clicked");
-
       if (!formik.isValid) {
         toast.error("Please fill up all the required information");
         return;
@@ -296,7 +353,7 @@ export default function QuickDetailsModal({
           ? customAvailability
           : availabilityOption,
         maxWait: values.maxWait,
-        email:values.email || "",
+        email: values.email || "",
       };
       // console.log(updatedValues)
 
@@ -360,6 +417,7 @@ export default function QuickDetailsModal({
   const refetchDrLists = async () => {
     try {
       const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
+
       localStorage.setItem(
         "searchData",
         JSON.stringify({ lat, lng, specialty: formik.values.specialty })
@@ -409,11 +467,11 @@ export default function QuickDetailsModal({
   const handleInsuranceCheckboxChange = (checked) => {
     setSelectedInsurance(checked);
     formik.setFieldValue("selectedOption", checked ? "no" : "yes");
-    if(checked){
+    if (checked) {
       formik.setFieldValue("insurer", "");
       formik.setFieldValue("subscriberId", "");
       formik.setFieldValue("insuranceType", "");
-      updateInsuranceInStorage('')
+      updateInsuranceInStorage("");
     }
   };
 
@@ -510,12 +568,6 @@ export default function QuickDetailsModal({
     formik.setFieldTouched("dob", true); // Mark as touched when changed
   };
 
-  // Handle medical specialty change
-  const handleSpecialtyChange = (value) => {
-    formik.setFieldValue("specialty", value);
-    formik.setFieldTouched("specialty", true);
-  };
-
   // Update gender
   const handleGenderChange = (value) => {
     setGender(value);
@@ -548,7 +600,11 @@ export default function QuickDetailsModal({
       }
     });
   };
-
+  function handleCreateOptions() {
+    return null;
+  }
+  const getOptionFromLabel = (options, label) =>
+    options.find((opt) => opt.label === label);
   return (
     <ReactModal
       isOpen={open}
@@ -583,21 +639,29 @@ export default function QuickDetailsModal({
                     <Label className="text-[#333333BF] text-sm">
                       Medical Specialty
                     </Label>
-                    <Autocomplete
+                    <Select
+                      styles={customSelectStyles}
                       id="specialty"
                       name="specialty"
                       className={cn(
-                        "w-full border border-[#333333] rounded-md",
+                        "w-full ",
                         formik.touched.specialty && formik.errors.specialty
                           ? "border-red-500"
                           : ""
                       )}
                       options={medicalSpecialtiesOptions}
-                      value={formik.values.specialty}
-                      selected={formik.values.specialty}
-                      onChange={handleSpecialtyChange}
+                      placeholder="Medical specialty"
+                      value={getOptionFromLabel(
+                        medicalSpecialtiesOptions,
+                        formik.values.specialty
+                      )}
+                      onChange={(selected) => {
+                        const specialtyString = selected?.label || "";
+                        formik.setFieldValue("specialty", specialtyString);
+                        formik.setFieldTouched("specialty", true); //
+                      }}
                       clearable={false}
-                      placeholder="Select a medical specialty"
+                      navbar
                     />
                     {formik.touched.specialty && formik.errors.specialty && (
                       <div className="text-red-500 text-sm">
@@ -747,24 +811,28 @@ export default function QuickDetailsModal({
                   <>
                     <Label className="text-[#333333BF] text-sm">Insurer</Label>
                     <div className="flex-1">
-                      <Autocomplete
+                      <Select
+                        styles={customSelectStyles}
                         id="insurer"
+                        placeholder="Search insurer"
                         name="insurer"
                         className={cn(
-                          "w-full border border-[#333333] rounded-md",
+                          "w-full ",
                           formik.touched.insurer && formik.errors.insurer
                             ? "border-red-500"
                             : ""
                         )}
                         options={insuranceCarrierOptions}
-                        value={formik.values.insurer}
-                        selected={formik.values.insurer}
-                        onChange={(value) => {
-                          formik.setFieldValue("insurer", value);
+                        value={getOptionFromLabel(
+                          insuranceCarrierOptions,
+                          formik.values.insurer
+                        )}
+                        onChange={(selected) => {
+                          const insurerString = selected?.label || "";
+                          formik.setFieldValue("insurer", insurerString);
                           formik.setFieldTouched("insurer", true); //
-                          updateInsuranceInStorage(value);
                         }}
-                        clearable={false}
+                        navbar
                       />
                       {formik.touched.insurer && formik.errors.insurer && (
                         <div className="text-red-500 text-sm">

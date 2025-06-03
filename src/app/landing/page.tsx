@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Autocomplete } from "../../../components/ui/autocomplete";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import { Input } from "@/components/ui/input";
 import {
@@ -44,6 +43,7 @@ import AboutContentRight from "../landing/components/AboutContentRight";
 import AboutContentLeft from "../landing/components/AboutContentLeft";
 import { Footer } from "react-day-picker";
 import FooterSection from "../landing/components/FooterSection";
+import Select from "@/components/ui/client-only-select";
 
 // Add global spinner component
 const GlobalSpinner = ({ isVisible }) => {
@@ -56,6 +56,60 @@ const GlobalSpinner = ({ isVisible }) => {
       </div>
     </div>
   );
+};
+export const customStyles = {
+  control: (provided) => ({
+    ...provided,
+    backgroundColor: "#fff",
+    border: "none",
+    boxShadow: "none",
+    borderRadius: "0.5rem",
+    minHeight: "40px",
+    fontSize: "14px",
+    padding: "2px 4px",
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#9ca3af",
+    textAlign: "left",
+    whiteSpace: "nowrap", // prevent line breaks
+    overflow: "hidden", // hide overflowed text
+    textOverflow: "ellipsis", // add "..." when text is too long
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+  }),
+  input: (provided) => ({
+    ...provided,
+    color: "#111827",
+    textAlign: "left",
+    margin: 0,
+    padding: 0,
+  }),
+  menu: (provided) => ({
+    ...provided,
+    marginTop: 0, // no space between input and dropdown
+    borderRadius: "0 0 0.5rem 0.5rem",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    width: "100%", // match input width
+  }),
+  menuList: (provided) => ({
+    ...provided,
+    padding: 0,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+    color: "#111827",
+    padding: "10px 12px",
+    cursor: "pointer",
+    textAlign: "left",
+  }),
+  indicatorsContainer: () => ({
+    display: "none", // removes the dropdown arrow
+  }),
 };
 
 const doctorTypes = [
@@ -124,7 +178,7 @@ const validationSchema = Yup.object().shape({
 export default function LandingPage() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedSpecialty, setSelectedSpecialty] = useState("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState(""); // ✅
   const [selectedInsurer, setSelectedInsurer] = useState("");
   const [isLoading, setisLoading] = useState(false);
   const [globalLoading, setGlobalLoading] = useState(false); // Add state for global spinner
@@ -135,7 +189,6 @@ export default function LandingPage() {
   const [populardoctors, setpopulardoctors] = useState([]);
   const inputRefs = useRef([]);
   const addressRefs = useRef([]);
-
   const handleDoctorTypeClick = (value: any) => {
     formik.setFieldValue("specialty", value);
     setSelectedSpecialty(value); // Update specialty when button is clicked
@@ -293,16 +346,26 @@ export default function LandingPage() {
   ];
   useEffect(() => {
     const parsedFormData = JSON.parse(localStorage.getItem("formData"));
-    const storedSpeciality = parsedFormData?.specialty;
-    const selectedInsurer = parsedFormData?.insurer;
-    if (storedSpeciality) {
-      setPrefilledSpecialty(storedSpeciality);
-      formik.setFieldValue("specialty", storedSpeciality);
-      setSelectedSpecialty(storedSpeciality); // Update specialty when button is clicked
+    const storedSpecialty = parsedFormData?.specialty;
+    const storedInsurer = parsedFormData?.insurer;
+
+    if (storedSpecialty) {
+      const specialtyObj = medicalSpecialtiesOptions.find(
+        (opt) => opt.value === storedSpecialty
+      );
+      if (specialtyObj) {
+        setSelectedSpecialty(specialtyObj);
+        formik.setFieldValue("specialty", specialtyObj.value);
+      }
     }
-    if (selectedInsurer) {
-      setSelectedInsurer(selectedInsurer);
-      formik.setFieldValue("insurer", selectedInsurer);
+    if (storedInsurer) {
+      const insurerObj = insuranceCarrierOptions.find(
+        (opt) => opt.value === storedInsurer
+      );
+      if (insurerObj) {
+        setSelectedInsurer(insurerObj);
+        formik.setFieldValue("insurer", insurerObj.value);
+      }
     }
     fetchUserLocationAndPopularDrs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -345,7 +408,6 @@ export default function LandingPage() {
         "https://callai-backend-243277014955.us-central1.run.app/api/patient-network-info",
         data
       );
-      // console.log(response.data)
       const existingFormData = localStorage.getItem("formData");
       const parsedExistingData = JSON.parse(existingFormData);
       // Merge existing data with new values (new values take precedence)
@@ -438,8 +500,8 @@ export default function LandingPage() {
     const ipAddress = localStorage.getItem("ipAddress");
     const data = {
       request_id,
-      doctor_speciality: formik.values.specialty,
-      insurer: formik.values.insurer,
+      doctor_speciality: formik.values.specialty?.value ?? "",
+      insurer: formik.values.insurer?.value ?? "",
       preferred_location: savedAddress,
     };
     try {
@@ -454,15 +516,18 @@ export default function LandingPage() {
   };
   const formik = useFormik({
     initialValues: {
-      specialty: prefilledSpecialty || "",
-      insurer: "",
+      specialty: prefilledSpecialty || { label: "", value: "" },
+      insurer: selectedInsurer || { label: "", value: "" },
     },
     validationSchema,
     onSubmit: async (values) => {
       localStorage.removeItem("topReviewDoctors");
       localStorage.removeItem("topRatedDoctors");
       track("Homepage_Search_Btn_Clicked");
-      if (values.specialty === "unsure" || values.specialty === "Other") {
+      if (
+        values.specialty?.value === "unsure" ||
+        values.specialty?.value === "Other"
+      ) {
         router.push("/coming-soon");
         setGlobalLoading(false); // Turn off global loading if redirecting
         return;
@@ -479,19 +544,19 @@ export default function LandingPage() {
       }
       try {
         const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
-        updateSpecialtyInStorage(values.specialty);
-        updateInsuranceInStorage(values.insurer);
+        updateSpecialtyInStorage(values.specialty?.value);
+        updateInsuranceInStorage(values.insurer?.value);
         localStorage.setItem(
           "searchData",
-          JSON.stringify({ lat, lng, specialty: values.specialty })
+          JSON.stringify({ lat, lng, specialty: values.specialty?.value })
         );
 
         // Call logRequestInfo without awaiting
         const requestIdPromise = logNetworkInfo(null, true);
         const speciality_value =
-          formik.values.specialty === "Prescription / Refill"
+          formik.values.specialty?.value === "Prescription / Refill"
             ? "Primary Care Physician"
-            : formik.values.specialty;
+            : formik.values.specialty?.value;
         const data = {
           location: `${lat},${lng}`,
           radius: 20000,
@@ -501,7 +566,6 @@ export default function LandingPage() {
           "https://callai-backend-243277014955.us-central1.run.app/api/new_search_places",
           data
         );
-
         // Handle request_id when the promise resolves
         requestIdPromise.then((request_id) => {
           if (request_id) {
@@ -555,6 +619,8 @@ export default function LandingPage() {
       await logDrLists(payload);
     }
   };
+
+
   const handleOnAddressChanged = (index) => {
     if (addressRefs.current[index]) {
       const places = addressRefs.current[index].getPlaces();
@@ -587,6 +653,7 @@ export default function LandingPage() {
     scrollToSection("home", 40);
     setAddressLocation(location);
   };
+
 
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">
@@ -806,19 +873,20 @@ export default function LandingPage() {
                       <LucideStethoscope className="w-5 h-5 text-gray-500" />
                     </div>
                     <div className="flex-1  border-gray-400 md:border-none">
-                      <Autocomplete
+                      <Select
                         id="specialty"
                         name="specialty"
-                        className="w-full"
+                        styles={customStyles}
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
                         value={selectedSpecialty}
                         selected={formik.values.specialty}
                         onChange={(value) => {
-                          formik.setFieldValue("specialty", value);
-                          setSelectedSpecialty(value);
+                          formik.setFieldValue("specialty", value?.value);
+                          setSelectedSpecialty(value); // ✅ set full object
                         }}
-                        clearable={false}
+                        isClearable={true}
+                        isSearchable={true}
                       />
                     </div>
                   </div>
@@ -827,20 +895,21 @@ export default function LandingPage() {
                     <div className="flex items-center justify-center px-3">
                       <BookText className="w-5 h-5 text-gray-500" />
                     </div>
-                    <div className="flex-1  border-gray-400 md:border-none">
-                      <Autocomplete
+                    <div className="flex-1 border-gray-400 md:border-none">
+                      <Select
                         id="insurer"
                         name="insurer"
-                        className="w-full"
+                        styles={customStyles}
                         options={insuranceCarrierOptions}
                         placeholder="Insurance carrier (optional)"
                         value={selectedInsurer}
                         selected={formik.values.insurer}
                         onChange={(value) => {
-                          formik.setFieldValue("insurer", value);
+                          formik.setFieldValue("insurer", value?.value);
                           setSelectedInsurer(value);
                         }}
-                        clearable={false}
+                        isClearable={true}
+                        isSearchable={true}
                       />
                     </div>
                   </div>
@@ -918,16 +987,26 @@ export default function LandingPage() {
                   <Button
                     key={index}
                     className={`rounded-full text-xs px-3 py-2 w-auto flex-shrink-0 ${
-                      selectedSpecialty === value.value
-                        ? "bg-slate-800 text-white" // Selected state
-                        : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800" // Normal state
+                      selectedSpecialty?.value === value.value
+                        ? "bg-slate-800 text-white"
+                        : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800"
                     }`}
-                    onClick={() => checkPrefillAvailability(value.value)} // get s
+                    onClick={() => {
+                      const selected = medicalSpecialtiesOptions.find(
+                        (opt) => opt.value === value.value
+                      );
+                      checkPrefillAvailability(selected?.value ?? "");
+                      if (selected) {
+                        setSelectedSpecialty(selected);
+                        formik.setFieldValue("specialty", selected?.value);
+                      }
+                    }}
                   >
                     {value.label}
                   </Button>
                 ))}
               </div>
+
               <ScrollBar
                 orientation="horizontal"
                 className="block md:block lg:hidden"
@@ -1063,7 +1142,7 @@ export default function LandingPage() {
           <h2 className="text-3xl md:px-44 mb-10 px-4 flex text-center">
             Top-rated doctors near me
           </h2>
-
+          {/* 
           <DoctorCardCarousel
             doctors={populardoctors}
             checkPrefillAvailability={checkPrefillAvailability}
@@ -1092,13 +1171,19 @@ export default function LandingPage() {
               <Button
                 key={index}
                 className={`rounded-full text-xs px-3 py-2 w-auto flex-shrink-0 ${
-                  selectedSpecialty === value.value
-                    ? "bg-slate-800 text-white" // Selected state
-                    : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800" // Normal state
+                  selectedSpecialty?.value === value.value
+                    ? "bg-slate-800 text-white"
+                    : "bg-[#EFEADE] text-[#202124] hover:text-white hover:bg-slate-800"
                 }`}
                 onClick={() => {
-                  // scrollToSection("home", 40);
-                  checkPrefillAvailability(value.value);
+                  const selected = medicalSpecialtiesOptions.find(
+                    (opt) => opt.value === value.value
+                  );
+                  checkPrefillAvailability(selected?.value ?? "");
+                  if (selected) {
+                    setSelectedSpecialty(selected);
+                    formik.setFieldValue("specialty", selected?.value);
+                  }
                 }}
               >
                 {value.label}

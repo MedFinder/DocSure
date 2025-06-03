@@ -21,6 +21,8 @@ import { request } from "http";
 import NavbarSection from "@/components/general-components/navbar-section";
 import FooterSection from "../landing/components/FooterSection";
 import Link from "next/link";
+import Select from "react-select";
+import { medicalSpecialtiesOptions } from "@/constants/store-constants";
 
 // Custom styles for DatePicker
 const customDatePickerStyles = `
@@ -45,7 +47,61 @@ const genderOptions = [
   { value: "Female", label: "Female" },
   { value: "Non-binary", label: "Non-binary" },
 ];
+
 export default function ContactNew() {
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      backgroundColor: "#fff",
+
+      boxShadow: "none",
+      minHeight: "40px",
+      fontSize: "14px",
+      padding: "2px 4px",
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "#9ca3af",
+      textAlign: "left",
+      whiteSpace: "nowrap", // prevent line breaks
+      overflow: "hidden", // hide overflowed text
+      textOverflow: "ellipsis", // add "..." when text is too long
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "#111827",
+      textAlign: "left",
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: "#111827",
+      textAlign: "left",
+      margin: 0,
+      padding: 0,
+    }),
+    menu: (provided) => ({
+      ...provided,
+      marginTop: 0, // no space between input and dropdown
+      borderRadius: "0 0 0.5rem 0.5rem",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      width: "100%", // match input width
+    }),
+    menuList: (provided) => ({
+      ...provided,
+      padding: 0,
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+      color: "#111827",
+      padding: "10px 12px",
+      cursor: "pointer",
+      textAlign: "left",
+    }),
+    indicatorsContainer: () => ({
+      display: "none", // removes the dropdown arrow
+    }),
+  };
   const [formData, setFormData] = useState({});
   const [searchData, setSearchData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -147,6 +203,7 @@ export default function ContactNew() {
       address: formData.address || "",
       dob: formData.dob ? new Date(formData.dob) : null, // Initialize with null or parsed date
       gender: formData.gender || "", // Add gender to formik values
+      specialty: "", // Add specialty to formik values
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -404,6 +461,24 @@ export default function ContactNew() {
                   {formik.errors.phoneNumber}
                 </div>
               )}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[#333333]">Specialty</Label>
+              <Select
+                id="specialty"
+                name="specialty"
+                className="w-full"
+                options={medicalSpecialtiesOptions}
+                placeholder="Medical specialty"
+                styles={customStyles}
+                value={medicalSpecialtiesOptions.find(
+                  (option) => option.value === formik.values.specialty
+                )}
+                onChange={(selectedOption) => {
+                  formik.setFieldValue("specialty", selectedOption.value);
+                }}
+                isClearable={false}
+              />
             </div>
           </div>
 

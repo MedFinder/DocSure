@@ -19,9 +19,9 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Combobox } from "@/components/ui/combo-box";
 import { medicalSpecialtiesOptions } from "@/constants/store-constants";
-import { Autocomplete } from "../../../components/ui/autocomplete";
 import { trackConversion } from "../../../src/lib/gtag";
 import { sendGTMEvent } from "@next/third-parties/google";
+import Select from "react-select";
 
 const doctorTypes = [
   { value: "Dermatologist", label: "Dermatologist" },
@@ -91,7 +91,7 @@ function HomePage() {
     if (savedLocation) {
       setSelectedLocation(JSON.parse(savedLocation));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const handleOnPlacesChanged = (index) => {
@@ -108,10 +108,7 @@ function HomePage() {
 
         // Store in localStorage
         localStorage.setItem("selectedAddress", formattedAddress);
-        localStorage.setItem(
-          "selectedLocation",
-          JSON.stringify({ lat, lng })
-        );
+        localStorage.setItem("selectedLocation", JSON.stringify({ lat, lng }));
       }
     }
   };
@@ -252,18 +249,20 @@ function HomePage() {
                     <Search className="w-5 h-5 text-gray-500" />
                   </div>
                   <div className="flex-1 border-b border-gray-400 md:border-none">
-                    <Autocomplete
+                    <Select
                       id="specialty"
                       name="specialty"
                       className="w-full"
                       options={medicalSpecialtiesOptions}
                       placeholder="Medical specialty"
-                      selected={formik.values.specialty}
-                      onChange={(value) => {
-                        formik.setFieldValue("specialty", value);
+                      value={medicalSpecialtiesOptions.find(
+                        (option) => option.value === formik.values.specialty
+                      )}
+                      onChange={(selectedOption) => {
+                        formik.setFieldValue("specialty", selectedOption.value);
                         setSelectedDoctorType("");
                       }}
-                      clearable={false}
+                      isClearable={false}
                     />
                   </div>
                 </div>
