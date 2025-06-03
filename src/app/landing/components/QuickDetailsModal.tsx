@@ -37,9 +37,9 @@ export const customSelectStyles = {
     minHeight: "40px",
     fontSize: "14px",
     padding: "2px 4px",
-    '&:hover': {
-      borderColor: "black"
-    }
+    "&:hover": {
+      borderColor: "black",
+    },
   }),
   placeholder: (provided) => ({
     ...provided,
@@ -213,6 +213,7 @@ export default function QuickDetailsModal({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedFormData = localStorage.getItem("formData");
+      console.log(storedFormData);
       const storedLocation = localStorage.getItem("selectedLocation");
       if (storedFormData) {
         const parsedFormData = JSON.parse(storedFormData);
@@ -229,7 +230,9 @@ export default function QuickDetailsModal({
           specialty: parsedFormData.specialty || "",
           address: parsedFormData.address || "",
           insurer: parsedFormData?.insurer || "",
-          selectedOption: parsedFormData?.insurer?'no': parsedFormData?.selectedOption,
+          selectedOption: parsedFormData?.insurer
+            ? "no"
+            : parsedFormData?.selectedOption,
           insuranceType: parsedFormData?.insuranceType || "",
           availability: parsedFormData?.availability || "anytime",
           subscriberId: parsedFormData?.subscriberId || "",
@@ -245,7 +248,7 @@ export default function QuickDetailsModal({
         });
 
         setInputValue(parsedFormData?.objective || "");
-        setSelectedInsurance(parsedFormData?.insurer ?false:true);
+        setSelectedInsurance(parsedFormData?.insurer ? false : true);
         setAvailabilityOption(parsedFormData?.availabilityOption || "anytime");
         setCustomAvailability(parsedFormData?.availability || "anytime");
         setGender(parsedFormData.gender || "");
@@ -334,7 +337,7 @@ export default function QuickDetailsModal({
           ? "Primary Care Physician"
           : formik.values.specialty;
       track("QuickDetails_Btn_Clicked");
-
+      console.log(formik.values.specialty);
       if (!formik.isValid) {
         toast.error("Please fill up all the required information");
         return;
@@ -352,7 +355,7 @@ export default function QuickDetailsModal({
           ? customAvailability
           : availabilityOption,
         maxWait: values.maxWait,
-        email:values.email || "",
+        email: values.email || "",
       };
       // console.log(updatedValues)
 
@@ -416,6 +419,7 @@ export default function QuickDetailsModal({
   const refetchDrLists = async () => {
     try {
       const { lat, lng } = selectedLocation || { lat: 0, lng: 0 };
+
       localStorage.setItem(
         "searchData",
         JSON.stringify({ lat, lng, specialty: formik.values.specialty })
@@ -465,11 +469,11 @@ export default function QuickDetailsModal({
   const handleInsuranceCheckboxChange = (checked) => {
     setSelectedInsurance(checked);
     formik.setFieldValue("selectedOption", checked ? "no" : "yes");
-    if(checked){
+    if (checked) {
       formik.setFieldValue("insurer", "");
       formik.setFieldValue("subscriberId", "");
       formik.setFieldValue("insuranceType", "");
-      updateInsuranceInStorage('')
+      updateInsuranceInStorage("");
     }
   };
 
@@ -604,7 +608,11 @@ export default function QuickDetailsModal({
       }
     });
   };
-
+  function handleCreateOptions() {
+    return null;
+  }
+  const getOptionFromLabel = (options, label) =>
+    options.find((opt) => opt.label === label);
   return (
     <ReactModal
       isOpen={open}
@@ -646,13 +654,23 @@ export default function QuickDetailsModal({
                       className="w-full"
                       options={medicalSpecialtiesOptions}
                       placeholder="Medical specialty"
-                      value={medicalSpecialtiesOptions.find(
-                        (option) => option.value === formik.values.specialty
+                      value={getOptionFromLabel(
+                        medicalSpecialtiesOptions,
+                        formik.values.specialty
                       )}
                       onChange={(selectedOption) => {
                         formik.setFieldValue("specialty", selectedOption.value);
                       }}
-                      isClearable={false}
+                      onChange={(selected) => {
+                        const specialtyString = selected?.label || "";
+
+                        formik.setFieldValue("specialty", specialtyString);
+                        formik.setFieldTouched("specialty", true); //
+                        updateSpecialtyInStorage(specialtyString);
+                      }}
+                      clearable={false}
+                      navbar
+                      // enabled={updatePreferences ? false : true}
                     />
                     {formik.touched.specialty && formik.errors.specialty && (
                       <div className="text-red-500 text-sm">
