@@ -744,7 +744,7 @@ export default function Transcript() {
       // Use customformdata if available, otherwise use the state formData
       const currentFormData = customformdata || formData;
       const savedSpecialty = localStorage.getItem("selectedSpecialty");
-
+      console.log(currentFormData, doctorPhoneNumber);
       if (!currentFormData || !doctorPhoneNumber) {
         console.error(
           "No formData found in localStorage or provided as parameter."
@@ -986,7 +986,7 @@ export default function Transcript() {
               if (!isAutoCallEnabledRef.current) {
                 toast.info("Auto-call is disabled. Calls will not proceed.");
                 return; // Exit if the switch is off
-              }else {
+              } else {
                 toast.warning(
                   "Appointment could not be booked. Trying next doctor..."
                 );
@@ -1290,7 +1290,7 @@ export default function Transcript() {
         setDoctors(updatedDoctors);
         setNextPageToken(response.data.next_page_token || null);
 
-        const storageKey =  "statusData";
+        const storageKey = "statusData";
 
         const currentData = JSON.parse(
           localStorage.getItem(storageKey) || "{}"

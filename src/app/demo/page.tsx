@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Autocomplete } from "../../../components/ui/autocomplete";
+import Select from "react-select";
 import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
 import { Input } from "@/components/ui/input";
 import {
@@ -132,6 +132,60 @@ const scrollToSection = (id: string, offset: number) => {
 };
 
 export default function LandingPage() {
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      backgroundColor: "#fff",
+      border: "none",
+      boxShadow: "none",
+      borderRadius: "0.5rem",
+      minHeight: "40px",
+      fontSize: "14px",
+      padding: "2px 4px",
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "#9ca3af",
+      textAlign: "left",
+      whiteSpace: "nowrap", // prevent line breaks
+      overflow: "hidden", // hide overflowed text
+      textOverflow: "ellipsis", // add "..." when text is too long
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "#111827",
+      textAlign: "left",
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: "#111827",
+      textAlign: "left",
+      margin: 0,
+      padding: 0,
+    }),
+    menu: (provided) => ({
+      ...provided,
+      marginTop: 0, // no space between input and dropdown
+      borderRadius: "0 0 0.5rem 0.5rem",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      width: "100%", // match input width
+    }),
+    menuList: (provided) => ({
+      ...provided,
+      padding: 0,
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+      color: "#111827",
+      padding: "10px 12px",
+      cursor: "pointer",
+      textAlign: "left",
+    }),
+    indicatorsContainer: () => ({
+      display: "none", // removes the dropdown arrow
+    }),
+  };
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -562,7 +616,8 @@ export default function LandingPage() {
     scrollToSection("home", 40);
     setAddressLocation(location);
   };
-
+  const getOptionFromLabel = (options, label) =>
+    options.find((opt) => opt.label === label);
   return (
     <div className="min-h-screen w-full bg-[#FCF8F1]  my-section ">
       {/* Navbar */}
@@ -770,20 +825,27 @@ export default function LandingPage() {
                     <div className="flex items-center justify-center px-3">
                       <Search className="w-5 h-5 text-gray-500" />
                     </div>
+
                     <div className="flex-1  border-gray-400 md:border-none">
-                      <Autocomplete
+                      <Select
                         id="specialty"
                         name="specialty"
                         className="w-full"
+                        styles={customStyles}
                         options={medicalSpecialtiesOptions}
                         placeholder="Medical specialty"
-                        value={selectedSpecialty}
-                        selected={formik.values.specialty}
-                        onChange={(value) => {
-                          formik.setFieldValue("specialty", value);
-                          setSelectedSpecialty(value);
+                        value={getOptionFromLabel(
+                          medicalSpecialtiesOptions,
+                          formik.values.specialty
+                        )}
+                        onChange={(selectedOption) => {
+                          setSpecialty(selectedOption.value);
+                          formik.setFieldValue(
+                            "specialty",
+                            selectedOption.value
+                          );
                         }}
-                        clearable={false}
+                        isClearable={false}
                       />
                     </div>
                   </div>
